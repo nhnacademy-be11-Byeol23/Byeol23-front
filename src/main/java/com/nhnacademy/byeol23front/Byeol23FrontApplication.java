@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class Byeol23FrontApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(Byeol23FrontApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(Byeol23FrontApplication.class, args);
+    }
 
 }
