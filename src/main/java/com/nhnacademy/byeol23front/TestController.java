@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 @Slf4j
 public class TestController {
+
     @GetMapping
     public String mainPage(){
         log.info("front");
