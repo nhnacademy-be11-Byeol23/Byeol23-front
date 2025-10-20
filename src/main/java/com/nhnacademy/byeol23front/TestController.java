@@ -11,6 +11,6 @@ public class TestController {
     @GetMapping
     public String mainPage(){
         log.info("front");
-        return "testPage";
+        return "index";
     }
 }
