@@ -43,7 +43,7 @@ jobs:
           script_stop: true
           script: |
             chmod +x ~/startup.sh
-            bash ~/startup.sh
+            bash ~/startup.sh front
             
             
 
