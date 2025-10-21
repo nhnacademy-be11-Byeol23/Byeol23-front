@@ -7119,13 +7119,6 @@ section,
   font-weight: 500;
 }
 
-/*위에 구분선 생성*/
-.utility-group{
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid #000000;
-}
-
 .account .profile-menu .menu-nav .nav-link.active i {
   color: var(--contrast-color);
 }
