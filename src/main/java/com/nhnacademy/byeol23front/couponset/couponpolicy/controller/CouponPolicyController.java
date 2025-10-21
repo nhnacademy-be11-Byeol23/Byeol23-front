@@ -10,6 +10,6 @@ public class CouponPolicyController {
     @GetMapping("")
     public String couponPolicyPage(){
 
-        return "admin-management/admin-management";
+        return "management";
     }
 }
