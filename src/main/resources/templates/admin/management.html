@@ -4,11 +4,13 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Account - NiceShop Bootstrap Template</title>
+  <title th:text="${pageTitle != null} ? ${pageTitle} + ' 페이지' : '관리자 페이지'"></title>
   <meta name="description" content="">
   <meta name="keywords" content="">
 
   <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+
+  <th:block th:replace="~{'admin/category/category-css' :: categoryCss}"></th:block>
 </head>
 
 <body class="account-page">
@@ -114,7 +116,7 @@
 
               <div class="tab-pane fade show active" id="test1" role="tabpanel">
                 <h3>카테고리 관리</h3>
-                <p>카테고리 관리 페이지</p>
+                <th:block th:replace="~{'admin/category/category' :: content}"></th:block>
               </div>
 
               <div class="tab-pane fade" id="test2" role="tabpanel">
@@ -151,6 +153,8 @@
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
 
+
+  <th:block th:replace="~{'admin/category/category-js' :: categoryJs}"></th:block>
 </body>
 
 </html>
