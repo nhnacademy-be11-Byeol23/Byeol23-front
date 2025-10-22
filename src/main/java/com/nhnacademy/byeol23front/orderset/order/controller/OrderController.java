@@ -1,17 +1,20 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
-import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.nhnacademy.byeol23front.common.ShopFeignClient;
+import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderCreateRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderCreateResponse;
+import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareRequest;
+import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareResponse;
+import com.nhnacademy.byeol23front.orderset.order.dto.PaymentParamResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,17 +23,34 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OrderController {
 
-	private final ShopFeignClient feignClient;
+	private final OrderApiClient orderApiClient;
 
 	@GetMapping
 	public String getOrder() {
 		return "order/checkout";
 	}
 
-	@PostMapping("/checkout")
+	@PostMapping("/prepare")
 	@ResponseBody
-	public ResponseEntity<OrderCreateResponse> processOrder(@RequestBody OrderCreateRequest request) {
-		return feignClient.createOrder(request);
+	public ResponseEntity<OrderPrepareResponse>prepareOrder(@RequestBody OrderPrepareRequest request) {
+		ResponseEntity<OrderPrepareResponse> response = orderApiClient.prepareOrder(request);
+		return response;
+	}
+
+
+	@GetMapping("/success")
+	public String orderSuccess(@RequestParam String orderId,
+		@RequestParam String paymentKey,
+		@RequestParam int amount) {
+
+		PaymentParamResponse paymentParamResponse = new PaymentParamResponse(orderId, paymentKey, amount);
+
+		return "order/success";
+	}
+
+	@GetMapping("/fail")
+	public String orderFail() {
+		return "order/fail";
 	}
 
 
