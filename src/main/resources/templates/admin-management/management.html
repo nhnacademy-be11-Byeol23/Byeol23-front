@@ -83,23 +83,33 @@
                   <li class="utility-group">
                     <h4>쿠폰 관리</h4>
                     <a class="nav-link" data-bs-toggle="tab" href="#orders">
-                      <span>테스트 메뉴1</span>
+                      <span>쿠폰 조회</span>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="tab" href="#orders">
-                      <span>테스트 메뉴2</span>
+                      <span>쿠폰 등록</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#orders">
+                      <span>쿠폰 발급</span>
                     </a>
                   </li>
                   <li class="utility-group">
                     <h4>정책 관리</h4>
                     <a class="nav-link" data-bs-toggle="tab" href="#orders">
-                      <span>테스트 메뉴1</span>
+                      <span>배송비 정책</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#coupon-policy">
+                      <span>쿠폰 정책</span>
                     </a>
                   </li>
                   <li class="nav-item">
                     <a class="nav-link" data-bs-toggle="tab" href="#orders">
-                      <span>테스트 메뉴2</span>
+                      <span>포인트 정책</span>
                     </a>
                   </li>
                 </ul>
@@ -120,6 +130,65 @@
               <div class="tab-pane fade" id="test2" role="tabpanel">
                 <h3>테스트 메뉴 2</h3>
                 <p>본문 작성 필요</p>
+              </div>
+
+              <div class="tab-pane fade" id="coupon-policy" role="tabpanel">
+                <h3>쿠폰 정책</h3>
+
+                <hr>
+
+                <h4>신규 쿠폰 정책 등록</h4>
+
+                <form action="/coupon-policy/create" method="post">
+                  <div class="form-group">
+                    <label for="policyName">정책명</label>
+                    <input type="text" class="form-control" id="policyName" name="policyName" placeholder="예: 신규 회원가입 10% 할인 쿠폰" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="criterionPrice">최소 구매 금액 (원)</label>
+                    <input type="number" class="form-control" id="criterionPrice" name="criterionPrice" placeholder="0" min="0">
+                    <small class="form-text text-muted">0원 입력 시 구매 금액 제한 없음</small>
+                  </div>
+
+                  <div class="form-group">
+                    <label>할인 유형</label>
+                    <div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="discountType" id="rateDiscount" value="RATE" checked>
+                        <label class="form-check-label" for="rateDiscount">
+                          정률 할인 (%)
+                        </label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="discountType" id="fixedDiscount" value="FIXED">
+                        <label class="form-check-label" for="fixedDiscount">
+                          정액 할인 (원)
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="rateOptions">
+                    <div class="form-group">
+                      <label for="discountRate">할인률 (%)</label>
+                      <input type="number" class="form-control" id="discountRate" name="discountRate" placeholder="10" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                      <label for="discountLimit">최대 할인 금액 (원)</label>
+                      <input type="number" class="form-control" id="discountLimit" name="discountLimit" placeholder="10000" min="0">
+                      <small class="form-text text-muted">0원 입력 시 최대 할인 금액 제한 없음</small>
+                    </div>
+                  </div>
+
+                  <div id="fixedOptions" style="display: none;">
+                    <div class="form-group">
+                      <label for="discountAmount">할인액 (원)</label>
+                      <input type="number" class="form-control" id="discountAmount" name="discountAmount" placeholder="5000" min="0">
+                    </div>
+                  </div>
+                  <button type="submit" class="app-btn">쿠폰 정책 저장</button>
+                </form>
               </div>
             </div>
           </div>
@@ -151,6 +220,8 @@
   <!-- Main JS File -->
   <script src="assets/js/main.js"></script>
 
+  <!-- Coupon Policy JS File -->
+  <script src="/js/couponPolicy.js"></script>
 </body>
 
 </html>
