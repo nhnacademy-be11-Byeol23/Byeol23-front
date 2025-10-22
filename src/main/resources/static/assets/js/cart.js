@@ -6,8 +6,8 @@ $(document).ready(() => {
     const $input = $(e.currentTarget).closest('.quantity-selector').find('.quantity-input');
     const currentValue = parseInt($input.val());
     const maxValue = parseInt($input.attr('max'));
-    
-    if (currentValue < maxValue) {
+
+    if (currentValue <= maxValue) {
       updateCartItem($input);
     }
   });
@@ -19,7 +19,7 @@ $(document).ready(() => {
     const currentValue = parseInt($input.val());
     const minValue = parseInt($input.attr('min'));
     
-    if (currentValue > minValue) {
+    if (currentValue >= minValue) {
       updateCartItem($input);
     }
   });
@@ -48,7 +48,7 @@ $(document).ready(() => {
     const quantity = parseInt($quantityInput.val());
 
     // TODO: Ajax로 서버에 전송 (나중에 구현)
-    
+
     // 현재는 로컬에서 계산
     const salePriceText = $cartItem.find('.sale-price').text();
     const salePrice = parsePrice(salePriceText);
