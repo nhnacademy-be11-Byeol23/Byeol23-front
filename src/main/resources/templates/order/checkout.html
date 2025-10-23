@@ -219,9 +219,9 @@
 <script src="assets/js/main.js"></script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', async () => {
+  document.addEventListener('DOMContentLoaded', () => {
     initPhoneHyphen();
-    await initTossPayments();
+    initTossPayments();
   });
 
   function initPhoneHyphen() {
@@ -247,7 +247,7 @@
     });
   }
 
-  async function initTossPayments() {
+  function initTossPayments() {
     const paymentButton = document.getElementById('payment-button');
     if (!paymentButton) return;
 
@@ -271,6 +271,19 @@
       const addressDetail = document.getElementById('address-detail')?.value;
       const totalBookPrice = parsePrice(document.getElementById('total-book-price')?.textContent);
 
+      const orderItems = document.querySelectorAll('.order-summary-content .order-item');
+      let orderName = "주문 상품"; // 기본값
+      if (orderItems.length > 0) {
+        const firstItemName = orderItems[0].querySelector('.order-item-details h4')?.textContent.trim();
+        if (firstItemName) {
+          if (orderItems.length > 1) {
+            orderName = `${firstItemName} 외 ${orderItems.length - 1}건`;
+          } else {
+            orderName = firstItemName;
+          }
+        }
+      }
+
       const orderPrepareRequest = {
         orderNumber: orderId,
         totalBookPrice: totalBookPrice,
@@ -282,7 +295,7 @@
         receiverPhone: phoneNumber
       };
 
-      fetch('/order/prepare', {
+      fetch('/orders/prepare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderPrepareRequest)
@@ -300,13 +313,15 @@
           throw new Error('주문 ID를 받지 못했습니다.');
         }
 
+        // 위에서 totalPrice와 response에서 받아온 실제 결제 금액을 비교할 필요가 있어 보임
+
         tossPayments.requestPayment('토스페이', {
-          orderId: orderId,
-          amount: totalPrice,
-          orderName: "상품 외 1건",
-          customerName: "김토스",
-          successUrl: 'http://localhost:10330/order/success',
-          failUrl: 'http://localhost:10330/order/fail'
+          orderId: orderIdFromServer,
+          amount: prepareResponse.actualOrderPrice,
+          orderName: orderName,
+          customerName: prepareResponse.receiver,
+          successUrl: window.location.origin + "/payments/confirm",
+          failUrl: window.location.origin + "/payments/fail"
         });
       })
       .catch(error => {

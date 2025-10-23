@@ -2,9 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>fail</title>
+    <title>error page</title>
 </head>
 <body>
-<h1>Order fail</h1>
+    <div class="error-message" th:if="${message != null}">
+        <strong>오류 메시지:</strong> <span th:text="${message}">오류 내용</span>
+    </div>
+    <div class="actions">
+        <a th:href="@{/}">홈으로 가기</a>
+        <a th:href="@{/order}" class="secondary">다시 주문하기</a> <!-- 주문 페이지 URL 확인 필요 -->
+    </div>
+
+    <div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+    <div id="preloader"></div>
+
 </body>
 </html>

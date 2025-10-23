@@ -1,10 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>success</title>
+    <meta charset="utf-8">
+
 </head>
-<body>
-<h1>order success</h1>
+<body class="order-success">
+
+
+<main class="main">
+    <h1>주문이 성공적으로 완료되었습니다!</h1>
+
+    <p>고객님의 주문(<strong th:text="${orderId}">주문번호</strong>)이 정상적으로 처리되었습니다.</p>
+
+    <!-- 결제 정보 표시 -->
+    <th:block th:if="${paymentInfo != null}">
+        <div class="order-details">
+            <h2>결제 상세 정보</h2>
+            <p><strong>주문 번호:</strong> <span th:text="${paymentInfo['orderId']}"></span></p>
+            <p><strong>결제 금액:</strong> <span th:text="${#numbers.formatInteger(paymentInfo['totalAmount'], 0, 'COMMA') + '원'}"></span></p>
+            <p><strong>결제 수단:</strong> <span th:text="${paymentInfo['method']}"></span></p>
+        </div>
+    </th:block>
+
+    <div style="margin-top: 30px;">
+        <a th:href="@{/}">홈으로 가기</a>
+    </div>
+
+</main>
 </body>
+
 </html>
