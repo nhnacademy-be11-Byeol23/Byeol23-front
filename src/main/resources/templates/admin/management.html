@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title th:text="${pageTitle != null} ? ${pageTitle} + ' 페이지' : '관리자 페이지'"></title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+
+  <th:block th:replace="~{'admin/category/category-css' :: categoryCss}"></th:block>
+</head>
+
+<body class="account-page">
+
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title light-background">
+      <div class="container d-lg-flex justify-content-between align-items-center">
+        <h1 class="mb-2 mb-lg-0">관리자 페이지</h1>
+      </div>
+    </div>
+    <!-- End Page Title -->
+
+    <!-- Account Section -->
+    <section id="account" class="account section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <!-- Mobile Menu Toggle -->
+        <div class="mobile-menu d-lg-none mb-4">
+          <button class="mobile-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#profileMenu">
+            <i class="bi bi-grid"></i>
+            <span>Menu</span>
+          </button>
+        </div>
+
+        <div class="row g-4">
+          <!-- Profile Menu -->
+          <div class="col-lg-3">
+            <div class="profile-menu collapse d-lg-block" id="profileMenu">
+              <!-- Navigation Menu -->
+              <nav class="menu-nav">
+
+                <ul class="nav flex-column" role="tablist">
+                  <h4>도서 관리</h4>
+                  <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#test1">
+                      <span>카테고리 관리</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#test2">
+                      <span>테스트 메뉴2</span>
+                    </a>
+                  </li>
+
+                  <li class="utility-group">
+                    <h4>회원 관리</h4>
+                    <a class="nav-link" data-bs-toggle="tab" href="#orders">
+                      <span>테스트 메뉴1</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#orders">
+                      <span>테스트 메뉴2</span>
+                    </a>
+                  </li>
+                  <li class="utility-group">
+                    <h4>주문 관리</h4>
+                    <a class="nav-link" data-bs-toggle="tab" href="#orders">
+                      <span>테스트 메뉴1</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#orders">
+                      <span>테스트 메뉴2</span>
+                    </a>
+                  </li>
+                  <li class="utility-group">
+                    <h4>쿠폰 관리</h4>
+                    <a class="nav-link" data-bs-toggle="tab" href="#orders">
+                      <span>테스트 메뉴1</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#orders">
+                      <span>테스트 메뉴2</span>
+                    </a>
+                  </li>
+                  <li class="utility-group">
+                    <h4>정책 관리</h4>
+                    <a class="nav-link" data-bs-toggle="tab" href="#orders">
+                      <span>테스트 메뉴1</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#orders">
+                      <span>테스트 메뉴2</span>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+
+          <!-- Content Area -->
+
+          <div class="col-lg-9">
+            <div class="tab-content">
+
+              <div class="tab-pane fade show active" id="test1" role="tabpanel">
+                <h3>카테고리 관리</h3>
+                <th:block th:replace="~{'admin/category/category' :: content}"></th:block>
+              </div>
+
+              <div class="tab-pane fade" id="test2" role="tabpanel">
+                <h3>테스트 메뉴 2</h3>
+                <p>본문 작성 필요</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /Account Section -->
+
+  </main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/drift-zoom/Drift.min.js"></script>
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+
+  <!-- Main JS File -->
+  <script src="assets/js/main.js"></script>
+
+
+  <th:block th:replace="~{'admin/category/category-js' :: categoryJs}"></th:block>
+</body>
+
+</html>

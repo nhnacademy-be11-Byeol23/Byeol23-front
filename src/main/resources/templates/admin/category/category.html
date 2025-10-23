@@ -1,0 +1,44 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="content">
+    <div class="category-page">
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h5 class="fw-semibold mb-3">최상위 카테고리 등록</h5>
+                <form id="rootForm" class="row g-3">
+                    <div class="col-md-4">
+                        <input id="root" type="text" name="name" class="form-control" placeholder="예시: 국내도서" required>
+                    </div>
+                    <div class="col-md-1 d-grid">
+                        <button type="submit" class="btn btn-dark">등록</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="fw-semibold mb-3">카테고리 목록</h5>
+                <ul id="category-list">
+                    <li th:each="category : ${categories}">
+                        <div class="category-line">
+            <span class="category-name"
+                  th:text="${category.name}"
+                  th:attr="data-id=${category.id}, data-has-children=${category.hasChildren}"
+                  th:classappend="${category.hasChildren} ? ' folder' : ' leaf'"
+                  onclick="loadChildren(this)">
+            </span>
+                            <div class="category-actions">
+                                <button type="button" class="btn btn-outline-secondary btn-sm"
+                                        th:attr="data-id=${category.id}" onclick="showAddForm(this)">추가</button>
+                                <button type="button" class="btn btn-outline-warning btn-sm"
+                                        th:attr="data-id=${category.id}, data-name=${category.name}" onclick="showEditForm(this)">수정</button>
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                        th:attr="data-id=${category.id}" onclick="deleteCategory(this)">삭제</button>
+                            </div>
+                        </div>
+                        <ul th:id="'children-' + ${category.id}" class="hidden"></ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</th:block>

@@ -5016,13 +5016,19 @@ section,
   font-size: 0.875rem;
 }
 
-.cart .cart-items .cart-item .price-tag .current-price {
+.cart .cart-items .cart-item .price-tag {
+  white-space: nowrap;
+  min-width: 140px;
+  display: inline-block;
+}
+
+.cart .cart-items .cart-item .price-tag .sale-price {
   font-weight: 600;
   color: var(--heading-color);
   font-size: 1rem;
 }
 
-.cart .cart-items .cart-item .price-tag .original-price {
+.cart .cart-items .cart-item .price-tag .regular-price {
   text-decoration: line-through;
   color: color-mix(in srgb, var(--default-color), transparent 40%);
   font-size: 0.875rem;
@@ -5181,6 +5187,8 @@ section,
 
 .cart .cart-summary .summary-item .summary-label {
   color: color-mix(in srgb, var(--default-color), transparent 20%);
+  min-width: 80px;
+  flex-shrink: 0;
 }
 
 .cart .cart-summary .summary-item .summary-value {
@@ -7117,6 +7125,13 @@ section,
   background-color: var(--accent-color);
   color: var(--contrast-color);
   font-weight: 500;
+}
+
+/*위에 구분선 생성*/
+.utility-group{
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #000000;
 }
 
 .account .profile-menu .menu-nav .nav-link.active i {
