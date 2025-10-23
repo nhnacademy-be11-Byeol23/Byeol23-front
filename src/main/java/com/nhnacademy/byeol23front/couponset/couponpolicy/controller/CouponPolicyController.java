@@ -13,7 +13,7 @@ public class CouponPolicyController {
     @GetMapping("")
     public String couponPolicyPage(){
 
-        return "admin-management/management";
+        return "admin/management";
     }
 
     @PostMapping("/create")
