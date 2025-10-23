@@ -1,0 +1,143 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="categoryJs">
+    <script>
+
+        document.getElementById("rootForm").addEventListener("submit", e => {
+            e.preventDefault();
+            const name = document.getElementById("root").value.trim();
+            if (!name) return alert("카테고리명을 입력하세요.");
+            fetch("/categories", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ name })
+            })
+                .then(res => { if (!res.ok) throw new Error("등록 실패"); location.reload(); })
+                .catch(err => alert(err));
+        });
+
+        function loadChildren(element) {
+            const parentId = element.dataset.id;
+            const hasChildren = element.dataset.hasChildren === "true";
+            const childrenUl = document.getElementById(`children-${parentId}`);
+            if (!hasChildren) return;
+
+            if (childrenUl.dataset.loaded === "true") {
+                childrenUl.classList.toggle("hidden");
+                return;
+            }
+
+            fetch(`/categories/${parentId}/children`)
+                .then(res => res.json())
+                .then(children => {
+                    childrenUl.innerHTML = "";
+                    children.forEach(child => {
+                        const li = document.createElement("li");
+                        li.innerHTML = `
+                        <div class="category-line">
+                            <span class="category-name ${child.hasChildren ? "folder" : "leaf"}"
+                                  data-id="${child.id}"
+                                  data-has-children="${child.hasChildren}"
+                                  onclick="loadChildren(this)">${child.name}</span>
+                            <div class="category-actions">
+                                <button class="btn btn-outline-secondary btn-sm" data-id="${child.id}" onclick="showAddForm(this)">추가</button>
+                                <button class="btn btn-outline-warning btn-sm" data-id="${child.id}" data-name="${child.name}" onclick="showEditForm(this)">수정</button>
+                                <button class="btn btn-outline-danger btn-sm" data-id="${child.id}" onclick="deleteCategory(this)">삭제</button>
+                            </div>
+                        </div>
+                        <ul id="children-${child.id}" class="hidden"></ul>
+                    `;
+                        childrenUl.appendChild(li);
+                    });
+                    childrenUl.dataset.loaded = "true";
+                    childrenUl.classList.remove("hidden");
+                });
+        }
+
+        function showAddForm(button) {
+            const parentId = button.dataset.id;
+            const li = button.closest("li");
+            const existingForm = li.querySelector(".inline-form");
+            if (existingForm) existingForm.remove();
+
+            const form = document.createElement("form");
+            form.classList.add("inline-form");
+            form.innerHTML = `
+        <input type="text" name="name" class="form-control form-control-sm" placeholder="하위 카테고리명" required>
+        <button type="submit" class="btn btn-sm btn-dark">등록</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cancelForm(this)">취소</button>
+    `;
+
+            const childUl = li.querySelector(`#children-${parentId}`);
+            if (childUl) {
+                li.insertBefore(form, childUl);
+            } else {
+                li.appendChild(form);
+            }
+
+            form.addEventListener("submit", e => {
+                e.preventDefault();
+                const name = form.querySelector("input[name='name']").value.trim();
+                if (!name) return alert("카테고리명을 입력하세요.");
+                fetch("/categories", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ name, parentId })
+                })
+                    .then(res => { if (!res.ok) throw new Error("추가 실패"); location.reload(); })
+                    .catch(err => alert(err));
+            });
+        }
+
+        function showEditForm(button) {
+            const id = button.dataset.id;
+            const oldName = button.dataset.name;
+            const li = button.closest("li");
+            const existingForm = li.querySelector(".inline-form");
+            if (existingForm) existingForm.remove();
+
+            const form = document.createElement("form");
+            form.classList.add("inline-form");
+            form.innerHTML = `
+        <input type="text" name="name" class="form-control form-control-sm" value="${oldName}" required>
+        <button type="submit" class="btn btn-outline-warning btn-sm">수정</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cancelForm(this)">취소</button>
+    `;
+
+            const childUl = li.querySelector(`#children-${id}`);
+            if (childUl) {
+                li.insertBefore(form, childUl);
+            } else {
+                li.appendChild(form);
+            }
+
+            form.addEventListener("submit", e => {
+                e.preventDefault();
+                const newName = form.querySelector("input[name='name']").value.trim();
+                if (!newName || newName === oldName) return;
+                fetch(`/categories/${id}`, {
+                    method: "PUT",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ name: newName })
+                })
+                    .then(res => {
+                        if (!res.ok) throw new Error("수정 실패");
+                        return res.json();
+                    })
+                    .then(data => {
+                        li.querySelector(".category-name").textContent = data.name;
+                        button.dataset.name = data.name;
+                        form.remove();
+                    })
+                    .catch(err => alert(err));
+            });
+        }
+
+        function cancelForm(btn) { btn.closest(".inline-form").remove(); }
+
+        function deleteCategory(button) {
+            const id = button.dataset.id;
+            fetch(`/categories/${id}`, { method: "DELETE" })
+                .then(res => { if (!res.ok) throw new Error("삭제 실패"); location.reload(); })
+                .catch(err => alert(err));
+        }
+    </script>
+</th:block>
