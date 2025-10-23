@@ -13,7 +13,10 @@ public class CategoryViewController {
 
     @GetMapping("/categories")
     public String categoryPage(Model model) {
+        model.addAttribute("pageTitle", "카테고리 관리");
+        model.addAttribute("categoryCss", "admin/category/category-css :: categoryCss");
+        model.addAttribute("categoryJs", "admin/category/category-js :: categoryJs");
         model.addAttribute("categories", categoryApiClient.getRoots());
-        return "category/category_form";
+        return "admin/management";
     }
 }
