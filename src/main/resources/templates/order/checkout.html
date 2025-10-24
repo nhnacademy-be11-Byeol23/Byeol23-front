@@ -9,199 +9,195 @@
   <meta name="keywords" content="">
 
   <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+  <script src="https://js.tosspayments.com/v1/payment-widget"></script>
 </head>
 
 <body class="checkout-page">
 
 <div th:replace="~{fragments/common_header :: commonHeader}"></div>
-  <main class="main">
+<main class="main">
 
-    <!-- Page Title -->
-    <div class="page-title light-background">
-      <div class="container d-lg-flex justify-content-between align-items-center">
-        <h1 class="mb-2 mb-lg-0">Checkout</h1>
-        <nav class="breadcrumbs">
-          <ol>
-            <li><a href="index.html">Home</a></li>
-            <li class="current">Checkout</li>
-          </ol>
-        </nav>
-      </div>
-    </div><!-- End Page Title -->
+  <!-- Page Title -->
+  <div class="page-title light-background">
+    <div class="container d-lg-flex justify-content-between align-items-center">
+      <h1 class="mb-2 mb-lg-0">Checkout</h1>
+      <nav class="breadcrumbs">
+        <ol>
+          <li><a href="index.html">Home</a></li>
+          <li class="current">Checkout</li>
+        </ol>
+      </nav>
+    </div>
+  </div><!-- End Page Title -->
 
-    <!-- Checkout Section -->
-    <section id="checkout" class="checkout section">
+  <!-- Checkout Section -->
+  <section id="checkout" class="checkout section">
 
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
 
-        <form id="checkout-form">
-          <div class="row">
-            <div class="col-lg-7">
-              <div class="checkout-container" data-aos="fade-up">
-                <div class="checkout-section" id="customer-info">
-                  <div class="section-header">
-                    <div class="section-number">1</div>
-                    <h3>주문자 정보</h3>
+      <form id="checkout-form">
+        <div class="row">
+          <div class="col-lg-7">
+            <div class="checkout-container" data-aos="fade-up">
+              <div class="checkout-section" id="customer-info">
+                <div class="section-header">
+                  <div class="section-number">1</div>
+                  <h3>주문자 정보</h3>
+                </div>
+                <div class="section-content">
+                  <div class="row">
+                    <div class="col-md-12 form-group">
+                      <label for="name">이름</label>
+                      <input type="text" name="name" class="form-control" id="name" placeholder="주문자 이름" required="">
+                    </div>
                   </div>
-                  <div class="section-content">
-                    <div class="row">
-                      <div class="col-md-12 form-group">
-                        <label for="name">이름</label>
-                        <input type="text" name="name" class="form-control" id="name" placeholder="주문자 이름" required="">
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <label for="phone">연락처</label>
-                      <input type="tel" class="form-control" name="phone" id="phone" placeholder="010-1234-5678" required="">
-                    </div>
+                  <div class="form-group">
+                    <label for="phone" >연락처</label>
+                    <input type="tel" class="form-control" name="phone" id="phone" placeholder="010-1234-5678" required="">
                   </div>
                 </div>
-
-                <div class="checkout-section" id="shipping-address">
-                  <div class="section-header">
-                    <div class="section-number">2</div>
-                    <h3>배송지 정보</h3>
-                  </div>
-                  <div class="section-content">
-                    <div class="form-group">
-                      <label for="zip">우편번호</label>
-                      <div class="input-group">
-                        <input type="text" name="zip" class="form-control" id="zip" placeholder="우편번호" required="">
-                        <button class="btn btn-outline-secondary" type="button" id="find-zip-btn">우편번호 찾기</button>
-                      </div>
-                    </div>
-                    <div class="form-group">
-                      <label for="address">주소</label>
-                      <input type="text" class="form-control" name="address" id="address" placeholder="기본 주소" required="">
-                    </div>
-                    <div class="form-group">
-                      <label for="address-detail">상세주소</label>
-                      <input type="text" class="form-control" name="address-detail" id="address-detail" placeholder="상세주소 (아파트 동, 호수 등)">
-                    </div>
-
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" id="save-address" name="save-address">
-                      <label class="form-check-label" for="save-address">
-                        이 주소를 다음에도 사용
-                      </label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" id="billing-same" name="billing-same" checked="">
-                      <label class="form-check-label" for="billing-same">
-                        주문자 정보와 동일
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
               </div>
-            </div>
 
-            <div class="col-lg-5">
-              <div class="order-summary" data-aos="fade-left" data-aos-delay="200">
-                <div class="order-summary-header">
-                  <h3>주문 요약</h3>
-                  <span class="item-count">2개 상품</span>
+              <div class="checkout-section" id="shipping-address">
+                <div class="section-header">
+                  <div class="section-number">2</div>
+                  <h3>배송지 정보</h3>
+                </div>
+                <div class="section-content">
+                  <div class="form-group">
+                    <label for="zip">우편번호</label>
+                    <div class="input-group">
+                      <input type="text" name="zip" class="form-control" id="zip" placeholder="우편번호" required="">
+                      <button class="btn btn-outline-secondary" type="button" id="find-zip-btn">우편번호 찾기</button>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="address">주소</label>
+                    <input type="text" class="form-control" name="address" id="address" placeholder="기본 주소" required="">
+                  </div>
+                  <div class="form-group">
+                    <label for="address-detail">상세주소</label>
+                    <input type="text" class="form-control" name="address-detail" id="address-detail" placeholder="상세주소 (아파트 동, 호수 등)">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="order-summary" data-aos="fade-left" data-aos-delay="200">
+              <div class="order-summary-header">
+                <h3>주문 요약</h3>
+                <span class="item-count">2개 상품</span>
+              </div>
+
+              <div class="order-summary-content">
+                <div class="order-items">
+                  <div class="order-item">
+                    <div class="order-item-image">
+                      <img src="assets/img/product/product-1.webp" alt="Product" class="img-fluid">
+                    </div>
+                    <div class="order-item-details">
+                      <h4>Lorem Ipsum Dolor</h4>
+                      <p class="order-item-variant">Color: Black | Size: M</p>
+                      <div class="order-item-price">
+                        <span class="quantity">1 ×</span>
+                        <span class="price">128,000원</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="order-item">
+                    <div class="order-item-image">
+                      <img src="assets/img/product/product-2.webp" alt="Product" class="img-fluid">
+                    </div>
+                    <div class="order-item-details">
+                      <h4>Sit Amet Consectetur</h4>
+                      <p class="order-item-variant">Color: White | Size: L</p>
+                      <div class="order-item-price">
+                        <span class="quantity">2 ×</span>
+                        <span class="price">85,000원</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                <div class="order-summary-content">
-                  <div class="order-items">
-                    <div class="order-item">
-                      <div class="order-item-image">
-                        <img src="assets/img/product/product-1.webp" alt="Product" class="img-fluid">
-                      </div>
-                      <div class="order-item-details">
-                        <h4>Lorem Ipsum Dolor</h4>
-                        <p class="order-item-variant">Color: Black | Size: M</p>
-                        <div class="order-item-price">
-                          <span class="quantity">1 ×</span>
-                          <span class="price">128,000원</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="order-item">
-                      <div class="order-item-image">
-                        <img src="assets/img/product/product-2.webp" alt="Product" class="img-fluid">
-                      </div>
-                      <div class="order-item-details">
-                        <h4>Sit Amet Consectetur</h4>
-                        <p class="order-item-variant">Color: White | Size: L</p>
-                        <div class="order-item-price">
-                          <span class="quantity">2 ×</span>
-                          <span class="price">85,000원</span>
-                        </div>
-                      </div>
-                    </div>
+                <div class="order-totals">
+                  <div class="order-subtotal d-flex justify-content-between">
+                    <span>전체 금액</span>
+                    <span id="total-book-price">298,000원</span>
                   </div>
-
-                  <div class="order-totals">
-                    <div class="order-subtotal d-flex justify-content-between">
-                      <span>전체 금액</span>
-                      <span id="total-book-price">298,000원</span>
-                    </div>
-                    <div class="order-shipping d-flex justify-content-between">
-                      <span>배송비</span>
-                      <span>-3,000원</span>
-                    </div>
-                    <div class="order-total d-flex justify-content-between">
-                      <span>실제 금액</span>
-                      <span id="actual-order-price">295,000원</span>
-                    </div>
+                  <div class="order-shipping d-flex justify-content-between">
+                    <span>배송비</span>
+                    <span>-3,000원</span>
                   </div>
-
-                  <div class="d-grid mt-4">
-                    <button type="button" id="payment-button" class="btn btn-primary btn-lg">295,000원 결제하기</button>
+                  <div class="order-total d-flex justify-content-between">
+                    <span>실제 금액</span>
+                    <span id="actual-order-price">295,000원</span>
                   </div>
+                </div>
+
+                <div class="d-grid mt-4">
+                  <button type="button" id="payment-button" class="btn btn-primary btn-lg">295,000원 결제하기</button>
                 </div>
               </div>
             </div>
           </div>
-        </form>
-        <!-- Terms and Privacy Modals -->
-        <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-scrollable">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.</p>
-                <p>Suspendisse in orci enim. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.</p>
-                <p>Suspendisse in orci enim. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Understand</button>
-              </div>
+
+          <div class="checkout-section" id="payment-method">
+            <div class="section-header">
+              <div class="section-number">3</div>
+              <h3>결제 방법</h3>
+            </div>
+          </div>
+
+        </div>
+      </form>
+      <!-- Terms and Privacy Modals -->
+      <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.</p>
+              <p>Suspendisse in orci enim. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.</p>
+              <p>Suspendisse in orci enim. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Understand</button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-scrollable">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="privacyModalLabel">Privacy Policy</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim.</p>
-                <p>Suspendisse in orci enim. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.</p>
-                <p>Suspendisse in orci enim. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Understand</button>
-              </div>
+      <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="privacyModalLabel">Privacy Policy</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim.</p>
+              <p>Suspendisse in orci enim. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.</p>
+              <p>Suspendisse in orci enim. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Understand</button>
             </div>
           </div>
         </div>
-
       </div>
 
-    </section><!-- /Checkout Section -->
+    </div>
 
-  </main>
+  </section><!-- /Checkout Section -->
+
+</main>
 
 <div th:replace="~{fragments/common_footer :: commonFooter}"></div>
 <!-- Scroll Top -->
@@ -223,95 +219,118 @@
 <script src="assets/js/main.js"></script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // 전화번호 자동 하이픈 기능
-    const phoneInput = document.getElementById('phone');
-    if (phoneInput) {
-      const formatPhoneNumber = (value) => {
-        if (!value) return value;
-        let phoneNumber = value.replace(/[^\d]/g, '');
-        if (phoneNumber.length > 11) {
-          phoneNumber = phoneNumber.slice(0, 11);
-        }
-        const phoneNumberLength = phoneNumber.length;
-        if (phoneNumberLength < 4) return phoneNumber;
-        if (phoneNumberLength < 8) return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
-        return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;
-      };
-      const phoneInputHandler = (e) => {
-        const target = e.target;
-        const cursorPosition = target.selectionStart;
-        const originalValue = target.value;
-        const originalLength = originalValue.length;
-        const formattedValue = formatPhoneNumber(originalValue);
-        target.value = formattedValue;
-        const newLength = formattedValue.length;
-        const newCursorPosition = cursorPosition + (newLength - originalLength);
-        target.setSelectionRange(newCursorPosition, newCursorPosition);
-      };
-      phoneInput.addEventListener('input', phoneInputHandler);
-    }
-
-    // 결제 버튼 클릭 시 Feign Client 호출 기능
-    const paymentButton = document.getElementById('payment-button');
-    if (paymentButton) {
-      paymentButton.addEventListener('click', function() {
-        const form = document.getElementById('checkout-form');
-        const formData = new FormData(form);
-
-        // "298,000원" 같은 문자열에서 숫자만 추출하는 헬퍼 함수
-        const parsePrice = (priceString) => {
-          if (!priceString) return 0;
-          return parseFloat(priceString.replace(/[^\d]/g, ''));
-        };
-
-        // 1단계에서 추가한 id로 가격 정보를 가져옵니다.
-        const totalBookPrice = parsePrice(document.getElementById('total-book-price')?.textContent);
-        const actualOrderPrice = parsePrice(document.getElementById('actual-order-price')?.textContent);
-
-        // OrderCreateRequest DTO 형식에 맞게 JSON 객체를 생성합니다.
-        const orderRequest = {
-          totalBookPrice: totalBookPrice,
-          actualOrderPrice: actualOrderPrice,
-          receiver: formData.get('name'),
-          receiverAddress: `(${formData.get('zip')}) ${formData.get('address')}`, // 우편번호와 주소를 조합
-          receiverAddressDetail: formData.get('address-detail'),
-          receiverPhone: formData.get('phone')
-        };
-
-        paymentButton.disabled = true;
-        paymentButton.textContent = '처리 중...';
-
-        // fetch API를 사용해 백엔드 Controller로 요청을 보냅니다.
-        fetch('/order/checkout', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(orderRequest),
-        })
-                .then(response => {
-                  if (!response.ok) {
-                    return response.json().then(err => { throw new Error(err.message || '결제 요청에 실패했습니다.') });
-                  }
-                  return response.json();
-                })
-                .then(data => {
-                  console.log('주문 성공:', data);
-                  alert('주문이 성공적으로 완료되었습니다!');
-                  // 예: window.location.href = '/order/success/' + data.orderId;
-                })
-                .catch(error => {
-                  console.error('주문 처리 중 오류 발생:', error);
-                  alert(error.message);
-                })
-                .finally(() => {
-                  paymentButton.disabled = false;
-                  paymentButton.textContent = `${actualOrderPrice.toLocaleString()}원 결제하기`;
-                });
-      });
-    }
+  document.addEventListener('DOMContentLoaded', () => {
+    initPhoneHyphen();
+    initTossPayments();
   });
+
+  function initPhoneHyphen() {
+    const phoneInput = document.getElementById('phone');
+    if (!phoneInput) return;
+
+    const formatPhoneNumber = (value) => {
+      if (!value) return value;
+      let phoneNumber = value.replace(/[^\d]/g, '');
+      if (phoneNumber.length > 11) phoneNumber = phoneNumber.slice(0, 11);
+      const len = phoneNumber.length;
+      if (len < 4) return phoneNumber;
+      if (len < 8) return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
+      return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;
+    };
+
+    phoneInput.addEventListener('input', (e) => {
+      const target = e.target;
+      const originalValue = target.value;
+      const formattedValue = formatPhoneNumber(originalValue);
+      // 커서 계산은 간단하게 처리 (정교화 가능)
+      target.value = formattedValue;
+    });
+  }
+
+  function initTossPayments() {
+    const paymentButton = document.getElementById('payment-button');
+    if (!paymentButton) return;
+
+
+    const clientKey = "test_ck_nRQoOaPz8L4QRwM6lGa58y47BMw6";
+
+    // customerKey 생성
+    const orderId = Math.random().toString(36).substring(2, 12);// orderId 만드는 로직 추가할 것
+    var tossPayments = TossPayments(clientKey);
+
+    // 결제 금액 가져오기
+    const parsePrice = (priceString) => Number(priceString.replace(/[^\d]/g, ''));
+    const totalPrice = parsePrice(document.getElementById('actual-order-price')?.textContent);
+
+    paymentButton.addEventListener('click', function () {
+      const customerName = document.getElementById('name')?.value.trim();
+      const rawPhone = document.getElementById('phone')?.value;
+      const phoneNumber = rawPhone ? rawPhone.replace(/[^\d]/g, '') : '';
+      const zip = document.getElementById('zip')?.value;
+      const address = document.getElementById('address')?.value;
+      const addressDetail = document.getElementById('address-detail')?.value;
+      const totalBookPrice = parsePrice(document.getElementById('total-book-price')?.textContent);
+
+      const orderItems = document.querySelectorAll('.order-summary-content .order-item');
+      let orderName = "주문 상품"; // 기본값
+      if (orderItems.length > 0) {
+        const firstItemName = orderItems[0].querySelector('.order-item-details h4')?.textContent.trim();
+        if (firstItemName) {
+          if (orderItems.length > 1) {
+            orderName = `${firstItemName} 외 ${orderItems.length - 1}건`;
+          } else {
+            orderName = firstItemName;
+          }
+        }
+      }
+
+      const orderPrepareRequest = {
+        orderNumber: orderId,
+        totalBookPrice: totalBookPrice,
+        actualOrderPrice: totalPrice,
+        receiver: customerName,
+        postCode: `${zip}`,
+        receiverAddress: `${address}`,
+        receiverAddressDetail: addressDetail,
+        receiverPhone: phoneNumber
+      };
+
+      fetch('/orders/prepare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderPrepareRequest)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('주문 준비에 실패했습니다.');
+        }
+        return response.json();
+      })
+      .then(prepareResponse => {
+        // 4. 서버로부터 orderId를 성공적으로 받으면 토스페이먼츠 호출
+        const orderIdFromServer = prepareResponse.orderNumber;
+        if (!orderIdFromServer) {
+          throw new Error('주문 ID를 받지 못했습니다.');
+        }
+
+        // 위에서 totalPrice와 response에서 받아온 실제 결제 금액을 비교할 필요가 있어 보임
+
+        tossPayments.requestPayment('토스페이', {
+          orderId: orderIdFromServer,
+          amount: prepareResponse.actualOrderPrice,
+          orderName: orderName,
+          customerName: prepareResponse.receiver,
+          successUrl: window.location.origin + "/payments/confirm",
+          failUrl: window.location.origin + "/payments/fail"
+        });
+      })
+      .catch(error => {
+        console.error('주문 처리 중 오류:', error);
+        alert(error.message);
+      });
+    });
+  }
+
 </script>
 
 </body>
