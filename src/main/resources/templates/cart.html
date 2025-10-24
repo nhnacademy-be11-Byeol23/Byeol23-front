@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Cart - NiceShop Bootstrap Template</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+</head>
+
+<body class="cart-page">
+
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title light-background">
+      <div class="container d-lg-flex justify-content-between align-items-center">
+        <h1 class="mb-2 mb-lg-0">장바구니</h1>
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a href="index.html">홈</a></li>
+            <li class="current">장바구니</li>
+          </ol>
+        </nav>
+      </div>
+    </div><!-- End Page Title -->
+
+    <!-- Cart Section -->
+    <section id="cart" class="cart section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row">
+          <div class="col-lg-8" data-aos="fade-up" data-aos-delay="200">
+            <div class="cart-items">
+              <div class="cart-header d-none d-lg-block">
+                <div class="row align-items-center">
+                  <div class="col-lg-5">
+                    <h5 class="ps-4">상품</h5>
+                  </div>
+                  <div class="col-lg-3 text-center">
+                    <h5>가격</h5>
+                  </div>
+                  <div class="col-lg-2 text-center">
+                    <h5>수량</h5>
+                  </div>
+                  <div class="col-lg-2 text-center">
+                    <h5>합계</h5>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Cart Item 1 -->
+              <div class="cart-item" data-cart-book-id="1">
+                <div class="row align-items-center">
+                  <div class="col-lg-5 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
+                    <div class="product-info d-flex align-items-center">
+                      <div class="product-image">
+                        <img src="https://image.yes24.com/goods/159582935/XL" alt="Product" class="img-fluid" loading="lazy">
+                      </div>
+                      <div class="product-details">
+                        <h6 class="product-title">찍히지 않습니다 3</h6>
+                        <button class="remove-item" type="button">
+                          <i class="bi bi-trash"></i> 삭제
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-3 col-12 mt-3 mt-lg-0 text-center">
+                    <div class="price-tag">
+                      <span class="sale-price">5,850원</span>
+                      <span class="regular-price">6,500원</span>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 col-12 mt-3 mt-lg-0 text-center">
+                    <div class="quantity-selector">
+                      <button class="quantity-btn decrease">
+                        <i class="bi bi-dash"></i>
+                      </button>
+                      <input type="number" class="quantity-input" value="1" min="1" max="10">
+                      <button class="quantity-btn increase">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 col-12 mt-3 mt-lg-0 text-center">
+                    <div class="item-total">
+                      <span>5,400원</span>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- End Cart Item -->
+
+              <!-- Cart Item 2 -->
+              <div class="cart-item" data-cart-book-id="2">
+                <div class="row align-items-center">
+                  <div class="col-lg-5 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
+                    <div class="product-info d-flex align-items-center">
+                      <div class="product-image">
+                        <img src="https://image.yes24.com/goods/159499969/XL" alt="Product" class="img-fluid" loading="lazy">
+                      </div>
+                      <div class="product-details">
+                        <h6 class="product-title">푸른 상자 20</h6>
+                        <button class="remove-item" type="button">
+                          <i class="bi bi-trash"></i> 삭제
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-3 col-12 mt-3 mt-lg-0 text-center">
+                    <div class="price-tag">
+                      <span class="sale-price">5,400원</span>
+                      <span class="regular-price">6,000원</span>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 col-12 mt-3 mt-lg-0 text-center">
+                    <div class="quantity-selector">
+                      <button class="quantity-btn decrease">
+                        <i class="bi bi-dash"></i>
+                      </button>
+                      <input type="number" class="quantity-input" value="1" min="1" max="10">
+                      <button class="quantity-btn increase">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 col-12 mt-3 mt-lg-0 text-center">
+                    <div class="item-total">
+                      <span>5,400원</span>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- End Cart Item -->
+
+              <!-- Cart Item 3 -->
+              <div class="cart-item" data-cart-book-id="3">
+                <div class="row align-items-center">
+                  <div class="col-lg-5 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
+                    <div class="product-info d-flex align-items-center">
+                      <div class="product-image">
+                        <img src="https://image.yes24.com/goods/150793767/XL" alt="Product" class="img-fluid" loading="lazy">
+                      </div>
+                      <div class="product-details">
+                        <h6 class="product-title">별이삼샵 11</h6>
+                        <button class="remove-item" type="button">
+                          <i class="bi bi-trash"></i> 삭제
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-3 col-12 mt-3 mt-lg-0 text-center">
+                    <div class="price-tag">
+                      <span class="sale-price">14,400원</span>
+                      <span class="regular-price">16,000원</span>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 col-12 mt-3 mt-lg-0 text-center">
+                    <div class="quantity-selector">
+                      <button class="quantity-btn decrease">
+                        <i class="bi bi-dash"></i>
+                      </button>
+                      <input type="number" class="quantity-input" value="1" min="1" max="10">
+                      <button class="quantity-btn increase">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 col-12 mt-3 mt-lg-0 text-center">
+                    <div class="item-total">
+                      <span>14,400원</span>
+                    </div>
+                  </div>
+                </div>
+              </div><!-- End Cart Item -->
+            </div>
+          </div>
+
+          <div class="col-lg-4 mt-4 mt-lg-0" data-aos="fade-up" data-aos-delay="300">
+            <div class="cart-summary">
+              <h4 class="summary-title">주문 요약</h4>
+
+              <div class="summary-item">
+                <span class="summary-label">소계</span>
+                <span class="summary-value">30,000원</span>
+              </div>
+
+              <div class="summary-item shipping-item">
+                <span class="summary-label">배송비</span>
+                <div class="shipping-options">
+                  <div class="form-check text-end">
+                    <p class="form-check-label">
+                      2,500원
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+<!--              <div class="summary-item discount">-->
+<!--                <span class="summary-label">할인</span>-->
+<!--                <span class="summary-value">-$0.00</span>-->
+<!--              </div>-->
+
+              <div class="summary-total">
+                <span class="summary-label">총계</span>
+                <span class="summary-value">32,500원</span>
+              </div>
+
+              <div class="checkout-button">
+                <a href="#" class="btn btn-accent w-100">
+                  결제하기 <i class="bi bi-arrow-right"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /Cart Section -->
+
+  </main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="assets/vendor/aos/aos.js"></script>
+  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="assets/vendor/drift-zoom/Drift.min.js"></script>
+  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+
+  <!-- Main JS File -->
+  <script src="assets/js/main.js"></script>
+  
+  <!-- jQuery (Cart 페이지에서만 사용) -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  
+  <!-- Cart JS File -->
+  <script src="assets/js/cart.js"></script>
+
+</body>
+
+</html>
