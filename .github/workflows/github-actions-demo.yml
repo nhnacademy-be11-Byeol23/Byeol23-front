@@ -4,6 +4,10 @@ on:
   push:
     branches: [ "main" ]
 
+env:
+  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
 jobs:
   build-and-deploy:
 
@@ -17,6 +21,12 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+
+      - name: Analyze Front with SonarQube
+        run: mvn verify sonar:sonar
+          -Dsonar.projectKey=byeol23-frontend
+          -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
+          -Dsonar.token=${{ env.SONAR_TOKEN }}
 
       - name: Build with Maven
         run: mvn -B package --file pom.xml

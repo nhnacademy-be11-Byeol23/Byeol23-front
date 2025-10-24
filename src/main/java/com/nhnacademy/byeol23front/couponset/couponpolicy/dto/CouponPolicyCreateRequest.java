@@ -1,6 +1,8 @@
 package com.nhnacademy.byeol23front.couponset.couponpolicy.dto;
 
+
 import java.math.BigDecimal;
+
 
 public record CouponPolicyCreateRequest(
         String policyName,

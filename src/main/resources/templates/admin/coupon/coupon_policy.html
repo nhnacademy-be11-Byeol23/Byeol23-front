@@ -1,11 +1,11 @@
-<div th:fragment="policyForm(formObject)">
-<h3>쿠폰 정책</h3>
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="content">
+<h3>쿠폰 정책 관리</h3>
 
 <hr>
 
 <h4>신규 쿠폰 정책 등록</h4>
 
-<form action="/coupon-policy/create" method="post">
+<form action="/coupon-policy/create" method="post" >
     <div class="form-group">
         <label for="policyName">정책명</label>
         <input type="text" class="form-control" id="policyName" name="policyName" placeholder="예: 신규 회원가입 10% 할인 쿠폰" required>
@@ -55,3 +55,4 @@
     </div>
     <button type="submit" class="app-btn">쿠폰 정책 저장</button>
 </form>
+</th:block>

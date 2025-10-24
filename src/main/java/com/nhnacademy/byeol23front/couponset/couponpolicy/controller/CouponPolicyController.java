@@ -17,7 +17,7 @@ public class CouponPolicyController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity createCouponPolicy(@ModelAttribute CouponPolicyCreateRequest couponPolicyCreateRequest){
+    public ResponseEntity createCouponPolicy(@RequestBody CouponPolicyCreateRequest couponPolicyCreateRequest){
         log.info(couponPolicyCreateRequest.toString());
 
         return ResponseEntity.ok().build();
