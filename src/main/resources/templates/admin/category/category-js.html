@@ -1,70 +1,22 @@
-<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="content">
-    <div class="category-page">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <h5 class="fw-semibold mb-3">최상위 카테고리 등록</h5>
-                <form id="rootForm" class="row g-3">
-                    <div class="col-md-4">
-                        <input id="root" type="text" name="name" class="form-control" placeholder="예시: 국내도서" required>
-                    </div>
-                    <div class="col-md-1 d-grid">
-                        <button type="submit" class="btn btn-dark">등록</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h5 class="fw-semibold mb-3">카테고리 목록</h5>
-                <ul id="category-list">
-                    <li th:each="category : ${categories}">
-                        <div class="category-line">
-                            <span class="category-name"
-                                  th:text="${category.name}"
-                                  th:attr="data-id=${category.id}, data-has-children=${category.hasChildren}"
-                                  th:classappend="${category.hasChildren} ? ' folder' : ' leaf'"
-                                  onclick="loadChildren(this)">
-                            </span>
-                            <div class="category-actions">
-                                <button type="button" class="btn btn-outline-secondary btn-sm"
-                                        th:attr="data-id=${category.id}" onclick="showAddForm(this)">추가</button>
-                                <button type="button" class="btn btn-outline-warning btn-sm"
-                                        th:attr="data-id=${category.id}, data-name=${category.name}" onclick="showEditForm(this)">수정</button>
-                                <button type="button" class="btn btn-outline-danger btn-sm"
-                                        th:attr="data-id=${category.id}" onclick="deleteCategory(this)">삭제</button>
-                            </div>
-                        </div>
-                        <ul th:id="'children-' + ${category.id}" class="hidden"></ul>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</th:block>
-
 <th:block xmlns:th="http://www.thymeleaf.org" th:fragment="categoryJs">
     <script>
-        document.getElementById("rootForm").addEventListener("submit", async (e) => {
+
+        document.getElementById("rootForm").addEventListener("submit", e => {
             e.preventDefault();
             const name = document.getElementById("root").value.trim();
             if (!name) return alert("카테고리명을 입력하세요.");
-
-            try {
-                const res = await fetch("/categories", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({ name })
-                });
-                if (!res.ok) {
-                    const err = await res.json().catch(() => null);
-                    const msg = err?.message || "등록 실패";
-                    throw new Error(msg);
-                }
-                location.reload();
-            } catch (err) {
-                alert(err.message);
-            }
+            fetch("/categories", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ name })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("등록 실패");
+                    // 👇 [수정] 새로고침 전 해시(#)를 설정
+                    location.hash = '#categories';
+                    location.reload();
+                })
+                .catch(err => alert(err));
         });
 
         function loadChildren(element) {
@@ -114,10 +66,10 @@
             const form = document.createElement("form");
             form.classList.add("inline-form");
             form.innerHTML = `
-                <input type="text" name="name" class="form-control form-control-sm" placeholder="하위 카테고리명" required>
-                <button type="submit" class="btn btn-sm btn-dark">등록</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cancelForm(this)">취소</button>
-            `;
+        <input type="text" name="name" class="form-control form-control-sm" placeholder="하위 카테고리명" required>
+        <button type="submit" class="btn btn-sm btn-dark">등록</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cancelForm(this)">취소</button>
+    `;
 
             const childUl = li.querySelector(`#children-${parentId}`);
             if (childUl) {
@@ -126,25 +78,22 @@
                 li.appendChild(form);
             }
 
-            form.addEventListener("submit", async (e) => {
+            form.addEventListener("submit", e => {
                 e.preventDefault();
                 const name = form.querySelector("input[name='name']").value.trim();
                 if (!name) return alert("카테고리명을 입력하세요.");
-                try {
-                    const res = await fetch("/categories", {
-                        method: "POST",
-                        headers: {"Content-Type": "application/json"},
-                        body: JSON.stringify({ name, parentId })
-                    });
-                    if (!res.ok) {
-                        const err = await res.json().catch(() => null);
-                        const msg = err?.message || "추가 실패";
-                        throw new Error(msg);
-                    }
-                    location.reload();
-                } catch (err) {
-                    alert(err.message);
-                }
+                fetch("/categories", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ name, parentId })
+                })
+                    .then(res => {
+                        if (!res.ok) throw new Error("추가 실패");
+                        // 👇 [수정] 새로고침 전 해시(#)를 설정
+                        location.hash = '#categories';
+                        location.reload();
+                    })
+                    .catch(err => alert(err));
             });
         }
 
@@ -158,10 +107,10 @@
             const form = document.createElement("form");
             form.classList.add("inline-form");
             form.innerHTML = `
-                <input type="text" name="name" class="form-control form-control-sm" value="${oldName}" required>
-                <button type="submit" class="btn btn-outline-warning btn-sm">수정</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cancelForm(this)">취소</button>
-            `;
+        <input type="text" name="name" class="form-control form-control-sm" value="${oldName}" required>
+        <button type="submit" class="btn btn-outline-warning btn-sm">수정</button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="cancelForm(this)">취소</button>
+    `;
 
             const childUl = li.querySelector(`#children-${id}`);
             if (childUl) {
@@ -170,48 +119,39 @@
                 li.appendChild(form);
             }
 
-            form.addEventListener("submit", async (e) => {
+            form.addEventListener("submit", e => {
                 e.preventDefault();
                 const newName = form.querySelector("input[name='name']").value.trim();
                 if (!newName || newName === oldName) return;
-                try {
-                    const res = await fetch(`/categories/${id}`, {
-                        method: "PUT",
-                        headers: {"Content-Type": "application/json"},
-                        body: JSON.stringify({ name: newName })
-                    });
-                    if (!res.ok) {
-                        const err = await res.json().catch(() => null);
-                        const msg = err?.message || "수정 실패";
-                        throw new Error(msg);
-                    }
-                    const data = await res.json();
-                    li.querySelector(".category-name").textContent = data.name;
-                    button.dataset.name = data.name;
-                    form.remove();
-                } catch (err) {
-                    alert(err.message);
-                }
+                fetch(`/categories/${id}`, {
+                    method: "PUT",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ name: newName })
+                })
+                    .then(res => {
+                        if (!res.ok) throw new Error("수정 실패");
+                        return res.json();
+                    })
+                    .then(data => {
+                        li.querySelector(".category-name").textContent = data.name;
+                        button.dataset.name = data.name;
+                        form.remove();
+                    })
+                    .catch(err => alert(err));
             });
         }
 
-        async function deleteCategory(button) {
-            const id = button.dataset.id;
-            try {
-                const res = await fetch(`/categories/${id}`, { method: "DELETE" });
-                if (!res.ok) {
-                    const err = await res.json().catch(() => null);
-                    const msg = err?.message || "삭제 실패";
-                    throw new Error(msg);
-                }
-                location.reload();
-            } catch (err) {
-                alert(err.message);
-            }
-        }
+        function cancelForm(btn) { btn.closest(".inline-form").remove(); }
 
-        function cancelForm(btn) {
-            btn.closest(".inline-form").remove();
+        function deleteCategory(button) {
+            const id = button.dataset.id;
+            fetch(`/categories/${id}`, { method: "DELETE" })
+                .then(res => {
+                    if (!res.ok) throw new Error("삭제 실패");
+                    location.hash = '#categories';
+                    location.reload();
+                })
+                .catch(err => alert(err));
         }
     </script>
 </th:block>
