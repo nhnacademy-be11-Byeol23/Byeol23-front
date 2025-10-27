@@ -1,0 +1,74 @@
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="admin_side_bar">
+  <div class="profile-menu collapse d-lg-block" id="profileMenu">
+    <nav class="menu-nav">
+      <ul class="nav flex-column" role="tablist">
+
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin}">
+            <span>관리자 홈</span>
+          </a>
+        </li>
+
+        <li class="utility-group"><h4>도서 관리</h4></li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/categories}">
+            <span>카테고리 관리</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/books/test2}">
+            <span>테스트 메뉴2</span>
+          </a>
+        </li>
+
+        <li class="utility-group"><h4>회원 관리</h4></li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/members/test1}">
+            <span>테스트 메뉴1</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/members/test2}">
+            <span>테스트 메뉴2</span>
+          </a>
+        </li>
+
+        <li class="utility-group"><h4>주문 관리</h4></li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/orders}">
+            <span>주문 내역</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/orders/test2}">
+            <span>테스트 메뉴2</span>
+          </a>
+        </li>
+
+        <li class="utility-group"><h4>쿠폰 관리</h4></li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/coupons/test1}">
+            <span>테스트 메뉴1</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/coupons/test2}">
+            <span>테스트 메뉴2</span>
+          </a>
+        </li>
+
+        <li class="utility-group"><h4>정책 관리</h4></li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/policies/test1}">
+            <span>테스트 메뉴1</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/admin/policies/test2}">
+            <span>테스트 메뉴2</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</th:block>

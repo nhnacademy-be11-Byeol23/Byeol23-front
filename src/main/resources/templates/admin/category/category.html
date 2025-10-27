@@ -1,44 +1,105 @@
-<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="content">
-    <div class="category-page">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-                <h5 class="fw-semibold mb-3">최상위 카테고리 등록</h5>
-                <form id="rootForm" class="row g-3">
-                    <div class="col-md-4">
-                        <input id="root" type="text" name="name" class="form-control" placeholder="예시: 국내도서" required>
-                    </div>
-                    <div class="col-md-1 d-grid">
-                        <button type="submit" class="btn btn-dark">등록</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h5 class="fw-semibold mb-3">카테고리 목록</h5>
-                <ul id="category-list">
-                    <li th:each="category : ${categories}">
-                        <div class="category-line">
-            <span class="category-name"
-                  th:text="${category.name}"
-                  th:attr="data-id=${category.id}, data-has-children=${category.hasChildren}"
-                  th:classappend="${category.hasChildren} ? ' folder' : ' leaf'"
-                  onclick="loadChildren(this)">
-            </span>
-                            <div class="category-actions">
-                                <button type="button" class="btn btn-outline-secondary btn-sm"
-                                        th:attr="data-id=${category.id}" onclick="showAddForm(this)">추가</button>
-                                <button type="button" class="btn btn-outline-warning btn-sm"
-                                        th:attr="data-id=${category.id}, data-name=${category.name}" onclick="showEditForm(this)">수정</button>
-                                <button type="button" class="btn btn-outline-danger btn-sm"
-                                        th:attr="data-id=${category.id}" onclick="deleteCategory(this)">삭제</button>
-                            </div>
-                        </div>
-                        <ul th:id="'children-' + ${category.id}" class="hidden"></ul>
-                    </li>
-                </ul>
-            </div>
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>관리자 - 카테고리 관리</title>
+    <meta name="description" content="관리자 카테고리 관리 페이지">
+    <meta name="keywords" content="">
+    <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+    <th:block th:replace="~{'admin/category/category-css' :: categoryCss}"></th:block>
+</head>
+
+<body class="admin-category-page">
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">관리자 - 카테고리 관리</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/admin}">관리자 홈</a></li>
+                    <li class="current">카테고리 관리</li>
+                </ol>
+            </nav>
         </div>
     </div>
-</th:block>
+
+    <section id="admin-categories" class="admin-categories section">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+            <div class="row g-4">
+                <div class="col-lg-3">
+                    <div th:replace="~{fragments/admin_side_bar :: admin_side_bar}"></div>
+                </div>
+
+                <div class="col-lg-9">
+                    <div class="category-page">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3">최상위 카테고리 등록</h5>
+                                <form id="rootForm" class="row g-3">
+                                    <div class="col-md-4">
+                                        <input id="root" type="text" name="name" class="form-control" placeholder="예시: 국내도서" required>
+                                    </div>
+                                    <div class="col-md-1 d-grid">
+                                        <button type="submit" class="btn btn-dark">등록</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3">카테고리 목록</h5>
+                                <ul id="category-list">
+                                    <th:block th:if="${categories != null}">
+                                        <li th:each="category : ${categories}">
+                                            <div class="category-line">
+                                                <span class="category-name"
+                                                      th:text="${category.name}"
+                                                      th:attr="data-id=${category.id}, data-has-children=${category.hasChildren}"
+                                                      th:classappend="${category.hasChildren} ? ' folder' : ' leaf'"
+                                                      onclick="loadChildren(this)">
+                                                </span>
+                                                <div class="category-actions">
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                            th:attr="data-id=${category.id}" onclick="showAddForm(this)">추가</button>
+                                                    <button type="button" class="btn btn-outline-warning btn-sm"
+                                                            th:attr="data-id=${category.id}, data-name=${category.name}" onclick="showEditForm(this)">수정</button>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                                            th:attr="data-id=${category.id}" onclick="deleteCategory(this)">삭제</button>
+                                                </div>
+                                            </div>
+                                            <ul th:id="'children-' + ${category.id}" class="hidden"></ul>
+                                        </li>
+                                    </th:block>
+                                    <li th:if="${categories == null or #lists.isEmpty(categories)}">
+                                        <p class="text-center py-3">등록된 카테고리가 없습니다.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div> </div> </div> </div> </section>
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<div id="preloader"></div>
+
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+<script th:src="@{/assets/js/main.js}"></script>
+
+<th:block th:replace="~{'admin/category/category-js' :: categoryJs}"></th:block>
+
+</body>
+</html>

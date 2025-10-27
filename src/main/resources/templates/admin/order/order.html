@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>관리자 - 주문 내역</title>
+  <meta name="description" content="관리자 주문 내역 페이지">
+  <meta name="keywords" content="">
+  <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+</head>
+
+<body class="admin-orders-page">
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+  <div class="page-title light-background">
+    <div class="container d-lg-flex justify-content-between align-items-center">
+      <h1 class="mb-2 mb-lg-0">관리자 - 주문 내역</h1>
+      <nav class="breadcrumbs">
+        <ol>
+          <li><a th:href="@{/}">Home</a></li>
+          <li><a th:href="@{/admin}">관리자 홈</a></li>
+          <li class="current">주문 내역</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <section id="admin-orders" class="admin-orders section">
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+      <div class="row g-4">
+
+        <div class="col-lg-3">
+          <div th:replace="~{fragments/admin_side_bar :: admin_side_bar}"></div>
+        </div>
+
+        <div class="col-lg-9">
+          <div class="order-page">
+
+            <div class="card shadow-sm mb-4">
+              <div class="card-body">
+                <h5 class="fw-semibold mb-3">주문 내역 검색</h5>
+                <form id="orderSearchForm" class="row g-3" th:action="@{/admin/orders}" method="GET">
+                  <div class="col-md-3">
+                    <label for="orderStatus" class="form-label">주문 상태</label>
+                    <select id="orderStatus" name="status" class="form-select">
+                      <option value="">전체</option>
+                      <option value="대기">대기</option>
+                      <option value="결제 완료">결제 완료</option>
+                      <option value="배송중">배송중</option>
+                      <option value="배송완료">배송완료</option>
+                      <option value="주문 취소">주문 취소</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label for="orderId" class="form-label">주문 번호</label>
+                    <input id="orderId" type="text" name="orderNumber" class="form-control" placeholder="주문 번호 입력">
+                  </div>
+                  <div class="col-md-3">
+                    <label for="customerName" class="form-label">주문자명</label>
+                    <input id="customerName" type="text" name="receiver" class="form-control" placeholder="수신자명 입력">
+                  </div>
+                  <div class="col-md-2 d-grid align-self-end">
+                    <button type="submit" class="btn btn-dark">검색</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h5 class="fw-semibold mb-3">주문 목록</h5>
+                <table class="table table-hover align-middle">
+                  <thead class="table-light">
+                  <tr>
+                    <th scope="col">주문번호</th>
+                    <th scope="col">주문일시</th>
+                    <th scope="col">주문자(수신자)</th>
+                    <th scope="col">결제 금액</th>
+                    <th scope="col">주문 상태</th>
+                    <th scope="col">관리</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr th:each="order : ${orders}">
+                    <td th:text="${order.orderNumber}">...</td>
+                    <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}">...</td>
+                    <td th:text="${order.receiver}">...</td>
+                    <td th:text="${#numbers.formatInteger(order.actualOrderPrice, 0, 'COMMA') + '원'}">...</td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="${order.orderStatus == '결제 완료'} ? 'text-bg-success' :
+                                             (${order.orderStatus == '배송중'} ? 'text-bg-primary' :
+                                             (${order.orderStatus == '주문 취소'} ? 'text-bg-danger' : 'text-bg-secondary'))"
+                              th:text="${order.orderStatus}">...</span>
+                    </td>
+                    <td>
+                      <a th:href="@{'/admin/orders/' + ${order.orderNumber}}" class="btn btn-outline-primary btn-sm">상세</a>
+                      <button type="button" class="btn btn-outline-danger btn-sm"
+                              th:attr="data-id=${order.orderNumber}"
+                              onclick="cancelOrder(this)">취소</button>
+                    </td>
+                  </tr>
+                  <tr th:if="${orders == null or orders.isEmpty()}">
+                    <td colspan="6" class="text-center py-4">조회된 주문 내역이 없습니다.</td>
+                  </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div> </div> </div> </div> </section>
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<div id="preloader"></div>
+
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+<script th:src="@{/assets/js/main.js}"></script>
+
+<th:block th:replace="~{'admin/order/order-js' :: orderJs}"></th:block>
+
+</body>
+</html>

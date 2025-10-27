@@ -1,5 +1,7 @@
 package com.nhnacademy.byeol23front.orderset.payment.client;
 
+import java.util.Map;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,4 +18,7 @@ public interface PaymentApiClient {
 
 	@PostMapping("/api/payments/cancel")
 	ResponseEntity<String> cancelPayment(@RequestBody PaymentCancelRequest paymentCancelRequest);
+
+	@PostMapping("/api/payments")
+	void createPayment(@RequestBody Map<String, Object> responseMap);
 }
