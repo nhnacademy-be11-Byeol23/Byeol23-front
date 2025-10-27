@@ -22,7 +22,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Analyze Backend with SonarQube
+      - name: Analyze Front with SonarQube
         run: mvn verify sonar:sonar
           -Dsonar.projectKey=byeol23-front
           -Dsonar.host.url=${{ env.SONAR_HOST_URL }}
