@@ -20,11 +20,11 @@
   <!-- Page Title -->
   <div class="page-title light-background">
     <div class="container d-lg-flex justify-content-between align-items-center">
-      <h1 class="mb-2 mb-lg-0">Checkout</h1>
+      <h1 class="mb-2 mb-lg-0">주문</h1>
       <nav class="breadcrumbs">
         <ol>
-          <li><a href="index.html">Home</a></li>
-          <li class="current">Checkout</li>
+          <li><a th:hred="@{/}">Home</a></li>
+          <li class="current">주문</li>
         </ol>
       </nav>
     </div>
@@ -254,8 +254,6 @@
 
     const clientKey = "test_ck_nRQoOaPz8L4QRwM6lGa58y47BMw6";
 
-    // customerKey 생성
-    const orderId = Math.random().toString(36).substring(2, 12);// orderId 만드는 로직 추가할 것
     var tossPayments = TossPayments(clientKey);
 
     // 결제 금액 가져오기
@@ -285,7 +283,6 @@
       }
 
       const orderPrepareRequest = {
-        orderNumber: orderId,
         totalBookPrice: totalBookPrice,
         actualOrderPrice: totalPrice,
         receiver: customerName,
