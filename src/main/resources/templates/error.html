@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title th:text="${status} + ' - 오류 페이지'">오류 페이지</title>
+
+  <meta name="description" content="오류가 발생했습니다.">
+
+  <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+
+  <style>
+    .error-section {
+      padding: 80px 0;
+    }
+    .error-code {
+      font-size: 8rem;
+      font-weight: 700;
+      color: #ccc;
+    }
+  </style>
+</head>
+
+<body class="error-page">
+
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+
+  <div class="page-title light-background">
+    <div class="container d-lg-flex justify-content-between align-items-center">
+      <h1 class="mb-2 mb-lg-0">오류 발생</h1>
+    </div>
+  </div><section id="error-content" class="error-section section">
+  <div class="container text-center" data-aos="fade-up">
+
+    <h1 class="error-code" th:text="${status ?: '---'}">---</h1>
+
+    <h3 th:text="${error ?: '오류가 발생했습니다.'}">Error Description</h3>
+
+    <p class="lead" th:text="${message ?: '요청 처리 중 문제가 발생했습니다.'}">
+      Sorry, something went wrong.
+    </p>
+
+    <div style="margin-top: 30px;">
+      <a th:href="@{/}" class="btn btn-primary btn-lg">홈으로 가기</a>
+    </div>
+
+    <div th:if="${timestamp != null and path != null}" style="margin-top: 40px; color: #888; font-size: 0.9rem;">
+      <p>
+        <span th:text="'오류 발생 시간: ' + ${timestamp}"></span><br>
+        <span th:text="'요청 경로: ' + ${path}"></span>
+      </p>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<div id="preloader"></div>
+
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+
+<script th:src="@{/assets/js/main.js}"></script>
+
+</body>
+
+</html>
