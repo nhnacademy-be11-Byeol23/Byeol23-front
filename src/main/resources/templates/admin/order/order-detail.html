@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:if="${orderDetail != null}">
+
+  <div class="mb-3">
+    <h6>기본 정보</h6>
+    <p class="mb-1"><strong>주문 번호:</strong> <span th:text="${orderDetail.orderNumber ?: 'N/A'}"></span></p>
+    <p class="mb-1"><strong>주문 일시:</strong> <span th:text="${orderDetail.orderDate != null ? #temporals.format(orderDetail.orderDate, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}"></span></p>
+    <p class="mb-1"><strong>주문 상태:</strong>
+      <span class="badge"
+            th:classappend="${orderDetail.orderStatus == '결제 완료'} ? 'text-bg-success' :
+                           (${orderDetail.orderStatus == '배송중'} ? 'text-bg-primary' :
+                           (${orderDetail.orderStatus == '주문 취소'} ? 'text-bg-danger' : 'text-bg-secondary'))"
+            th:text="${orderDetail.orderStatus ?: 'N/A'}"></span>
+    </p>
+    <p class="mb-0"><strong>결제 금액:</strong> <span th:text="${orderDetail.actualOrderPrice != null ? #numbers.formatInteger(orderDetail.actualOrderPrice, 0, 'COMMA') + '원' : 'N/A'}"></span></p>
+  </div>
+
+  <hr>
+
+  <div class="mb-3">
+    <h6>수신자 정보</h6>
+    <p class="mb-1"><strong>이름:</strong> <span th:text="${orderDetail.receiver ?: 'N/A'}"></span></p>
+    <p class="mb-1"><strong>연락처:</strong> <span th:text="${orderDetail.receiverPhone ?: 'N/A'}"></span></p>
+    <p class="mb-0"><strong>주소:</strong>
+      <span th:text="${orderDetail.receiverAddress ?: ''}"></span>
+      <span th:text="${orderDetail.receiverAddressDetail ?: ''}"></span>
+      (<span th:text="${orderDetail.postCode ?: 'N/A'}"></span>)
+    </p>
+  </div>
+
+  <hr>
+
+  <div>
+    <h6>주문 상품</h6>
+    <ul class="list-group list-group-flush">
+      <th:block th:if="${orderDetail.items != null and not #lists.isEmpty(orderDetail.items)}">
+        <li class="list-group-item d-flex justify-content-between align-items-center"
+            th:each="item : ${orderDetail.items}">
+          <div>
+            <span th:text="${item.bookTitle ?: '상품명 없음'}"></span>
+            <small class="text-muted" th:text="'(' + ${item.quantity ?: 0} + '개)'"></small>
+          </div>
+          <span class="fw-semibold" th:text="${item.price != null and item.quantity != null ? #numbers.formatInteger(item.price * item.quantity, 0, 'COMMA') + '원' : '가격 정보 없음'}"></span>
+        </li>
+      </th:block>
+      <li class="list-group-item text-muted" th:if="${orderDetail.items == null or #lists.isEmpty(orderDetail.items)}">
+        주문 상품 정보가 없습니다.
+      </li>
+    </ul>
+  </div>
+
+</th:block>
+
+<div th:if="${orderDetail == null}">
+  <p class="text-danger">주문 상세 정보를 불러올 수 없습니다.</p>
+</div>
+
+</html>

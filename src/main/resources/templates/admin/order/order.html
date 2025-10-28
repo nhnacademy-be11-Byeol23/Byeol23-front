@@ -97,7 +97,12 @@
                               th:text="${order.orderStatus}">...</span>
                     </td>
                     <td>
-                      <a th:href="@{'/admin/orders/' + ${order.orderNumber}}" class="btn btn-outline-primary btn-sm">상세</a>
+                      <button type="button" class="btn btn-outline-primary btn-sm"
+                              data-bs-toggle="modal"
+                              data-bs-target="#orderDetailsModal"
+                              th:attr="data-order-number=${order.orderNumber}"
+                              onclick="loadOrderDetails(this)">상세</button>
+
                       <button type="button" class="btn btn-outline-danger btn-sm"
                               th:attr="data-id=${order.orderNumber}"
                               onclick="cancelOrder(this)">취소</button>
@@ -113,6 +118,30 @@
 
           </div> </div> </div> </div> </section>
 </main>
+
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="orderDetailsModalLabel">주문 상세 정보</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center" id="modalLoadingSpinner">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        <div id="modalOrderDetailsContent">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <div th:replace="~{fragments/common_footer :: commonFooter}"></div>
 
