@@ -79,9 +79,66 @@
                     <label for="address-detail">상세주소</label>
                     <input type="text" class="form-control" name="address-detail" id="address-detail" placeholder="상세주소 (아파트 동, 호수 등)">
                   </div>
+                  <div class="section-content">
+                    <div class="form-group mt-3">
+                      <label class="form-label">배송일 선택 <small class="text-muted">(도착 예상일)</small></label>
+                      <div class="delivery-date-buttons d-flex flex-wrap gap-2">
+                        <th:block th:each="dateInfo : ${deliveryDates}">
+                          <input type="radio" class="btn-check" name="deliveryDate"
+                                 th:id="'date-' + ${dateInfo.valueDate}"
+                                 th:value="${dateInfo.valueDate}"
+                                 th:checked="${dateInfo.valueDate == defaultDeliveryDate}"
+                                 autocomplete="off">
+                          <label class="btn btn-outline-secondary"
+                                 th:for="'date-' + ${dateInfo.valueDate}"
+                                 th:text="${dateInfo.dayName} + ' (' + ${dateInfo.displayDate} + ')'">
+                            날짜 버튼
+                          </label>
+                        </th:block>
+                      </div>
+                      <small class="text-muted d-block mt-1">주말 및 공휴일 제외, 5 영업일 이내 선택 가능합니다.</small>
+                    </div>
+                  </div>
                 </div>
               </div>
 
+            </div>
+
+            <div class="checkout-section" id="discount-section">
+              <div class="section-header">
+                <div class="section-number">3</div>
+                <h3>할인 적용</h3>
+              </div>
+              <div class="section-content">
+                <div class="mb-3 row align-items-center">
+                  <label class="col-sm-2 col-form-label"><i class="bi bi-coin me-1"></i>보유</label>
+                  <div class="col-sm-10">
+                    <div class="fw-bold" id="current-points" th:text="${userPoint != null ? #numbers.formatInteger(userPoint, 0, 'COMMA') + ' P' : '0 P'}">5,000 P</div>
+                  </div>
+                </div>
+
+                <div class="mb-3 row align-items-center">
+                  <label for="points-to-use" class="col-sm-2 col-form-label">사용</label>
+                  <div class="col-sm-10">
+                    <div class="input-group">
+                      <input type="number" class="form-control text-end" id="points-to-use" name="usedPoints" placeholder="0" min="0"
+                             th:max="${userPoint ?: 0}" step="1">
+                      <span class="input-group-text">P</span>
+                      <button class="btn btn-outline-secondary" type="button" id="apply-all-points-btn">모두 사용</button>
+                    </div>
+                    <small class="text-muted d-block mt-1" th:text="'(최대 ' + (${userPoint != null ? #numbers.formatInteger(userPoint, 0, 'COMMA') : 0}) + ' P 사용 가능)'">(최대 5,000 P 사용 가능)</small> </div>
+                </div>
+
+                <div class="row align-items-center">
+                  <label class="col-sm-2 col-form-label"><i class="bi bi-ticket-perc me-1"></i>쿠폰</label>
+                  <div class="col-sm-10">
+                    <button type="button" class="btn btn-outline-secondary" id="select-coupon-btn" data-bs-toggle="modal" data-bs-target="#couponSelectModal">
+                      사용 가능한 쿠폰 선택하기
+                    </button>
+                    <div id="selected-coupon-info" class="mt-2 text-success fw-semibold" style="display: none;"></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -132,6 +189,12 @@
                     <span>배송비</span>
                     <span>-3,000원</span>
                   </div>
+
+                  <div class="order-points-discount d-flex justify-content-between text-danger" style="display: none;">
+                    <span>포인트 할인</span>
+                    <span id="points-discount-amount">-0원</span>
+                  </div>
+
                   <div class="order-total d-flex justify-content-between">
                     <span>실제 금액</span>
                     <span id="actual-order-price">295,000원</span>
@@ -147,11 +210,19 @@
 
           <div class="checkout-section" id="payment-method">
             <div class="section-header">
-              <div class="section-number">3</div>
+              <div class="section-number">4</div>
               <h3>결제 방법</h3>
             </div>
-          </div>
+            <div class="section-content">
 
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" name="paymentMethod" id="tossPay" value="TOSS_EASY_PAY">
+                <label class="form-check-label" for="tossPay">
+                  <strong>토스 간편 결제</strong>
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
       </form>
       <!-- Terms and Privacy Modals -->
@@ -217,11 +288,12 @@
 
 <!-- Main JS File -->
 <script src="assets/js/main.js"></script>
-
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     initPhoneHyphen();
     initTossPayments();
+    initPointInputListener();
+    initApplyAllPointsButton();
   });
 
   function initPhoneHyphen() {
@@ -249,16 +321,24 @@
 
   function initTossPayments() {
     const paymentButton = document.getElementById('payment-button');
-    if (!paymentButton) return;
+    const actualOrderPriceEl = document.getElementById('actual-order-price'); // 요소 미리 찾아두기
 
+    if (!paymentButton || !actualOrderPriceEl) {
+      console.error("결제 버튼 또는 최종 금액 요소를 찾을 수 없습니다!");
+      return;
+    }
 
     const clientKey = "test_ck_nRQoOaPz8L4QRwM6lGa58y47BMw6";
 
     var tossPayments = TossPayments(clientKey);
 
     // 결제 금액 가져오기
-    const parsePrice = (priceString) => Number(priceString.replace(/[^\d]/g, ''));
-    const totalPrice = parsePrice(document.getElementById('actual-order-price')?.textContent);
+    // 금액 파싱 함수 (이 함수 스코프 안에도 정의)
+    const parsePrice = (priceValue) => {
+      if (priceValue == null) return 0;
+      const priceString = String(priceValue);
+      return Number(priceString.replace(/[^\d]/g, '')) || 0;
+    };
 
     paymentButton.addEventListener('click', function () {
       const customerName = document.getElementById('name')?.value.trim();
@@ -268,6 +348,8 @@
       const address = document.getElementById('address')?.value;
       const addressDetail = document.getElementById('address-detail')?.value;
       const totalBookPrice = parsePrice(document.getElementById('total-book-price')?.textContent);
+
+      const currentFinalPrice = parsePrice(actualOrderPriceEl.textContent); // 미리 찾아둔 요소 사용
 
       const orderItems = document.querySelectorAll('.order-summary-content .order-item');
       let orderName = "주문 상품"; // 기본값
@@ -282,15 +364,55 @@
         }
       }
 
+      const selectedDeliveryArrivedDate = document.querySelector('input[name="deliveryDate"]:checked');
+      const deliveryDateValue = selectedDeliveryArrivedDate ? selectedDeliveryArrivedDate.value : null;
+
+      if (!deliveryDateValue) {
+        alert("배송 희망 날짜를 선택해주세요");
+        return;
+      }
+
+      const tossPayRadio = document.getElementById('tossPay');
+
+      // 최종 금액이 0보다 크고, 토스페이 라디오 버튼이 선택되지 않았으면 알림 후 중단
+      if (currentFinalPrice > 0 && (!tossPayRadio || !tossPayRadio.checked)) {
+        alert("결제 방법을 선택해주세요.");
+        return; // 함수 실행 중단
+      }
+
       const orderPrepareRequest = {
         totalBookPrice: totalBookPrice,
-        actualOrderPrice: totalPrice,
+        actualOrderPrice: currentFinalPrice,
         receiver: customerName,
         postCode: `${zip}`,
         receiverAddress: `${address}`,
         receiverAddressDetail: addressDetail,
-        receiverPhone: phoneNumber
+        receiverPhone: phoneNumber,
+        deliveryArrivedDate:deliveryDateValue
       };
+
+      if (currentFinalPrice === 0) {
+        console.log("최종 결제 금액이 0원이므로 결제창 호출을 건너뛰고 주문 준비만 진행합니다.");
+        // fetch만 호출하고 tossPayments.requestPayment는 호출하지 않음
+        fetch('/orders/prepare', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderPrepareRequest)
+        })
+                .then(response => {
+                  if (!response.ok) { throw new Error('주문 준비에 실패했습니다.'); }
+                  return response.json();
+                })
+                .then(prepareResponse => {
+                  // 결제가 필요 없으므로 바로 성공 페이지로 이동 (orderId 전달)
+                  window.location.href = window.location.origin + `/orders/success?orderNumber=${prepareResponse.orderNumber}`;
+                })
+                .catch(error => {
+                  console.error('0원 주문 처리 중 오류:', error);
+                  alert(error.message);
+                });
+        return; // 토스 결제 로직 실행 방지
+      }
 
       fetch('/orders/prepare', {
         method: 'POST',
@@ -310,11 +432,9 @@
           throw new Error('주문 ID를 받지 못했습니다.');
         }
 
-        // 위에서 totalPrice와 response에서 받아온 실제 결제 금액을 비교할 필요가 있어 보임
-
         tossPayments.requestPayment('토스페이', {
           orderId: orderIdFromServer,
-          amount: prepareResponse.actualOrderPrice,
+          amount: currentFinalPrice,
           orderName: orderName,
           customerName: prepareResponse.receiver,
           successUrl: window.location.origin + "/payments/confirm",
@@ -328,7 +448,119 @@
     });
   }
 
+  /**
+   * 포인트 입력 필드에 이벤트 리스너를 추가하는 함수
+   */
+  function initPointInputListener() {
+    const pointsInput = document.getElementById('points-to-use');
+    if (pointsInput) {
+      console.log("포인트 입력 리스너 추가됨"); // <--- 로그 추가
+      pointsInput.addEventListener('input', (event) => { // event 파라미터 추가
+        console.log("포인트 입력 감지:", event.target.value); // <--- 로그 추가
+        updatePriceSummary();
+      });
+    } else {
+      console.error("ID 'points-to-use' 요소를 찾을 수 없음!"); // <--- 요소 못 찾을 때 로그 추가
+    }
+  }
+
+  // --- [추가] '모두 사용' 버튼 클릭 이벤트 리스너 ---
+  function initApplyAllPointsButton() {
+    const applyAllBtn = document.getElementById('apply-all-points-btn');
+    const pointsInput = document.getElementById('points-to-use');
+
+    if (applyAllBtn && pointsInput) {
+      console.log("'모두 사용' 버튼 리스너 추가됨"); // <--- 로그 추가
+      applyAllBtn.addEventListener('click', () => {
+        const maxPointsInput = parseInt(pointsInput.getAttribute('max') || '0', 10);
+        const currentPointsStr = document.getElementById('current-points')?.textContent.replace(/[^\d]/g, '');
+        const availablePoints = parseInt(currentPointsStr, 10) || 0;
+        const maxPointsToUse = Math.min(maxPointsInput, availablePoints);
+
+        // 1. input 값을 먼저 설정
+        pointsInput.value = maxPointsToUse;
+
+        // 2. 그 다음 업데이트 함수 호출
+        updatePriceSummary();
+      });
+    } else {
+      console.error("ID 'apply-all-points-btn' 또는 'points-to-use' 요소를 찾을 수 없음!");
+    }
+  }
+  /**
+   * 최종 결제 금액 및 할인 내역을 업데이트하는 함수
+   */
+  function updatePriceSummary() {
+    // 1. 필요한 DOM 요소 가져오기
+    const pointsInput = document.getElementById('points-to-use');
+    const pointsDiscountAmountEl = document.getElementById('points-discount-amount');
+    const pointsDiscountRowEl = document.querySelector('.order-points-discount'); // 할인 행 전체 div
+    // const couponDiscountAmountEl = document.getElementById('coupon-discount-amount'); // (쿠폰 구현 시)
+    // const couponDiscountRowEl = document.querySelector('.order-coupon-discount'); // (쿠폰 구현 시)
+    const totalBookPriceEl = document.getElementById('total-book-price');
+    const deliveryFeeEl = document.getElementById('delivery-fee');
+    const actualOrderPriceEl = document.getElementById('actual-order-price');
+    const paymentButton = document.getElementById('payment-button');
+
+    // 금액 파싱 함수 (쉼표, '원' 제거)
+    const parsePrice = (element) => {
+      if (!element || !element.textContent) return 0;
+      return parseInt(element.textContent.replace(/[^\d]/g, ''), 10) || 0;
+    };
+
+    // 2. 현재 값 읽기
+    let usedPoints = parseInt(pointsInput.value, 10) || 0;
+    const maxPoints = parseInt(pointsInput.getAttribute('max') || '0', 10); // input의 max 속성값
+    const currentPointsStr = document.getElementById('current-points')?.textContent.replace(/[^\d]/g, '');
+    const availablePoints = parseInt(currentPointsStr, 10) || 0; // 실제 보유 포인트
+
+    // 사용 가능한 최대 포인트는 (input max 값)과 (보유 포인트) 중 작은 값
+    const effectiveMaxPoints = Math.min(maxPoints, availablePoints);
+    console.log("계산된 최대 사용 가능 포인트:", effectiveMaxPoints); // <--- 로그 추가!
+
+    // 3. 포인트 유효성 검사 및 조정
+    if (usedPoints < 0) {
+      usedPoints = 0;
+      pointsInput.value = 0; // 음수 입력 시 0으로 변경
+    }
+    if (usedPoints > effectiveMaxPoints) {
+      usedPoints = effectiveMaxPoints;
+      pointsInput.value = usedPoints; // 최대값 초과 시 최대값으로 변경
+    }
+
+    // 4. 할인 금액 계산 (1포인트 = 1원으로 가정)
+    const pointDiscount = usedPoints;
+    // const couponDiscount = parsePrice(couponDiscountAmountEl); // (쿠폰 구현 시)
+    const couponDiscount = 0; // 임시
+
+    // 5. 할인 금액 표시 업데이트
+    if (pointDiscount > 0) {
+      pointsDiscountAmountEl.textContent = `-${pointDiscount.toLocaleString('ko-KR')}원`;
+      pointsDiscountRowEl.style.display = 'flex'; // 할인 행 보이기
+    } else {
+      pointsDiscountAmountEl.textContent = '-0원';
+      pointsDiscountRowEl.style.display = 'none'; // 할인 행 숨기기
+    }
+
+    // (쿠폰 할인 표시 업데이트 로직 추가)
+
+    // 6. 최종 결제 금액 계산
+    const subtotal = parsePrice(totalBookPriceEl);
+    const deliveryFee = parsePrice(deliveryFeeEl);
+    const finalPrice = Math.max(0, subtotal + deliveryFee - pointDiscount - couponDiscount); // 최종 금액은 0원 미만 불가
+
+    // 7. 최종 결제 금액 및 버튼 텍스트 업데이트
+    actualOrderPriceEl.textContent = `${finalPrice.toLocaleString('ko-KR')}원`;
+    paymentButton.textContent = `${finalPrice.toLocaleString('ko-KR')}원 결제하기`;
+
+    // [중요] 토스페이먼츠 호출 시 넘기는 금액(amount)도 이 finalPrice로 업데이트해야 함!
+    // initTossPayments 함수 내부의 totalPrice 변수 업데이트 필요 (예: 전역 변수 사용 또는 함수 재호출)
+  }
+
+
+
 </script>
+
 
 </body>
 
