@@ -1,10 +1,6 @@
 package com.nhnacademy.byeol23front.bookset.category.controller;
 
-import java.util.List;
-
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
-import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
-import com.nhnacademy.byeol23front.orderset.order.dto.OrderInfoResponse;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
