@@ -19,7 +19,7 @@ import com.nhnacademy.byeol23front.orderset.order.dto.OrderInfoResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareResponse;
 
-@FeignClient(name = "orderApiClient", url = "${backend.api.url}")
+@FeignClient(name = "orderApiClient", url = "${gateway.api.url}")
 public interface OrderApiClient {
 
 	@PostMapping(value = "/api/orders")
