@@ -10,55 +10,6 @@
 
             // 2. 사용자에게 정말 취소할 것인지 확인받습니다.
             if (confirm(`주문 번호 [${orderNumber}]를 정말 취소하시겠습니까?`)) {
-
-                // 3. 서버에 주문 취소 요청을 보냅니다.
-                //    (API 엔드포인트는 실제 구현에 맞게 변경해야 합니다.
-                //     예: PUT /api/admin/orders/{orderNumber}/status, body: {status: "주문 취소"})
-                //    여기서는 간단히 POST /api/admin/orders/{orderNumber}/cancel 로 가정합니다.
-                fetch(`/api/admin/orders/${orderNumber}/cancel`, {
-                    method: "POST" // 또는 PUT, PATCH, DELETE 등 서버 API 스펙에 맞게
-                    // (필요시 headers나 body 추가)
-                    // headers: { 'Content-Type': 'application/json' },
-                    // body: JSON.stringify({ reason: "관리자 취소" })
-                })
-                    .then(response => {
-                        // 4. 응답 상태를 확인합니다.
-                        if (!response.ok) {
-                            // 서버에서 오류 응답(4xx, 5xx)이 온 경우 에러를 발생시킵니다.
-                            throw new Error("주문 취소 처리 중 오류가 발생했습니다.");
-                        }
-                        // 성공 시 (2xx 응답)
-                        return response.text(); // 또는 response.json() 등 실제 응답 형식에 맞게
-                    })
-                    .then(data => {
-                        // 5. 성공 메시지를 보여주고 페이지를 새로고침합니다.
-                        alert(`주문 [${orderNumber}]이(가) 성공적으로 취소되었습니다.`);
-
-                        // 현재 탭(#orders1)을 유지하기 위해 해시를 설정하고 새로고침합니다.
-                        location.hash = '#orders1';
-                        location.reload();
-                    })
-                    .catch(error => {
-                        // 6. 실패 시 오류 메시지를 보여줍니다.
-                        console.error("Order cancellation failed:", error);
-                        alert(error.message || "주문 취소에 실패했습니다.");
-                    });
-            }
-        }
-    </script>
-</th:block>
-<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="orderJs">
-    <script>
-        /**
-         * 주문 취소 버튼 클릭 시 실행되는 함수
-         * @param {HTMLButtonElement} button - 클릭된 '취소' 버튼 요소
-         */
-        function cancelOrder(button) {
-            // 1. 버튼의 data-id 속성에서 주문 번호를 가져옵니다.
-            const orderNumber = button.dataset.id;
-
-            // 2. 사용자에게 정말 취소할 것인지 확인받습니다.
-            if (confirm(`주문 번호 [${orderNumber}]를 정말 취소하시겠습니까?`)) {
                 const orderCancelRequest = {
                     cancelReason: "관리자 취소"
                 }
@@ -93,5 +44,40 @@
                     });
             }
         }
+
+        /**
+         * 주문 상세 정보를 모달에 AJAX로 로드하는 함수
+         * @param {HTMLButtonElement} button - 클릭된 '상세' 버튼 요소
+         */
+        function loadOrderDetails(button) {
+            const orderNumber = button.dataset.orderNumber;
+            const modalContentDiv = document.getElementById('modalOrderDetailsContent');
+            const loadingSpinner = document.getElementById('modalLoadingSpinner');
+
+            // 내용 비우고 로딩 스피너 표시
+            modalContentDiv.innerHTML = '';
+            loadingSpinner.style.display = 'block';
+            document.getElementById('orderDetailsModalLabel').textContent = `주문 상세 정보 (${orderNumber})`;
+
+            // 백엔드 컨트롤러 호출 (HTML 내용을 반환한다고 가정)
+            fetch(`/admin/orders/${orderNumber}`) // Controller's @GetMapping path
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`주문 정보를 불러오는데 실패했습니다. (상태: ${response.status})`);
+                    }
+                    return response.text(); // 응답을 HTML 텍스트로 받음
+                })
+                .then(html => {
+                    // 받아온 HTML을 모달 바디의 내용 영역에 삽입
+                    modalContentDiv.innerHTML = html;
+                    loadingSpinner.style.display = 'none'; // 로딩 스피너 숨기기
+                })
+                .catch(error => {
+                    console.error("Error loading order details:", error);
+                    modalContentDiv.innerHTML = `<p class="text-danger">오류: ${error.message}</p>`;
+                    loadingSpinner.style.display = 'none';
+                });
+        }
+
     </script>
 </th:block>
