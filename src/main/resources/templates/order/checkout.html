@@ -83,11 +83,11 @@
                     <div class="form-group mt-3">
                       <label class="form-label">배송일 선택 <small class="text-muted">(도착 예상일)</small></label>
                       <div class="delivery-date-buttons d-flex flex-wrap gap-2">
-                        <th:block th:each="dateInfo : ${deliveryDates}">
+                        <th:block th:each="dateInfo, iterStat : ${deliveryDates}">
                           <input type="radio" class="btn-check" name="deliveryDate"
                                  th:id="'date-' + ${dateInfo.valueDate}"
                                  th:value="${dateInfo.valueDate}"
-                                 th:checked="${dateInfo.valueDate == defaultDeliveryDate}"
+                                 th:checked="${iterStat.first}"
                                  autocomplete="off">
                           <label class="btn btn-outline-secondary"
                                  th:for="'date-' + ${dateInfo.valueDate}"
@@ -366,11 +366,6 @@
 
       const selectedDeliveryArrivedDate = document.querySelector('input[name="deliveryDate"]:checked');
       const deliveryDateValue = selectedDeliveryArrivedDate ? selectedDeliveryArrivedDate.value : null;
-
-      if (!deliveryDateValue) {
-        alert("배송 희망 날짜를 선택해주세요");
-        return;
-      }
 
       const tossPayRadio = document.getElementById('tossPay');
 
