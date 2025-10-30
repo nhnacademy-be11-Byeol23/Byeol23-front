@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.nhnacademy.byeol23front.orderset.payment.dto.PaymentCancelRequest;
 import com.nhnacademy.byeol23front.orderset.payment.dto.PaymentParamRequest;
 
-@FeignClient(name = "paymentApiClient", url = "${backend.api.url}")
+@FeignClient(name = "BYEOL23-GATEWAY", contextId = "paymentApiClient")
 public interface PaymentApiClient {
 
 	@PostMapping("/api/payments/confirm")
