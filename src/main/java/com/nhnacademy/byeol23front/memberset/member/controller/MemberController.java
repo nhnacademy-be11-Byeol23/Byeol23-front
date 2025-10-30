@@ -40,6 +40,6 @@ public class MemberController {
 
 	@PostMapping("/login")
 	public String login(@ModelAttribute LoginRequest request) {
-		return "redirct:/";
+		return "redirect:/";
 	}
 }

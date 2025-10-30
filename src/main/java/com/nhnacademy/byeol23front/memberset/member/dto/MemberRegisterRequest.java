@@ -21,7 +21,5 @@ public class MemberRegisterRequest {
 	String nickname;
 	String email;
 	String phoneNumber;
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	LocalDate birthDate;
 }

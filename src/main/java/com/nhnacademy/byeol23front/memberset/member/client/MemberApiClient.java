@@ -11,7 +11,7 @@ import com.nhnacademy.byeol23front.memberset.member.dto.MemberRegisterRequest;
 import com.nhnacademy.byeol23front.memberset.member.dto.MemberRegisterResponse;
 
 
-@FeignClient(name = "memberApiClient", url = "${backend.api.url}")
+@FeignClient(name = "BYEOL23-GATEWAY", contextId = "MemberApiClient")
 public interface MemberApiClient {
 	/**
 	 * 회원 가입
