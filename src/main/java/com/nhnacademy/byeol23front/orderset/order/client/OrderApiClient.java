@@ -1,7 +1,6 @@
 package com.nhnacademy.byeol23front.orderset.order.client;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +17,9 @@ import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderInfoResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareResponse;
+import com.nhnacademy.byeol23front.orderset.order.dto.PointOrderResponse;
 
-@FeignClient(name = "BYEOL23-GATEWAY")
+@FeignClient(name = "BYEOL23-GATEWAY", contextId = "orderApiClient")
 public interface OrderApiClient {
 
 	@PostMapping(value = "/api/orders")
@@ -38,5 +38,8 @@ public interface OrderApiClient {
 	ResponseEntity<List<OrderInfoResponse>> searchOrders(@RequestParam(name = "status", required = false) String status,
 		@RequestParam(name = "orderNumber", required = false) String orderNumber,
 		@RequestParam(name = "receiver", required = false) String receiver);
+
+	@PostMapping("/api/orders/points")
+	ResponseEntity<PointOrderResponse> saveOrderWithPoints(@RequestParam String orderNumber);
 
 }
