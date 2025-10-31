@@ -1,4 +1,4 @@
-package com.nhnacademy.byeol23front.utils.minio;
+package com.nhnacademy.byeol23front.minio.util;
 
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
@@ -9,17 +9,22 @@ import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.model.S3Object;
+
 import java.io.File;
 
 import java.net.URI;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -61,7 +66,7 @@ public class MinioUtil {
 	}
 
 	// 호출 시 항상 유효한 클라이언트를 반환(지연 로딩 + DCL)
-	public S3Client getS3Client() {
+	private S3Client getS3Client() {
 		S3Client c = this.s3Client;
 		if (c == null) {
 			synchronized (this) {
@@ -87,7 +92,9 @@ public class MinioUtil {
 			.build();
 	}
 
-	public String getPresignedUrl(@NotNull String objectName) {
+
+
+	public String getPresignedUrl(ImageType type, long id) {
 		try {
 			MinioClient minioClient = MinioClient.builder()
 				.endpoint(host, port, false)
@@ -97,7 +104,7 @@ public class MinioUtil {
 			GetPresignedObjectUrlArgs args = GetPresignedObjectUrlArgs.builder()
 				.method(Method.GET)
 				.bucket(bucketName)
-				.object(objectName)
+				.object(generateObjectKey(type, id))
 				.expiry(1, TimeUnit.HOURS)
 				.build();
 
@@ -111,13 +118,51 @@ public class MinioUtil {
 			throw new RuntimeException("일반 오류 발생", e);
 		}
 	}
-	public void putObject(long bookId, int order, File file) {
+
+	public List<String> listUrls(ImageType type, long id) {
+		List<String> urls = null;
+		String prefix = String.format("%s/%d", type.name(), id);
+		try{
+			urls = getS3Client().listObjectsV2Paginator(req -> req.bucket(bucketName).prefix(prefix))
+				.contents()
+				.stream()
+				.map(S3Object::key)
+				.map(this::fileName2Url)
+				.toList();
+		} catch (Exception e){
+			log.error("파일 목록 조회 오류 발생: {}", e.getMessage());
+			throw new RuntimeException("파일 목록 조회 오류 발생", e);
+		}
+		return urls;
+	}
+
+	private String fileName2Url(String fileName){
+		return "http://" + host + ":" + port + "/" + bucketName + "/" + fileName;
+	}
+
+	public String putObject(ImageType type, long id, MultipartFile file) {
 		try{
 			S3Client s3 = getS3Client();
-			s3.putObject(req -> req.bucket(bucketName).key(bookId+"-"+order), RequestBody.fromFile(file));
+			String fileName = generateObjectKey(type, id);
+			s3.putObject(req -> req.bucket(bucketName).key(fileName), RequestBody.fromBytes(file.getBytes()));
+			return fileName2Url(fileName);
 		} catch (Exception e){
 			log.error("파일 업로드 오류 발생: {}", e.getMessage());
 			throw new RuntimeException("파일 업로드 오류 발생", e);
 		}
+	}
+
+	public void deleteObject(ImageType type, long id) {
+		try{
+			S3Client s3 = getS3Client();
+			s3.deleteObject(req -> req.bucket(bucketName).key(generateObjectKey(type, id)));
+		} catch (Exception e){
+			log.error("파일 삭제 오류 발생: {}", e.getMessage());
+			throw new RuntimeException("파일 삭제 오류 발생", e);
+		}
+	}
+
+	private String generateObjectKey(ImageType type, long id) {
+		return String.format("%s/%d.jpg", type.name(), id);
 	}
 }
