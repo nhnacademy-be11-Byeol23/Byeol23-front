@@ -19,7 +19,7 @@ import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.PointOrderResponse;
 
-@FeignClient(name = "BYEOL23-GATEWAY")
+@FeignClient(name = "BYEOL23-GATEWAY", contextId = "orderApiClient")
 public interface OrderApiClient {
 
 	@PostMapping(value = "/api/orders")
