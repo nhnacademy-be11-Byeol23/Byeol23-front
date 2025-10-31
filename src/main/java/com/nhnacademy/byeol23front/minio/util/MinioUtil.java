@@ -21,8 +21,6 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
-import java.io.File;
-
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
