@@ -65,6 +65,8 @@ public class MinioUtil {
 
 	// 호출 시 항상 유효한 클라이언트를 반환(지연 로딩 + DCL)
 	private S3Client getS3Client() {
+		log.info(host+":"+port+":s3client");
+		log.info(bucketName);
 		S3Client c = this.s3Client;
 		if (c == null) {
 			synchronized (this) {

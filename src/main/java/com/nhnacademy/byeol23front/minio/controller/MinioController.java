@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +39,12 @@ public class MinioController {
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<String> uploadImage(
 		@io.swagger.v3.oas.annotations.parameters.RequestBody(
-			description = "이미지 업로드 요청",
+			description = "이미지 업로드 요청"+ """
+				{
+							"imageType": "BOOK",
+							"id": 1
+						}
+				""",
 			required = true,
 			content = @Content(
 				examples = @ExampleObject(
@@ -78,15 +84,16 @@ public class MinioController {
 
 	}
 
-	@GetMapping("/images")
+	@GetMapping("/images/{imageType}/{id}")
 	public ResponseEntity<List<String>> getImageRequest(
-		@RequestBody GetImageUrlRequest request
-	) {
+		@PathVariable String imageType,
+		@PathVariable Long id
+	){
 		//TODO backend 통신로직 및 그대로 반환
 		//임시코드
 		return new ResponseEntity<>(new ArrayList<>(){{
-			add("https://byeol23-minio.s3.ap-northeast-2.amazonaws.com/book/1/1679495604869-1659136349934-1659136349934.png");
-			add("https://byeol23-minio.s3.ap-northeast-2.amazonaws.com/book/1/1679495604870-1659136349934-1659136349934.png");
+			add("URL1");
+			add("URL2");
 		}}, null, 200
 		);
 	}
