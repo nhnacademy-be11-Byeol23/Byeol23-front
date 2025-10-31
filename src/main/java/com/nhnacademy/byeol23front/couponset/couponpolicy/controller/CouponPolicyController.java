@@ -4,21 +4,26 @@ import com.nhnacademy.byeol23front.couponset.couponpolicy.dto.CouponPolicyCreate
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @Controller
-@RequestMapping("/coupon-policy")
+@RequestMapping("/admin/coupon-policy")
 public class CouponPolicyController {
-    @GetMapping("")
-    public String couponPolicyPage(){
+    @GetMapping("/create")
+    public String categoryPage(Model model) {
+        model.addAttribute("pageTitle", "쿠폰 정책 생성");
 
-        return "admin/management";
+
+        return "admin/coupon/coupon_policy";
     }
 
     @PostMapping("/create")
-    public ResponseEntity createCouponPolicy(@RequestBody CouponPolicyCreateRequest couponPolicyCreateRequest){
+    public ResponseEntity createCouponPolicy(CouponPolicyCreateRequest couponPolicyCreateRequest) {
         log.info(couponPolicyCreateRequest.toString());
+
+
 
         return ResponseEntity.ok().build();
     }
