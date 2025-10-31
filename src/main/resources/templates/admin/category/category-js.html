@@ -10,7 +10,12 @@
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({ name })
             })
-                .then(res => { if (!res.ok) throw new Error("등록 실패"); location.reload(); })
+                .then(res => {
+                    if (!res.ok) throw new Error("등록 실패");
+                    // 👇 [수정] 새로고침 전 해시(#)를 설정
+                    location.hash = '#categories';
+                    location.reload();
+                })
                 .catch(err => alert(err));
         });
 
@@ -82,7 +87,12 @@
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({ name, parentId })
                 })
-                    .then(res => { if (!res.ok) throw new Error("추가 실패"); location.reload(); })
+                    .then(res => {
+                        if (!res.ok) throw new Error("추가 실패");
+                        // 👇 [수정] 새로고침 전 해시(#)를 설정
+                        location.hash = '#categories';
+                        location.reload();
+                    })
                     .catch(err => alert(err));
             });
         }
@@ -136,7 +146,11 @@
         function deleteCategory(button) {
             const id = button.dataset.id;
             fetch(`/categories/${id}`, { method: "DELETE" })
-                .then(res => { if (!res.ok) throw new Error("삭제 실패"); location.reload(); })
+                .then(res => {
+                    if (!res.ok) throw new Error("삭제 실패");
+                    location.hash = '#categories';
+                    location.reload();
+                })
                 .catch(err => alert(err));
         }
     </script>

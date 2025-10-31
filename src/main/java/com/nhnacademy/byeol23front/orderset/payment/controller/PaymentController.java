@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.payment.client.PaymentApiClient;
 import com.nhnacademy.byeol23front.orderset.payment.dto.PaymentCancelRequest;
 import com.nhnacademy.byeol23front.orderset.payment.dto.PaymentParamRequest;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class PaymentController {
 	private final PaymentApiClient paymentApiClient;
+	private final OrderApiClient orderApiClient;
 	private final ObjectMapper objectMapper;
 
 	@GetMapping("/confirm")
@@ -51,6 +53,8 @@ public class PaymentController {
 					if (amount.compareTo(approvedAmount) == 0) {
 						log.info("결제 승인 및 금액 검증 성공! 주문 ID: {}", orderId);
 
+						paymentApiClient.createPayment(responseMap);
+						orderApiClient.updateOrderStatus(orderId);
 						model.addAttribute("orderId", orderId);
 						model.addAttribute("paymentInfo", responseMap);
 						return "order/success";
@@ -60,41 +64,58 @@ public class PaymentController {
 							PaymentCancelRequest cancelRequest = new PaymentCancelRequest("결제 금액 검증 실패", paymentKey);
 							ResponseEntity<String> cancelResponse = paymentApiClient.cancelPayment(cancelRequest);
 
+							String message;
 							if (cancelResponse.getStatusCode().is2xxSuccessful()) {
 								log.info("결제 취소 성공! 주문 ID: {}, 사유: {}", orderId, "결제 금액 검증 실패");
-								model.addAttribute("message", "결제 금액 검증에 실패하여 결제를 자동으로 취소했습니다.");
+								message = "결제 금액 검증에 실패하여 결제를 자동으로 취소했습니다.";
 							} else {
 								log.error("결제 취소 요청 실패! 상태 코드: {}, 응답: {}", cancelResponse.getStatusCode(), cancelResponse.getBody());
-								model.addAttribute("message", "결제 금액 검증 실패 및 자동 취소 중 오류 발생. 관리자에게 문의하세요.");
+								message = "결제 금액 검증 실패 및 자동 취소 중 오류 발생. 관리자에게 문의하세요.";
 							}
+
+							model.addAttribute("status", 400); // 400 Bad Request
+							model.addAttribute("error", "Payment Validation Failed");
+							model.addAttribute("message", message);
+							return "error";
 						} catch (Exception e) {
 							log.error("결제 취소 api 호출 중 오류 발생: {}", e.getMessage());
 							model.addAttribute("message", "결제 금액 검증 실패 및 자동 취소 중 시스템 오류 발생.");
 						}
-
-						return "order/fail";
+						return "error";
 					}
 				} else {
 					log.error("토스페이먼츠 승인 상태 오류. 상태: {}", responseMap.get("status"));
+					model.addAttribute("status", 500);
+					model.addAttribute("error", "Payment Status Error");
 					model.addAttribute("message", "결제 승인 상태 확인에 실패했습니다: " + responseMap.get("status"));
-					return "order/fail";
+					return "error";
 				}
 			}
 
 		} catch (Exception e) {
 			log.error("결제 승인 처리 중 예외 발생", e);
 			Thread.currentThread().interrupt();
+			model.addAttribute("status", 500); // 500 Internal Server Error
+			model.addAttribute("error", "Internal Server Error");
 			model.addAttribute("message", "결제 처리 중 시스템 오류 발생: " + e.getMessage());
-			return "order/fail";
+			return "error";
 		}
 
 		return "order/success";
 	}
 
 	@GetMapping("/fail")
-	public String orderFail(Model model) {
-		model.addAttribute("message", "결제 처리 중 시스템 오류 발생");
-		return "order/fail";
+	public String orderFail(@RequestParam(required = false) String code,
+		@RequestParam(required = false) String message,
+		Model model) {
+
+		log.warn("결제 실패: code={}, message={}", code, message);
+
+		// [수정] /fail 엔드포인트도 공통 에러 페이지 사용
+		model.addAttribute("status", 400);
+		model.addAttribute("error", code != null ? code : "Payment Failed");
+		model.addAttribute("message", message != null ? message : "결제에 실패했습니다. (사용자 취소 또는 오류)");
+		return "error";
 	}
 
 
