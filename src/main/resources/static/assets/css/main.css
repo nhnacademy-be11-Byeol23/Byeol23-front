@@ -12621,3 +12621,14 @@ section,
     justify-content: center;
   }
 }
+
+/* 사이드바(.profile-menu) 내부의 nav-link 색상을 검은색으로 */
+.profile-menu .menu-nav .nav-link {
+  color: #333; /* 검은색 계열 */
+}
+.profile-menu .menu-nav .nav-link.active {
+  color: #007bff;
+}
+.profile-menu .menu-nav .nav-link:hover {
+  color: #0056b3;
+}
