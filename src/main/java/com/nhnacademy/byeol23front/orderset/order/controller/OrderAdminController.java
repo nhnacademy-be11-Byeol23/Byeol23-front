@@ -1,7 +1,8 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +17,7 @@ import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderCancelRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderInfoResponse;
+import com.nhnacademy.byeol23front.orderset.order.dto.OrderSearchCondition;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,11 +33,12 @@ public class OrderAdminController {
 	public String cancelOrder(@PathVariable String orderNumber,
 		@RequestBody OrderCancelRequest request) {
 		orderApiClient.cancelOrder(orderNumber, request);
+
 		return "redirect:/admin/orders";
 	}
 
-	@GetMapping("/{orderNumber}")
-	public String getOrderByOrderNumber(@PathVariable String orderNumber, Model model) {
+	@GetMapping("/{order-number}")
+	public String getOrderByOrderNumber(@PathVariable(name = "order-number") String orderNumber, Model model) {
 		ResponseEntity<OrderDetailResponse> response = orderApiClient.getOrderByOrderNumber(orderNumber);
 		log.info("order: {}", response.getBody());
 		model.addAttribute("orderDetail", response.getBody());
@@ -44,14 +47,17 @@ public class OrderAdminController {
 	}
 
 	@GetMapping
-	public String searchOrders(@RequestParam(name = "status", required = false) String status,
+	public String getOrderMain(@RequestParam(name = "status", required = false) String status,
 		@RequestParam(name = "orderNumber", required = false) String orderNumber,
 		@RequestParam(name = "receiver", required = false) String receiver,
+		@PageableDefault(size = 10) Pageable pageable,
 		Model model) {
 
-		ResponseEntity<List<OrderInfoResponse>> filteredOrders = orderApiClient.searchOrders(status, orderNumber, receiver);
+		OrderSearchCondition orderSearchCondition = new OrderSearchCondition(status, orderNumber, receiver);
+		ResponseEntity<Page<OrderInfoResponse>> results = orderApiClient.searchOrders(orderSearchCondition, pageable);
 
-		model.addAttribute("orders", filteredOrders.getBody());
+		model.addAttribute("orders", results.getBody());
+
 		return "admin/order/order";
 	}
 }
