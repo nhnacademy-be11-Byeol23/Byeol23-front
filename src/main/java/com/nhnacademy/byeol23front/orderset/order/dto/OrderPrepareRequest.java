@@ -9,6 +9,7 @@ public record OrderPrepareRequest(BigDecimal totalBookPrice,
 								  String postCode,
 								  String receiverAddress,
 								  String receiverAddressDetail,
+								  String receiverAddressExtra,
 								  String receiverPhone,
 								  LocalDate deliveryArrivedDate) {
 }
