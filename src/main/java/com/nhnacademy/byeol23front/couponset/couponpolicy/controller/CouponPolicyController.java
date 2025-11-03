@@ -29,6 +29,6 @@ public class CouponPolicyController {
         log.info(couponPolicyCreateRequest.toString());
         couponPolicyApiClient.couponPolicyCreate(couponPolicyCreateRequest);
 
-        return "redirect:/admin/coupon/coupon_policy";
+        return "redirect:/admin/coupon-policy/create";
     }
 }
