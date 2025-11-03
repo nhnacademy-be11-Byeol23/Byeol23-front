@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "categoryApiClient", url = "${backend.api.url}")
+@FeignClient(name = "BYEOL23-GATEWAY", contextId = "categoryApiClient")
 public interface CategoryApiClient {
 
     @PostMapping("/api/categories")
