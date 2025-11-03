@@ -32,10 +32,10 @@ function toggleUpdate(tagId){
 async function updateTag(tagId){
     const input = document.getElementById("tagUpdateInput" + tagId);
     const newName = input.value.trim();
-    if (newName === "") alert("수정할 이름을 입력하십시오"); return;
+    if (newName === "") {alert("수정할 이름을 입력하십시오"); return;}
     console.log(newName);
     const res = await fetch(`/admin/tags/`+tagId , {
-        method: "PUT", // or PATCH
+        method: "PUT",
         headers: {"Content-Type": "application/json"},
         redirect: 'follow',
         body: JSON.stringify({ tagName: newName })

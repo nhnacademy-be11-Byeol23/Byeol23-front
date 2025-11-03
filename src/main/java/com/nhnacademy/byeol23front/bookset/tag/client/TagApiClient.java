@@ -17,7 +17,7 @@ import com.nhnacademy.byeol23front.bookset.tag.dto.TagCreateResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.TagUpdateRequest;
 import com.nhnacademy.byeol23front.bookset.tag.dto.TagUpdateResponse;
 
-@FeignClient(name = "tagClient", url = "${backend.api.url}")
+@FeignClient(name = "BYEOL23-GATEWAY", contextId = "tagApiClient")
 public interface TagApiClient {
 	@PostMapping(value = "/api/tags")
 	ResponseEntity<TagCreateResponse> createTag(@RequestBody TagCreateRequest request);
