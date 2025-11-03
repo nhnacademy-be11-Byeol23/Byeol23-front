@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @FeignClient(
-	name = "bookApiClient",
-	url = "${backend.api.url}"
+	name = "BYEOL23-GATEWAY",
+	contextId = "bookApiClient"
 )
 public interface BookApiClient {
 	@PostMapping("/api/books")
@@ -28,4 +28,5 @@ public interface BookApiClient {
 
 	@DeleteMapping("/api/books/{book-id}")
 	void deleteBook(@PathVariable("book-id") Long bookId);
+
 }
