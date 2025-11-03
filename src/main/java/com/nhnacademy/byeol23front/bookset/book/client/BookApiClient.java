@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @FeignClient(
-	name = "bookApiClient",
-	url = "${backend.api.url}"
+	name = "BYEOL23-GATEWAY",
+	contextId = "bookApiClient"
 )
 public interface BookApiClient {
 	@PostMapping("/api/books")
