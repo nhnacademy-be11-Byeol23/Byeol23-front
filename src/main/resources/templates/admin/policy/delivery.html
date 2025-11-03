@@ -82,21 +82,55 @@
                                     </thead>
                                     <tbody>
                                     <!-- 'policies' 리스트 순회 (변수명 policies로 가정) -->
-                                    <tr th:each="policy : ${policies}">
+                                    <tr th:each="policy : ${policies.content}">
                                         <td th:text="${policy.freeDeliveryCondition != null and policy.freeDeliveryCondition > 0 ? #numbers.formatInteger(policy.freeDeliveryCondition, 0, 'COMMA') + '원 이상' : '조건 없음'}">50,000원 이상</td>
                                         <td th:text="${#numbers.formatInteger(policy.deliveryFee, 0, 'COMMA') + '원'}">3,000원</td>
                                         <!-- 변경 일자 필드명 updatedAt으로 가정 -->
                                         <td th:text="${policy.changedAt != null ? #temporals.format(policy.changedAt, 'yyyy-MM-dd HH:mm') : '-'}">2025-10-29 10:00</td>
                                     </tr>
                                     <!-- 정책 없을 때 메시지 -->
-                                    <tr th:if="${policies == null or #lists.isEmpty(policies)}">
+                                    <tr th:if="${policies.isEmpty()}">
                                         <td colspan="4" class="text-center py-4">
                                             등록된 배송비 정책이 없습니다.
                                         </td>
                                     </tr>
                                     </tbody>
                                 </table>
+                                <nav th:if="${!policies.isEmpty() and policies.totalPages > 1}" aria-label="Page navigation" class="mt-4">
+                                    <ul class="pagination justify-content-center">
 
+                                        <li class="page-item" th:classappend="${policies.first} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/policies/deliveries(page=0)}" aria-label="First">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item" th:classappend="${policies.first} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/policies/deliveries(page=${policies.number - 1})}" aria-label="Previous">
+                                                <span aria-hidden="true">&lsaquo;</span>
+                                            </a>
+                                        </li>
+
+                                        <th:block th:with="
+                                            start = ${T(java.lang.Math).max(0, policies.number - 2)},
+                                            end = ${T(java.lang.Math).min(policies.totalPages - 1, policies.number + 2)}">
+                                            <li class="page-item" th:each="pageNum : ${#numbers.sequence(start, end)}"
+                                                th:classappend="${pageNum == policies.number} ? 'active'">
+                                                <a class="page-link" th:href="@{/admin/policies/deliveries(page=${pageNum})}" th:text="${pageNum + 1}">1</a>
+                                            </li>
+                                        </th:block>
+
+                                        <li class="page-item" th:classappend="${policies.last} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/policies/deliveries(page=${policies.number + 1})}" aria-label="Next">
+                                                <span aria-hidden="true">&rsaquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item" th:classappend="${policies.last} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/policies/deliveries(page=${policies.totalPages - 1})}" aria-label="Last">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
                     </div>

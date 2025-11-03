@@ -1,7 +1,8 @@
 package com.nhnacademy.byeol23front.orderset.delivery.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,10 +25,12 @@ public class DeliveryPolicyController {
 	private final DeliveryApiClient deliveryApiClient;
 
 	@GetMapping
-	public String getDeliveryMain(Model model) {
-		List<DeliveryPolicyInfoResponse> deliveryList = deliveryApiClient.getDeliveryPolicies().getBody();
+	public String getDeliveryMain(@PageableDefault(size = 10) Pageable pageable, Model model) {
+		ResponseEntity<Page<DeliveryPolicyInfoResponse>> response = deliveryApiClient.getDeliveryPolicies(pageable);
 
-		model.addAttribute("policies", deliveryList);
+		Page<DeliveryPolicyInfoResponse> deliveryPage = response.getBody();
+
+		model.addAttribute("policies", deliveryPage);
 		return "admin/policy/delivery";
 	}
 
