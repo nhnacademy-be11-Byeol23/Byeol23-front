@@ -1,0 +1,94 @@
+.tag-page {
+    --accent-color: #db3b5b; /* a red-pink accent to differentiate from categories */
+    --indent: 16px;
+    background-color: #f8f9fa;
+    padding: 1rem;
+}
+
+.tag-page ul { list-style: none; padding-left: 0; margin: 0; }
+.tag-page li { margin: 6px 0; }
+
+#tag-list { list-style: none; padding-left: 0; margin: 0; }
+#tag-list > li { list-style: none; }
+
+.tag-update-input {
+    margin-bottom: 5px;
+}
+
+/* Each tag row */
+.tag-page .tag-line {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background-color 0.2s, box-shadow 0.2s;
+    border: 1px solid rgba(0,0,0,0.04);
+    background-color: #fff;
+}
+.tag-page .tag-line:hover {
+    background-color: color-mix(in srgb, var(--accent-color), transparent 94%);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+
+/* Tag name */
+.tag-page .tag-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #333;
+    cursor: default;
+    word-break: break-word;
+}
+
+/* Optional pill look for tags (subtle) */
+.tag-page .tag-name::before {
+    content: "#";
+    color: var(--accent-color);
+    font-weight: 700;
+    opacity: 0.9;
+}
+
+/* Actions (Edit/Delete, etc.) */
+.tag-page .tag-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.tag-page .tag-actions .btn {
+    font-size: 0.85rem;
+    padding: 2px 10px;
+    height: 28px;
+    line-height: 1.2;
+}
+
+/* Inline add/edit form if you show them under a row */
+.tag-page .inline-form {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+}
+.tag-page .inline-form .form-control {
+    width: 220px;
+    height: 32px;
+    font-size: 0.9rem;
+    padding: 4px 8px;
+}
+
+/* Utility states */
+.tag-page .hidden { display: none; }
+.tag-page .muted  { color: #6c757d; }
+
+/* Responsive tweaks */
+@media (max-width: 576px) {
+    .tag-page .tag-line {
+        grid-template-columns: 1fr;
+        row-gap: 8px;
+    }
+    .tag-page .tag-actions {
+        justify-content: flex-start;
+    }
+}
