@@ -35,7 +35,7 @@
                         <h3>쿠폰 정책 관리</h3>
                         <hr>
                         <h4>신규 쿠폰 정책 등록</h4>
-                        <form action="/admin/coupon-policy/create" method="post">
+                        <form action="/admin/coupon-policy" method="post">
                             <div class="form-group">
                                 <label for="policyName">정책명</label>
                                 <input type="text" class="form-control" id="policyName" name="policyName"
@@ -97,6 +97,37 @@
                             </div>
                             <button type="submit" class="app-btn">쿠폰 정책 저장</button>
                         </form>
+                    </div>
+                    <hr class="my-4"> <h4>쿠폰 정책 목록</h4>
+                    <div class="table-responsive"> <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th scope="col">정책명</th>
+                            <th scope="col">최소 구매액</th>
+                            <th scope="col">할인률(%)</th>
+                            <th scope="col">최대 할인 금액</th>
+                            <th scope="col">할인 금액</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(policies)}">
+                            <td colspan="6" class="text-center">등록된 쿠폰 정책이 없습니다.</td>
+                        </tr>
+
+                        <tr th:each="policy : ${policies}">
+                            <td th:text="${policy.policyName}">
+                            </td>
+                            <td th:text="${#numbers.formatInteger(policy.criterionPrice, 3, 'COMMA') + '원'}">
+                            </td>
+                            <td th:text="${policy.discountRate != null ? policy.discountRate + '%' : '-'}">
+                            </td>
+                            <td th:text="${policy.discountLimit != null ? #numbers.formatInteger(policy.discountLimit, 3, 'COMMA') + '원' : '-'}">
+                            </td>
+                            <td th:text="${policy.discountAmount != null ? #numbers.formatInteger(policy.discountAmount, 3, 'COMMA') + '원' : '-'}">
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                     </div>
                 </div>
             </div>
