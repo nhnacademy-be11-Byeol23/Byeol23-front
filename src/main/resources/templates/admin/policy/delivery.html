@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>관리자 - 배송비 정책 관리</title>
+    <meta name="description" content="배송비 정책 관리 페이지">
+    <meta name="keywords" content="">
+    <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+</head>
+
+<body class="admin-delivery-policies-page">
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+    <!-- Page Title -->
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">관리자 - 배송비 정책 관리</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/admin}">관리자 홈</a></li>
+                    <li class="current">배송비 정책 관리</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content Section -->
+    <section id="admin-policies" class="admin-policies section">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+            <div class="row g-4">
+
+                <!-- 1. Sidebar Column -->
+                <div class="col-lg-3">
+                    <div th:replace="~{fragments/admin_side_bar :: admin_side_bar}"></div>
+                </div>
+
+                <!-- 2. Content Column -->
+                <div class="col-lg-9">
+                    <!-- 👇 Content directly included here, replacing th:replace -->
+                    <div class="policy-page">
+
+                        <!-- 배송비 정책 추가/수정 폼 -->
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3" id="policy-form-title">새 배송비 정책 추가(가장 최근에 생성된 배송비 정책 적용)</h5>
+                                <form id="policyForm" class="row g-3" th:action="@{/admin/policies/deliveries}" method="POST">
+                                    <input type="hidden" id="policyId" name="policyId">
+                                    <div class="col-md-5">
+                                        <label for="freeDeliveryCondition" class="form-label">무료 배송 기준 (원)</label>
+                                        <input type="number" class="form-control" id="freeDeliveryCondition" name="freeDeliveryCondition" min="0" step="1000">
+                                        <small class="text-muted">이 금액 이상 구매 시 무료 배송 (0 또는 비워두면 항상 부과)</small>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label for="deliveryFee" class="form-label">배송비 (원)</span></label>
+                                        <input type="number" class="form-control" id="deliveryFee" name="deliveryFee" min="0" step="100" required>
+                                    </div>
+                                    <div class="col-12 text-end">
+                                        <button type="button" class="btn btn-secondary" onclick="resetPolicyForm()">취소</button>
+                                        <button type="submit" class="btn btn-dark">저장</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- 배송비 정책 목록 테이블 -->
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3">배송비 정책 목록</h5>
+
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">무료 배송 조건</th>
+                                        <th scope="col">배송비</th>
+                                        <th scope="col">변경 일자</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <!-- 'policies' 리스트 순회 (변수명 policies로 가정) -->
+                                    <tr th:each="policy : ${policies.content}">
+                                        <td th:text="${policy.freeDeliveryCondition != null and policy.freeDeliveryCondition > 0 ? #numbers.formatInteger(policy.freeDeliveryCondition, 0, 'COMMA') + '원 이상' : '조건 없음'}">50,000원 이상</td>
+                                        <td th:text="${#numbers.formatInteger(policy.deliveryFee, 0, 'COMMA') + '원'}">3,000원</td>
+                                        <!-- 변경 일자 필드명 updatedAt으로 가정 -->
+                                        <td th:text="${policy.changedAt != null ? #temporals.format(policy.changedAt, 'yyyy-MM-dd HH:mm') : '-'}">2025-10-29 10:00</td>
+                                    </tr>
+                                    <!-- 정책 없을 때 메시지 -->
+                                    <tr th:if="${policies.isEmpty()}">
+                                        <td colspan="4" class="text-center py-4">
+                                            등록된 배송비 정책이 없습니다.
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <nav th:if="${!policies.isEmpty() and policies.totalPages > 1}" aria-label="Page navigation" class="mt-4">
+                                    <ul class="pagination justify-content-center">
+
+                                        <li class="page-item" th:classappend="${policies.first} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/policies/deliveries(page=0)}" aria-label="First">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item" th:classappend="${policies.first} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/policies/deliveries(page=${policies.number - 1})}" aria-label="Previous">
+                                                <span aria-hidden="true">&lsaquo;</span>
+                                            </a>
+                                        </li>
+
+                                        <th:block th:with="
+                                            start = ${T(java.lang.Math).max(0, policies.number - 2)},
+                                            end = ${T(java.lang.Math).min(policies.totalPages - 1, policies.number + 2)}">
+                                            <li class="page-item" th:each="pageNum : ${#numbers.sequence(start, end)}"
+                                                th:classappend="${pageNum == policies.number} ? 'active'">
+                                                <a class="page-link" th:href="@{/admin/policies/deliveries(page=${pageNum})}" th:text="${pageNum + 1}">1</a>
+                                            </li>
+                                        </th:block>
+
+                                        <li class="page-item" th:classappend="${policies.last} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/policies/deliveries(page=${policies.number + 1})}" aria-label="Next">
+                                                <span aria-hidden="true">&rsaquo;</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item" th:classappend="${policies.last} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/admin/policies/deliveries(page=${policies.totalPages - 1})}" aria-label="Last">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 👆 Content ends here -->
+                </div> <!-- End .col-lg-9 -->
+
+            </div> <!-- End .row.g-4 -->
+        </div> <!-- End .container -->
+    </section>
+
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<!-- Scroll Top, Preloader etc. -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<div id="preloader"></div>
+
+<!-- JS Files -->
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+<script th:src="@{/assets/js/main.js}"></script>
+
+
+</body>
+</html>
+
