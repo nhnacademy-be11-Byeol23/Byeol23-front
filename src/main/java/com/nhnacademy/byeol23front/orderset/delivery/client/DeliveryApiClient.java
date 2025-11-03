@@ -11,7 +11,7 @@ import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyCreateReq
 import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyCreateResponse;
 import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
 
-@FeignClient(name = "deliveryApiClient", url = "${backend.api.url}")
+@FeignClient(name = "BYEOL23-GATEWAY", contextId = "deliveryApiClient")
 public interface DeliveryApiClient {
 
 	@GetMapping("/api/delivery-policies")
