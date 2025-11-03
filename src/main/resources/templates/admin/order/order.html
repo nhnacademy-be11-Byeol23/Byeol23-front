@@ -46,21 +46,23 @@
                   <div class="col-md-3">
                     <label for="orderStatus" class="form-label">주문 상태</label>
                     <select id="orderStatus" name="status" class="form-select">
-                      <option value="">전체</option>
-                      <option value="대기">대기</option>
-                      <option value="결제 완료">결제 완료</option>
-                      <option value="배송중">배송중</option>
-                      <option value="배송완료">배송완료</option>
-                      <option value="주문 취소">주문 취소</option>
+                      <option value="" th:selected="${param.status == null or param.status == ''}">전체</option>
+                      <option value="대기" th:selected="${param.status == '대기'}">대기</option>
+                      <option value="결제 완료" th:selected="${param.status == '결제 완료'}">결제 완료</option>
+                      <option value="배송중" th:selected="${param.status == '배송중'}">배송중</option>
+                      <option value="배송완료" th:selected="${param.status == '배송완료'}">배송완료</option>
+                      <option value="주문 취소" th:selected="${param.status == '주문 취소'}">주문 취소</option>
                     </select>
                   </div>
                   <div class="col-md-4">
                     <label for="orderId" class="form-label">주문 번호</label>
-                    <input id="orderId" type="text" name="orderNumber" class="form-control" placeholder="주문 번호 입력">
+                    <input id="orderId" type="text" name="orderNumber" class="form-control" placeholder="주문 번호 입력"
+                           th:value="${param.orderNumber}">
                   </div>
                   <div class="col-md-3">
                     <label for="customerName" class="form-label">주문자명</label>
-                    <input id="customerName" type="text" name="receiver" class="form-control" placeholder="수신자명 입력">
+                    <input id="customerName" type="text" name="receiver" class="form-control" placeholder="수신자명 입력"
+                           th:value="${param.receiver}">
                   </div>
                   <div class="col-md-2 d-grid align-self-end">
                     <button type="submit" class="btn btn-dark">검색</button>
@@ -84,7 +86,7 @@
                   </tr>
                   </thead>
                   <tbody>
-                  <tr th:each="order : ${orders}">
+                  <tr th:each="order : ${orders.content}">
                     <td th:text="${order.orderNumber}">...</td>
                     <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}">...</td>
                     <td th:text="${order.receiver}">...</td>
@@ -97,22 +99,97 @@
                               th:text="${order.orderStatus}">...</span>
                     </td>
                     <td>
-                      <a th:href="@{'/admin/orders/' + ${order.orderNumber}}" class="btn btn-outline-primary btn-sm">상세</a>
+                      <button type="button" class="btn btn-outline-primary btn-sm"
+                              data-bs-toggle="modal"
+                              data-bs-target="#orderDetailsModal"
+                              th:attr="data-order-number=${order.orderNumber}"
+                              onclick="loadOrderDetails(this)">상세</button>
+
                       <button type="button" class="btn btn-outline-danger btn-sm"
                               th:attr="data-id=${order.orderNumber}"
                               onclick="cancelOrder(this)">취소</button>
                     </td>
                   </tr>
-                  <tr th:if="${orders == null or orders.isEmpty()}">
+                  <tr th:if="${orders.empty}">
                     <td colspan="6" class="text-center py-4">조회된 주문 내역이 없습니다.</td>
                   </tr>
                   </tbody>
                 </table>
+
+                <nav th:if="${!orders.empty and orders.totalPages > 1}" aria-label="Page navigation" class="mt-4">
+                  <ul class="pagination justify-content-center">
+
+                    <li class="page-item" th:classappend="${orders.first} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="@{/admin/orders(page=0, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})}"
+                         aria-label="First">
+                        <span aria-hidden="true">&laquo;</span>
+                      </a>
+                    </li>
+                    <li class="page-item" th:classappend="${orders.first} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="@{/admin/orders(page=${orders.number - 1}, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})}"
+                         aria-label="Previous">
+                        <span aria-hidden="true">&lsaquo;</span>
+                      </a>
+                    </li>
+
+                    <th:block th:with="
+                        start = ${T(java.lang.Math).max(0, orders.number - 2)},
+                        end = ${T(java.lang.Math).min(orders.totalPages - 1, orders.number + 2)}">
+                      <li class="page-item" th:each="pageNum : ${#numbers.sequence(start, end)}"
+                          th:classappend="${pageNum == orders.number} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/admin/orders(page=${pageNum}, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})}"
+                           th:text="${pageNum + 1}">1</a>
+                      </li>
+                    </th:block>
+
+                    <li class="page-item" th:classappend="${orders.last} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="@{/admin/orders(page=${orders.number + 1}, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})}"
+                         aria-label="Next">
+                        <span aria-hidden="true">&rsaquo;</span>
+                      </a>
+                    </li>
+                    <li class="page-item" th:classappend="${orders.last} ? 'disabled'">
+                      <a class="page-link"
+                         th:href="@{/admin/orders(page=${orders.totalPages - 1}, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})}"
+                         aria-label="Last">
+                        <span aria-hidden="true">&raquo;</span>
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
               </div>
             </div>
 
           </div> </div> </div> </div> </section>
 </main>
+
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="orderDetailsModalLabel">주문 상세 정보</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="text-center" id="modalLoadingSpinner">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        <div id="modalOrderDetailsContent">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <div th:replace="~{fragments/common_footer :: commonFooter}"></div>
 

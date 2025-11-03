@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
-import com.nhnacademy.byeol23front.orderset.order.dto.OrderCreateResponse;
 import com.nhnacademy.byeol23front.orderset.payment.client.PaymentApiClient;
 import com.nhnacademy.byeol23front.orderset.payment.dto.PaymentCancelRequest;
 import com.nhnacademy.byeol23front.orderset.payment.dto.PaymentParamRequest;
+import com.nhnacademy.byeol23front.orderset.payment.dto.PaymentResultResponse;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,24 +40,23 @@ public class PaymentController {
 
 		try {
 			PaymentParamRequest paymentParamRequest = new PaymentParamRequest(orderId, paymentKey, amount);
-			ResponseEntity<String> response = paymentApiClient.confirmPayment(paymentParamRequest);
+			ResponseEntity<PaymentResultResponse> response = paymentApiClient.confirmPayment(paymentParamRequest);
 
 			log.info("토스페이먼츠 승인 API 응답 상태 코드: {}", response.getStatusCode());
 			log.info("토스페이먼츠 승인 API 응답 본문: {}", response.getBody());
 
 			if (response.getStatusCode().is2xxSuccessful()) {
-				Map<String, Object> responseMap = objectMapper.readValue(response.getBody(), new TypeReference<Map<String, Object>>() {});
+				PaymentResultResponse dto = response.getBody();
 
-				if ("DONE".equals(responseMap.get("status"))) {
-					Number approvedAmountNumber = (Number) responseMap.get("totalAmount");
-					BigDecimal approvedAmount = BigDecimal.valueOf(approvedAmountNumber.longValue());
+				if ("DONE".equals(dto.status())) {
+					BigDecimal approvedAmount = dto.totalAmount();
 					if (amount.compareTo(approvedAmount) == 0) {
 						log.info("결제 승인 및 금액 검증 성공! 주문 ID: {}", orderId);
 
-						paymentApiClient.createPayment(responseMap);
+						paymentApiClient.createPayment(dto);
 						orderApiClient.updateOrderStatus(orderId);
 						model.addAttribute("orderId", orderId);
-						model.addAttribute("paymentInfo", responseMap);
+						model.addAttribute("paymentInfo", dto);
 						return "order/success";
 					} else {
 						log.error("금액 위변조 의심! 요청 금액: {}, 승인 금액: {}", amount, approvedAmount);
@@ -85,10 +84,10 @@ public class PaymentController {
 						return "error";
 					}
 				} else {
-					log.error("토스페이먼츠 승인 상태 오류. 상태: {}", responseMap.get("status"));
+					log.error("토스페이먼츠 승인 상태 오류. 상태: {}", response.getStatusCode());
 					model.addAttribute("status", 500);
 					model.addAttribute("error", "Payment Status Error");
-					model.addAttribute("message", "결제 승인 상태 확인에 실패했습니다: " + responseMap.get("status"));
+					model.addAttribute("message", "결제 승인 상태 확인에 실패했습니다: " + response.getBody().status());
 					return "error";
 				}
 			}
