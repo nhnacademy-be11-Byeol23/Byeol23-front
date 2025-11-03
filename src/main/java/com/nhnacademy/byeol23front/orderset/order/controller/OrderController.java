@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
+import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareResponse;
@@ -36,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class OrderController {
 	private final OrderApiClient orderApiClient;
+	private final DeliveryApiClient deliveryApiClient;
 
 	@GetMapping
 	public String getOrder(Model model) {
@@ -48,10 +50,11 @@ public class OrderController {
 		DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("M/d"); // 10/30
 		DateTimeFormatter valueFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
 
-		while (businessDaysCount < 7) {
+		while (businessDaysCount < 5) {
 			currentDate = currentDate.plusDays(1);
 			DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
 			if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
+				businessDaysCount++;
 				String dayName = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN); // e.g 목
 				String displayDate = currentDate.format(displayFormatter); // e.g 10/30
 				String valueDate = currentDate.format(valueFormatter); // e.g 2025-10-30
@@ -66,11 +69,38 @@ public class OrderController {
 					defaultDate = currentDate;
 				}
 			}
-			businessDaysCount++;
 		}
 
 		model.addAttribute("deliveryDates", deliveryDate);
 		model.addAttribute("defaultDeliveryDate", defaultDate != null ? defaultDate.format(valueFormatter) : "");
+
+		BigDecimal totalBookPrice = new BigDecimal(298000);
+
+		ResponseEntity<DeliveryPolicyInfoResponse> response = deliveryApiClient.getCurrentDeliveryPolicy();
+		DeliveryPolicyInfoResponse deliveryPolicy = response.getBody();
+
+		BigDecimal deliveryFee = BigDecimal.ZERO;
+		BigDecimal actualOrderPrice = totalBookPrice;
+
+		if (deliveryPolicy != null) {
+			BigDecimal policyFee = deliveryPolicy.deliveryFee();
+			BigDecimal freeThreshold = deliveryPolicy.freeDeliveryCondition();
+
+			if (freeThreshold != null && freeThreshold.compareTo(BigDecimal.ZERO) > 0
+				&& totalBookPrice.compareTo(freeThreshold) >= 0) {
+				deliveryFee = BigDecimal.ZERO;
+			} else {
+				deliveryFee = policyFee != null ? policyFee : BigDecimal.ZERO;
+			}
+		} else {
+			log.warn("배송비 정책을 가져올 수 없습니다. 기본 배송비 0원으로 처리합니다.");
+		}
+
+		actualOrderPrice = totalBookPrice.add(deliveryFee);
+
+		model.addAttribute("totalBookPrice", totalBookPrice);
+		model.addAttribute("deliveryFee", deliveryFee);
+		model.addAttribute("actualOrderPrice", actualOrderPrice);
 
 		model.addAttribute("userPoint", 3000000);
 
