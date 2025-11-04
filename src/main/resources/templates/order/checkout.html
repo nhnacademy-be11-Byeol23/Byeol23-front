@@ -164,9 +164,9 @@
               </div>
 
               <div class="order-summary-content">
-                <div class="order-item" th:each="item : ${orderItem}">
+                <div class="order-item d-flex align-items-center" th:each="item : ${orderItem}">
                   <div class="order-item-image me-3">
-                    <img th:src="${item.imageUrl}" alt="Product" class="img-fluid">
+                    <img th:src="${item.imageUrl}" alt="Product" class="img-fluid" style="width: 80px; height: auto;">
                   </div>
 
                   <div class="order-item-details">
@@ -481,18 +481,26 @@
   function initApplyAllPointsButton() {
     const applyAllBtn = document.getElementById('apply-all-points-btn');
     const pointsInput = document.getElementById('points-to-use');
+    const totalBookPriceEl = document.getElementById('total-book-price');
 
-    if (applyAllBtn && pointsInput) {
+    const parsePrice = (element) => {
+      if (!element || !element.textContent) return 0;
+      return parseInt(element.textContent.replace(/[^\d]/g, ''), 10) || 0;
+    };
+
+    if (applyAllBtn && pointsInput && totalBookPriceEl) {
       console.log("'모두 사용' 버튼 리스너 추가됨"); // <--- 로그 추가
       applyAllBtn.addEventListener('click', () => {
         const maxPointsInput = parseInt(pointsInput.getAttribute('max') || '0', 10);
         const currentPointsStr = document.getElementById('current-points')?.textContent.replace(/[^\d]/g, '');
         const availablePoints = parseInt(currentPointsStr, 10) || 0;
-        const maxPointsToUse = Math.min(maxPointsInput, availablePoints);
+        const maxPointsFromBalance = Math.min(maxPointsInput, availablePoints);
 
-        // 1. input 값을 먼저 설정
+        const subtotal = parsePrice(totalBookPriceEl);
+
+        const maxPointsToUse = Math.min(maxPointsFromBalance, subtotal);
+
         pointsInput.value = maxPointsToUse;
-
         // 2. 그 다음 업데이트 함수 호출
         updatePriceSummary();
       });
@@ -527,8 +535,14 @@
     const currentPointsStr = document.getElementById('current-points')?.textContent.replace(/[^\d]/g, '');
     const availablePoints = parseInt(currentPointsStr, 10) || 0; // 실제 보유 포인트
 
+    const subtotal = parsePrice(totalBookPriceEl);
+    const deliveryFee = parsePrice(deliveryFeeEl);
+
+    const maxPointsFromBalance = Math.min(maxPoints, availablePoints);
+    const maxPointsFromSubtotal = subtotal;
+
     // 사용 가능한 최대 포인트는 (input max 값)과 (보유 포인트) 중 작은 값
-    const effectiveMaxPoints = Math.min(maxPoints, availablePoints);
+    const effectiveMaxPoints = Math.min(maxPointsFromSubtotal, maxPointsFromBalance);
     console.log("계산된 최대 사용 가능 포인트:", effectiveMaxPoints); // <--- 로그 추가!
 
     // 3. 포인트 유효성 검사 및 조정
@@ -558,8 +572,6 @@
     // (쿠폰 할인 표시 업데이트 로직 추가)
 
     // 6. 최종 결제 금액 계산
-    const subtotal = parsePrice(totalBookPriceEl);
-    const deliveryFee = parsePrice(deliveryFeeEl);
     const finalPrice = Math.max(0, subtotal + deliveryFee - pointDiscount - couponDiscount); // 최종 금액은 0원 미만 불가
 
     // 7. 최종 결제 금액 및 버튼 텍스트 업데이트
