@@ -68,13 +68,11 @@ public class OrderController {
 		session.removeAttribute("directOrderRequest");
 
 		addDeliveryDatesToModel(model);
-		BookInfoRequest bookInfoRequest = request.bookList().getFirst();
 		addOrderSummary(model, request.bookList());
-		addDeliveryFeeToModel(model, bookInfoRequest);
+		addDeliveryFeeToModel(model, request);
 		model.addAttribute("userPoint", 300_000);
 
 		return "order/checkout";
-
 	}
 
 	@GetMapping
@@ -120,7 +118,7 @@ public class OrderController {
 		ResponseEntity<OrderPrepareResponse> response = orderApiClient.prepareOrder(request);
 		log.info("주문 준비 응답: {}", response.getBody());
 
-		if(!response.getStatusCode().is2xxSuccessful()) {
+		if (!response.getStatusCode().is2xxSuccessful()) {
 			log.error("주문 준비 실패: {}", response.getStatusCode());
 			throw new OrderPrepareFailException("주문 임시 저장에 실패했습니다.");
 		}
@@ -188,10 +186,15 @@ public class OrderController {
 		model.addAttribute("defaultDeliveryDate", defaultDate != null ? defaultDate.format(valueFormatter) : "");
 	}
 
-	private void addDeliveryFeeToModel(Model model, BookInfoRequest request) {
-		BigDecimal quantity = BigDecimal.valueOf(request.quantity());
+	private void addDeliveryFeeToModel(Model model, BookOrderRequest request) {
 
-		BigDecimal totalBookPrice = request.salePrice().multiply(quantity);
+		BigDecimal totalBookPrice = BigDecimal.ZERO;
+
+		for (BookInfoRequest infoRequest : request.bookList()) {
+			BigDecimal quantity = BigDecimal.valueOf(infoRequest.quantity());
+			BigDecimal itemSubtotal = infoRequest.salePrice().multiply(quantity);
+			totalBookPrice = totalBookPrice.add(itemSubtotal);
+		}
 
 		ResponseEntity<DeliveryPolicyInfoResponse> response = deliveryApiClient.getCurrentDeliveryPolicy();
 		DeliveryPolicyInfoResponse deliveryPolicy = response.getBody();
