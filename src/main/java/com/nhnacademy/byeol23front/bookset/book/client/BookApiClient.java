@@ -28,4 +28,5 @@ public interface BookApiClient {
 
 	@DeleteMapping("/api/books/{book-id}")
 	void deleteBook(@PathVariable("book-id") Long bookId);
+
 }
