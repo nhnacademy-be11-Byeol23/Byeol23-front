@@ -110,13 +110,13 @@
                               onclick="cancelOrder(this)">취소</button>
                     </td>
                   </tr>
-                  <tr th:if="${orders.empty}">
+                  <tr th:if="${orders.isEmpty()}">
                     <td colspan="6" class="text-center py-4">조회된 주문 내역이 없습니다.</td>
                   </tr>
                   </tbody>
                 </table>
 
-                <nav th:if="${!orders.empty and orders.totalPages > 1}" aria-label="Page navigation" class="mt-4">
+                <nav th:if="${!orders.isEmpty() and orders.totalPages > 1}" aria-label="Page navigation" class="mt-4">
                   <ul class="pagination justify-content-center">
 
                     <li class="page-item" th:classappend="${orders.first} ? 'disabled'">
