@@ -37,6 +37,7 @@ public class MinioUtil {
 	private String accessKey;
 	private String secretKey;
 	private String bucketName;
+	private String prefix;
 
 	// 재사용을 위한 단일 인스턴스
 	private volatile S3Client s3Client;
@@ -80,6 +81,7 @@ public class MinioUtil {
 	}
 
 	private S3Client buildClient() {
+		prefix = "http://" + host + ":" + port + "/" + bucketName + "/";
 		return S3Client.builder()
 			.endpointOverride(URI.create("http://" + host + ":" + port))
 			.region(Region.US_EAST_1)
@@ -94,7 +96,7 @@ public class MinioUtil {
 
 
 
-	public String getPresignedUrl(ImageType type, long id) {
+	public String getPresignedUrl(ImageDomain type, long id) {
 		try {
 			MinioClient minioClient = MinioClient.builder()
 				.endpoint(host, port, false)
@@ -119,7 +121,7 @@ public class MinioUtil {
 		}
 	}
 
-	public List<String> listUrls(ImageType type, long id) {
+	public List<String> listUrls(ImageDomain type, long id) {
 		List<String> urls = null;
 		String prefix = String.format("%s/%d", type.name(), id);
 		try{
@@ -140,10 +142,10 @@ public class MinioUtil {
 		return "http://" + host + ":" + port + "/" + bucketName + "/" + fileName;
 	}
 
-	public String putObject(ImageType type, long id, MultipartFile file) {
+	public String putObject(ImageDomain type, long id, MultipartFile file) {
 		try{
 			S3Client s3 = getS3Client();
-			String fileName = generateObjectKey(type, id);
+			String fileName = String.format("%s-%s",generateObjectKey(type, id), System.currentTimeMillis());
 			s3.putObject(req -> req.bucket(bucketName).key(fileName), RequestBody.fromBytes(file.getBytes()));
 			return fileName2Url(fileName);
 		} catch (Exception e){
@@ -152,17 +154,26 @@ public class MinioUtil {
 		}
 	}
 
-	public void deleteObject(ImageType type, long id) {
+	public void deleteObject(String url) {
 		try{
 			S3Client s3 = getS3Client();
-			s3.deleteObject(req -> req.bucket(bucketName).key(generateObjectKey(type, id)));
+			s3.deleteObject(req -> req.bucket(bucketName).key(urlToObjectKey(url)));
 		} catch (Exception e){
 			log.error("파일 삭제 오류 발생: {}", e.getMessage());
 			throw new RuntimeException("파일 삭제 오류 발생", e);
 		}
 	}
 
-	private String generateObjectKey(ImageType type, long id) {
-		return String.format("%s/%d.jpg", type.name(), id);
+	private String generateObjectKey(ImageDomain type, long id) {
+		return String.format("%s/%d/%d.jpg", type.name(), id, System.currentTimeMillis());
+	}
+
+	private String urlToObjectKey(String url) {
+		// http://host:port/bucketName/objectKey
+		if (url.startsWith(prefix)) {
+			return url.substring(prefix.length());
+		} else {
+			throw new IllegalArgumentException("Invalid URL: " + url);
+		}
 	}
 }

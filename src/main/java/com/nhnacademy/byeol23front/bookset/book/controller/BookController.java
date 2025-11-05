@@ -22,7 +22,6 @@ public class BookController {
 
 	@GetMapping("/{book-id}")
 	public String getBookById(@PathVariable(name = "book-id") Long bookId, Model model) {
-
 		BookResponse bookDetail = bookApiClient.getBook(bookId);
 
 		DeliveryPolicyInfoResponse currentDeliveryPolicy = deliveryApiClient.getCurrentDeliveryPolicy().getBody();
