@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>관리자 - 기여자 관리</title>
+    <meta name="description" content="관리자 기여자 관리 페이지">
+    <meta name="keywords" content="">
+    <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+    <link rel="stylesheet" th:href = "@{/assets/css/contributor.css}">
+</head>
+
+<body class="admin-contributor-page">
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">관리자 - 기여자 관리</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/admin}">관리자 홈</a></li>
+                    <li class="current">기여자 관리</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <section id="admin-contributors" class="admin-contributors section">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+            <div class="row g-4">
+                <div class="col-lg-3">
+                    <div th:replace="~{fragments/admin_side_bar :: admin_side_bar}"></div>
+                </div>
+
+                <div class="col-lg-9">
+                    <div class="contributor-page">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3">기여자 등록</h5>
+                                <form id="contributorCreateForm" class="row g-3">
+                                    <div class="col-md-4">
+                                        <input id="root" type="text" name="name" class="form-control" placeholder="예시: 한강" required>
+                                    </div>
+                                    <div class="col-md-1">
+                                        <select name="contributor-role" id="contributor-role-input">
+                                            <option value="AUTHOR">저자</option>
+                                            <option value="TRANSLATOR">역자</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-1 d-grid">
+                                        <button type="submit" class="btn btn-dark">등록</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3">기여자 목록</h5>
+                                <ul id="contributor-list">
+                                    <th:block th:if="${contributors != null}">
+                                        <li th:each="contributor : ${contributors}">
+                                            <div class="contributor-line">
+                                                <span class="contributor-name"
+                                                      th:text="${contributor.contributorName}"
+                                                      th:attr="data-id=${contributor.contributorId}">
+                                                </span>
+                                                <span class="contributor-role"
+                                                      th:text="${contributor.contributorRole()}"
+                                                      th:attr="data-id=${contributor.contributorRole()}">
+                                                </span>
+                                                <div class="contributor-actions">
+                                                    <button type="button" class="btn btn-outline-warning btn-sm"
+                                                            th:attr="onclick='toggleUpdate(' + ${contributor.contributorId() + ')'}">수정</button>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                                            th:attr="data-id=${contributor.contributorId}" onclick="deleteContributor(this)">삭제</button>
+                                                </div>
+                                            </div>
+                                            <div th:attr="id= 'contributorUpdateDiv' + ${contributor.contributorId()}" class="contributor-updates" style="display: none">
+                                                <input th:attr="id= 'contributorUpdateInput' + ${contributor.contributorId()}" type="text" name="contributorName" class="contributor-update-input form-control form-control-sm">
+                                                <select name="contributor-role" th:attr="id = 'contributor-role-update' + ${contributor.contributorId()}">
+                                                    <option value="AUTHOR">저자</option>
+                                                    <option value="TRANSLATOR">역자</option>
+                                                </select>
+                                                <button th:attr="onclick='updateContributor(' + ${contributor.contributorId() + ')'}" class="btn btn-outline-warning btn-sm">수정</button>
+                                                <button th:attr="onclick='toggleUpdate(' + ${contributor.contributorId() + ')'}" class="btn btn-outline-danger btn-sm">취소</button>
+                                            </div>
+                                        </li>
+                                    </th:block>
+                                    <li th:if="${contributors == null or #lists.isEmpty(contributors)}">
+                                        <p class="text-center py-3">등록된 기여자가 없습니다.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div th:if="${!contributors.isEmpty()}">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item" th:classappend="${paging.first()} ? 'disabled'">
+                                        <a class="page-link"
+                                           th:href="@{|?page=${paging.number() - 1}|}">
+                                            <span>이전</span>
+                                        </a>
+                                    </li>
+                                    <li th:each="page: ${#numbers.sequence(0, paging.totalPages() - 1)}"
+                                        th:if="${page >= paging.number - 5 and page <= paging.number + 5}"
+                                        th:classappend="${page == paging.number} ? 'active'"
+                                        class="page-item">
+                                        <a th:text="${page + 1}" class="page-link" th:href="@{|?page=${page}|}"></a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${paging.last} ? 'disabled'">
+                                        <a class="page-link" th:href="@{|?page=${paging.number + 1}|}">
+                                            <span>다음</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div> </div> </div> </div> </section>
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<div id="preloader"></div>
+
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+<script th:src="@{/assets/js/main.js}"></script>
+
+<script th:src="@{/assets/js/contributor.js}"></script>
+
+</body>
+</html>
