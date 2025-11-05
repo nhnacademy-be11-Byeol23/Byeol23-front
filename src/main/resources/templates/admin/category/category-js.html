@@ -5,7 +5,7 @@
             e.preventDefault();
             const name = document.getElementById("root").value.trim();
             if (!name) return alert("카테고리명을 입력하세요.");
-            fetch("/categories", {
+            fetch(`/categories`, {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({ name })
@@ -82,7 +82,7 @@
                 e.preventDefault();
                 const name = form.querySelector("input[name='name']").value.trim();
                 if (!name) return alert("카테고리명을 입력하세요.");
-                fetch("/categories", {
+                fetch(`/categories`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
                     body: JSON.stringify({ name, parentId })

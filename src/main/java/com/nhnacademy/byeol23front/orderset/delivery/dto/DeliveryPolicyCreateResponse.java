@@ -6,5 +6,5 @@ import java.time.LocalDateTime;
 public record DeliveryPolicyCreateResponse(Long deliveryPolicyId,
 										   BigDecimal freeDeliveryCondition,
 										   BigDecimal deliveryFee,
-										   LocalDateTime changeAt) {
+										   LocalDateTime changedAt) {
 }

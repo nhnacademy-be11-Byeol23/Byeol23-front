@@ -2,6 +2,7 @@ package com.nhnacademy.byeol23front.orderset.delivery.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,8 +26,16 @@ public class DeliveryPolicyController {
 	private final DeliveryApiClient deliveryApiClient;
 
 	@GetMapping
-	public String getDeliveryMain(@PageableDefault(size = 10) Pageable pageable, Model model) {
+	public String getDeliveryMain(@PageableDefault(size = 10, sort = "changedAt", direction = Sort.Direction.DESC) Pageable pageable, Model model) {
 		ResponseEntity<Page<DeliveryPolicyInfoResponse>> response = deliveryApiClient.getDeliveryPolicies(pageable);
+
+		if (!response.getStatusCode().is2xxSuccessful()) {
+			String message = "배송비 정책 생성에 실패했습니다.: " + response.getStatusCode();
+			model.addAttribute("status", 400); // 400 Bad Request
+			model.addAttribute("error", "뀨");
+			model.addAttribute("message", message);
+			return "error";
+		}
 
 		Page<DeliveryPolicyInfoResponse> deliveryPage = response.getBody();
 
