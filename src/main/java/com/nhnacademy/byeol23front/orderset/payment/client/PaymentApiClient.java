@@ -9,16 +9,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.nhnacademy.byeol23front.orderset.payment.dto.PaymentCancelRequest;
 import com.nhnacademy.byeol23front.orderset.payment.dto.PaymentParamRequest;
+import com.nhnacademy.byeol23front.orderset.payment.dto.PaymentResultResponse;
 
-@FeignClient(name = "paymentApiClient", url = "${backend.api.url}")
+@FeignClient(name = "BYEOL23-GATEWAY", contextId = "paymentApiClient")
 public interface PaymentApiClient {
 
 	@PostMapping("/api/payments/confirm")
-	ResponseEntity<String> confirmPayment(@RequestBody PaymentParamRequest paymentParamRequest);
+	ResponseEntity<PaymentResultResponse> confirmPayment(@RequestBody PaymentParamRequest paymentParamRequest);
 
 	@PostMapping("/api/payments/cancel")
 	ResponseEntity<String> cancelPayment(@RequestBody PaymentCancelRequest paymentCancelRequest);
 
 	@PostMapping("/api/payments")
-	void createPayment(@RequestBody Map<String, Object> responseMap);
+	void createPayment(@RequestBody PaymentResultResponse response);
 }
