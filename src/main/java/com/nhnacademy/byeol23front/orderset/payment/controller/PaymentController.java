@@ -54,7 +54,7 @@ public class PaymentController {
 						log.info("결제 승인 및 금액 검증 성공! 주문 ID: {}", orderId);
 
 						paymentApiClient.createPayment(dto);
-						orderApiClient.updateOrderStatus(orderId);
+						orderApiClient.updateOrderStatus(orderId, "결제 완료");
 						model.addAttribute("orderId", orderId);
 						model.addAttribute("paymentInfo", dto);
 						return "order/success";
