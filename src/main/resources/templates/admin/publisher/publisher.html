@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>관리자 - 카테고리 관리</title>
+    <meta name="description" content="관리자 카테고리 관리 페이지">
+    <meta name="keywords" content="">
+    <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+    <link rel="stylesheet" th:href = "@{/assets/css/publisher.css}">
+</head>
+
+<body class="admin-publisher-page">
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">관리자 - 출판사 관리</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/admin}">관리자 홈</a></li>
+                    <li class="current">출판사 관리</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <section id="admin-categories" class="admin-categories section">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+            <div class="row g-4">
+                <div class="col-lg-3">
+                    <div th:replace="~{fragments/admin_side_bar :: admin_side_bar}"></div>
+                </div>
+
+                <div class="col-lg-9">
+                    <div class="publisher-page">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3">출판사 등록</h5>
+                                <form id="publisherCreateForm" class="row g-3">
+                                    <div class="col-md-4">
+                                        <input id="root" type="text" name="name" class="form-control" placeholder="예시: 문학동네" required>
+                                    </div>
+                                    <div class="col-md-1 d-grid">
+                                        <button type="submit" class="btn btn-dark">등록</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3">출판사 목록</h5>
+                                <ul id="publisher-list">
+                                    <th:block th:if="${publishers != null}">
+                                        <li th:each="publisher : ${publishers}">
+                                            <div class="publisher-line">
+                                                <span class="publisher-name"
+                                                      th:text="${publisher.publisherName}"
+                                                      th:attr="data-id=${publisher.publisherId}">
+                                                </span>
+                                                <div class="publisher-actions">
+                                                    <button type="button" class="btn btn-outline-warning btn-sm"
+                                                            th:attr="onclick='toggleUpdate(' + ${publisher.publisherId() + ')'}">수정</button>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm"
+                                                            th:attr="data-id=${publisher.publisherId}" onclick="deletePublisher(this)">삭제</button>
+                                                </div>
+                                                <div th:attr="id= 'publisherUpdateDiv' + ${publisher.publisherId()}" class="publisher-updates row g-2" style="display: none">
+                                                    <div class="col-4">
+                                                        <input th:value="${publisher.publisherName()}" th:attr="id= 'publisherUpdateInput' + ${publisher.publisherId()}" type="text" name="publisherName" class="publisher-update-input form-control form-control-sm">
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <button th:attr="onclick='updatePublisher(' + ${publisher.publisherId() + ')'}" class="btn btn-outline-warning btn-sm">수정</button>
+                                                        <button th:attr="onclick='toggleUpdate(' + ${publisher.publisherId() + ')'}" class="btn btn-outline-danger btn-sm">취소</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </th:block>
+                                    <li th:if="${publishers == null or #lists.isEmpty(publishers)}">
+                                        <p class="text-center py-3">등록된 출판사가 없습니다.</p>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div th:if="${!publishers.isEmpty()}">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item" th:classappend="${paging.first()} ? 'disabled'">
+                                        <a class="page-link"
+                                           th:href="@{|?page=${paging.number() - 1}|}">
+                                            <span>이전</span>
+                                        </a>
+                                    </li>
+                                    <li th:each="page: ${#numbers.sequence(0, paging.totalPages() - 1)}"
+                                        th:if="${page >= paging.number - 5 and page <= paging.number + 5}"
+                                        th:classappend="${page == paging.number} ? 'active'"
+                                        class="page-item">
+                                        <a th:text="${page + 1}" class="page-link" th:href="@{|?page=${page}|}"></a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${paging.last} ? 'disabled'">
+                                        <a class="page-link" th:href="@{|?page=${paging.number + 1}|}">
+                                            <span>다음</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div> </div> </div> </div> </section>
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<div id="preloader"></div>
+
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+<script th:src="@{/assets/js/main.js}"></script>
+
+<script th:src="@{/assets/js/publisher.js}"></script>
+
+</body>
+</html>
