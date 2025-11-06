@@ -25,6 +25,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.nhnacademy.byeol23front.minio.dto.VailidFileType;
+
 @Slf4j
 @Getter
 @Setter
@@ -96,30 +98,30 @@ public class MinioUtil {
 
 
 
-	public String getPresignedUrl(ImageDomain type, long id) {
-		try {
-			MinioClient minioClient = MinioClient.builder()
-				.endpoint(host, port, false)
-				.credentials(accessKey, secretKey)
-				.build();
-
-			GetPresignedObjectUrlArgs args = GetPresignedObjectUrlArgs.builder()
-				.method(Method.GET)
-				.bucket(bucketName)
-				.object(generateObjectKey(type, id))
-				.expiry(1, TimeUnit.HOURS)
-				.build();
-
-			return minioClient.getPresignedObjectUrl(args);
-		} catch (MinioException e) {
-			log.error("MinIO 오류 발생: {}", e.getMessage());
-			log.error("HTTP 추적: {}", e.httpTrace());
-			throw new RuntimeException("MinIO 오류 발생", e);
-		} catch (Exception e) {
-			log.error("일반 오류 발생: {}", e.getMessage());
-			throw new RuntimeException("일반 오류 발생", e);
-		}
-	}
+	// public String getPresignedUrl(ImageDomain type, long id) {
+	// 	try {
+	// 		MinioClient minioClient = MinioClient.builder()
+	// 			.endpoint(host, port, false)
+	// 			.credentials(accessKey, secretKey)
+	// 			.build();
+	//
+	// 		GetPresignedObjectUrlArgs args = GetPresignedObjectUrlArgs.builder()
+	// 			.method(Method.GET)
+	// 			.bucket(bucketName)
+	// 			.object(generateObjectKey(type, id))
+	// 			.expiry(1, TimeUnit.HOURS)
+	// 			.build();
+	//
+	// 		return minioClient.getPresignedObjectUrl(args);
+	// 	} catch (MinioException e) {
+	// 		log.error("MinIO 오류 발생: {}", e.getMessage());
+	// 		log.error("HTTP 추적: {}", e.httpTrace());
+	// 		throw new RuntimeException("MinIO 오류 발생", e);
+	// 	} catch (Exception e) {
+	// 		log.error("일반 오류 발생: {}", e.getMessage());
+	// 		throw new RuntimeException("일반 오류 발생", e);
+	// 	}
+	// }
 
 	public List<String> listUrls(ImageDomain type, long id) {
 		List<String> urls = null;
@@ -143,9 +145,15 @@ public class MinioUtil {
 	}
 
 	public String putObject(ImageDomain type, long id, MultipartFile file) {
+		String name = file.getOriginalFilename();
+		String extension = name != null && name.contains(".")
+			? name.substring(name.lastIndexOf(".") + 1).toLowerCase()
+			: "";
+		VailidFileType fileType = VailidFileType.fromExtension(extension);
+
 		try{
 			S3Client s3 = getS3Client();
-			String fileName = String.format("%s-%s",generateObjectKey(type, id), System.currentTimeMillis());
+			String fileName = String.format("%s",generateObjectKey(type, id, fileType));
 			s3.putObject(req -> req.bucket(bucketName).key(fileName), RequestBody.fromBytes(file.getBytes()));
 			return fileName2Url(fileName);
 		} catch (Exception e){
@@ -164,8 +172,8 @@ public class MinioUtil {
 		}
 	}
 
-	private String generateObjectKey(ImageDomain type, long id) {
-		return String.format("%s/%d/%d.jpg", type.name(), id, System.currentTimeMillis());
+	private String generateObjectKey(ImageDomain type, long id, VailidFileType fileType) {
+		return String.format("%s/%d/%d.%s", type.name(), id, System.currentTimeMillis(), fileType.getFileType());
 	}
 
 	private String urlToObjectKey(String url) {
