@@ -26,9 +26,9 @@ public interface ContributorApiClient {
 	@PostMapping(value = "/api/contributors")
 	ResponseEntity<ContributorCreateResponse> createContributor(@RequestBody ContributorCreateRequest contributorCreateRequest);
 
-	@PutMapping(value = "/api/contributors/{contributorId}")
-	ContributorUpdateResponse updateContributor(@PathVariable Long contributorId, @RequestBody ContributorUpdateRequest contributorUpdateRequest);
+	@PutMapping(value = "/api/contributors/{contributor-id}")
+	ContributorUpdateResponse updateContributor(@PathVariable(name = "contributor-id") Long contributorId, @RequestBody ContributorUpdateRequest contributorUpdateRequest);
 
-	@DeleteMapping(value = "/api/contributors/{contributorId}")
-	void deleteContributor(@PathVariable Long contributorId);
+	@DeleteMapping(value = "/api/contributors/{contributor-id}")
+	void deleteContributor(@PathVariable(name = "contributor-id") Long contributorId);
 }

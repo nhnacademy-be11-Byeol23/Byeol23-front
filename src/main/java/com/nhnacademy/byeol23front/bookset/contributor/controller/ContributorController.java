@@ -30,7 +30,7 @@ public class ContributorController {
 	@GetMapping
 	public String getAllContributors(
 		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "3") int size,
+		@RequestParam(defaultValue = "10") int size,
 		Model model){
 
 		PageResponse<AllContributorResponse> response = feignClient.getAllContributors(page, size).getBody();
