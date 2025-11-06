@@ -43,7 +43,14 @@
       <div class="col-lg-5" data-aos="fade-left" data-aos-delay="200">
         <div class="product-details">
           <div class="product-badge-container">
-            <span class="badge-category">카테고리</span>
+            <div class="category-badges mb-2" th:if="${book.categories != null and !#lists.isEmpty(book.categories)}">
+              <span th:each="category : ${book.categories}" 
+                    class="badge bg-primary me-1"
+                    th:text="${category.categoryName}"
+                    title="${category.pathName}">
+              </span>
+            </div>
+            <span class="badge-category" th:if="${book.categories == null or #lists.isEmpty(book.categories)}">카테고리 없음</span>
 
             <div class="rating-group">
               <div class="stars">
