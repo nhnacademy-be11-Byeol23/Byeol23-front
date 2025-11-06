@@ -30,7 +30,7 @@ public class PublisherController {
 	@GetMapping
 	public String getPublishers(
 		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "3") int size,
+		@RequestParam(defaultValue = "10") int size,
 		Model model
 		){
 		PageResponse<AllPublishersInfoResponse> response = feignClient.getAllPublishers(page, size).getBody();
@@ -46,15 +46,15 @@ public class PublisherController {
 	}
 
 	@ResponseBody
-	@DeleteMapping("/{publisherId}")
-	public ResponseEntity<Void> deletePublisher(@PathVariable Long publisherId){
+	@DeleteMapping("/{publisher-id}")
+	public ResponseEntity<Void> deletePublisher(@PathVariable(name = "publisher-id") Long publisherId){
 		feignClient.deletePublisher(publisherId);
 		return ResponseEntity.ok().build();
 	}
 
 	@ResponseBody
-	@PutMapping("/{publisherId}")
-	public ResponseEntity<Void> updatePublisher(@PathVariable Long publisherId, @RequestBody PublisherUpdateRequest publisherName){
+	@PutMapping("/{publisher-id}")
+	public ResponseEntity<Void> updatePublisher(@PathVariable(name = "publisher-id") Long publisherId, @RequestBody PublisherUpdateRequest publisherName){
 		feignClient.updatePublisher(publisherId, publisherName);
 		return ResponseEntity.ok().build();
 	}

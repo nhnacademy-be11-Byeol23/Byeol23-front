@@ -25,12 +25,12 @@ public interface PublisherApiClient {
 	@GetMapping(value = "/api/publishers")
 	ResponseEntity<PageResponse<AllPublishersInfoResponse>> getAllPublishers(
 		@RequestParam(value = "page", defaultValue = "0") int page,
-		@RequestParam(value = "size", defaultValue = "5") int size
+		@RequestParam(value = "size", defaultValue = "10") int size
 	);
 
-	@DeleteMapping(value = "/api/publishers/{publisherId}")
-	void deletePublisher(@PathVariable Long publisherId);
+	@DeleteMapping(value = "/api/publishers/{publisher-id}")
+	void deletePublisher(@PathVariable(name = "publisher-id") Long publisherId);
 
-	@PutMapping(value = "/api/publishers/{publisherId}")
-	PublisherUpdateResponse updatePublisher(@PathVariable Long publisherId, @RequestBody PublisherUpdateRequest publisherName);
+	@PutMapping(value = "/api/publishers/{publisher-id}")
+	PublisherUpdateResponse updatePublisher(@PathVariable(name = "publisher-id") Long publisherId, @RequestBody PublisherUpdateRequest publisherName);
 }
