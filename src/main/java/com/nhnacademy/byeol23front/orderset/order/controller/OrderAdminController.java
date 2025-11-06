@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
+import com.nhnacademy.byeol23front.orderset.order.dto.OrderBulkUpdateRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderCancelRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderInfoResponse;
@@ -59,5 +62,11 @@ public class OrderAdminController {
 		model.addAttribute("orders", results.getBody());
 
 		return "admin/order/order";
+	}
+
+	@PostMapping("/bulk-status")
+	public String updateBulkOrderStatus(@RequestBody OrderBulkUpdateRequest request) {
+		orderApiClient.updateBulkOrderStatus(request);
+		return "redirect:/admin/orders";
 	}
 }

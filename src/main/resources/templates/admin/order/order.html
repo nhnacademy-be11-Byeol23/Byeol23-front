@@ -73,10 +73,32 @@
 
             <div class="card shadow-sm">
               <div class="card-body">
-                <h5 class="fw-semibold mb-3">주문 목록</h5>
+                <h5 class="fw-semibold mb-0">주문 목록</h5>
+
+                <div class="dropdown">
+                  <button class="btn btn-outline-secondary dropdown-toggle btn-sm" type="button" id="bulkActionBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-check-square me-1"></i> 일괄 작업
+                  </button>
+                  <ul class="dropdown-menu" aria-labelledby="bulkActionBtn">
+                    <li>
+                      <a class="dropdown-item bulk-action-item" href="#" data-status="배송중">
+                        선택 항목 '배송중'으로 변경
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item bulk-action-item" href="#" data-status="배송완료">
+                        선택 항목 '배송완료'로 변경
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
                 <table class="table table-hover align-middle">
                   <thead class="table-light">
                   <tr>
+                    <th scope="col" class="text-center" style="width: 3rem;">
+                      <input class="form-check-input" type="checkbox" id="check-all">
+                    </th>
                     <th scope="col">주문번호</th>
                     <th scope="col">주문일시</th>
                     <th scope="col">주문자(수신자)</th>
@@ -87,6 +109,10 @@
                   </thead>
                   <tbody>
                   <tr th:each="order : ${orders.content}">
+                    <td class="text-center">
+                      <input class="form-check-input order-checkbox" type="checkbox"
+                             th:value="${order.orderNumber}">
+                    </td>
                     <td th:text="${order.orderNumber}">...</td>
                     <td th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}">...</td>
                     <td th:text="${order.receiver}">...</td>
@@ -111,7 +137,7 @@
                     </td>
                   </tr>
                   <tr th:if="${orders.isEmpty()}">
-                    <td colspan="6" class="text-center py-4">조회된 주문 내역이 없습니다.</td>
+                    <td colspan="7" class="text-center py-4">조회된 주문 내역이 없습니다.</td>
                   </tr>
                   </tbody>
                 </table>
@@ -207,5 +233,99 @@
 
 <th:block th:replace="~{'admin/order/order-js' :: orderJs}"></th:block>
 
+
+<script th:inline="javascript">
+
+  /**
+   * 일괄 변경(체크박스, 드롭다운) 관련 이벤트 리스너를 초기화합니다.
+   */
+  function initBulkActions() {
+    const checkAll = document.getElementById('check-all');
+    const orderCheckboxes = document.querySelectorAll('.order-checkbox');
+    const bulkActionItems = document.querySelectorAll('.bulk-action-item');
+
+    // 1. "전체 선택" 체크박스 클릭 이벤트
+    if (checkAll) {
+      checkAll.addEventListener('click', () => {
+        orderCheckboxes.forEach(checkbox => {
+          checkbox.checked = checkAll.checked;
+        });
+      });
+    }
+
+    // 2. 개별 체크박스 클릭 이벤트 (전체 선택 상태 반영)
+    orderCheckboxes.forEach(checkbox => {
+      checkbox.addEventListener('click', () => {
+        if (!checkbox.checked) {
+          checkAll.checked = false;
+        } else if (document.querySelectorAll('.order-checkbox:checked').length === orderCheckboxes.length) {
+          checkAll.checked = true;
+        }
+      });
+    });
+
+    // 3. "일괄 작업" 드롭다운 메뉴 클릭 이벤트
+    bulkActionItems.forEach(item => {
+      item.addEventListener('click', (event) => {
+        event.preventDefault(); // 링크 이동 방지
+
+        const statusToUpdate = event.target.dataset.status;
+
+        // 3-1. 체크된 박스들의 'value' (orderNumber)를 수집
+        const checkedBoxes = document.querySelectorAll('.order-checkbox:checked');
+        if (checkedBoxes.length === 0) {
+          alert('먼저 변경할 주문을 하나 이상 선택하세요.');
+          return;
+        }
+
+        const orderNumbers = Array.from(checkedBoxes).map(cb => cb.value);
+
+        if (!confirm(`선택한 ${orderNumbers.length}개 주문의 상태를 '${statusToUpdate}'(으)로 변경하시겠습니까?`)) {
+          return;
+        }
+
+        // 3-2. 서버로 전송할 DTO 생성
+        const bulkUpdateRequest = {
+          orderNumberLists: orderNumbers,
+          status: statusToUpdate
+        };
+
+        // 3-3. fetch API로 서버에 POST (또는 PUT/PATCH) 요청
+        // (CSRF 토큰이 필요하면 headers에 추가해야 합니다)
+        const csrfToken = document.querySelector("meta[name='_csrf']")?.content;
+        const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
+
+        const headers = {
+          'Content-Type': 'application/json'
+        };
+        if (csrfToken && csrfHeader) {
+          headers[csrfHeader] = csrfToken;
+        }
+
+        fetch('/admin/orders/bulk-status', {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(bulkUpdateRequest)
+        })
+                .then(response => {
+                  if (response.ok) {
+                    alert('성공적으로 변경되었습니다.');
+                    location.reload(); // 페이지 새로고침
+                  } else {
+                    return response.json().then(err => { throw new Error(err.message || '변경에 실패했습니다.') });
+                  }
+                })
+                .catch(error => {
+                  console.error('일괄 변경 실패:', error);
+                  alert(`오류 발생: ${error.message}`);
+                });
+      });
+    });
+  }
+
+  // 4. 페이지 로드 완료 시 함수 실행
+  document.addEventListener('DOMContentLoaded', initBulkActions);
+
+</script>
 </body>
 </html>

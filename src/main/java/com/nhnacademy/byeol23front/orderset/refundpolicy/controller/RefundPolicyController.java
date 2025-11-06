@@ -31,9 +31,9 @@ public class RefundPolicyController {
 		ResponseEntity<Page<RefundPolicyInfoResponse>> response = refundPolicyApiClient.getAllRefundPolicies(pageable);
 
 		if (!response.getStatusCode().is2xxSuccessful()) {
-			String message = "배송비 정책 생성에 실패했습니다.: " + response.getStatusCode();
+			String message = "환불 정책 생성에 실패했습니다.: " + response.getStatusCode();
 			model.addAttribute("status", 400); // 400 Bad Request
-			model.addAttribute("error", "뀨");
+			model.addAttribute("error", "API 호출 실패");
 			model.addAttribute("message", message);
 			return "error";
 		}
