@@ -64,30 +64,43 @@
                                     <th:block th:if="${contributors != null}">
                                         <li th:each="contributor : ${contributors}">
                                             <div class="contributor-line">
-                                                <span class="contributor-name"
-                                                      th:text="${contributor.contributorName}"
-                                                      th:attr="data-id=${contributor.contributorId}">
-                                                </span>
-                                                <span class="contributor-role"
-                                                      th:text="${contributor.contributorRole()}"
-                                                      th:attr="data-id=${contributor.contributorRole()}">
-                                                </span>
+                                                <div class="row">
+                                                    <div>
+                                                        <span class="contributor-name"
+                                                              th:text="${contributor.contributorName}"
+                                                              th:attr="data-id=${contributor.contributorId}">
+                                                        </span>
+                                                        <span class="contributor-role"
+                                                              th:text="${contributor.contributorRole()}"
+                                                              th:attr="data-id=${contributor.contributorRole()}">
+                                                        </span>
+                                                    </div>
+                                                </div>
+
                                                 <div class="contributor-actions">
                                                     <button type="button" class="btn btn-outline-warning btn-sm"
                                                             th:attr="onclick='toggleUpdate(' + ${contributor.contributorId() + ')'}">수정</button>
                                                     <button type="button" class="btn btn-outline-danger btn-sm"
                                                             th:attr="data-id=${contributor.contributorId}" onclick="deleteContributor(this)">삭제</button>
                                                 </div>
+                                                <div class="contributor-updates">
+                                                    <div th:attr="id= 'contributorUpdateDiv' + ${contributor.contributorId()}" class="contributor-updates" style="display: none">
+
+                                                        <input th:value="${contributor.contributorName()}" th:attr="id= 'contributorUpdateInput' + ${contributor.contributorId()}" type="text" name="contributorName" class="contributor-update-input contributor-update-elements">
+
+
+                                                        <select name="contributor-role" th:attr="id = 'contributor-role-update' + ${contributor.contributorId()}" class="contributor-update-elements">
+                                                            <option value="AUTHOR">저자</option>
+                                                            <option value="TRANSLATOR">역자</option>
+                                                        </select>
+
+                                                        <button th:attr="onclick='updateContributor(' + ${contributor.contributorId() + ')'}" class="btn btn-outline-warning btn-sm contributor-update-elements">수정</button>
+                                                        <button th:attr="onclick='toggleUpdate(' + ${contributor.contributorId() + ')'}" class="btn btn-outline-danger btn-sm contributor-update-elements">취소</button>
+
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div th:attr="id= 'contributorUpdateDiv' + ${contributor.contributorId()}" class="contributor-updates" style="display: none">
-                                                <input th:attr="id= 'contributorUpdateInput' + ${contributor.contributorId()}" type="text" name="contributorName" class="contributor-update-input form-control form-control-sm">
-                                                <select name="contributor-role" th:attr="id = 'contributor-role-update' + ${contributor.contributorId()}">
-                                                    <option value="AUTHOR">저자</option>
-                                                    <option value="TRANSLATOR">역자</option>
-                                                </select>
-                                                <button th:attr="onclick='updateContributor(' + ${contributor.contributorId() + ')'}" class="btn btn-outline-warning btn-sm">수정</button>
-                                                <button th:attr="onclick='toggleUpdate(' + ${contributor.contributorId() + ')'}" class="btn btn-outline-danger btn-sm">취소</button>
-                                            </div>
+
                                         </li>
                                     </th:block>
                                     <li th:if="${contributors == null or #lists.isEmpty(contributors)}">

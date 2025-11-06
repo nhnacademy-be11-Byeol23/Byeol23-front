@@ -21,7 +21,7 @@ document.getElementById("contributorCreateForm").addEventListener("submit", e =>
 function toggleUpdate(contributorId){
     const updateLine = document.getElementById("contributorUpdateDiv" + contributorId);
     if(updateLine.style.display === "none"){
-        updateLine.style.display = "list-item";
+        updateLine.style.display = "flex";
     } else {
         updateLine.style.display = "none";
     }
