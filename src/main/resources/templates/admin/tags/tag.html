@@ -68,11 +68,11 @@
                                                     <button type="button" class="btn btn-outline-danger btn-sm"
                                                             th:attr="data-id=${tag.tagId}" onclick="deleteTag(this)">삭제</button>
                                                 </div>
-                                                <div th:attr="id= 'tagUpdateDiv' + ${tag.tagId()}" class="tag-updates row-cols-2" style="display: none">
-                                                    <div class="col-auto">
+                                                <div th:attr="id= 'tagUpdateDiv' + ${tag.tagId()}" class="tag-updates row g-3" style="display: none">
+                                                    <div class="col-4">
                                                         <input th:attr="id= 'tagUpdateInput' + ${tag.tagId()}" type="text" name="tagName" class="tag-update-input form-control form-control-sm">
                                                     </div>
-                                                    <div class="col-auto" style="margin-left: 5px">
+                                                    <div class="col-4" style="margin-left: 5px">
                                                         <button th:attr="onclick='updateTag(' + ${tag.tagId() + ')'}" class="btn btn-outline-warning btn-sm">수정</button>
                                                         <button th:attr="onclick='toggleUpdate(' + ${tag.tagId() + ')'}" class="btn btn-outline-danger btn-sm">취소</button>
                                                     </div>
