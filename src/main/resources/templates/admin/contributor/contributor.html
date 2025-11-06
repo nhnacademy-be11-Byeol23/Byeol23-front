@@ -86,17 +86,17 @@
                                                 <div class="contributor-updates">
                                                     <div th:attr="id= 'contributorUpdateDiv' + ${contributor.contributorId()}" class="contributor-updates row g-3" style="display: none">
                                                         <div class="col-4">
-                                                            <input th:value="${contributor.contributorName()}" th:attr="id= 'contributorUpdateInput' + ${contributor.contributorId()}" type="text" name="contributorName" class="contributor-update-input contributor-update-elements form-control">
+                                                            <input th:value="${contributor.contributorName()}" th:attr="id= 'contributorUpdateInput' + ${contributor.contributorId()}" type="text" name="contributorName" class="contributor-update-input contributor-update-elements form-control form-control-sm">
                                                         </div>
                                                         <div class="col-2">
-                                                            <select name="contributor-role" th:attr="id = 'contributor-role-update' + ${contributor.contributorId()}" class="contributor-update-elements form-select" style="width: 70%;">
+                                                            <select name="contributor-role" th:attr="id = 'contributor-role-update' + ${contributor.contributorId()}" class="contributor-update-elements form-select form-select-sm" style="width: 70%;">
                                                                 <option value="AUTHOR">저자</option>
                                                                 <option value="TRANSLATOR">역자</option>
                                                             </select>
                                                         </div>
                                                         <div class="col-4">
-                                                            <button th:attr="onclick='updateContributor(' + ${contributor.contributorId() + ')'}" class="btn btn-outline-warning contributor-update-elements">수정</button>
-                                                            <button th:attr="onclick='toggleUpdate(' + ${contributor.contributorId() + ')'}" class="btn btn-outline-danger contributor-update-elements">취소</button>
+                                                            <button th:attr="onclick='updateContributor(' + ${contributor.contributorId() + ')'}" class="btn btn-sm btn-outline-warning contributor-update-elements">수정</button>
+                                                            <button th:attr="onclick='toggleUpdate(' + ${contributor.contributorId() + ')'}" class="btn btn-sm btn-outline-danger contributor-update-elements">취소</button>
                                                         </div>
                                                     </div>
                                                 </div>
