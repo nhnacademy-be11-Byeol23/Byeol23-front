@@ -28,9 +28,9 @@ public interface TagApiClient {
 		@RequestParam(value = "size", defaultValue = "5") int size
 		);
 
-	@DeleteMapping(value = "/api/tags/{tagId}")
-	void deleteTag(@PathVariable Long tagId);
+	@DeleteMapping(value = "/api/tags/{tag-id}")
+	void deleteTag(@PathVariable(name = "tag-id") Long tagId);
 
-	@PutMapping(value = "/api/tags/{tagId}")
-	TagUpdateResponse updateTag(@PathVariable Long tagId, @RequestBody TagUpdateRequest tagName);
+	@PutMapping(value = "/api/tags/{tag-id}")
+	TagUpdateResponse updateTag(@PathVariable(name = "tag-id") Long tagId, @RequestBody TagUpdateRequest tagName);
 }

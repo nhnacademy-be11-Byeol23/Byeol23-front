@@ -23,7 +23,7 @@ document.getElementById("tagCreateForm").addEventListener("submit", e => {
 function toggleUpdate(tagId){
     const updateLine = document.getElementById("tagUpdateDiv" + tagId);
     if(updateLine.style.display === "none"){
-        updateLine.style.display = "list-item";
+        updateLine.style.display = "flex";
     } else {
         updateLine.style.display = "none";
     }
