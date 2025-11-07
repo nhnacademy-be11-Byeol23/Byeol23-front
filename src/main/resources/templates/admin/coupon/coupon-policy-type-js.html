@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<!--
+  This file is a Thymeleaf fragment containing JavaScript.
+  It is intended to be included in the coupon policy creation/editing page.
+  It adds event listeners to the discount type radio buttons (Rate vs. Fixed)
+  to dynamically show, hide, and disable the relevant input fields.
+-->
+<body>
+
+<!--
+  JavaScript Fragment for Coupon Policy Type Toggle
+
+  This script adds event listeners to the 'discountType' radio buttons.
+  - When 'Rate' is selected, it shows rate-related inputs and hides fixed inputs.
+  - When 'Fixed' is selected, it shows fixed-related inputs and hides rate inputs.
+
+  It also correctly sets the 'disabled' attribute on the inputs that are hidden
+  to ensure their values are not submitted with the form.
+-->
+<th:block th:fragment="couponPolicyTypeJs">
+    <script>
+        // Wait for the DOM to be fully loaded before attaching event listeners
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Get references to the radio buttons
+            const rateRadio = document.getElementById('rateDiscount');
+            const fixedRadio = document.getElementById('fixedDiscount');
+
+            // Get references to the sections to toggle
+            const rateOptions = document.getElementById('rateOptions');
+            const fixedOptions = document.getElementById('fixedOptions');
+
+            // Get references to the inputs within those sections
+            const discountRateInput = document.getElementById('discountRate');
+            const discountLimitInput = document.getElementById('discountLimit');
+            const discountAmountInput = document.getElementById('discountAmount');
+
+            /**
+             * Toggles the visibility and 'disabled' state of form sections
+             * based on the selected discount type radio button.
+             */
+            function toggleDiscountOptions() {
+                if (rateRadio.checked) {
+                    // Show Rate options, Hide Fixed options
+                    rateOptions.style.display = 'block';
+                    fixedOptions.style.display = 'none';
+
+                    // Enable Rate inputs
+                    if (discountRateInput) discountRateInput.disabled = false;
+                    if (discountLimitInput) discountLimitInput.disabled = false;
+
+                    // Disable Fixed input and clear its value
+                    if (discountAmountInput) {
+                        discountAmountInput.disabled = true;
+                        discountAmountInput.value = ''; // Clear value when hidden
+                    }
+                } else if (fixedRadio.checked) {
+                    // Hide Rate options, Show Fixed options
+                    rateOptions.style.display = 'none';
+                    fixedOptions.style.display = 'block';
+
+                    // Disable Rate inputs and clear their values
+                    if (discountRateInput) {
+                        discountRateInput.disabled = true;
+                        discountRateInput.value = ''; // Clear value when hidden
+                    }
+                    if (discountLimitInput) {
+                        discountLimitInput.disabled = true;
+                        discountLimitInput.value = ''; // Clear value when hidden
+                    }
+
+                    // Enable Fixed input
+                    if (discountAmountInput) discountAmountInput.disabled = false;
+                }
+            }
+
+            // Add event listeners to both radio buttons
+            if (rateRadio) {
+                rateRadio.addEventListener('change', toggleDiscountOptions);
+            }
+            if (fixedRadio) {
+                fixedRadio.addEventListener('change', toggleDiscountOptions);
+            }
+
+            // Run the function once on page load to set the initial state
+            // (based on the 'checked' attribute in the HTML)
+            toggleDiscountOptions();
+        });
+    </script>
+</th:block>
+
+</body>
+</html>
