@@ -21,7 +21,7 @@ public class CouponPolicyController {
     private final CouponPolicyApiClient couponPolicyApiClient;
 
     @GetMapping
-    public String categoryPage(Model model) {
+    public String couponPolicyPage(Model model) {
         ResponseEntity<List<CouponPolicyInfoResponse>> response = couponPolicyApiClient.getCouponPolicies();
         model.addAttribute("pageTitle", "쿠폰 정책 생성");
         model.addAttribute("policies", response.getBody());
