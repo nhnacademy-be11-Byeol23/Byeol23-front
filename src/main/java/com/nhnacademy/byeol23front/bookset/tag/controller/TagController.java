@@ -31,7 +31,7 @@ public class TagController {
 	@GetMapping
 	public String getTags(
 		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "3") int size,
+		@RequestParam(defaultValue = "10") int size,
 		Model model
 		){
 		PageResponse<AllTagsInfoResponse> response = feignClient.getAllTags(page, size).getBody();
@@ -47,15 +47,15 @@ public class TagController {
 	}
 
 	@ResponseBody
-	@DeleteMapping("/{tagId}")
-	public ResponseEntity<Void> deleteTag(@PathVariable Long tagId){
+	@DeleteMapping("/{tag-id}")
+	public ResponseEntity<Void> deleteTag(@PathVariable(name = "tag-id") Long tagId){
 		feignClient.deleteTag(tagId);
 		return ResponseEntity.ok().build();
 	}
 
 	@ResponseBody
-	@PutMapping("/{tagId}")
-	public ResponseEntity<Void> updateTag(@PathVariable Long tagId, @RequestBody TagUpdateRequest tagName){
+	@PutMapping("/{tag-id}")
+	public ResponseEntity<Void> updateTag(@PathVariable(name = "tag-id") Long tagId, @RequestBody TagUpdateRequest tagName){
 		feignClient.updateTag(tagId, tagName);
 		return ResponseEntity.ok().build();
 	}
