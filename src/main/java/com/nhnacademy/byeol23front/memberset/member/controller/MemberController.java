@@ -3,10 +3,10 @@ package com.nhnacademy.byeol23front.memberset.member.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
@@ -22,8 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/members")
 @RequiredArgsConstructor
 public class MemberController {
-
-	private final MemberService memberService;
+	private final MemberApiClient memberApiClient;
 
 	@GetMapping("/register")
 	public String showRegisterForm() {
@@ -31,15 +30,23 @@ public class MemberController {
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<MemberRegisterResponse> register(@ModelAttribute MemberRegisterRequest request) {
-		return ResponseEntity.ok(memberService.register(request));
+	public String register(@ModelAttribute MemberRegisterRequest request, BindingResult br) {
+		if(br.hasErrors()) {
+			return "member/register";
+		}
+		memberApiClient.registerRequest(request);
+		return "redirect:/";
 	}
 
 	@GetMapping("/login")
 	public String showLoginForm() { return "member/login"; }
 
 	@PostMapping("/login")
-	public String login(@ModelAttribute LoginRequest request) {
-		return "redirect:/";
+	public String login(@ModelAttribute LoginRequest request, BindingResult br) {
+		if(br.hasErrors()) {
+			return "/error";
+		}
+		memberApiClient.loginRequest(request);
+		return "redirect:";
 	}
 }

@@ -1,5 +1,31 @@
 $(document).ready(() => {
   
+  // 디바운싱을 위한 타이머
+  let updateTimer = null;
+  
+  // 삭제 버튼
+  $('.remove-item').on('click', function(e) {
+    e.preventDefault();
+    const cartBookId = $(this).data('cart-book-id');
+    
+    if (confirm('이 상품을 장바구니에서 삭제하시겠습니까?')) {
+      // 프론트엔드 서버로 Ajax 요청 (Feign Client를 통해 Gateway → Backend로 전달)
+      $.ajax({
+        url: `/carts/cart-books/${cartBookId}`,
+        type: 'DELETE',
+        success: function() {
+          console.log('삭제 성공:', cartBookId);
+          // 페이지 새로고침
+          location.reload();
+        },
+        error: function(xhr, status, error) {
+          console.error('삭제 실패:', error);
+          alert('상품 삭제에 실패했습니다.');
+        }
+      });
+    }
+  });
+  
   // 수량 증가 버튼
   $('.quantity-btn.increase').on('click', (e) => {
     e.preventDefault();
@@ -44,21 +70,42 @@ $(document).ready(() => {
   // 수량 변경 처리
   const updateCartItem = ($quantityInput) => {
     const $cartItem = $quantityInput.closest('.cart-item');
-    const bookId = $cartItem.data('cart-book-id');
+    const cartBookId = $cartItem.data('cart-book-id');
     const quantity = parseInt($quantityInput.val());
 
-    // TODO: Ajax로 서버에 전송 (나중에 구현)
-
-    // 현재는 로컬에서 계산
+    // 먼저 UI를 즉시 업데이트 (사용자 경험 향상)
     const salePriceText = $cartItem.find('.sale-price').text();
     const salePrice = parsePrice(salePriceText);
     const itemTotal = salePrice * quantity;
-
-    // 개별 항목 합계 업데이트
-    updateItemTotal($cartItem, itemTotal);
     
-    // 주문 요약 업데이트
+    updateItemTotal($cartItem, itemTotal);
     updateSummary();
+
+    // 이전 타이머가 있으면 취소 (디바운싱)
+    if (updateTimer) {
+      clearTimeout(updateTimer);
+    }
+
+    // 2초 후에 서버로 요청 (사용자가 수량 변경을 멈춘 후 전송)
+    updateTimer = setTimeout(() => {
+      // 프론트엔드 서버로 Ajax 요청 (Feign Client를 통해 Gateway → Backend로 전달)
+      $.ajax({
+        url: '/carts/cart-books',
+        type: 'PUT',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          cartBookId: cartBookId,
+          quantity: quantity
+        }),
+        success: function() {
+          console.log('수량 업데이트 성공:', cartBookId, quantity);
+        },
+        error: function(xhr, status, error) {
+          console.error('수량 업데이트 실패:', error);
+          alert('수량 업데이트에 실패했습니다.');
+        }
+      });
+    }, 2000);
   };
 
   // 개별 항목 합계 업데이트
@@ -79,8 +126,8 @@ $(document).ready(() => {
       subtotal += itemTotal;
     });
 
-    const shippingFeeText = $('.shipping-item .form-check-label').text();
-    const shippingFee = parsePrice(shippingFeeText);
+    // data-delivery-fee 속성에서 배송비 가져오기 (무료면 0, 아니면 실제 배송비)
+    const shippingFee = parseInt($('.shipping-item .form-check-label').attr('data-delivery-fee')) || 0;
     const total = subtotal + shippingFee;
 
     // DOM 업데이트

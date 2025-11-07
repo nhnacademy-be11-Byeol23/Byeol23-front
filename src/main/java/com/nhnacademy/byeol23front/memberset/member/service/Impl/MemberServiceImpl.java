@@ -22,18 +22,15 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberServiceImpl implements MemberService {
 
 	private final MemberApiClient memberApiClient;
-	private final PasswordEncoder passwordEncoder;
 
 	@Override
 	public MemberRegisterResponse register(MemberRegisterRequest request) {
-		request.setPassword(passwordEncoder.encode(request.getPassword()));
 		MemberRegisterResponse response = memberApiClient.registerRequest(request).getBody();
 		return response;
 	}
 
 	@Override
 	public LoginResponse login(LoginRequest request) {
-		request.setPassword(passwordEncoder.encode(request.getPassword()));
 		LoginResponse response = memberApiClient.loginRequest(request).getBody();
 		return response;
 	}
