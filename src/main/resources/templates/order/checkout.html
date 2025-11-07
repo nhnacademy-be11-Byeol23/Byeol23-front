@@ -164,7 +164,11 @@
               </div>
 
               <div class="order-summary-content">
-                <div class="order-item d-flex align-items-center" th:each="item : ${orderItem}">
+                <div class="order-item d-flex align-items-center"
+                     th:each="item : ${orderItem}"
+                     th:data-book-id="${item.bookId}"
+                     th:data-quantity="${item.quantity}"
+                     th:data-sale-price="${item.salePrice}">
                   <div class="order-item-image me-3">
                     <img th:src="${item.imageUrl}" alt="Product" class="img-fluid" style="width: 80px; height: auto;">
                   </div>
@@ -354,6 +358,35 @@
     };
 
     paymentButton.addEventListener('click', function () {
+      const bookInfoRequestList = [];
+      const orderItemElements = document.querySelectorAll('.order-item');
+
+      orderItemElements.forEach(item => {
+        const bookId = item.dataset.bookId;
+        const bookName = item.dataset.bookName;
+        const imageUrl = item.dataset.imageUrl;
+        const regularPrice = parseFloat(item.dataset.regularPrice);
+        const salePrice = parseFloat(item.dataset.salePrice);
+        const quantity = parseInt(item.dataset.quantity, 10);
+        // 데이터가 유효한지 확인
+        if (bookId && !isNaN(quantity) && !isNaN(salePrice)) {
+          // 백엔드 DTO (BookInfoRequest)와 동일한 구조의 객체 생성
+          bookInfoRequestList.push({
+            bookId: bookId,
+            bookName: bookName,
+            imageUrl: imageUrl,
+            regularPrice:regularPrice,
+            salePrice: salePrice,
+            quantity: quantity,
+          });
+        }
+      });
+
+        if (bookInfoRequestList.length === 0) {
+          alert("주문할 상품이 없습니다.");
+          return;
+        }
+
       const customerName = document.getElementById('name')?.value.trim();
       const rawPhone = document.getElementById('phone')?.value;
       const phoneNumber = rawPhone ? rawPhone.replace(/[^\d]/g, '') : '';
@@ -398,7 +431,8 @@
         receiverAddressDetail: addressDetail,
         receiverAddressExtra: addressExtra,
         receiverPhone: phoneNumber,
-        deliveryArrivedDate:deliveryDateValue
+        deliveryArrivedDate:deliveryDateValue,
+        bookInfoRequestList: bookInfoRequestList
       };
 
       console.log("전송할 객체:", orderPrepareRequest);

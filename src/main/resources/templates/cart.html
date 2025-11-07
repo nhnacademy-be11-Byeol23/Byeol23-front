@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Cart - NiceShop Bootstrap Template</title>
+  <title>장바구니 - 별이삼shop</title>
   <meta name="description" content="">
   <meta name="keywords" content="">
 
@@ -23,7 +22,7 @@
         <h1 class="mb-2 mb-lg-0">장바구니</h1>
         <nav class="breadcrumbs">
           <ol>
-            <li><a href="index.html">홈</a></li>
+            <li><a th:href="@{/}">홈</a></li>
             <li class="current">장바구니</li>
           </ol>
         </nav>
@@ -35,7 +34,24 @@
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
 
-        <div class="row">
+        <!-- 빈 장바구니 메시지 -->
+        <div th:if="${cart == null || cart.cartBooks() == null || cart.cartBooks().isEmpty()}" 
+             class="row justify-content-center">
+          <div class="col-lg-8 text-center py-5">
+            <div class="empty-cart-message" style="padding: 60px 20px;">
+              <i class="bi bi-cart-x" style="font-size: 80px; color: #ddd; margin-bottom: 20px;"></i>
+              <h3 style="color: #666; margin-bottom: 15px;">장바구니가 비어있습니다</h3>
+              <p style="color: #999; margin-bottom: 30px;">원하는 도서를 장바구니에 담아보세요</p>
+              <a th:href="@{/}" class="btn btn-accent" style="padding: 12px 40px;">
+                <i class="bi bi-house-door"></i> 구매하러 가기
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 장바구니 아이템 목록 -->
+        <div th:if="${cart != null && cart.cartBooks() != null && !cart.cartBooks().isEmpty()}" 
+             class="row">
           <div class="col-lg-8" data-aos="fade-up" data-aos-delay="200">
             <div class="cart-items">
               <div class="cart-header d-none d-lg-block">
@@ -55,17 +71,17 @@
                 </div>
               </div>
 
-              <!-- Cart Item 1 -->
-              <div class="cart-item" data-cart-book-id="1">
+              <!-- Cart Item -->
+              <div th:each="cartBook : ${cart.cartBooks()}" class="cart-item" th:attr="data-cart-book-id=${cartBook.cartBookId()}">
                 <div class="row align-items-center">
                   <div class="col-lg-5 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
                     <div class="product-info d-flex align-items-center">
                       <div class="product-image">
-                        <img src="https://image.yes24.com/goods/159582935/XL" alt="Product" class="img-fluid" loading="lazy">
+                        <img th:src="${cartBook.imageUrl()}" alt="Product" class="img-fluid" loading="lazy">
                       </div>
                       <div class="product-details">
-                        <h6 class="product-title">찍히지 않습니다 3</h6>
-                        <button class="remove-item" type="button">
+                        <h6 class="product-title" th:text="${cartBook.bookName()}"></h6>
+                        <button class="remove-item text-danger" type="button" th:attr="data-cart-book-id=${cartBook.cartBookId()}" style="color: #dc3545;">
                           <i class="bi bi-trash"></i> 삭제
                         </button>
                       </div>
@@ -73,8 +89,12 @@
                   </div>
                   <div class="col-lg-3 col-12 mt-3 mt-lg-0 text-center">
                     <div class="price-tag">
-                      <span class="sale-price">5,850원</span>
-                      <span class="regular-price">6,500원</span>
+                        <span class="sale-price"
+                              th:text="${#numbers.formatInteger(cartBook.salePrice, 3, 'COMMA')} + '원'">
+                        </span>
+                      <span class="regular-price"
+                            th:text="${#numbers.formatInteger(cartBook.regularPrice, 3, 'COMMA')} + '원'">
+                      </span>
                     </div>
                   </div>
                   <div class="col-lg-2 col-12 mt-3 mt-lg-0 text-center">
@@ -82,7 +102,7 @@
                       <button class="quantity-btn decrease">
                         <i class="bi bi-dash"></i>
                       </button>
-                      <input type="number" class="quantity-input" value="1" min="1" max="10">
+                      <input type="number" class="quantity-input" th:value="${cartBook.quantity}" min="1" max="10">
                       <button class="quantity-btn increase">
                         <i class="bi bi-plus"></i>
                       </button>
@@ -90,93 +110,12 @@
                   </div>
                   <div class="col-lg-2 col-12 mt-3 mt-lg-0 text-center">
                     <div class="item-total">
-                      <span>5,400원</span>
+                      <span th:text="${#numbers.formatInteger(cartBook.salePrice * cartBook.quantity, 3, 'COMMA')} + '원'"></span>
                     </div>
                   </div>
                 </div>
               </div><!-- End Cart Item -->
 
-              <!-- Cart Item 2 -->
-              <div class="cart-item" data-cart-book-id="2">
-                <div class="row align-items-center">
-                  <div class="col-lg-5 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
-                    <div class="product-info d-flex align-items-center">
-                      <div class="product-image">
-                        <img src="https://image.yes24.com/goods/159499969/XL" alt="Product" class="img-fluid" loading="lazy">
-                      </div>
-                      <div class="product-details">
-                        <h6 class="product-title">푸른 상자 20</h6>
-                        <button class="remove-item" type="button">
-                          <i class="bi bi-trash"></i> 삭제
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-3 col-12 mt-3 mt-lg-0 text-center">
-                    <div class="price-tag">
-                      <span class="sale-price">5,400원</span>
-                      <span class="regular-price">6,000원</span>
-                    </div>
-                  </div>
-                  <div class="col-lg-2 col-12 mt-3 mt-lg-0 text-center">
-                    <div class="quantity-selector">
-                      <button class="quantity-btn decrease">
-                        <i class="bi bi-dash"></i>
-                      </button>
-                      <input type="number" class="quantity-input" value="1" min="1" max="10">
-                      <button class="quantity-btn increase">
-                        <i class="bi bi-plus"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="col-lg-2 col-12 mt-3 mt-lg-0 text-center">
-                    <div class="item-total">
-                      <span>5,400원</span>
-                    </div>
-                  </div>
-                </div>
-              </div><!-- End Cart Item -->
-
-              <!-- Cart Item 3 -->
-              <div class="cart-item" data-cart-book-id="3">
-                <div class="row align-items-center">
-                  <div class="col-lg-5 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
-                    <div class="product-info d-flex align-items-center">
-                      <div class="product-image">
-                        <img src="https://image.yes24.com/goods/150793767/XL" alt="Product" class="img-fluid" loading="lazy">
-                      </div>
-                      <div class="product-details">
-                        <h6 class="product-title">별이삼샵 11</h6>
-                        <button class="remove-item" type="button">
-                          <i class="bi bi-trash"></i> 삭제
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-3 col-12 mt-3 mt-lg-0 text-center">
-                    <div class="price-tag">
-                      <span class="sale-price">14,400원</span>
-                      <span class="regular-price">16,000원</span>
-                    </div>
-                  </div>
-                  <div class="col-lg-2 col-12 mt-3 mt-lg-0 text-center">
-                    <div class="quantity-selector">
-                      <button class="quantity-btn decrease">
-                        <i class="bi bi-dash"></i>
-                      </button>
-                      <input type="number" class="quantity-input" value="1" min="1" max="10">
-                      <button class="quantity-btn increase">
-                        <i class="bi bi-plus"></i>
-                      </button>
-                    </div>
-                  </div>
-                  <div class="col-lg-2 col-12 mt-3 mt-lg-0 text-center">
-                    <div class="item-total">
-                      <span>14,400원</span>
-                    </div>
-                  </div>
-                </div>
-              </div><!-- End Cart Item -->
             </div>
           </div>
 
@@ -186,15 +125,25 @@
 
               <div class="summary-item">
                 <span class="summary-label">소계</span>
-                <span class="summary-value">30,000원</span>
+                <span class="summary-value" th:text="${#numbers.formatInteger(totalPrice, 0, 'COMMA') + '원'}">30,000원</span>
               </div>
 
               <div class="summary-item shipping-item">
                 <span class="summary-label">배송비</span>
                 <div class="shipping-options">
                   <div class="form-check text-end">
-                    <p class="form-check-label">
-                      2,500원
+                    <p class="form-check-label" 
+                       th:attr="data-delivery-fee=${cart != null && totalPrice >= cart.freeDeliveryCondition ? 0 : (cart != null ? cart.deliveryFee : 0)}">
+                      <span th:if="${cart != null && totalPrice >= cart.freeDeliveryCondition}">
+                        무료 (
+                        <span th:text="${#numbers.formatInteger(cart.freeDeliveryCondition, 0, 'COMMA') + '원'}"></span>
+                        이상 구매)
+                      </span>
+                      <span th:if="${cart != null && totalPrice < cart.freeDeliveryCondition}" 
+                            th:text="${#numbers.formatInteger(cart.deliveryFee, 0, 'COMMA') + '원'}">
+                        2,500원
+                      </span>
+                      <span th:if="${cart == null}">배송비 정보 없음</span>
                     </p>
                   </div>
                 </div>
@@ -207,7 +156,11 @@
 
               <div class="summary-total">
                 <span class="summary-label">총계</span>
-                <span class="summary-value">32,500원</span>
+                <span class="summary-value" 
+                      th:text="${cart != null ? 
+                               #numbers.formatInteger(totalPrice + (totalPrice >= cart.freeDeliveryCondition ? 0 : cart.deliveryFee), 0, 'COMMA') + '원' 
+                               : #numbers.formatInteger(totalPrice, 0, 'COMMA') + '원'}">
+                </span>
               </div>
 
               <div class="checkout-button">
@@ -217,7 +170,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div><!-- End 장바구니 아이템 목록 -->
 
       </div>
 
@@ -234,22 +187,22 @@
   <div id="preloader"></div>
 
   <!-- Vendor JS Files -->
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/php-email-form/validate.js"></script>
-  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-  <script src="assets/vendor/aos/aos.js"></script>
-  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="assets/vendor/drift-zoom/Drift.min.js"></script>
-  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+  <script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+  <script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+  <script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+  <script th:src="@{/assets/vendor/aos/aos.js}"></script>
+  <script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+  <script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+  <script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
 
   <!-- Main JS File -->
-  <script src="assets/js/main.js"></script>
+  <script th:src="@{/assets/js/main.js}"></script>
   
   <!-- jQuery (Cart 페이지에서만 사용) -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   
   <!-- Cart JS File -->
-  <script src="assets/js/cart.js"></script>
+  <script th:src="@{/assets/js/cart.js}"></script>
 
 </body>
 
