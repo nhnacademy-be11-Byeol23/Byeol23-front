@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>관리자 - 포장지 관리</title>
+  <meta name="description" content="포장지 관리 페이지">
+  <meta name="keywords" content="">
+  <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+</head>
+
+<body class="admin-packaging-page">
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+  <section id="admin-options" class="admin-options section">
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+      <div class="row g-4">
+
+        <div class="col-lg-3">
+          <div th:replace="~{fragments/admin_side_bar :: admin_side_bar}"></div>
+        </div>
+
+        <div class="col-lg-9">
+          <div class="options-page">
+
+            <div class="card shadow-sm mb-4">
+              <div class="card-body">
+                <h5 class="fw-semibold mb-3" id="policy-form-title">새 포장지 추가</h5>
+                <form id="packagingForm" class="row g-3" th:action="@{/admin/packagings}" method="POST" enctype="multipart/form-data">
+                  <input type="hidden" id="packagingPaperId" name="packagingPaperId">
+
+                  <div class="col-md-4">
+                    <label for="packagingName" class="form-label">포장지 이름</label>
+                    <input type="text" class="form-control" id="packagingName" name="packagingName" placeholder="예: 레드 스트라이프" required>
+                  </div>
+                  <div class="col-md-3">
+                    <label for="packagingPrice" class="form-label">가격 (원)</label>
+                    <input type="number" class="form-control" id="packagingPrice" name="packagingPrice" min="0" step="100" required>
+                  </div>
+                  <div class="col-md-5">
+                    <label for="imageFile" class="form-label">이미지 파일</label>
+                    <input type="file" class="form-control" id="imageFile" name="imageFile" accept="image/*">
+                  </div>
+
+                  <div class="col-12 text-end">
+                    <button type="reset" class="btn btn-secondary">취소</button>
+                    <button type="submit" class="btn btn-dark">저장</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h5 class="fw-semibold mb-3">포장지 목록</h5>
+
+                <table class="table table-hover align-middle">
+                  <thead class="table-light">
+                  <tr>
+                    <th scope="col" style="width: 15%;">미리보기</th>
+                    <th scope="col">포장지 이름</th>
+                    <th scope="col">가격</th>
+                    <th scope="col" style="width: 10%;">관리</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <tr th:each="paper : ${packaging.content}">
+                    <td>
+                      <img th:src="${paper.packagingImageUrl}" th:alt="${paper.packagingName}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;"
+                           th:if="${paper.packagingImageUrl != null and paper.packagingImageUrl != ''}">
+                      <span th:if="${paper.packagingImageUrl == null or paper.packagingImageUrl == ''}" class="text-muted">(이미지 없음)</span>
+                    </td>
+                    <td th:text="${paper.packagingName}">레드 스트라이프</td>
+                    <td th:text="${#numbers.formatInteger(paper.packagingPrice, 0, 'COMMA') + '원'}">1,000원</td>
+
+                    <td>
+                      <button type="button" class="btn btn-outline-primary btn-sm"
+                              data-bs-toggle="modal"
+                              data-bs-target="#packagingEditModal"
+                              th:data-id="${paper.packagingId}"
+                              th:data-name="${paper.packagingName}"
+                              th:data-price="${paper.packagingPrice}"
+                              th:data-image-url="${paper.packagingImageUrl}"
+                              onclick="editPackaging(this)">
+                        수정
+                      </button>
+                      <button type="button" class="btn btn-outline-danger btn-sm"
+                              th:data-id="${paper.packagingId}"
+                              onclick="deletePackaging(this)">
+                        삭제
+                      </button>
+                    </td>
+                  </tr>
+
+                  <tr th:if="${packaging.isEmpty()}">
+                    <td colspan="4" class="text-center py-4">
+                      등록된 포장지가 없습니다.
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+                <nav th:if="${!packaging.isEmpty() and packaging.totalPages > 1}" aria-label="Page navigation" class="mt-4">
+                  <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${packaging.first} ? 'disabled'">
+                      <a class="page-link" th:href="@{/admin/packagings(page=0)}" aria-label="First">
+                        <span aria-hidden="true">&laquo;</span>
+                      </a>
+                    </li>
+                    <li class="page-item" th:classappend="${packaging.first} ? 'disabled'">
+                      <a class="page-link" th:href="@{/admin/packagings(page=${packaging.number - 1})}" aria-label="Previous">
+                        <span aria-hidden="true">&lsaquo;</span>
+                      </a>
+                    </li>
+                    <th:block th:with="
+                        start = ${T(java.lang.Math).max(0, packaging.number - 2)},
+                        end = ${T(java.lang.Math).min(packaging.totalPages - 1, packaging.number + 2)}">
+                      <li class="page-item" th:each="pageNum : ${#numbers.sequence(start, end)}"
+                          th:classappend="${pageNum == packaging.number} ? 'active'">
+                        <a class="page-link" th:href="@{/admin/packagings(page=${pageNum})}" th:text="${pageNum + 1}">1</a>
+                      </li>
+                    </th:block>
+                    <li class="page-item" th:classappend="${packaging.last} ? 'disabled'">
+                      <a class="page-link" th:href="@{/admin/packagings(page=${packaging.number + 1})}" aria-label="Next">
+                        <span aria-hidden="true">&rsaquo;</span>
+                      </a>
+                    </li>
+                    <li class="page-item" th:classappend="${packaging.last} ? 'disabled'">
+                      <a class="page-link" th:href="@{/admin/packagings(page=${packaging.totalPages - 1})}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;</span>
+                      </a>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div> </div> </div> </section>
+
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<div id="preloader"></div>
+
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+<script th:src="@{/assets/js/main.js}"></script>
+<div class="modal fade" id="packagingEditModal" tabindex="-1" aria-labelledby="packagingEditModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="packagingEditModalLabel">포장지 수정</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form id="packagingEditForm" method="POST" enctype="multipart/form-data">
+        <div class="modal-body">
+          <input type="hidden" name="_method" value="PUT"> <input type="hidden" id="edit_packagingId" name="packagingId">
+
+          <div class="mb-3">
+            <label for="edit_packagingName" class="form-label">포장지 이름</label>
+            <input type="text" class="form-control" id="edit_packagingName" name="packagingName" required>
+          </div>
+          <div class="mb-3">
+            <label for="edit_packagingPrice" class="form-label">가격 (원)</label>
+            <input type="number" class="form-control" id="edit_packagingPrice" name="packagingPrice" min="0" step="100" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">현재 이미지</label>
+            <div>
+              <img id="edit_currentImage" src="" alt="현재 이미지" class="img-thumbnail" style="width: 100px; height: 100px; object-fit: cover;">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="edit_imageFile" class="form-label">이미지 변경 (선택)</label>
+            <input type="file" class="form-control" id="edit_imageFile" name="imageFile" accept="image/*">
+            <small class="text-muted">파일을 선택하지 않으면 기존 이미지가 유지됩니다.</small>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+          <button type="submit" class="btn btn-primary">변경 사항 저장</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+<script th:inline="javascript">
+
+  // (CSRF 토큰은 전역 변수로 선언)
+  const csrfToken = document.querySelector("meta[name='_csrf']")?.content;
+  const csrfHeader = document.querySelector("meta[name='_csrf_header']")?.content;
+
+  /**
+   * 1. [수정] "삭제" 함수를 DOMContentLoaded 바깥(전역 스코프)으로 이동
+   */
+  function deletePackaging(button) {
+    const id = button.dataset.id;
+
+    if (!confirm(`포장지 ID ${id}번을(를) 정말 삭제하시겠습니까?`)) {
+      return;
+    }
+
+    // 2. [수정] URL을 Thymeleaf 인라인으로 안전하게 생성
+    const deleteUrl = /*[[@{/admin/packagings}]]*/ '/admin/packagings' + '/' + id;
+    console.log(deleteUrl);
+
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    if (csrfToken && csrfHeader) {
+      headers[csrfHeader] = csrfToken;
+    }
+
+    fetch(deleteUrl, {
+      method: 'DELETE',
+      headers: headers
+    })
+            .then(response => {
+              if (response.ok) {
+                alert('삭제되었습니다.');
+                location.reload(); // 페이지 새로고침
+              } else {
+                alert('삭제에 실패했습니다. (오류 코드: ' + response.status + ')');
+              }
+            })
+            .catch(error => {
+              console.error('삭제 중 오류:', error);
+              alert('삭제 중 오류가 발생했습니다.');
+            });
+  }
+
+
+  // 4. "수정" 모달 관련 로직은 DOMContentLoaded 내부에 두는 것이 맞습니다.
+  document.addEventListener('DOMContentLoaded', () => {
+
+    const editModal = document.getElementById('packagingEditModal');
+
+    if (editModal) {
+      editModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const id = button.dataset.id;
+        const name = button.dataset.name;
+        const price = button.dataset.price;
+        const imageUrl = button.dataset.imageUrl;
+
+        const form = document.getElementById('packagingEditForm');
+
+        const actionUrl = /*[[@{/admin/packagings}]]*/ '/admin/packagings';
+        form.action = `${actionUrl}/${id}`; // (PUT 요청 URL)
+
+        form.querySelector('#edit_packagingId').value = id;
+        form.querySelector('#edit_packagingName').value = name;
+        form.querySelector('#edit_packagingPrice').value = price;
+        form.querySelector('#edit_currentImage').src = imageUrl || ''; // (null 방지)
+        form.querySelector('#edit_imageFile').value = '';
+      });
+    }
+  });
+
+</script>
+</body>
+</html>
