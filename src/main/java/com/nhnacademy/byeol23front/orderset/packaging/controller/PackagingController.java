@@ -86,12 +86,11 @@ public class PackagingController {
 		return "redirect:/admin/packagings";
 	}
 
-	@PostMapping("/{packaging-id}/delete")
+	@DeleteMapping("/{packaging-id}")
 	@ResponseBody
 	public ResponseEntity<Void> deletePackagingById(@PathVariable(name = "packaging-id") Long packagingId) {
-		minioService.deleteImage(ImageDomain.PACKAGING, packagingId);
 		packagingApiClient.deleteById(packagingId);
-
+		minioService.deleteImage(ImageDomain.PACKAGING, packagingId);
 		return ResponseEntity.noContent().build();
 	}
 
