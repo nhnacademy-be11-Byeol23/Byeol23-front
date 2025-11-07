@@ -22,7 +22,7 @@ eureka:
       defaultZone: http://127.0.0.1:10338/dashboard/eureka
   instance:
     prefer-ip-address: true
-    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${server.port}}
 
 logging:
   level:
