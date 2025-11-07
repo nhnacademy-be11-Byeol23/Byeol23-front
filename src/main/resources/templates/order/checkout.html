@@ -160,36 +160,25 @@
             <div class="order-summary" data-aos="fade-left" data-aos-delay="200">
               <div class="order-summary-header">
                 <h3>주문 요약</h3>
-                <span class="item-count">2개 상품</span>
+                <span class="item-count" th:text="${#lists.size(orderItem)} + '개 상품'">0개 상품</span>
               </div>
 
               <div class="order-summary-content">
-                <div class="order-items">
-                  <div class="order-item">
-                    <div class="order-item-image">
-                      <img src="assets/img/product/product-1.webp" alt="Product" class="img-fluid">
-                    </div>
-                    <div class="order-item-details">
-                      <h4>Lorem Ipsum Dolor</h4>
-                      <p class="order-item-variant">Color: Black | Size: M</p>
-                      <div class="order-item-price">
-                        <span class="quantity">1 ×</span>
-                        <span class="price">128,000원</span>
-                      </div>
-                    </div>
+                <div class="order-item d-flex align-items-center"
+                     th:each="item : ${orderItem}"
+                     th:data-book-id="${item.bookId}"
+                     th:data-quantity="${item.quantity}"
+                     th:data-sale-price="${item.salePrice}">
+                  <div class="order-item-image me-3">
+                    <img th:src="${item.imageUrl}" alt="Product" class="img-fluid" style="width: 80px; height: auto;">
                   </div>
 
-                  <div class="order-item">
-                    <div class="order-item-image">
-                      <img src="assets/img/product/product-2.webp" alt="Product" class="img-fluid">
-                    </div>
-                    <div class="order-item-details">
-                      <h4>Sit Amet Consectetur</h4>
-                      <p class="order-item-variant">Color: White | Size: L</p>
-                      <div class="order-item-price">
-                        <span class="quantity">2 ×</span>
-                        <span class="price">85,000원</span>
-                      </div>
+                  <div class="order-item-details">
+                    <h4 th:text="${item.bookName}" class="mb-1">도서 제목</h4>
+                    <div class="order-item-price">
+                      <span class="quantity" th:text="${item.quantity} + ' ×'">1 ×</span>
+
+                      <span class="price" th:text="${#numbers.formatInteger(item.salePrice, 0, 'COMMA') + '원'}">128,000원</span>
                     </div>
                   </div>
                 </div>
@@ -302,16 +291,16 @@
 <div id="preloader"></div>
 
 <!-- Vendor JS Files -->
-<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="assets/vendor/php-email-form/validate.js"></script>
-<script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-<script src="assets/vendor/aos/aos.js"></script>
-<script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-<script src="assets/vendor/drift-zoom/Drift.min.js"></script>
-<script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
 
 <!-- Main JS File -->
-<script src="assets/js/main.js"></script>
+<script th:src="@{/assets/js/main.js}"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     initPhoneHyphen();
@@ -369,6 +358,35 @@
     };
 
     paymentButton.addEventListener('click', function () {
+      const bookInfoRequestList = [];
+      const orderItemElements = document.querySelectorAll('.order-item');
+
+      orderItemElements.forEach(item => {
+        const bookId = item.dataset.bookId;
+        const bookName = item.dataset.bookName;
+        const imageUrl = item.dataset.imageUrl;
+        const regularPrice = parseFloat(item.dataset.regularPrice);
+        const salePrice = parseFloat(item.dataset.salePrice);
+        const quantity = parseInt(item.dataset.quantity, 10);
+        // 데이터가 유효한지 확인
+        if (bookId && !isNaN(quantity) && !isNaN(salePrice)) {
+          // 백엔드 DTO (BookInfoRequest)와 동일한 구조의 객체 생성
+          bookInfoRequestList.push({
+            bookId: bookId,
+            bookName: bookName,
+            imageUrl: imageUrl,
+            regularPrice:regularPrice,
+            salePrice: salePrice,
+            quantity: quantity,
+          });
+        }
+      });
+
+        if (bookInfoRequestList.length === 0) {
+          alert("주문할 상품이 없습니다.");
+          return;
+        }
+
       const customerName = document.getElementById('name')?.value.trim();
       const rawPhone = document.getElementById('phone')?.value;
       const phoneNumber = rawPhone ? rawPhone.replace(/[^\d]/g, '') : '';
@@ -413,7 +431,8 @@
         receiverAddressDetail: addressDetail,
         receiverAddressExtra: addressExtra,
         receiverPhone: phoneNumber,
-        deliveryArrivedDate:deliveryDateValue
+        deliveryArrivedDate:deliveryDateValue,
+        bookInfoRequestList: bookInfoRequestList
       };
 
       console.log("전송할 객체:", orderPrepareRequest);
@@ -496,18 +515,26 @@
   function initApplyAllPointsButton() {
     const applyAllBtn = document.getElementById('apply-all-points-btn');
     const pointsInput = document.getElementById('points-to-use');
+    const totalBookPriceEl = document.getElementById('total-book-price');
 
-    if (applyAllBtn && pointsInput) {
+    const parsePrice = (element) => {
+      if (!element || !element.textContent) return 0;
+      return parseInt(element.textContent.replace(/[^\d]/g, ''), 10) || 0;
+    };
+
+    if (applyAllBtn && pointsInput && totalBookPriceEl) {
       console.log("'모두 사용' 버튼 리스너 추가됨"); // <--- 로그 추가
       applyAllBtn.addEventListener('click', () => {
         const maxPointsInput = parseInt(pointsInput.getAttribute('max') || '0', 10);
         const currentPointsStr = document.getElementById('current-points')?.textContent.replace(/[^\d]/g, '');
         const availablePoints = parseInt(currentPointsStr, 10) || 0;
-        const maxPointsToUse = Math.min(maxPointsInput, availablePoints);
+        const maxPointsFromBalance = Math.min(maxPointsInput, availablePoints);
 
-        // 1. input 값을 먼저 설정
+        const subtotal = parsePrice(totalBookPriceEl);
+
+        const maxPointsToUse = Math.min(maxPointsFromBalance, subtotal);
+
         pointsInput.value = maxPointsToUse;
-
         // 2. 그 다음 업데이트 함수 호출
         updatePriceSummary();
       });
@@ -542,8 +569,14 @@
     const currentPointsStr = document.getElementById('current-points')?.textContent.replace(/[^\d]/g, '');
     const availablePoints = parseInt(currentPointsStr, 10) || 0; // 실제 보유 포인트
 
+    const subtotal = parsePrice(totalBookPriceEl);
+    const deliveryFee = parsePrice(deliveryFeeEl);
+
+    const maxPointsFromBalance = Math.min(maxPoints, availablePoints);
+    const maxPointsFromSubtotal = subtotal;
+
     // 사용 가능한 최대 포인트는 (input max 값)과 (보유 포인트) 중 작은 값
-    const effectiveMaxPoints = Math.min(maxPoints, availablePoints);
+    const effectiveMaxPoints = Math.min(maxPointsFromSubtotal, maxPointsFromBalance);
     console.log("계산된 최대 사용 가능 포인트:", effectiveMaxPoints); // <--- 로그 추가!
 
     // 3. 포인트 유효성 검사 및 조정
@@ -573,8 +606,6 @@
     // (쿠폰 할인 표시 업데이트 로직 추가)
 
     // 6. 최종 결제 금액 계산
-    const subtotal = parsePrice(totalBookPriceEl);
-    const deliveryFee = parsePrice(deliveryFeeEl);
     const finalPrice = Math.max(0, subtotal + deliveryFee - pointDiscount - couponDiscount); // 최종 금액은 0원 미만 불가
 
     // 7. 최종 결제 금액 및 버튼 텍스트 업데이트
