@@ -13,6 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
+import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
+
 import java.util.List;
 
 @Controller
@@ -53,7 +55,7 @@ public class BookAdminController {
 
 			// 선택된 카테고리 ID 리스트 계산
 			List<Long> selectedCategoryIds = book.categories() != null
-				? book.categories().stream().map(cat -> cat.id()).collect(java.util.stream.Collectors.toList())
+				? book.categories().stream().map(CategoryLeafResponse::id).toList()
 				: java.util.Collections.emptyList();
 			model.addAttribute("selectedCategoryIds", selectedCategoryIds);
 
