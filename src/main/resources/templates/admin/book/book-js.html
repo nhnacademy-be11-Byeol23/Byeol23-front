@@ -23,6 +23,16 @@
                     const bookId = data.bookId;
                     const isUpdate = bookId && bookId.length > 0;
 
+                    // 체크박스 방식 - disabled가 아닌 체크된 체크박스만 수집
+                    const categoryCheckboxes = bookForm.querySelectorAll('input[name="categoryIds"]:checked:not(:disabled)');
+                    const categoryIds = Array.from(categoryCheckboxes)
+                        .filter(cb => !cb.disabled) // disabled 체크박스 제외
+                        .map(cb => parseInt(cb.value, 10));
+
+                    console.log('선택된 카테고리 ID:', categoryIds);
+                    console.log('체크된 체크박스 개수:', categoryCheckboxes.length);
+                    console.log('모든 categoryIds 체크박스:', bookForm.querySelectorAll('input[name="categoryIds"]'));
+
                     const requestBody = {
                         bookName: data.bookName,
                         toc: data.toc,
@@ -33,7 +43,8 @@
                         isPack: bookForm.querySelector('#isPack').checked,
                         bookStatus: data.bookStatus,
                         stock: parseInt(data.stock, 10),
-                        publisherId: parseInt(data.publisherId, 10)
+                        publisherId: parseInt(data.publisherId, 10),
+                        categoryIds: categoryIds
                     };
 
                     if (!isUpdate) {
@@ -64,10 +75,137 @@
                         });
                 });
             }
+
+            // 도서 수정 폼인 경우, 기존 선택된 카테고리 체크박스 체크
+            const bookIdInput = document.getElementById('bookId');
+            if (bookIdInput && bookIdInput.value) {
+                // 업데이트 폼인 경우
+                // 전역 변수에서 선택된 카테고리 ID 가져오기
+                let selectedIds = [];
+                if (typeof selectedCategoryIds !== 'undefined' && selectedCategoryIds.length > 0) {
+                    selectedIds = selectedCategoryIds;
+                } else if (typeof window.selectedCategoryIds !== 'undefined' && window.selectedCategoryIds.length > 0) {
+                    selectedIds = window.selectedCategoryIds;
+                }
+                
+                if (selectedIds.length > 0) {
+                    console.log('기존 선택된 카테고리 ID:', selectedIds);
+                    
+                    // 모든 카테고리 체크박스를 순회하면서 selectedIds에 포함된 것 체크
+                    const allCategoryCheckboxes = bookForm.querySelectorAll('input[name="categoryIds"]');
+                    allCategoryCheckboxes.forEach(checkbox => {
+                        const categoryId = parseInt(checkbox.value, 10);
+                        if (selectedIds.includes(categoryId) && !checkbox.disabled) {
+                            checkbox.checked = true;
+                            console.log('체크박스 체크됨:', categoryId);
+                        }
+                    });
+                }
+            }
+
+            // 카테고리 트리 관련 함수들
+            window.toggleCategory = function(element) {
+                const categoryId = element.dataset.id;
+                const isExpanded = element.dataset.expanded === 'true';
+                const childrenUl = document.getElementById(`children-${categoryId}`);
+                const icon = element.querySelector('i');
+                
+                if (!childrenUl) return;
+                
+                if (isExpanded) {
+                    // 접기
+                    childrenUl.style.display = 'none';
+                    icon.classList.remove('bi-chevron-down');
+                    icon.classList.add('bi-chevron-right');
+                    element.dataset.expanded = 'false';
+                } else {
+                    // 펼치기
+                    if (childrenUl.dataset.loaded !== 'true') {
+                        // 자식 카테고리 로드
+                        loadCategoryChildren(categoryId, childrenUl);
+                    } else {
+                        childrenUl.style.display = 'block';
+                    }
+                    icon.classList.remove('bi-chevron-right');
+                    icon.classList.add('bi-chevron-down');
+                    element.dataset.expanded = 'true';
+                }
+            };
+            
+            window.loadCategoryChildren = function(parentId, parentUl) {
+                let selectedCategoryIds = [];
+                
+                // 전역 변수에서 가져오기 (우선순위)
+                if (typeof selectedCategoryIds !== 'undefined' && selectedCategoryIds.length > 0) {
+                    selectedCategoryIds = selectedCategoryIds;
+                } else if (typeof window.selectedCategoryIds !== 'undefined' && window.selectedCategoryIds.length > 0) {
+                    selectedCategoryIds = window.selectedCategoryIds;
+                } else {
+                    // 이미 체크된 체크박스에서 수집 (fallback)
+                    const checkedBoxes = bookForm.querySelectorAll('input[name="categoryIds"]:checked');
+                    selectedCategoryIds = Array.from(checkedBoxes).map(cb => parseInt(cb.value, 10));
+                }
+                
+                console.log('loadCategoryChildren - 선택된 카테고리 ID:', selectedCategoryIds);
+                
+                fetch(`/categories/${parentId}/children`)
+                    .then(response => response.json())
+                    .then(children => {
+                        parentUl.innerHTML = '';
+                        children.forEach(child => {
+                            const hasChildren = child.hasChildren;
+                            const isChecked = selectedCategoryIds.includes(child.id);
+                            
+                            const li = document.createElement('li');
+                            li.innerHTML = `
+                                <div class="d-flex align-items-center mb-2">
+                                    ${hasChildren ? 
+                                        `<span class="category-toggle me-2" 
+                                               style="cursor: pointer; user-select: none;"
+                                               data-id="${child.id}" 
+                                               data-expanded="false"
+                                               onclick="toggleCategory(this)">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </span>` : 
+                                        '<span style="width: 20px; display: inline-block;"></span>'
+                                    }
+                                    <div class="form-check">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               id="category_${child.id}" 
+                                               name="categoryIds" 
+                                               value="${child.id}"
+                                               ${hasChildren ? 'disabled' : ''}
+                                               ${isChecked ? 'checked' : ''}>
+                                        <label class="form-check-label" 
+                                               for="category_${child.id}" 
+                                               style="${hasChildren ? 'font-weight: 600; color: #666;' : ''}">
+                                            ${child.name}
+                                        </label>
+                                    </div>
+                                </div>
+                                ${hasChildren ? 
+                                    `<ul id="children-${child.id}" 
+                                         class="ms-4" 
+                                         style="list-style: none; padding-left: 0; display: none;">
+                                    </ul>` : ''
+                                }
+                            `;
+                            parentUl.appendChild(li);
+                        });
+                        parentUl.dataset.loaded = 'true';
+                        parentUl.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('카테고리 로드 실패:', error);
+                        alert('카테고리를 불러오는데 실패했습니다.');
+                    });
+            };
+
         });
 
-        // 도서 삭제 함수
-        function softDeleteBook(bookId) {
+        // 도서 삭제 함수 - DOMContentLoaded 밖으로 이동 (즉시 실행)
+        window.softDeleteBook = function(bookId) {
             console.log('softDeleteBook 호출됨, bookId:', bookId);
             if (confirm('정말로 이 도서의 삭제 상태를 변경하시겠습니까?')) {
                 const url = '/admin/books/' + bookId;
@@ -92,6 +230,6 @@
                         alert('오류가 발생했습니다: ' + error.message);
                     });
             }
-        }
+        };
     </script>
 </th:block>

@@ -2,6 +2,9 @@ package com.nhnacademy.byeol23front.bookset.book.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+
+import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
 
 public record BookResponse(
 	Long bookId,
@@ -16,6 +19,7 @@ public record BookResponse(
 	String bookStatus,
 	Integer stock,
 	Long publisherId,
-	boolean isDeleted
+	boolean isDeleted,
+	List<CategoryLeafResponse> categories
 ) {
 }
