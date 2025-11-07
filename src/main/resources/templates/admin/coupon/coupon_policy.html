@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>관리자 - 쿠폰 정책 관리</title>
+    <meta name="description" content="관리자 쿠폰 정책 관리 페이지">
+    <meta name="keywords" content="">
+    <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+</head>
+
+<body class="admin-coupon-policies-page">
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">관리자 - 쿠폰 정책 관리</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/admin}">관리자 홈</a></li>
+                    <li class="current">정책 관리</li>
+                    <li class="current">쿠폰 정책 관리</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <section id="admin-policies" class="admin-policies section">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+            <div class="row g-4">
+
+                <div class="col-lg-3">
+                    <div th:replace="~{fragments/admin_side_bar :: admin_side_bar}"></div>
+                </div>
+
+                <div class="col-lg-9">
+                    <div class="policy-page">
+
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3" id="policy-form-title">신규 쿠폰 정책 등록</h5>
+                                <form action="/admin/coupon-policy" method="post" class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="policyName" class="form-label">정책명</label>
+                                        <input type="text" class="form-control" id="policyName" name="policyName"
+                                               placeholder="예: 신규 회원가입 10% 할인 쿠폰"
+                                               required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="criterionPrice" class="form-label">최소 구매 금액 (원)</label>
+                                        <input type="number" class="form-control" id="criterionPrice" name="criterionPrice"
+                                               placeholder="0" min="0" required>
+                                        <small class="form-text text-muted">0원 입력 시 구매 금액 제한 없음</small>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">할인 유형</label>
+                                        <div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="discountType"
+                                                       id="rateDiscount" value="RATE"
+                                                       checked>
+                                                <label class="form-check-label" for="rateDiscount">
+                                                    정률 할인 (%)
+                                                </label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="discountType"
+                                                       id="fixedDiscount" value="FIXED">
+                                                <label class="form-check-label" for="fixedDiscount">
+                                                    정액 할인 (원)
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="rateOptions" class="col-12 row g-3 m-0 p-0">
+                                        <div class="col-md-6">
+                                            <label for="discountRate" class="form-label">할인률 (%)</label>
+                                            <input type="number" class="form-control" id="discountRate" name="discountRate"
+                                                   placeholder="10" min="0" max="100">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="discountLimit" class="form-label">최대 할인 금액 (원)</label>
+                                            <input type="number" class="form-control" id="discountLimit"
+                                                   name="discountLimit" placeholder="10000" min="0">
+                                            <small class="form-text text-muted">0원 입력 시 최대 할인 금액 제한 없음</small>
+                                        </div>
+                                    </div>
+
+                                    <div id="fixedOptions" class="col-12 row g-3 m-0 p-0" style="display: none;">
+                                        <div class="col-md-6">
+                                            <label for="discountAmount" class="form-label">할인액 (원)</label>
+                                            <input type="number" class="form-control" id="discountAmount"
+                                                   name="discountAmount" placeholder="5000" min="0">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 text-end">
+                                        <button type="reset" class="btn btn-secondary">취소</button>
+                                        <button type="submit" class="btn btn-dark">쿠폰 정책 저장</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3">쿠폰 정책 목록</h5>
+
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th scope="col">정책명</th>
+                                            <th scope="col">최소 구매액</th>
+                                            <th scope="col">할인률(%)</th>
+                                            <th scope="col">최대 할인 금액</th>
+                                            <th scope="col">할인 금액</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:if="${#lists.isEmpty(policies)}">
+                                            <td colspan="5" class="text-center py-4">
+                                                등록된 쿠폰 정책이 없습니다.
+                                            </td>
+                                        </tr>
+                                        <tr th:each="policy : ${policies}">
+                                            <td th:text="${policy.policyName}"></td>
+                                            <td th:text="${#numbers.formatInteger(policy.criterionPrice, 3, 'COMMA') + '원'}"></td>
+                                            <td th:text="${policy.discountRate != null ? policy.discountRate + '%' : '-'}"></td>
+                                            <td th:text="${policy.discountLimit != null ? #numbers.formatInteger(policy.discountLimit, 3, 'COMMA') + '원' : '-'}"></td>
+                                            <td th:text="${policy.discountAmount != null ? #numbers.formatInteger(policy.discountAmount, 3, 'COMMA') + '원' : '-'}"></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<div id="preloader"></div>
+
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+<script th:src="@{/assets/js/main.js}"></script>
+
+<th:block th:replace="~{'admin/coupon/coupon-policy-type-js' :: couponPolicyTypeJs}"></th:block>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // 폼 유효성 검사 로직은 그대로 유지
+        const form = document.querySelector('form[action="/admin/coupon-policy"]');
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const discountType = document.querySelector('input[name="discountType"]:checked').value;
+            const discountRate = document.getElementById('discountRate').value;
+            const discountLimit = document.getElementById('discountLimit').value;
+            const discountAmount = document.getElementById('discountAmount').value;
+
+            let isValid = false;
+            let alertMessage = '';
+
+            if (discountType === 'RATE') {
+                if (discountRate && discountLimit) {
+                    isValid = true;
+                } else {
+                    alertMessage = '할인률(%)과 최대 할인 금액(원)을 모두 입력해주세요.';
+                }
+            } else if (discountType === 'FIXED') {
+                if (discountAmount) {
+                    isValid = true;
+                } else {
+                    alertMessage = '할인액(원)을 입력주세요.';
+                }
+            }
+
+            if (isValid) {
+                event.target.submit();
+            } else {
+                alert(alertMessage);
+            }
+        });
+
+        // '취소' 버튼(type="reset")은 폼 필드만 초기화합니다.
+        // 만약 라디오 버튼 등 JS로 제어되는 항목의 초기화가 필요하면 여기에 추가합니다.
+        form.addEventListener('reset', function() {
+            // 라디오 버튼을 '정률 할인'으로, 폼 표시를 초기 상태로 되돌림
+            document.getElementById('rateDiscount').checked = true;
+            document.getElementById('fixedDiscount').checked = false;
+            document.getElementById('rateOptions').style.display = 'flex'; // row는 flex
+            document.getElementById('fixedOptions').style.display = 'none';
+        });
+    });
+</script>
+
+</body>
+</html>
