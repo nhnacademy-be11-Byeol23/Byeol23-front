@@ -8,14 +8,14 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(name = "BYEOL23-GATEWAY", contextId = "cartApiClient")
 public interface CartApiClient {
 
-    @GetMapping("/api/carts/{memberId}")
-    CartResponse getCartByMember(@PathVariable("memberId") Long memberId);
+    @GetMapping("/api/carts/{member-id}")
+    CartResponse getCartByMember(@PathVariable("member-id") Long memberId);
 
     @PutMapping("/api/cart-books")
     void updateCartBook(@RequestBody CartBookUpdateRequest request);
 
-    @DeleteMapping("/api/cart-books/{cartBookId}")
-    void deleteCartBook(@PathVariable("cartBookId") Long cartBookId);
+    @DeleteMapping("/api/cart-books/{cart-book-id}")
+    void deleteCartBook(@PathVariable("cart-book-id") Long cartBookId);
 
 }
 

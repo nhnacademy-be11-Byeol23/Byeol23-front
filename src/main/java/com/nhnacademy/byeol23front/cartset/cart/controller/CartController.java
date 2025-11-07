@@ -18,13 +18,8 @@ public class CartController {
     private final CartApiClient cartApiClient;
 
     // 장바구니 페이지 조회
-    @GetMapping
-    public String getCartPage() {
-        return "cart";
-    }
-
-    @GetMapping("/{memberId}")
-    public String getCart(@PathVariable Long memberId, Model model) {
+    @GetMapping("/{member-id}")
+    public String getCart(@PathVariable("member-id") Long memberId, Model model) {
         CartResponse cart = cartApiClient.getCartByMember(memberId);
 
         long totalPrice = 0L;
@@ -48,9 +43,9 @@ public class CartController {
     }
 
     // 장바구니 도서 삭제 (AJAX 요청용)
-    @DeleteMapping("/cart-books/{cartBookId}")
+    @DeleteMapping("/cart-books/{cart-book-id}")
     @ResponseBody
-    public ResponseEntity<Void> deleteCartBook(@PathVariable Long cartBookId) {
+    public ResponseEntity<Void> deleteCartBook(@PathVariable("cart-book-id") Long cartBookId) {
         cartApiClient.deleteCartBook(cartBookId);
         return ResponseEntity.ok().build();
     }
