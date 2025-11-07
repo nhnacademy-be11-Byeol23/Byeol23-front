@@ -215,9 +215,16 @@
       return;
     }
 
-    // 2. [수정] URL을 Thymeleaf 인라인으로 안전하게 생성
-    const deleteUrl = /*[[@{/admin/packagings}]]*/ '/admin/packagings' + '/' + id;
-    console.log(deleteUrl);
+    // --- ⬇️ [수정된 부분] ---
+    // 1. Thymeleaf의 '+' 연산자를 사용해 서버에서 URL을 미리 만듭니다.
+    // 2. /*[[...]]*/ 대신, 문자열 리터럴인 '[[...]]'를 사용합니다.
+    // 1. [수정] Thymeleaf가 생성한 URL을 변수에 담습니다.
+    let generatedUrl = [[@{/admin/packagings}]] + '/' + id + '/delete';
+
+    // 2. [수정] 문자열의 시작과 끝에 있는 따옴표(")를 제거합니다.
+    const deleteUrl = generatedUrl.replace(/"/g, '');
+
+    console.log(deleteUrl); // (결과: /admin/packagings/1/delete)
 
     const headers = {
       'Content-Type': 'application/json'
@@ -227,7 +234,7 @@
     }
 
     fetch(deleteUrl, {
-      method: 'DELETE',
+      method: 'POST',
       headers: headers
     })
             .then(response => {
