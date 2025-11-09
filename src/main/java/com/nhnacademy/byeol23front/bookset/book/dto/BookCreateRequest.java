@@ -16,6 +16,7 @@ public record BookCreateRequest(
 	String bookStatus,
 	Integer stock,
 	Long publisherId,
-	List<Long> categoryIds
+	List<Long> categoryIds,
+	List<Long> tagIds
 ) {
 }
