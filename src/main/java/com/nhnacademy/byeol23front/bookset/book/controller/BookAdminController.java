@@ -14,7 +14,12 @@ import org.springframework.web.bind.annotation.*;
 
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
+import com.nhnacademy.byeol23front.bookset.tag.client.TagApiClient;
+import com.nhnacademy.byeol23front.bookset.tag.dto.AllTagsInfoResponse;
+import com.nhnacademy.byeol23front.bookset.tag.dto.PageResponse;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -23,6 +28,7 @@ import java.util.List;
 public class BookAdminController {
 	private final BookApiClient bookApiClient;
 	private final CategoryApiClient categoryApiClient;
+	private final TagApiClient tagApiClient;
 
 	@PostMapping("/new")
 	@ResponseBody
@@ -52,19 +58,30 @@ public class BookAdminController {
 			BookResponse book = bookApiClient.getBook(id);
 			model.addAttribute("book", book);
 			model.addAttribute("categories", categoryApiClient.getRoots());
+			PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 1000).getBody();
+			List<AllTagsInfoResponse> allTags = tagsResponse != null ? tagsResponse.content() : new ArrayList<>();
+			model.addAttribute("allTags", allTags);
 
 			// 선택된 카테고리 ID 리스트 계산
 			List<Long> selectedCategoryIds = book.categories() != null
 				? book.categories().stream().map(CategoryLeafResponse::id).toList()
-				: java.util.Collections.emptyList();
+				: Collections.emptyList();
 			model.addAttribute("selectedCategoryIds", selectedCategoryIds);
+
+			List<Long> selectedTagIds = book.tags() != null
+				? book.tags().stream().map(AllTagsInfoResponse::tagId).toList()
+				: Collections.emptyList();
+			model.addAttribute("selectedTagIds", selectedTagIds);
+
 
 			return "admin/book/bookUpdateForm";
 		} catch (Exception e) {
 			// 에러 처리
 			e.printStackTrace();
-			model.addAttribute("categories", java.util.Collections.emptyList());
-			model.addAttribute("selectedCategoryIds", java.util.Collections.emptyList());
+			model.addAttribute("categories", Collections.emptyList());
+			model.addAttribute("selectedCategoryIds", Collections.emptyList());
+			model.addAttribute("selectedTagIds", Collections.emptyList()); 
+			model.addAttribute("allTags", Collections.emptyList());
 			return "admin/book/bookUpdateForm";
 		}
 	}
@@ -78,6 +95,16 @@ public class BookAdminController {
 	@GetMapping("/new")
 	public String bookForm(Model model) {
 		model.addAttribute("categories", categoryApiClient.getRoots());
+		
+		// 태그 목록 가져오기 추가
+		try {
+			PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 1000).getBody();
+			List<AllTagsInfoResponse> allTags = tagsResponse != null ? tagsResponse.content() : new ArrayList<>();
+			model.addAttribute("allTags", allTags);
+		} catch (Exception e) {
+			model.addAttribute("allTags", new ArrayList<>());
+		}
+		
 		return "admin/book/bookForm";
 	}
 
