@@ -17,6 +17,8 @@ import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
 import com.nhnacademy.byeol23front.bookset.tag.client.TagApiClient;
 import com.nhnacademy.byeol23front.bookset.tag.dto.AllTagsInfoResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.PageResponse;
+import com.nhnacademy.byeol23front.bookset.contributor.client.ContributorApiClient;
+import com.nhnacademy.byeol23front.bookset.contributor.dto.AllContributorResponse;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,6 +31,11 @@ public class BookAdminController {
 	private final BookApiClient bookApiClient;
 	private final CategoryApiClient categoryApiClient;
 	private final TagApiClient tagApiClient;
+	private final ContributorApiClient contributorApiClient;
+
+	private static final String ALL_CONTRIBUTORS = "allContributors";
+	private static final String CATEGORIES = "categories";
+	private static final String ALL_TAGS = "allTags";
 
 	@PostMapping("/new")
 	@ResponseBody
@@ -54,36 +61,34 @@ public class BookAdminController {
 
 	@GetMapping("/update/{book-id}")
 	public String bookUpdateForm(@PathVariable("book-id") Long id, Model model){
-		try {
-			BookResponse book = bookApiClient.getBook(id);
-			model.addAttribute("book", book);
-			model.addAttribute("categories", categoryApiClient.getRoots());
-			PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 1000).getBody();
-			List<AllTagsInfoResponse> allTags = tagsResponse != null ? tagsResponse.content() : new ArrayList<>();
-			model.addAttribute("allTags", allTags);
+		BookResponse book = bookApiClient.getBook(id);
+		model.addAttribute("book", book);
+		model.addAttribute(CATEGORIES, categoryApiClient.getRoots());
 
-			// 선택된 카테고리 ID 리스트 계산
-			List<Long> selectedCategoryIds = book.categories() != null
-				? book.categories().stream().map(CategoryLeafResponse::id).toList()
-				: Collections.emptyList();
-			model.addAttribute("selectedCategoryIds", selectedCategoryIds);
+		PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 100).getBody();
+		List<AllTagsInfoResponse> allTags = tagsResponse != null ? tagsResponse.content() : new ArrayList<>();
+		model.addAttribute(ALL_TAGS, allTags);
 
-			List<Long> selectedTagIds = book.tags() != null
-				? book.tags().stream().map(AllTagsInfoResponse::tagId).toList()
-				: Collections.emptyList();
-			model.addAttribute("selectedTagIds", selectedTagIds);
+		com.nhnacademy.byeol23front.bookset.contributor.dto.PageResponse<AllContributorResponse> contributorsResponse = contributorApiClient.getAllContributors(0, 1000).getBody();
+		List<AllContributorResponse> allContributors = contributorsResponse != null ? contributorsResponse.content() : new ArrayList<>();
+		model.addAttribute(ALL_CONTRIBUTORS, allContributors);
 
+		List<Long> selectedCategoryIds = book.categories() != null
+			? book.categories().stream().map(CategoryLeafResponse::id).toList()
+			: Collections.emptyList();
+		model.addAttribute("selectedCategoryIds", selectedCategoryIds);
 
-			return "admin/book/bookUpdateForm";
-		} catch (Exception e) {
-			// 에러 처리
-			e.printStackTrace();
-			model.addAttribute("categories", Collections.emptyList());
-			model.addAttribute("selectedCategoryIds", Collections.emptyList());
-			model.addAttribute("selectedTagIds", Collections.emptyList()); 
-			model.addAttribute("allTags", Collections.emptyList());
-			return "admin/book/bookUpdateForm";
-		}
+		List<Long> selectedTagIds = book.tags() != null
+			? book.tags().stream().map(AllTagsInfoResponse::tagId).toList()
+			: Collections.emptyList();
+		model.addAttribute("selectedTagIds", selectedTagIds);
+
+		List<Long> selectedContributorIds = book.contributors() != null
+			? book.contributors().stream().map(AllContributorResponse::contributorId).toList()
+			: Collections.emptyList();
+		model.addAttribute("selectedContributorIds", selectedContributorIds);
+
+		return "admin/book/bookUpdateForm";
 	}
 
 	@GetMapping
@@ -94,17 +99,16 @@ public class BookAdminController {
 
 	@GetMapping("/new")
 	public String bookForm(Model model) {
-		model.addAttribute("categories", categoryApiClient.getRoots());
-		
-		// 태그 목록 가져오기 추가
-		try {
-			PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 1000).getBody();
-			List<AllTagsInfoResponse> allTags = tagsResponse != null ? tagsResponse.content() : new ArrayList<>();
-			model.addAttribute("allTags", allTags);
-		} catch (Exception e) {
-			model.addAttribute("allTags", new ArrayList<>());
-		}
-		
+		model.addAttribute(CATEGORIES, categoryApiClient.getRoots());
+
+		PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 1000).getBody();
+		List<AllTagsInfoResponse> allTags = tagsResponse != null ? tagsResponse.content() : new ArrayList<>();
+		model.addAttribute(ALL_TAGS, allTags);
+
+		com.nhnacademy.byeol23front.bookset.contributor.dto.PageResponse<AllContributorResponse> contributorsResponse = contributorApiClient.getAllContributors(0, 1000).getBody();
+		List<AllContributorResponse> allContributors = contributorsResponse != null ? contributorsResponse.content() : new ArrayList<>();
+		model.addAttribute(ALL_CONTRIBUTORS, allContributors);
+
 		return "admin/book/bookForm";
 	}
 

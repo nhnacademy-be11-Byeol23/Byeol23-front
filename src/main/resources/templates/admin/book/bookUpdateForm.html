@@ -42,10 +42,13 @@
                                 /*<![CDATA[*/
                                 var selectedCategoryIds = /*[[${selectedCategoryIds}]]*/ [];
                                 var selectedTagIds = /*[[${selectedTagIds}]]*/ [];
+                                var selectedContributorIds = /*[[${selectedContributorIds}]]*/ [];
                                 // 카테고리 이름 정보 추가
                                 var selectedCategories = /*[[${book.categories}]]*/ [];
                                 // 태그 이름 정보 추가
                                 var selectedTags = /*[[${book.tags}]]*/ [];
+                                // 기여자 이름 정보 추가
+                                var selectedContributors = /*[[${book.contributors}]]*/ [];
                                 /*]]>*/
                             </script>
                             <div class="mb-3">
@@ -104,7 +107,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="publisherId" class="form-label">출판사 ID</label>
-                                <input type="number" class="form-control" id="publisherId" name="publisherId" th:value="*{publisherId}" required>
+                                <input type="number" class="form-control" id="publisherId" name="publisherId" th:value="*{publisher().publisherId()}" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">카테고리</label>
@@ -123,6 +126,15 @@
                                 <div id="selectedTagsDisplay" class="d-flex flex-wrap gap-2 mb-2"></div>
                                 <input type="hidden" id="selectedTagIds" name="tagIds" value="">
                                 <div class="form-text">태그 선택 버튼을 클릭하여 태그를 선택하세요.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">기여자</label>
+                                <button type="button" class="btn btn-outline-secondary btn-sm mb-2" onclick="openContributorModal()">
+                                    <i class="bi bi-person"></i> 기여자 선택
+                                </button>
+                                <div id="selectedContributorsDisplay" class="d-flex flex-wrap gap-2 mb-2"></div>
+                                <input type="hidden" id="selectedContributorIds" name="contributorIds" value="">
+                                <div class="form-text">기여자 선택 버튼을 클릭하여 기여자를 선택하세요.</div>
                             </div>
                             <div class="d-flex justify-content-end gap-2">
                                 <a th:href="@{/admin/books}" class="btn btn-secondary">취소</a>
@@ -237,6 +249,47 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                 <button type="button" class="btn btn-primary" onclick="saveSelectedCategories()">저장</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 기여자 선택 모달 -->
+<div class="modal fade" id="contributorModal" tabindex="-1" aria-labelledby="contributorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contributorModalLabel">기여자 선택</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="border rounded p-3" style="max-height: 400px; overflow-y: auto;">
+                    <div class="row g-2">
+                        <th:block th:if="${allContributors != null and !#lists.isEmpty(allContributors)}">
+                            <div class="col-md-6" th:each="contributor : ${allContributors}">
+                                <div class="form-check">
+                                    <input class="form-check-input contributor-checkbox" 
+                                           type="checkbox" 
+                                           th:id="'contributor_' + ${contributor.contributorId()}" 
+                                           th:value="${contributor.contributorId()}"
+                                           th:data-contributor-name="${contributor.contributorName()}"
+                                           th:data-contributor-role="${contributor.contributorRole()}">
+                                    <label class="form-check-label" th:for="'contributor_' + ${contributor.contributorId()}">
+                                        <span th:text="${contributor.contributorName()}"></span>
+                                        <small class="text-muted" th:text="'(' + ${contributor.contributorRole()} + ')'"></small>
+                                    </label>
+                                </div>
+                            </div>
+                        </th:block>
+                        <div th:if="${allContributors == null or #lists.isEmpty(allContributors)}" class="col-12">
+                            <p class="text-center text-muted py-3 mb-0">등록된 기여자가 없습니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="saveSelectedContributors()">저장</button>
             </div>
         </div>
     </div>
