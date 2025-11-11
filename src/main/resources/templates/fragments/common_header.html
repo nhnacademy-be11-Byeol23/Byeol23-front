@@ -70,7 +70,6 @@
             </div>
         </div>
     </div>
-
     <!-- Navigation -->
     <div class="header-nav">
         <div class="container-fluid container-xl position-relative">
@@ -78,361 +77,52 @@
                 <ul>
                     <li><a href="#">베스트</a></li>
                     <li><a href="#">신상품</a></li>
-                    <!-- Products Mega Menu 2 -->
-                    <li class="products-megamenu-2"><a href="#"><span>국내도서</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
 
-                        <!-- Products Mega Menu 2 Mobile View -->
+                    <li th:each="root : ${tree}" class="products-megamenu-2">
+                        <a th:href="@{'/api/categories/' + ${root.categoryId} + '/books'(pathId=${root.pathId})}">
+                            <span th:text="${root.categoryName}"></span>
+                            <i class="bi bi-chevron-down toggle-dropdown"></i>
+                        </a>
+
                         <ul class="mobile-megamenu">
-                            <li class="dropdown"><a href="#"><span>Clothing</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                <ul>
-                                    <li><a href="#">Shirts &amp; Tops</a></li>
-                                    <li><a href="#">Coats &amp; Outerwear</a></li>
-                                    <li><a href="#">Underwear</a></li>
-                                    <li><a href="#">Sweatshirts</a></li>
-                                    <li><a href="#">Dresses</a></li>
-                                    <li><a href="#">Swimwear</a></li>
+                            <li th:each="child : ${root.children}" class="dropdown">
+                                <a th:href="@{'/api/categories/' + ${child.categoryId} + '/books'(pathId=${child.pathId})}">
+                                    <span th:text="${child.categoryName}"></span>
+                                    <i class="bi bi-chevron-down toggle-dropdown"></i>
+                                </a>
+                                <ul th:if="${#lists.size(child.children) > 0}">
+                                    <li th:each="grand : ${child.children}">
+                                        <a th:href="@{'/api/categories/' + ${grand.categoryId} + '/books'(pathId=${grand.pathId})}"
+                                           th:text="${grand.categoryName}"></a>
+                                    </li>
                                 </ul>
                             </li>
+                        </ul>
 
-                            <li class="dropdown"><a href="#"><span>Shoes</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                <ul>
-                                    <li><a href="#">Boots</a></li>
-                                    <li><a href="#">Sandals</a></li>
-                                    <li><a href="#">Heels</a></li>
-                                    <li><a href="#">Loafers</a></li>
-                                    <li><a href="#">Slippers</a></li>
-                                    <li><a href="#">Oxfords</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="dropdown"><a href="#"><span>Accessories</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                <ul>
-                                    <li><a href="#">Handbags</a></li>
-                                    <li><a href="#">Eyewear</a></li>
-                                    <li><a href="#">Hats</a></li>
-                                    <li><a href="#">Watches</a></li>
-                                    <li><a href="#">Jewelry</a></li>
-                                    <li><a href="#">Belts</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="dropdown"><a href="#"><span>Specialty Sizes</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                <ul>
-                                    <li><a href="#">Plus Size</a></li>
-                                    <li><a href="#">Petite</a></li>
-                                    <li><a href="#">Wide Shoes</a></li>
-                                    <li><a href="#">Narrow Shoes</a></li>
-                                </ul>
-                            </li>
-
-                        </ul><!-- End Products Mega Menu 2 Mobile View -->
-
-                        <!-- Products Mega Menu 2 Desktop View -->
+                        <!-- Desktop View -->
                         <div class="desktop-megamenu">
-
-                            <!-- Tabs Content -->
                             <div class="megamenu-content tab-content">
-
-                                <div class="tab-pane fade show active" role="tabpanel">
+                                <div class="tab-pane fade show active">
                                     <div class="category-layout">
                                         <div class="categories-section">
                                             <div class="category-headers">
-                                                <h4>Clothing</h4>
-                                                <h4>Shoes</h4>
-                                                <h4>Accessories</h4>
-                                                <h4>Specialty Sizes</h4>
+                                                <h4 th:each="child : ${root.children}" th:text="${child.categoryName}"></h4>
                                             </div>
 
                                             <div class="category-links">
-                                                <div class="link-row">
-                                                    <a href="#">Shirts &amp; Tops</a>
-                                                    <a href="#">Boots</a>
-                                                    <a href="#">Handbags</a>
-                                                    <a href="#">Plus Size</a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Coats &amp; Outerwear</a>
-                                                    <a href="#">Sandals</a>
-                                                    <a href="#">Eyewear</a>
-                                                    <a href="#">Petite</a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Underwear</a>
-                                                    <a href="#">Heels</a>
-                                                    <a href="#">Hats</a>
-                                                    <a href="#">Wide Shoes</a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Sweatshirts</a>
-                                                    <a href="#">Loafers</a>
-                                                    <a href="#">Watches</a>
-                                                    <a href="#">Narrow Shoes</a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Dresses</a>
-                                                    <a href="#">Slippers</a>
-                                                    <a href="#">Jewelry</a>
-                                                    <a href="#"></a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Swimwear</a>
-                                                    <a href="#">Oxfords</a>
-                                                    <a href="#">Belts</a>
-                                                    <a href="#"></a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">View all</a>
-                                                    <a href="#">View all</a>
-                                                    <a href="#">View all</a>
-                                                    <a href="#"></a>
+                                                <div class="link-row" th:each="child : ${root.children}">
+                                                    <a th:each="grand : ${child.children}"
+                                                       th:text="${grand.categoryName}"
+                                                       th:href="@{'/api/categories/' + ${grand.categoryId} + '/books'(pathId=${grand.pathId})}">
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
-
-                        </div><!-- End Products Mega Menu 2 Desktop View -->
-
-                    </li><!-- End Products Mega Menu 2 -->
-
-                    <li class="products-megamenu-2"><a href="#"><span>외국도서</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-
-                        <!-- Products Mega Menu 2 Mobile View -->
-                        <ul class="mobile-megamenu">
-                            <li class="dropdown"><a href="#"><span>Clothing</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                <ul>
-                                    <li><a href="#">Shirts &amp; Tops</a></li>
-                                    <li><a href="#">Coats &amp; Outerwear</a></li>
-                                    <li><a href="#">Underwear</a></li>
-                                    <li><a href="#">Sweatshirts</a></li>
-                                    <li><a href="#">Dresses</a></li>
-                                    <li><a href="#">Swimwear</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="dropdown"><a href="#"><span>Shoes</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                <ul>
-                                    <li><a href="#">Boots</a></li>
-                                    <li><a href="#">Sandals</a></li>
-                                    <li><a href="#">Heels</a></li>
-                                    <li><a href="#">Loafers</a></li>
-                                    <li><a href="#">Slippers</a></li>
-                                    <li><a href="#">Oxfords</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="dropdown"><a href="#"><span>Accessories</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                <ul>
-                                    <li><a href="#">Handbags</a></li>
-                                    <li><a href="#">Eyewear</a></li>
-                                    <li><a href="#">Hats</a></li>
-                                    <li><a href="#">Watches</a></li>
-                                    <li><a href="#">Jewelry</a></li>
-                                    <li><a href="#">Belts</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="dropdown"><a href="#"><span>Specialty Sizes</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                <ul>
-                                    <li><a href="#">Plus Size</a></li>
-                                    <li><a href="#">Petite</a></li>
-                                    <li><a href="#">Wide Shoes</a></li>
-                                    <li><a href="#">Narrow Shoes</a></li>
-                                </ul>
-                            </li>
-
-                        </ul><!-- End Products Mega Menu 2 Mobile View -->
-
-                        <!-- Products Mega Menu 2 Desktop View -->
-                        <div class="desktop-megamenu">
-
-                            <!-- Tabs Content -->
-                            <div class="megamenu-content tab-content">
-
-                                <div class="tab-pane fade show active" role="tabpanel">
-                                    <div class="category-layout">
-                                        <div class="categories-section">
-                                            <div class="category-headers">
-                                                <h4>Clothing</h4>
-                                                <h4>Shoes</h4>
-                                                <h4>Accessories</h4>
-                                                <h4>Specialty Sizes</h4>
-                                            </div>
-
-                                            <div class="category-links">
-                                                <div class="link-row">
-                                                    <a href="#">Shirts &amp; Tops</a>
-                                                    <a href="#">Boots</a>
-                                                    <a href="#">Handbags</a>
-                                                    <a href="#">Plus Size</a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Coats &amp; Outerwear</a>
-                                                    <a href="#">Sandals</a>
-                                                    <a href="#">Eyewear</a>
-                                                    <a href="#">Petite</a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Underwear</a>
-                                                    <a href="#">Heels</a>
-                                                    <a href="#">Hats</a>
-                                                    <a href="#">Wide Shoes</a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Sweatshirts</a>
-                                                    <a href="#">Loafers</a>
-                                                    <a href="#">Watches</a>
-                                                    <a href="#">Narrow Shoes</a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Dresses</a>
-                                                    <a href="#">Slippers</a>
-                                                    <a href="#">Jewelry</a>
-                                                    <a href="#"></a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Swimwear</a>
-                                                    <a href="#">Oxfords</a>
-                                                    <a href="#">Belts</a>
-                                                    <a href="#"></a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">View all</a>
-                                                    <a href="#">View all</a>
-                                                    <a href="#">View all</a>
-                                                    <a href="#"></a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                        </div><!-- End Products Mega Menu 2 Desktop View -->
-
-                    </li><!-- End Products Mega Menu 2 -->
-
-                    <li class="products-megamenu-2"><a href="#"><span>문구/GIFT</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-
-                        <!-- Products Mega Menu 2 Mobile View -->
-                        <ul class="mobile-megamenu">
-                            <li class="dropdown"><a href="#"><span>Clothing</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                <ul>
-                                    <li><a href="#">Shirts &amp; Tops</a></li>
-                                    <li><a href="#">Coats &amp; Outerwear</a></li>
-                                    <li><a href="#">Underwear</a></li>
-                                    <li><a href="#">Sweatshirts</a></li>
-                                    <li><a href="#">Dresses</a></li>
-                                    <li><a href="#">Swimwear</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="dropdown"><a href="#"><span>Shoes</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                <ul>
-                                    <li><a href="#">Boots</a></li>
-                                    <li><a href="#">Sandals</a></li>
-                                    <li><a href="#">Heels</a></li>
-                                    <li><a href="#">Loafers</a></li>
-                                    <li><a href="#">Slippers</a></li>
-                                    <li><a href="#">Oxfords</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="dropdown"><a href="#"><span>Accessories</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                <ul>
-                                    <li><a href="#">Handbags</a></li>
-                                    <li><a href="#">Eyewear</a></li>
-                                    <li><a href="#">Hats</a></li>
-                                    <li><a href="#">Watches</a></li>
-                                    <li><a href="#">Jewelry</a></li>
-                                    <li><a href="#">Belts</a></li>
-                                </ul>
-                            </li>
-
-                            <li class="dropdown"><a href="#"><span>Specialty Sizes</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                                <ul>
-                                    <li><a href="#">Plus Size</a></li>
-                                    <li><a href="#">Petite</a></li>
-                                    <li><a href="#">Wide Shoes</a></li>
-                                    <li><a href="#">Narrow Shoes</a></li>
-                                </ul>
-                            </li>
-
-                        </ul><!-- End Products Mega Menu 2 Mobile View -->
-
-                        <!-- Products Mega Menu 2 Desktop View -->
-                        <div class="desktop-megamenu">
-
-                            <!-- Tabs Content -->
-                            <div class="megamenu-content tab-content">
-
-                                <div class="tab-pane fade show active" role="tabpanel">
-                                    <div class="category-layout">
-                                        <div class="categories-section">
-                                            <div class="category-headers">
-                                                <h4>Clothing</h4>
-                                                <h4>Shoes</h4>
-                                                <h4>Accessories</h4>
-                                                <h4>Specialty Sizes</h4>
-                                            </div>
-
-                                            <div class="category-links">
-                                                <div class="link-row">
-                                                    <a href="#">Shirts &amp; Tops</a>
-                                                    <a href="#">Boots</a>
-                                                    <a href="#">Handbags</a>
-                                                    <a href="#">Plus Size</a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Coats &amp; Outerwear</a>
-                                                    <a href="#">Sandals</a>
-                                                    <a href="#">Eyewear</a>
-                                                    <a href="#">Petite</a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Underwear</a>
-                                                    <a href="#">Heels</a>
-                                                    <a href="#">Hats</a>
-                                                    <a href="#">Wide Shoes</a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Sweatshirts</a>
-                                                    <a href="#">Loafers</a>
-                                                    <a href="#">Watches</a>
-                                                    <a href="#">Narrow Shoes</a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Dresses</a>
-                                                    <a href="#">Slippers</a>
-                                                    <a href="#">Jewelry</a>
-                                                    <a href="#"></a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">Swimwear</a>
-                                                    <a href="#">Oxfords</a>
-                                                    <a href="#">Belts</a>
-                                                    <a href="#"></a>
-                                                </div>
-                                                <div class="link-row">
-                                                    <a href="#">View all</a>
-                                                    <a href="#">View all</a>
-                                                    <a href="#">View all</a>
-                                                    <a href="#"></a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                        </div><!-- End Products Mega Menu 2 Desktop View -->
-
-                    </li><!-- End Products Mega Menu 2 -->
-
+                        </div>
+                    </li>
                 </ul>
             </nav>
         </div>
