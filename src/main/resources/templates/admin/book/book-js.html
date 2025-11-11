@@ -244,6 +244,101 @@
             }
         };
 
+        // 기여자 선택 모달 열기 - 전역 스코프로 이동
+        window.openContributorModal = function() {
+            const modalElement = document.getElementById('contributorModal');
+            if (modalElement) {
+                // 기존 선택된 기여자 ID 가져오기
+                const contributorIdsInput = document.getElementById('selectedContributorIds');
+                let selectedContributorIdsList = [];
+                
+                if (contributorIdsInput && contributorIdsInput.value) {
+                    selectedContributorIdsList = contributorIdsInput.value.split(',').filter(id => id.trim()).map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
+                } else {
+                    // JavaScript 변수에서 가져오기
+                    if (typeof window.selectedContributorIds !== 'undefined' && window.selectedContributorIds.length > 0) {
+                        selectedContributorIdsList = window.selectedContributorIds;
+                    } else if (typeof selectedContributorIds !== 'undefined' && selectedContributorIds.length > 0) {
+                        selectedContributorIdsList = selectedContributorIds;
+                    }
+                }
+                
+                console.log('기여자 모달 열기 - 기존 선택된 기여자 ID:', selectedContributorIdsList);
+                
+                // 모달이 표시되기 전에 체크박스 상태 설정
+                if (selectedContributorIdsList.length > 0) {
+                    selectedContributorIdsList.forEach(contributorId => {
+                        const contributorCheckbox = document.getElementById(`contributor_${contributorId}`);
+                        if (contributorCheckbox) {
+                            contributorCheckbox.checked = true;
+                            console.log('기여자 체크됨 (모달 열기 전):', contributorId);
+                        }
+                    });
+                }
+                
+                const modal = new bootstrap.Modal(modalElement);
+                
+                // 모달이 완전히 표시된 후에도 체크 상태 확인 및 재설정
+                modalElement.addEventListener('shown.bs.modal', function() {
+                    console.log('기여자 모달 완전히 표시됨');
+                    if (selectedContributorIdsList.length > 0) {
+                        // 약간의 지연을 두고 체크 (DOM이 완전히 렌더링된 후)
+                        setTimeout(() => {
+                            selectedContributorIdsList.forEach(contributorId => {
+                                const contributorCheckbox = document.getElementById(`contributor_${contributorId}`);
+                                if (contributorCheckbox) {
+                                    if (!contributorCheckbox.checked) {
+                                        contributorCheckbox.checked = true;
+                                        console.log('기여자 체크됨 (모달 표시 후):', contributorId);
+                                    }
+                                } else {
+                                    console.warn('기여자 체크박스를 찾을 수 없음:', `contributor_${contributorId}`);
+                                }
+                            });
+                        }, 100);
+                    }
+                }, { once: true });
+                
+                modal.show();
+            } else {
+                console.error('기여자 모달을 찾을 수 없습니다.');
+            }
+        };
+
+        // 선택된 기여자 저장 - 전역 스코프로 이동
+        window.saveSelectedContributors = function() {
+            const checkedContributors = document.querySelectorAll('.contributor-checkbox:checked');
+            const selectedContributorIds = Array.from(checkedContributors).map(cb => parseInt(cb.value, 10));
+            const selectedContributorNames = Array.from(checkedContributors).map(cb => cb.dataset.contributorName);
+            
+            // hidden input에 저장
+            const contributorIdsInput = document.getElementById('selectedContributorIds');
+            if (contributorIdsInput) {
+                contributorIdsInput.value = selectedContributorIds.join(',');
+            }
+            
+            // 선택된 기여자 표시
+            const displayDiv = document.getElementById('selectedContributorsDisplay');
+            if (displayDiv) {
+                displayDiv.innerHTML = '';
+                selectedContributorNames.forEach((name) => {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-success me-1';
+                    badge.textContent = name;
+                    displayDiv.appendChild(badge);
+                });
+            }
+            
+            // 모달 닫기
+            const modalElement = document.getElementById('contributorModal');
+            if (modalElement) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) {
+                    modal.hide();
+                }
+            }
+        };
+
         // 카테고리 모달용 로드 함수 (자동으로 펼쳐진 상태)
         window.loadCategoryChildrenInModal = function(parentId, parentUl) {
             let selectedCategoryIds = [];
@@ -496,19 +591,36 @@
                         .filter(cb => !cb.disabled)
                         .map(cb => parseInt(cb.value, 10));
                     
+                    // 모달 내부의 체크박스도 확인 (모달이 닫혀있어도 DOM에는 존재)
+                    const modalCategoryCheckboxes = document.querySelectorAll('#categoryModal .category-checkbox:checked:not(:disabled)');
+                    const modalCategoryIds = Array.from(modalCategoryCheckboxes)
+                        .map(cb => parseInt(cb.value, 10));
+                    
                     // 또는 hidden input에서 가져오기
                     const categoryIdsValue = document.getElementById('selectedCategoryIds')?.value || '';
                     const categoryIdsFromInput = categoryIdsValue ? categoryIdsValue.split(',').filter(id => id.trim()).map(id => parseInt(id.trim(), 10)) : [];
                     
-                    // hidden input 값이 있으면 그것을 우선 사용
-                    const finalCategoryIds = categoryIdsFromInput.length > 0 ? categoryIdsFromInput : categoryIds;
+                    // 우선순위: hidden input > 모달 체크박스 > 폼 내부 체크박스
+                    let finalCategoryIds = [];
+                    if (categoryIdsFromInput.length > 0) {
+                        finalCategoryIds = categoryIdsFromInput;
+                    } else if (modalCategoryIds.length > 0) {
+                        finalCategoryIds = modalCategoryIds;
+                    } else {
+                        finalCategoryIds = categoryIds;
+                    }
 
                     // 태그 ID 수집
                     const tagIdsValue = document.getElementById('selectedTagIds')?.value || '';
                     const tagIds = tagIdsValue ? tagIdsValue.split(',').filter(id => id.trim()).map(id => parseInt(id.trim(), 10)) : [];
 
+                    // 기여자 ID 수집
+                    const contributorIdsValue = document.getElementById('selectedContributorIds')?.value || '';
+                    const contributorIds = contributorIdsValue ? contributorIdsValue.split(',').filter(id => id.trim()).map(id => parseInt(id.trim(), 10)) : [];
+
                     console.log('선택된 카테고리 ID:', finalCategoryIds);
                     console.log('선택된 태그 ID:', tagIds);
+                    console.log('선택된 기여자 ID:', contributorIds);
 
                     const requestBody = {
                         bookName: data.bookName,
@@ -522,7 +634,8 @@
                         stock: parseInt(data.stock, 10),
                         publisherId: parseInt(data.publisherId, 10),
                         categoryIds: finalCategoryIds,
-                        tagIds: tagIds
+                        tagIds: tagIds,
+                        contributorIds: contributorIds
                     };
 
                     if (!isUpdate) {
@@ -641,6 +754,57 @@
                             if (tagCheckbox) {
                                 tagCheckbox.checked = true;
                                 console.log('태그 모달 체크박스 체크됨:', tagId);
+                            }
+                        });
+                    }, 200);
+                }
+
+                // 기존 선택된 기여자 처리
+                let selectedContributorIdsList = [];
+                let selectedContributorsList = [];
+                
+                if (typeof window.selectedContributorIds !== 'undefined' && window.selectedContributorIds.length > 0) {
+                    selectedContributorIdsList = window.selectedContributorIds;
+                } else if (typeof selectedContributorIds !== 'undefined' && selectedContributorIds.length > 0) {
+                    selectedContributorIdsList = selectedContributorIds;
+                }
+                
+                // 기여자 이름 정보 가져오기
+                if (typeof window.selectedContributors !== 'undefined' && window.selectedContributors.length > 0) {
+                    selectedContributorsList = window.selectedContributors;
+                } else if (typeof selectedContributors !== 'undefined' && selectedContributors.length > 0) {
+                    selectedContributorsList = selectedContributors;
+                }
+                
+                console.log('기존 선택된 기여자 ID:', selectedContributorIdsList);
+                console.log('기존 선택된 기여자 정보:', selectedContributorsList);
+                
+                // hidden input에 저장
+                const contributorIdsInput = document.getElementById('selectedContributorIds');
+                if (contributorIdsInput && selectedContributorIdsList.length > 0) {
+                    contributorIdsInput.value = selectedContributorIdsList.join(',');
+                }
+                
+                // 선택된 기여자 표시
+                const contributorDisplayDiv = document.getElementById('selectedContributorsDisplay');
+                if (contributorDisplayDiv && selectedContributorsList.length > 0) {
+                    contributorDisplayDiv.innerHTML = '';
+                    selectedContributorsList.forEach(contributor => {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge bg-success me-1 mb-1';
+                        badge.textContent = contributor.contributorName || contributor.name || `기여자 ${contributor.contributorId || contributor.id}`;
+                        contributorDisplayDiv.appendChild(badge);
+                    });
+                }
+                
+                // 기여자 모달 내부의 체크박스도 체크 (모달이 아직 열리지 않았어도)
+                if (selectedContributorIdsList.length > 0) {
+                    setTimeout(() => {
+                        selectedContributorIdsList.forEach(contributorId => {
+                            const contributorCheckbox = document.getElementById(`contributor_${contributorId}`);
+                            if (contributorCheckbox) {
+                                contributorCheckbox.checked = true;
+                                console.log('기여자 모달 체크박스 체크됨:', contributorId);
                             }
                         });
                     }, 200);

@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
+import com.nhnacademy.byeol23front.bookset.contributor.dto.AllContributorResponse;
+import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.AllTagsInfoResponse;
 
 public record BookResponse(
@@ -19,9 +21,10 @@ public record BookResponse(
 	boolean isPack,
 	String bookStatus,
 	Integer stock,
-	Long publisherId,
+	AllPublishersInfoResponse publisher,
 	boolean isDeleted,
 	List<CategoryLeafResponse> categories,
-	List<AllTagsInfoResponse> tags
+	List<AllTagsInfoResponse> tags,
+	List<AllContributorResponse> contributors
 ) {
 }
