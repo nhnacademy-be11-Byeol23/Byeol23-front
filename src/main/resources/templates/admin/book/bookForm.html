@@ -35,7 +35,7 @@
                 <div class="col-lg-9">
                     <div class="book-management-container">
                         <h2>새 도서 추가</h2>
-                        <form id="bookForm" class="book-form">
+                        <form id="bookForm" class="book-form" th:action="@{/admin/books/new}" method="post" enctype="multipart/form-data">
                             <div class="mb-3">
                                 <label for="bookName" class="form-label">도서명</label>
                                 <input type="text" class="form-control" id="bookName" name="bookName" required>
@@ -124,6 +124,17 @@
                                 <div id="selectedContributorsDisplay" class="d-flex flex-wrap gap-2 mb-2"></div>
                                 <input type="hidden" id="selectedContributorIds" name="contributorIds" value="">
                                 <div class="form-text">기여자 선택 버튼을 클릭하여 기여자를 선택하세요.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="bookImages" class="form-label">도서 이미지</label>
+                                <input type="file" 
+                                       class="form-control" 
+                                       id="bookImages" 
+                                       name="images" 
+                                       accept="image/*" 
+                                       multiple>
+                                <div class="form-text">이미지를 여러 개 선택할 수 있습니다 (Ctrl+클릭 또는 Shift+클릭)</div>
+                                <div id="imagePreviewList" class="mt-2 d-flex flex-wrap gap-2"></div>
                             </div>
                             <div class="d-flex justify-content-end gap-2">
                                 <a th:href="@{/admin/books}" class="btn btn-secondary">취소</a>
