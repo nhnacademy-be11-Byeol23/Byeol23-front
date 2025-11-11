@@ -22,10 +22,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
+import com.nhnacademy.byeol23front.minio.service.MinioService;
 import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
 import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
@@ -33,6 +32,8 @@ import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.PointOrderResponse;
 import com.nhnacademy.byeol23front.orderset.order.exception.OrderPrepareFailException;
+import com.nhnacademy.byeol23front.orderset.packaging.client.PackagingApiClient;
+import com.nhnacademy.byeol23front.orderset.packaging.dto.PackagingInfoResponse;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +46,8 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderController {
 	private final OrderApiClient orderApiClient;
 	private final DeliveryApiClient deliveryApiClient;
-	private final BookApiClient bookApiClient;
+	private final PackagingApiClient packagingApiClient;
+	private final MinioService minioService;
 
 	@PostMapping("/direct")
 	@ResponseBody
@@ -60,6 +62,7 @@ public class OrderController {
 	@GetMapping("/direct")
 	public String getOrderFormDirect(HttpSession session, Model model) {
 		BookOrderRequest request = (BookOrderRequest)session.getAttribute("directOrderRequest");
+		List<PackagingInfoResponse> packagingOptions = packagingApiClient.getAllPackagingLists();
 
 		if (Objects.isNull(request)) {
 			throw new IllegalArgumentException("주문 정보가 없습니다.");
@@ -67,9 +70,13 @@ public class OrderController {
 
 		session.removeAttribute("directOrderRequest");
 
+		addTotalQuantity(model, request.bookList());
 		addDeliveryDatesToModel(model);
 		addOrderSummary(model, request.bookList());
 		addDeliveryFeeToModel(model, request);
+		
+
+		model.addAttribute("packagingOptions", packagingOptions);
 		model.addAttribute("userPoint", 300_000);
 
 		return "order/checkout";
@@ -225,5 +232,13 @@ public class OrderController {
 
 	private void addOrderSummary(Model model, List<BookInfoRequest> requestList) {
 		model.addAttribute("orderItem", requestList);
+	}
+
+	private void addTotalQuantity(Model model, List<BookInfoRequest> requestList) {
+		int totalQuantity = requestList.stream()
+			.mapToInt(BookInfoRequest::quantity)
+			.sum();
+
+		model.addAttribute("totalQuantity", totalQuantity);
 	}
 }
