@@ -23,5 +23,5 @@ public interface MemberApiClient {
 	 * 로그인
 	 */
 	@PostMapping("/auth/login")
-	ResponseEntity<LoginResponse> loginRequest(@RequestBody LoginRequest request);
+	ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request);
 }

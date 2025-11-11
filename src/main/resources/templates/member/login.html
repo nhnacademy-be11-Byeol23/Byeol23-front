@@ -118,7 +118,71 @@
 <script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
 <script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
 <script th:src="@{/assets/js/main.js}"></script>
+<script th:src="@{/assets/js/jwt.js}"></script>
 
 </body>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('.auth-form-content');
+    if (!form) return;
+
+    const csrfToken  = document.querySelector('meta[name="_csrf"]')?.content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || 'X-CSRF-TOKEN';
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const fd = new FormData(form);
+
+      try {
+        const res = await authFetch('/members/login', {
+          method: 'POST',
+          body: fd,
+          credentials: 'include',
+          headers: csrfToken ? { [csrfHeader]: csrfToken, 'X-Requested-With': 'XMLHttpRequest', 'Accept':'application/json' }
+                  : { 'X-Requested-With': 'XMLHttpRequest', 'Accept':'application/json' }
+        });
+
+        if (!res.ok) {
+          const msg = await safeReadText(res);
+          alert(msg || '로그인 실패');
+          return;
+        }
+
+        let accessToken = res.headers.get('Authorization');
+        if (accessToken?.startsWith('Bearer ')) {
+          accessToken = accessToken.substring(7);
+        } else {
+          const body = await res.json().catch(() => null);
+          accessToken = body?.accessToken;
+          if (body?.nickname) sessionStorage.setItem('nickname', body.nickname);
+        }
+        if (!accessToken) {
+          alert('토큰이 없습니다.');
+          return;
+        }
+
+        sessionStorage.setItem('accessToken', accessToken);
+
+      } catch (err) {
+        console.error(err);
+        alert('네트워크 오류');
+      }
+    });
+  });
+
+  async function safeReadText(res) {
+    try {
+      const ct = res.headers.get('content-type') || '';
+      if (ct.includes('application/json')) {
+        const j = await res.json();
+        return j.message || JSON.stringify(j);
+      }
+      return await res.text();
+    } catch { return ''; }
+  }
+</script>
+
 
 </html>
