@@ -837,73 +837,48 @@
     function initPackagingModal() {
         const packagingModal = document.getElementById('packagingSelectModal');
         const savePackagingButton = document.getElementById('savePackagingButton');
+        if (!packagingModal || !savePackagingButton) return;
 
-        if (!packagingModal || !savePackagingButton) {
-            console.error("포장지 모달 또는 저장 버튼을 찾을 수 없습니다.");
-            return;
-        }
+        // ... (모달 열릴 때 로직은 그대로) ...
 
-        // 1. 모달이 열릴 때, 'orderItemId' (bookId)를 hidden input에 저장 (기존 코드)
-        packagingModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const orderItemId = button.dataset.orderItemId; // This is the bookId
-            const hiddenInput = document.getElementById('modal_order_item_id');
-            hiddenInput.value = orderItemId;
-
-            // 2. 현재 아이템에 저장된 포장지 정보를 찾아 모달에 기본 체크
-            const orderItemDiv = document.querySelector(`.order-item[data-book-id="${orderItemId}"]`);
-            const currentPackagingId = orderItemDiv.dataset.packagingId || '0'; // 기본값 '0'
-            const currentRadio = packagingModal.querySelector(`input[name="packagingId"][value="${currentPackagingId}"]`);
-            if (currentRadio) {
-                currentRadio.checked = true;
-            }
-        });
-
-        // 3. '적용' 버튼 클릭 시
+        // '적용' 버튼 클릭 시
         savePackagingButton.addEventListener('click', () => {
-            // 3a. 어떤 책(bookId)에 대한 것인지 가져옵니다.
             const bookId = document.getElementById('modal_order_item_id').value;
-
-            // 3b. 선택된 포장지 라디오 버튼을 찾습니다.
             const selectedRadio = packagingModal.querySelector('input[name="packagingId"]:checked');
-            if (!selectedRadio) return; // 선택된 게 없으면 종료
+            if (!selectedRadio) return;
 
             const packagingId = selectedRadio.value;
             const label = selectedRadio.closest('label');
 
-            // 3c. 포장지 가격을 텍스트에서 파싱합니다. (예: "(+1,000원)" -> 1000)
             const priceText = label.querySelector('.text-muted').textContent;
             const packagingPrice = parseInt(priceText.replace(/[^\d]/g, ''), 10) || 0;
 
-            // 3d. 포장지 이름을 가져옵니다.
-            const packagingName = label.querySelector('strong, span:not(.text-muted)').textContent;
+            const nameElement = label.querySelector('strong, span:not(.text-muted)');
+            const packagingName = nameElement ? nameElement.textContent : '포장 선택됨';
 
-            // 3e. 메인 페이지의 .order-item div에 data- 속성으로 정보를 저장합니다.
             const orderItemDiv = document.querySelector(`.order-item[data-book-id="${bookId}"]`);
             const triggerButton = document.querySelector(`button[data-order-item-id="${bookId}"]`);
 
             if (orderItemDiv && triggerButton) {
+                orderItemDiv.dataset.packagingId = packagingId;
+                orderItemDiv.dataset.packagingPrice = packagingPrice;
+
+                // 모든 색상 클래스를 제거하여 초기화합니다.
+                triggerButton.classList.remove('btn-success', 'btn-dark', 'btn-outline-secondary', 'text-white');
+
                 if (packagingId === '0') {
-                    // '포장 안 함' 선택 시
-                    orderItemDiv.dataset.packagingId = '0';
-                    orderItemDiv.dataset.packagingPrice = '0';
-
+                    // '포장 안 함' 선택 시 (기본값)
                     triggerButton.innerHTML = '<i class="bi bi-box-seam me-1"></i> 포장 선택';
-                    triggerButton.classList.remove('btn-success'); // 초록색 버튼 제거
+                    triggerButton.classList.add('btn-outline-secondary'); // 기본 회색 테두리 버튼
                 } else {
-                    // 특정 포장지 선택 시
-                    orderItemDiv.dataset.packagingId = packagingId;
-                    orderItemDiv.dataset.packagingPrice = packagingPrice; // 가격 저장
-
+                    // 포장 선택 시
                     triggerButton.innerHTML = `<i class="bi bi-check-lg me-1"></i> ${packagingName}`;
-                    triggerButton.classList.add('btn-success'); // 초록색 버튼으로 변경
+                    triggerButton.classList.add('btn', 'btn-dark', 'text-white'); // 검은색 배경, 흰색 텍스트
                 }
             }
 
-            // 3f. 가격 재계산을 위해 updatePriceSummary() 호출
             updatePriceSummary();
 
-            // 3g. 모달을 닫습니다.
             const modalInstance = bootstrap.Modal.getInstance(packagingModal);
             modalInstance.hide();
 
