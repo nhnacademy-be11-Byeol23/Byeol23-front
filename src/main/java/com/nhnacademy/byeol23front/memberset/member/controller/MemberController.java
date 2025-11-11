@@ -56,7 +56,6 @@ public class MemberController {
 		}
 
 		ResponseEntity<LoginResponse> upstream = memberApiClient.login(request);
-		log.info("upstream {}", upstream);
 		HttpHeaders headers = new HttpHeaders();
 		String accessToken = upstream.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 		if (accessToken != null) {
@@ -67,7 +66,7 @@ public class MemberController {
 		if (setCookies != null && !setCookies.isEmpty()) {
 			headers.put(HttpHeaders.SET_COOKIE, setCookies);
 		}
-		log.info("accessToken{} , cookie {}", accessToken, setCookies);
+		log.info("accessToken {} , cookie {}", accessToken, setCookies);
 		boolean isAjax = "XMLHttpRequest".equalsIgnoreCase(httpReq.getHeader("X-Requested-With"));
 		if (isAjax) {
 			return ResponseEntity
