@@ -18,7 +18,7 @@ public class FeignInterceptor {
 		public RequestInterceptor authHeaderInterceptor() {
 			return template -> {
 				String path = template.path();
-
+				log.info(path);
 				if(!path.startsWith("/books") && !path.startsWith("/members")) {
 					return;
 				}
