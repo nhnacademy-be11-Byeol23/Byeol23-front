@@ -106,8 +106,16 @@
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="publisherId" class="form-label">출판사 ID</label>
-                                <input type="number" class="form-control" id="publisherId" name="publisherId" th:value="*{publisher().publisherId()}" required>
+                                <label for="publisherId" class="form-label">출판사</label>
+                                <select class="form-select" id="publisherId" name="publisherId" required>
+                                    <th:block th:if="${allPublishers != null and !#lists.isEmpty(allPublishers)}">
+                                        <option th:each="publisher : ${allPublishers}"
+                                                th:value="${publisher.publisherId()}"
+                                                th:text="${publisher.publisherName()}"
+                                                th:selected="${publisher.publisherId() == book.publisher().publisherId()}">
+                                        </option>
+                                    </th:block>
+                                </select>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">카테고리</label>
