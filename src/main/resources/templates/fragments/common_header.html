@@ -78,51 +78,22 @@
                     <li><a href="#">베스트</a></li>
                     <li><a href="#">신상품</a></li>
 
-                    <li th:each="root : ${tree}" class="products-megamenu-2">
-                        <a th:href="@{'/api/categories/' + ${root.categoryId} + '/books'(pathId=${root.pathId})}">
-                            <span th:text="${root.categoryName}"></span>
-                            <i class="bi bi-chevron-down toggle-dropdown"></i>
-                        </a>
+                    <li th:each="root : ${tree}" class="dropdown">
+                        <a th:href="@{'/categories/' + ${root.categoryId} + '/books'(pathId=${root.pathId})}"> <span th:text="${root.categoryName}"></span> </a>
 
-                        <ul class="mobile-megamenu">
-                            <li th:each="child : ${root.children}" class="dropdown">
-                                <a th:href="@{'/api/categories/' + ${child.categoryId} + '/books'(pathId=${child.pathId})}">
-                                    <span th:text="${child.categoryName}"></span>
-                                    <i class="bi bi-chevron-down toggle-dropdown"></i>
-                                </a>
-                                <ul th:if="${#lists.size(child.children) > 0}">
+                        <ul th:if="${#lists.size(root.children) > 0}" class="dropdown-menu level-1">
+                            <li th:each="child : ${root.children}" class="dropdown-submenu" th:classappend="${#lists.size(child.children) > 0} ? ' has-children' : ''">
+                                <a th:href="@{'/categories/' + ${child.categoryId} + '/books'(pathId=${child.pathId})}" th:text="${child.categoryName}"></a>
+
+                                <ul th:if="${#lists.size(child.children) > 0}" class="dropdown-menu level-2">
                                     <li th:each="grand : ${child.children}">
-                                        <a th:href="@{'/api/categories/' + ${grand.categoryId} + '/books'(pathId=${grand.pathId})}"
-                                           th:text="${grand.categoryName}"></a>
+                                    <a th:href="@{'/categories/' + ${grand.categoryId} + '/books'(pathId=${grand.pathId})}" th:text="${grand.categoryName}"></a>
                                     </li>
                                 </ul>
                             </li>
                         </ul>
-
-                        <!-- Desktop View -->
-                        <div class="desktop-megamenu">
-                            <div class="megamenu-content tab-content">
-                                <div class="tab-pane fade show active">
-                                    <div class="category-layout">
-                                        <div class="categories-section">
-                                            <div class="category-headers">
-                                                <h4 th:each="child : ${root.children}" th:text="${child.categoryName}"></h4>
-                                            </div>
-
-                                            <div class="category-links">
-                                                <div class="link-row" th:each="child : ${root.children}">
-                                                    <a th:each="grand : ${child.children}"
-                                                       th:text="${grand.categoryName}"
-                                                       th:href="@{'/api/categories/' + ${grand.categoryId} + '/books'(pathId=${grand.pathId})}">
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </li>
+
                 </ul>
             </nav>
         </div>
