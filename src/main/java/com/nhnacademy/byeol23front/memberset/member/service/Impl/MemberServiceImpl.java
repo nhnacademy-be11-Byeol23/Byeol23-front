@@ -24,15 +24,13 @@ public class MemberServiceImpl implements MemberService {
 	private final MemberApiClient memberApiClient;
 
 	@Override
-	public MemberRegisterResponse register(MemberRegisterRequest request) {
-		MemberRegisterResponse response = memberApiClient.registerRequest(request).getBody();
-		return response;
+	public void register(MemberRegisterRequest request) {
+		memberApiClient.registerRequest(request);
 	}
 
 	@Override
 	public LoginResponse login(LoginRequest request) {
-		LoginResponse response = memberApiClient.loginRequest(request).getBody();
-		return response;
+		return memberApiClient.login(request).getBody();
 	}
 
 

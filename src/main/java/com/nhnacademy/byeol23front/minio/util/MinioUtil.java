@@ -1,9 +1,5 @@
 package com.nhnacademy.byeol23front.minio.util;
 
-import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.MinioClient;
-import io.minio.errors.MinioException;
-import io.minio.http.Method;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.Getter;
@@ -23,7 +19,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.net.URI;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 
 import com.nhnacademy.byeol23front.minio.dto.VailidFileType;
 
@@ -173,7 +169,8 @@ public class MinioUtil {
 	}
 
 	private String generateObjectKey(ImageDomain type, long id, VailidFileType fileType) {
-		return String.format("%s/%d/%d.%s", type.name(), id, System.currentTimeMillis(), fileType.getFileType());
+		String uniqueId = UUID.randomUUID().toString();
+		return String.format("%s/%d/%s.%s", type.name(), id, uniqueId, fileType.getFileType());
 	}
 
 	private String urlToObjectKey(String url) {

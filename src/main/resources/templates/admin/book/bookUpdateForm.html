@@ -35,7 +35,7 @@
                 <div class="col-lg-9">
                     <div class="book-management-container">
                         <h2>도서 수정</h2>
-                        <form id="bookForm" class="book-form" th:object="${book}">
+                        <form id="bookForm" class="book-form" th:action="@{/admin/books/{id}(id=${book.bookId})}" method="post" enctype="multipart/form-data" th:object="${book}">
                             <input type="hidden" id="bookId" name="bookId" th:value="*{bookId}">
                             <!-- 선택된 카테고리 ID 목록을 JavaScript에서 사용할 수 있도록 추가 -->
                             <script th:inline="javascript">
@@ -135,6 +135,30 @@
                                 <div id="selectedContributorsDisplay" class="d-flex flex-wrap gap-2 mb-2"></div>
                                 <input type="hidden" id="selectedContributorIds" name="contributorIds" value="">
                                 <div class="form-text">기여자 선택 버튼을 클릭하여 기여자를 선택하세요.</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">현재 도서 이미지</label>
+                                <div class="d-flex flex-wrap gap-2 mb-3" th:if="${book.images != null and !book.images.isEmpty()}">
+                                    <div th:each="image : ${book.images}" class="position-relative">
+                                        <img th:src="${image.imageUrl}" 
+                                             alt="도서 이미지" 
+                                             class="img-thumbnail" 
+                                             style="width: 100px; height: 100px; object-fit: cover;">
+                                    </div>
+                                </div>
+                                <div th:if="${book.images == null or book.images.isEmpty()}" class="text-muted mb-3">
+                                    등록된 이미지가 없습니다.
+                                </div>
+                                
+                                <label for="bookImages" class="form-label">새 이미지로 변경 (선택)</label>
+                                <input type="file" 
+                                       class="form-control" 
+                                       id="bookImages" 
+                                       name="images" 
+                                       accept="image/*" 
+                                       multiple>
+                                <div class="form-text">새 이미지를 선택하면 기존 이미지가 모두 삭제되고 새 이미지로 대체됩니다. 이미지를 변경하지 않으려면 파일을 선택하지 마세요.</div>
+                                <div id="imagePreviewList" class="mt-2 d-flex flex-wrap gap-2"></div>
                             </div>
                             <div class="d-flex justify-content-end gap-2">
                                 <a th:href="@{/admin/books}" class="btn btn-secondary">취소</a>

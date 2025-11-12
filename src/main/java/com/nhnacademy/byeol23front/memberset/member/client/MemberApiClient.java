@@ -4,6 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.nhnacademy.byeol23front.memberset.member.dto.LoginRequest;
 import com.nhnacademy.byeol23front.memberset.member.dto.LoginResponse;
@@ -23,5 +24,5 @@ public interface MemberApiClient {
 	 * 로그인
 	 */
 	@PostMapping("/auth/login")
-	ResponseEntity<LoginResponse> loginRequest(@RequestBody LoginRequest request);
+	ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request);
 }
