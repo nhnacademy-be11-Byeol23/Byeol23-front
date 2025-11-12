@@ -16,13 +16,10 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(requestInterceptor)
-			.addPathPatterns("/**")  // 모든 경로에 적용
+			.addPathPatterns("/members")  // 모든 경로에 적용
 			.excludePathPatterns(
 				"/members/login",    // 로그인 페이지 제외
-				"/members/register", // 회원가입 페이지 제외
-				"/",                 // 메인 페이지 제외
-				"/assets/**",        // 정적 리소스 제외
-				"/error"             // 에러 페이지 제외
+				"/members/register" // 회원가입 페이지 제외
 			);
 	}
 }
