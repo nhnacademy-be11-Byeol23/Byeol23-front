@@ -35,7 +35,7 @@
       <div class="col-lg-7" data-aos="zoom-in" data-aos-delay="150">
         <div class="product-gallery">
           <div class="main-showcase">
-            <img src="https://image.aladin.co.kr/product/33566/83/cover500/8937456486_1.jpg" alt="도서 커버" class="img-fluid main-product-image" id="main-product-image">
+            <img src="https://image.yes24.com/momo/Noimg_L.jpg" alt="도서 커버" class="img-fluid main-product-image" id="main-product-image">
           </div>
         </div>
       </div>
@@ -44,14 +44,20 @@
         <div class="product-details">
           <div class="product-badge-container">
             <div class="category-badges mb-2" th:if="${book.categories != null and !#lists.isEmpty(book.categories)}">
-              <span th:each="category : ${book.categories}" 
+              <span th:each="category : ${book.categories}"
                     class="badge bg-primary me-1"
                     th:text="${category.categoryName}"
                     title="${category.pathName}">
               </span>
             </div>
             <span class="badge-category" th:if="${book.categories == null or #lists.isEmpty(book.categories)}">카테고리 없음</span>
-
+            <div class="tag-badges" th:if="${book.tags != null and !#lists.isEmpty(book.tags)}">
+              <i class="bi bi-tags-fill me-1" style="font-size: 0.9rem;"></i>
+              <span th:each="tag : ${book.tags}"
+                    class="badge bg-secondary me-1"
+                    th:text="${tag.tagName}">
+                </span>
+            </div>
             <div class="rating-group">
               <div class="stars">
                 <i class="bi bi-star-fill"></i>
@@ -78,11 +84,20 @@
             </div>
           </div>
 
-          <div class="product-description">
-            <p th:text="${book.toc}">도서 목차</p>
-          </div>
+          <span th:text="${book.publisher().publisherName()}">출판사명</span>
 
-          <div class="availability-status">
+          <span class="mx-1">|</span>
+
+          <th:block th:each="contributor, iter : ${book.contributors}">
+            <span th:text="${contributor.contributorName()}">저자명</span>
+            <span th:text="${contributor.contributorRole()} ? ' (' + ${contributor.contributorRole()} + ')' : ''">(저)</span>
+            <span th:if="!${iter.last}">, </span>
+          </th:block>
+
+          <span th:if="${book.contributors == null or #lists.isEmpty(book.contributors)}">
+                기여자 정보 없음
+              </span>
+          <div class="availability-status mt-3">
             <div class="stock-indicator" th:if="${book.stock > 0}">
               <i class="bi bi-check-circle-fill"></i>
               <span class="stock-text">구매 가능</span>
@@ -92,6 +107,14 @@
               <span class="stock-text">재고 없음</span>
             </div>
             <div class="quantity-left" th:if="${book.stock > 0}" th:text="'(잔여 재고: ' + ${book.stock} + '권)'">재고: 18권</div>
+            <div th:if="${book.isPack}" class="stock-indicator text-success">
+              <i class="bi bi-box-seam-fill"></i>
+              <span class="stock-text">포장 가능</span>
+            </div>
+            <div th:unless="${book.isPack}" class="stock-indicator text-muted">
+              <i class="bi bi-box"></i>
+              <span class="stock-text">포장 불가</span>
+            </div>
           </div>
 
           <div class="purchase-section">
@@ -158,12 +181,17 @@
               <div class="overview-content">
                 <div class="row g-4">
                   <div class="col-lg-12"> <div class="content-section">
-                    <h3>도서 소개</h3>
+                    <h3>도서 설명</h3>
                     <p th:text="${book.description}">
                       도서에 대한 상세한 설명글입니다.
                     </p>
-
                   </div>
+                    <div class="content-section mt-4">
+                      <h3>도서 목차</h3>
+                      <p th:text="${book.toc}">
+                        도서 목차가 여기에 표시됩니다.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -177,12 +205,21 @@
                       <h4>도서 상세 정보</h4>
                       <div class="spec-table">
                         <div class="spec-row">
-                          <span class="spec-name">저자</span>
-                          <span class="spec-value">저자명</span>
+                          <span class="spec-name">기여자</span>
+                          <span class="spec-value">
+                            <th:block th:each="contrib, iter : ${book.contributors}">
+                              <span th:text="${contrib.contributorName}"></span>
+                              <span th:text="' (' + ${contrib.contributorRole} + ')'"></span>
+                              <span th:if="!${iter.last}">, </span>
+                            </th:block>
+                            <span th:if="${book.contributors == null or #lists.isEmpty(book.contributors)}">
+                              기여자 정보 없음
+                            </span>
+                          </span>
                         </div>
                         <div class="spec-row">
                           <span class="spec-name">출판사</span>
-                          <span class="spec-value" th:text="${book.publisherId}">출판사명</span>
+                          <span class="spec-value" th:text="${book.publisher().publisherName()}">출판사명</span>
                         </div>
                         <div class="spec-row">
                           <span class="spec-name">발행일</span>
@@ -245,8 +282,8 @@
 
     const bookId = /*[[${book.bookId}]]*/ 1;
     const bookName = /*[[${book.bookName}]]*/ "책 이름";
-    const regularPrice = /*[[${book.regularPrice}]] */ 16000;
-    const salePrice = /*[[${book.salePrice}]]*/ 15990;
+    const regularPrice = /*[[${book.regularPrice}]]*/ null;
+    const salePrice = /*[[${book.salePrice}]]*/ null;
     const postUrl = /*[[@{/orders/direct}]]*/ '/orders/direct';
     const successUrl = /*[[@{/orders/direct}]]*/ '/orders/direct';
 
@@ -262,14 +299,21 @@
           // 로그인이 안 돼있을 때 로그인 페이지로 리다이렉트 시킬 수 있도록
         }
 
+        const isPack = /*[[${book.isPack}]]*/ false;
+        const publisher = /*[[${book.publisher}]]*/ null;
+        const contributors = /*[[${book.contributors}]]*/ [];
+
         const bookInfoRequest = {
           bookId: bookId,
           bookName: bookName,
           imageUrl: "https://image.aladin.co.kr/product/33566/83/cover100/8937456486_1.jpg",
+          isPack: isPack,
           regularPrice: regularPrice,
           salePrice: salePrice,
-          quantity: quantity
-        }
+          publisher: publisher,
+          quantity: quantity,
+          contributors: contributors
+      }
 
         const bookOrderRequest = {
           memberId: memberId,

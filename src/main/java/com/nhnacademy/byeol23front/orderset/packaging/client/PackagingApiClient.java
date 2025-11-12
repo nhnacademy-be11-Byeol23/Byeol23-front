@@ -1,5 +1,7 @@
 package com.nhnacademy.byeol23front.orderset.packaging.client;
 
+import java.util.List;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,5 +34,8 @@ public interface PackagingApiClient {
 
 	@DeleteMapping("/api/packagings/{packaging-id}")
 	ResponseEntity<Void> deleteById(@PathVariable(name = "packaging-id") Long packagingId);
+
+	@GetMapping("/api/packagings/lists")
+	List<PackagingInfoResponse> getAllPackagingLists();
 
 }
