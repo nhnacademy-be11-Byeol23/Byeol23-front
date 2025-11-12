@@ -6,6 +6,7 @@ import com.nhnacademy.byeol23front.bookset.book.dto.BookUpdateRequest;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -17,11 +18,13 @@ import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
 import com.nhnacademy.byeol23front.bookset.tag.client.TagApiClient;
 import com.nhnacademy.byeol23front.bookset.tag.dto.AllTagsInfoResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.PageResponse;
+import com.nhnacademy.byeol23front.memberset.JwtParser;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequestMapping("/admin/books")
 @RequiredArgsConstructor
@@ -29,6 +32,7 @@ public class BookAdminController {
 	private final BookApiClient bookApiClient;
 	private final CategoryApiClient categoryApiClient;
 	private final TagApiClient tagApiClient;
+	private final JwtParser jwtParser;
 
 	@PostMapping("/new")
 	@ResponseBody
@@ -43,7 +47,8 @@ public class BookAdminController {
 
 	@PutMapping("/{book-id}")
 	@ResponseBody
-	public ResponseEntity<Void> updateBook(@PathVariable("book-id") Long id, @RequestBody BookUpdateRequest request){
+	public ResponseEntity<Void> updateBook(@PathVariable("book-id") Long id, @RequestBody BookUpdateRequest request, @RequestHeader(value = "Authorization") String auth){
+		log.info("jwt memberId: {}", jwtParser.jwtParseMemberId(auth));
 		try {
 			bookApiClient.updateBook(id, request);
 			return ResponseEntity.ok().build();

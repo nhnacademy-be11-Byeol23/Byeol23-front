@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>AuthFetch GET 테스트</title>
+  <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+</head>
+
+<body>
+  <div class="container mt-5">
+    <h1>AuthFetch GET 요청 테스트</h1>
+    <p>페이지 로드 시 자동으로 GET 요청이 전송됩니다.</p>
+    
+    <div class="mt-4">
+      <h5>테스트 URL:</h5>
+      <p id="testUrl" class="text-muted">/members/test</p>
+      <p class="text-info small">페이지 로드 시 authFetch로 GET 요청이 전송되며, Authorization 헤더가 자동으로 포함됩니다.</p>
+    </div>
+    
+    <div class="mt-4">
+      <h5>응답 결과:</h5>
+      <pre id="responseDisplay" class="bg-light p-3 rounded">요청 중...</pre>
+    </div>
+  </div>
+
+  <script>
+    // 페이지 로드 시 자동으로 GET 요청 전송 (Authorization 헤더 포함)
+    window.addEventListener('DOMContentLoaded', async () => {
+      const testUrl = '/members/test'; // 테스트할 URL
+      
+      try {
+        // authFetch를 사용하여 Authorization 헤더가 포함된 GET 요청 전송
+        const response = await authFetch(testUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        });
+
+        const responseData = {
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries())
+        };
+
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          responseData.body = await response.json();
+        } else {
+          responseData.body = await response.text();
+        }
+
+        document.getElementById('responseDisplay').textContent = 
+          JSON.stringify(responseData, null, 2);
+      } catch (error) {
+        document.getElementById('responseDisplay').textContent = 
+          `에러: ${error.message}`;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -5,7 +5,7 @@ spring:
   application:
     name: byeol23-front
   profiles:
-    active: prod
+    active: dev
 
 backend:
   api:
