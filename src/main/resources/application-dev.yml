@@ -4,3 +4,21 @@ minio:
   access-key: V2CnisSrBMa0w2QtE8cP
   secret-key: Bfyx9qcRRI2J7LHF5r5ZoFFWIFSZ40d4K9FEpDnh
   bucket-name: starlbookimg
+
+logging:
+  level:
+    com.nhnacademy.byeol23front: DEBUG
+    feign: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+
+jwt:
+  public-key:
+    -----BEGIN PUBLIC KEY-----
+    MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiNJoRcPJmLQ7Ii+hv78J
+    NhtSgo7w7u8TS3PsftAMKBvkqpeAInmnpra1usEPhXTVWOyLLxL6yJAymKY8lzDf
+    3I74T0F4GJiomkjjOdIT5TEAc5X3um+IuHxu7Qapr0BuKwBvT4FCBJ9jzPOCq8xk
+    h2q/AWGfOTlPLjBmAVnp2NbbV4aI5cQR6D9a/extPX6hhAtq/NZqE665L/SVIXqP
+    abu2Owpvn90O6HtNXzg6ytk7Rj4FBx6YLtqHy0QAf8/o/Zc1nr+ZHwSsDQ+am6Sp
+    2ZmUl03ScerF7EMtfZyzUqY46RFNgUkhB7iJb2hZ3xYGtR9SUI+PDvt2Kz6AETew
+    hQIDAQAB
+    -----END PUBLIC KEY-----
