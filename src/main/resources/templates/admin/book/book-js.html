@@ -537,7 +537,7 @@
             // Toast UI Editor 초기화
             const editorElement = document.querySelector('#descriptionEditor');
             if (editorElement && typeof toastui !== 'undefined' && toastui.Editor) {
-                const initialContent = document.getElementById('descriptionContent')?.value || '내용을 입력해 주세요.';
+                const initialContent = document.getElementById('descriptionContent')?.value;
                 editor = new toastui.Editor({
                     el: editorElement,
                     height: '300px',
@@ -553,7 +553,7 @@
             // Toast UI Editor 초기화
             const tocEditorElement = document.querySelector('#tocEditor');
             if (tocEditorElement && typeof toastui !== 'undefined' && toastui.Editor) {
-                const initialTocContent = document.getElementById('tocContent')?.value || '목차를 입력해 주세요.';
+                const initialTocContent = document.getElementById('tocContent')?.value;
                 tocEditor = new toastui.Editor({
                     el: tocEditorElement,
                     height: '300px',
