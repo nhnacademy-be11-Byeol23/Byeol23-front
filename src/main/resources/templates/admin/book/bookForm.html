@@ -42,9 +42,12 @@
                             </div>
                             <div class="mb-3">
                                 <label for="descriptionEditor" class="form-label">설명</label>
-                                <textarea id="descriptionContent" style="display:none;" th:text="${book != null} ? ${book.description} : ''"></textarea>
+
+                                <!-- Visible editor target -->
+                                <div id="descriptionEditor" class="form-control p-0"></div>
+
+                                <!-- Hidden field submitted with the form -->
                                 <input type="hidden" id="description" name="description">
-                                <div id="descriptionEditor"></div>
                             </div>
                             <div class="mb-3">
                                 <label for="tocEditor" class="form-label">목차</label>
