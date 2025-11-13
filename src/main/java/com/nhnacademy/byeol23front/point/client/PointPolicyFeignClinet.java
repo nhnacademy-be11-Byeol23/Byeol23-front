@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.nhnacademy.byeol23front.point.dto.PointPolicyDTO;
 
 @FeignClient(name = "BYEOL23-BACKEND", contextId = "pointFeignClient")
-public interface PointFeignClinet {
+public interface PointPolicyFeignClinet {
 
 	@GetMapping("/api/point-policies")
 	ResponseEntity<List<PointPolicyDTO>> getAllPointPolicies(
