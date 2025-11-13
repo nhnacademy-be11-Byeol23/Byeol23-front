@@ -53,7 +53,7 @@ public class BookAdminController {
 			List<Long> categoryIds = tmp.categoryIds() != null ? tmp.categoryIds() : List.of();
 			List<Long> tagIds = tmp.tagIds() != null ? tmp.tagIds() : List.of();
 			List<Long> contributorIds = tmp.contributorIds() != null ? tmp.contributorIds() : List.of();
-
+			
 			BookCreateRequest request = new BookCreateRequest(
 				tmp.bookName(),
 				tmp.toc(),
@@ -88,7 +88,7 @@ public class BookAdminController {
 				}
 			}
 			return "redirect:/admin/books";
-
+			
 		} catch (Exception e) {
 			log.error("도서 생성 실패", e);
 			return "redirect:/admin/books/new";
@@ -101,7 +101,7 @@ public class BookAdminController {
 			List<Long> categoryIds = tmp.categoryIds() != null ? tmp.categoryIds() : List.of();
 			List<Long> tagIds = tmp.tagIds() != null ? tmp.tagIds() : List.of();
 			List<Long> contributorIds = tmp.contributorIds() != null ? tmp.contributorIds() : List.of();
-
+			
 			if (tmp.images() != null && !tmp.images().isEmpty()) {
 				boolean hasNewImages = tmp.images().stream().anyMatch(img -> !img.isEmpty());
 				if (hasNewImages) {
@@ -130,7 +130,7 @@ public class BookAdminController {
 					}
 				}
 			}
-
+			
 			BookUpdateRequest request = new BookUpdateRequest(
 				tmp.bookName(),
 				tmp.toc(),
@@ -148,7 +148,7 @@ public class BookAdminController {
 			);
 			bookApiClient.updateBook(bookId, request);
 			return "redirect:/admin/books";
-
+			
 		} catch (Exception e) {
 			log.error("도서 수정 실패: bookId={}", bookId, e);
 			return "redirect:/admin/books/update/" + bookId;
