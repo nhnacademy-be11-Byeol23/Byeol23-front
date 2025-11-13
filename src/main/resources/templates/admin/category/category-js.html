@@ -89,7 +89,6 @@
                 })
                     .then(res => {
                         if (!res.ok) throw new Error("추가 실패");
-                        // 👇 [수정] 새로고침 전 해시(#)를 설정
                         location.hash = '#categories';
                         location.reload();
                     })
@@ -130,12 +129,8 @@
                 })
                     .then(res => {
                         if (!res.ok) throw new Error("수정 실패");
-                        return res.json();
-                    })
-                    .then(data => {
-                        li.querySelector(".category-name").textContent = data.name;
-                        button.dataset.name = data.name;
-                        form.remove();
+                        location.hash = '#categories';
+                        location.reload();
                     })
                     .catch(err => alert(err));
             });
