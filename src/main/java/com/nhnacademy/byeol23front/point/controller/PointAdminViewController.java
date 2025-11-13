@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/admin/point-policy")
-public class PointViewController {
+public class PointAdminViewController {
 
 	@GetMapping
 	public String pointPolicyPage(Model model) {

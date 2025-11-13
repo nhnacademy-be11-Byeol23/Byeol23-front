@@ -98,8 +98,16 @@
                                 </div>
                             </div>
                             <div class="mb-3">
-                                <label for="publisherId" class="form-label">출판사 ID</label>
-                                <input type="number" class="form-control" id="publisherId" name="publisherId" required>
+                                <label for="publisherId" class="form-label">출판사</label>
+                                <select class="form-select" id="publisherId" name="publisherId" required>
+                                    <option value="" selected disabled>출판사를 선택하세요</option>
+                                    <th:block th:if="${allPublishers != null and !#lists.isEmpty(allPublishers)}">
+                                        <option th:each="publisher : ${allPublishers}"
+                                                th:value="${publisher.publisherId()}"
+                                                th:text="${publisher.publisherName()}">
+                                        </option>
+                                    </th:block>
+                                </select>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">카테고리</label>
@@ -108,7 +116,6 @@
                                 </button>
                                 <div id="selectedCategoriesDisplay" class="d-flex flex-wrap gap-2 mb-2"></div>
                                 <input type="hidden" id="selectedCategoryIds" name="categoryIds" value="">
-                                <div class="form-text">카테고리 선택 버튼을 클릭하여 카테고리를 선택하세요.</div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">태그</label>
@@ -117,7 +124,6 @@
                                 </button>
                                 <div id="selectedTagsDisplay" class="d-flex flex-wrap gap-2 mb-2"></div>
                                 <input type="hidden" id="selectedTagIds" name="tagIds" value="">
-                                <div class="form-text">태그 선택 버튼을 클릭하여 태그를 선택하세요.</div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">기여자</label>
@@ -126,7 +132,6 @@
                                 </button>
                                 <div id="selectedContributorsDisplay" class="d-flex flex-wrap gap-2 mb-2"></div>
                                 <input type="hidden" id="selectedContributorIds" name="contributorIds" value="">
-                                <div class="form-text">기여자 선택 버튼을 클릭하여 기여자를 선택하세요.</div>
                             </div>
                             <div class="mb-3">
                                 <label for="bookImages" class="form-label">도서 이미지</label>

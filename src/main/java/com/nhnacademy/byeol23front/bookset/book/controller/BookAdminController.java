@@ -19,6 +19,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
+import com.nhnacademy.byeol23front.bookset.publisher.client.PublisherApiClient;
+import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
 import com.nhnacademy.byeol23front.bookset.tag.client.TagApiClient;
 import com.nhnacademy.byeol23front.bookset.tag.dto.AllTagsInfoResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.PageResponse;
@@ -41,11 +43,13 @@ public class BookAdminController {
 	private final CategoryApiClient categoryApiClient;
 	private final TagApiClient tagApiClient;
 	private final ContributorApiClient contributorApiClient;
+	private final PublisherApiClient publisherApiClient;
 	private final MinioService minioService;
 
 	private static final String ALL_CONTRIBUTORS = "allContributors";
 	private static final String CATEGORIES = "categories";
 	private static final String ALL_TAGS = "allTags";
+	private static final String ALL_PUBLISHERS = "allPublishers";
 
 	@PostMapping("/new")
 	public String createBook(@ModelAttribute BookCreateTmpRequest tmp) {
@@ -169,6 +173,10 @@ public class BookAdminController {
 		List<AllContributorResponse> allContributors = contributorsResponse != null ? contributorsResponse.content() : new ArrayList<>();
 		model.addAttribute(ALL_CONTRIBUTORS, allContributors);
 
+		com.nhnacademy.byeol23front.bookset.publisher.dto.PageResponse<AllPublishersInfoResponse> publishersResponse = publisherApiClient.getAllPublishers(0, 100).getBody();
+		List<AllPublishersInfoResponse> allPublishers = publishersResponse != null ? publishersResponse.content() : new ArrayList<>();
+		model.addAttribute(ALL_PUBLISHERS, allPublishers);
+
 		List<Long> selectedCategoryIds = book.categories() != null
 			? book.categories().stream().map(CategoryLeafResponse::id).toList()
 			: Collections.emptyList();
@@ -204,6 +212,10 @@ public class BookAdminController {
 		com.nhnacademy.byeol23front.bookset.contributor.dto.PageResponse<AllContributorResponse> contributorsResponse = contributorApiClient.getAllContributors(0, 1000).getBody();
 		List<AllContributorResponse> allContributors = contributorsResponse != null ? contributorsResponse.content() : new ArrayList<>();
 		model.addAttribute(ALL_CONTRIBUTORS, allContributors);
+
+		com.nhnacademy.byeol23front.bookset.publisher.dto.PageResponse<AllPublishersInfoResponse> publishersResponse = publisherApiClient.getAllPublishers(0, 100).getBody();
+		List<AllPublishersInfoResponse> allPublishers = publishersResponse != null ? publishersResponse.content() : new ArrayList<>();
+		model.addAttribute(ALL_PUBLISHERS, allPublishers);
 
 		return "admin/book/bookForm";
 	}

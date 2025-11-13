@@ -31,7 +31,4 @@ public class BookController {
 
 		return "book/book-details";
 	}
-
-
-
 }
