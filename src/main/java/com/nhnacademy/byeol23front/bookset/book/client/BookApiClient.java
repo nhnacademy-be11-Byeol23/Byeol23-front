@@ -2,8 +2,11 @@ package com.nhnacademy.byeol23front.bookset.book.client;
 
 import com.nhnacademy.byeol23front.bookset.book.dto.BookCreateRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookStockResponse;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookStockUpdateRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookUpdateRequest;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +27,16 @@ public interface BookApiClient {
 		@RequestBody BookUpdateRequest request);
 
 	@GetMapping("/api/books")
-	List<BookResponse> getBooks();
+	List<BookResponse> getBooks(
+		@RequestParam(defaultValue = "0") int pageNo,
+		@RequestParam(defaultValue = "10") int pageSize
+	);
+
+	@GetMapping("/api/books/{book-id}/stock")
+	BookStockResponse getBookStock(@PathVariable("book-id") Long bookId);
+
+	@PutMapping("/api/books/{book-id}/stock")
+	void updateBookStock(@PathVariable("book-id") Long bookId, @RequestBody BookStockUpdateRequest request);
 
 	@DeleteMapping("/api/books/{book-id}")
 	void deleteBook(@PathVariable("book-id") Long bookId);
