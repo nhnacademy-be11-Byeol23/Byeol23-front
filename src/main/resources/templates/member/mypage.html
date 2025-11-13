@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>마이페이지</title>
+    <meta name="description" content="마이페이지">
+    <meta name="keywords" content="">
+    <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+    <style>
+        .mypage-wrap { max-width: 980px; margin: 24px auto; }
+        .avatar {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: #e9ecef; display: inline-flex; align-items: center; justify-content: center;
+            font-weight: 700; color: #6c757d; text-transform: uppercase;
+        }
+        .grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 992px) { .grid-two { grid-template-columns: 1fr; } }
+        .badge-role, .badge-grade { font-size: .85rem; }
+    </style>
+</head>
+
+<body class="mypage-page">
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+
+<!--/*@thymesVar id="member" type="com.nhnacademy.byeol23front.memberset.member.dto.MyPageResponse"*/-->
+<main class="main" th:object="${member}">
+    <!-- 상단 타이틀/빵부스러기 -->
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">마이페이지</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li class="current">마이페이지</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- 본문 -->
+    <section id="mypage" class="section">
+        <div class="container mypage-wrap" data-aos="fade-up" data-aos-delay="100">
+            <!-- 요약 카드 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="avatar"
+                         th:text="*{nickname}">
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <h4 class="mb-0" th:text="*{nickname}">사용자</h4>
+                            <span class="badge text-bg-dark badge-role" th:if="*{memberRole != null}" th:text="*{memberRole}">USER</span>
+                            <span class="badge text-bg-primary badge-grade" th:if="*{grade != null}" th:text="*{grade}">BRONZE</span>
+                        </div>
+                        <div class="text-muted mt-1" th:text="'로그인 ID: ' + *{loginId}">로그인 ID: sample</div>
+                    </div>
+
+                    <div class="text-end">
+                        <div class="text-muted">보유 포인트</div>
+                        <div class="fs-4 fw-semibold"
+                             th:text="*{#numbers.formatDecimal(currentPoint, 1, 'COMMA', 0, 'POINT')}">0</div>
+                        <div class="mt-2 d-flex gap-2 justify-content-end">
+                            <a th:href="@{/points/charge}" class="btn btn-sm btn-outline-primary">충전</a>
+                            <a th:href="@{/points/history}" class="btn btn-sm btn-outline-secondary">내역</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상세/수정 -->
+            <div class="grid-two">
+                <!-- 상세 정보 -->
+                <div class="card shadow-sm">
+                    <div class="card-header fw-semibold">계정 정보</div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">이름</dt>
+                            <dd class="col-sm-8" th:text="*{memberName}">홍길동</dd>
+
+                            <dt class="col-sm-4">닉네임</dt>
+                            <dd class="col-sm-8" th:text="*{nickname}">gildong</dd>
+
+                            <dt class="col-sm-4">이메일</dt>
+                            <dd class="col-sm-8">
+                                <a th:href="*{'mailto:' + email}" th:text="*{email}">user@example.com</a>
+                            </dd>
+
+                            <dt class="col-sm-4">휴대폰</dt>
+                            <dd class="col-sm-8" th:text="*{phoneNumber}">010-0000-0000</dd>
+
+                            <dt class="col-sm-4">생년월일</dt>
+                            <dd class="col-sm-8"
+                                th:text="*{#temporals.format(birthDate, 'yyyy-MM-dd')}">1999-01-01</dd>
+
+                            <dt class="col-sm-4">권한</dt>
+                            <dd class="col-sm-8" th:text="*{memberRole}">USER</dd>
+
+                            <dt class="col-sm-4">등급</dt>
+                            <dd class="col-sm-8" th:text="*{grade}">BRONZE</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- 수정 폼 -->
+                <div class="card shadow-sm">
+                    <div class="card-header fw-semibold">프로필 수정</div>
+                    <div class="card-body">
+                        <form th:action="@{/mypage}" method="post" th:object="${member}">
+
+                            <!-- 글로벌 에러 -->
+                            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger" role="alert"
+                                 th:each="err : ${#fields.globalErrors()}" th:text="${err}">입력 오류가 있습니다.</div>
+
+                            <div class="mb-3">
+                                <label class="form-label">닉네임</label>
+                                <input type="text" class="form-control" th:field="*{nickname}" maxlength="32"/>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">휴대폰 번호</label>
+                                <input type="tel" class="form-control" th:field="*{phoneNumber}" placeholder="010-0000-0000"/>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">이메일</label>
+                                <input type="email" class="form-control" th:field="*{email}"/>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">생년월일</label>
+                                <input type="date" class="form-control"
+                                       th:value="*{#temporals.format(birthDate, 'yyyy-MM-dd')}"
+                                       name="birthDate"/>
+                                <div class="text-danger small" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}"></div>
+                            </div>
+
+                            <!-- 읽기 전용 노출 -->
+                            <div class="mb-3">
+                                <label class="form-label">로그인 ID</label>
+                                <input type="text" class="form-control" th:value="${loginId}" disabled/>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">저장</button>
+                                <a th:href="@{/mypage}" class="btn btn-outline-secondary">초기화</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<div id="preloader"></div>
+
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+<script th:src="@{/assets/js/main.js}"></script>
+</body>
+</html>
