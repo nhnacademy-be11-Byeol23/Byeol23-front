@@ -63,6 +63,7 @@
                     bookName: document.getElementById("bookName").value,
                     toc: document.getElementById("toc").value,
                     description: document.getElementById("description").value,
+                    //TODO: 위즈윅 에디터에서 값 가져오는 과정에서 에러 발생
                     regularPrice: parseFloat(document.getElementById("regularPrice").value),
                     salePrice: parseFloat(document.getElementById("salePrice").value),
                     publishDate: document.getElementById("publishDate").value,
