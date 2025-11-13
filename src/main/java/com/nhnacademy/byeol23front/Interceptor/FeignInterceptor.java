@@ -19,7 +19,7 @@ public class FeignInterceptor {
 			return template -> {
 				String path = template.path();
 				log.info(path);
-				if(!path.startsWith("/books") && !path.startsWith("/members")) {
+				if(!path.startsWith("/test") && !path.startsWith("/members")) {
 					return;
 				}
 

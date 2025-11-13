@@ -2,7 +2,9 @@ package com.nhnacademy.byeol23front.bookset.book.controller;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookCreateRequest;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookCreateTmpRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookUpdateRequest;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookUpdateTmpRequest;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 
 import lombok.RequiredArgsConstructor;
@@ -12,13 +14,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
 import com.nhnacademy.byeol23front.bookset.tag.client.TagApiClient;
 import com.nhnacademy.byeol23front.bookset.tag.dto.AllTagsInfoResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.PageResponse;
-import com.nhnacademy.byeol23front.memberset.JwtParser;
+import com.nhnacademy.byeol23front.bookset.contributor.client.ContributorApiClient;
+import com.nhnacademy.byeol23front.bookset.contributor.dto.AllContributorResponse;
+import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
+import com.nhnacademy.byeol23front.minio.service.MinioService;
+import com.nhnacademy.byeol23front.minio.util.ImageDomain;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,63 +40,151 @@ public class BookAdminController {
 	private final BookApiClient bookApiClient;
 	private final CategoryApiClient categoryApiClient;
 	private final TagApiClient tagApiClient;
-	private final JwtParser jwtParser;
+	private final ContributorApiClient contributorApiClient;
+	private final MinioService minioService;
+
+	private static final String ALL_CONTRIBUTORS = "allContributors";
+	private static final String CATEGORIES = "categories";
+	private static final String ALL_TAGS = "allTags";
 
 	@PostMapping("/new")
-	@ResponseBody
-	public ResponseEntity<Void> createBook(@RequestBody BookCreateRequest request) {
+	public String createBook(@ModelAttribute BookCreateTmpRequest tmp) {
 		try {
-			bookApiClient.createBook(request);
-			return ResponseEntity.ok().build();
+			List<Long> categoryIds = tmp.categoryIds() != null ? tmp.categoryIds() : List.of();
+			List<Long> tagIds = tmp.tagIds() != null ? tmp.tagIds() : List.of();
+			List<Long> contributorIds = tmp.contributorIds() != null ? tmp.contributorIds() : List.of();
+
+			BookCreateRequest request = new BookCreateRequest(
+				tmp.bookName(),
+				tmp.toc(),
+				tmp.description(),
+				tmp.regularPrice(),
+				tmp.salePrice(),
+				tmp.isbn(),
+				tmp.publishDate(),
+				tmp.isPack(),
+				tmp.bookStatus(),
+				tmp.stock(),
+				tmp.publisherId(),
+				categoryIds,
+				tagIds,
+				contributorIds
+			);
+
+			BookResponse createdBook = bookApiClient.createBook(request);
+			Long bookId = createdBook.bookId();
+			log.info("도서 생성 완료: bookId={}", bookId);
+
+			if (tmp.images() != null && !tmp.images().isEmpty()) {
+				for (MultipartFile image : tmp.images()) {
+					if (!image.isEmpty()) {
+						try {
+							minioService.uploadImage(ImageDomain.BOOK, bookId, image);
+							log.info("이미지 업로드 성공: bookId={}, fileName={}", bookId, image.getOriginalFilename());
+						} catch (Exception e) {
+							log.error("이미지 업로드 실패: fileName={}", image.getOriginalFilename(), e);
+						}
+					}
+				}
+			}
+			return "redirect:/admin/books";
+
 		} catch (Exception e) {
-			return ResponseEntity.internalServerError().build();
+			log.error("도서 생성 실패", e);
+			return "redirect:/admin/books/new";
 		}
 	}
 
-	@PutMapping("/{book-id}")
-	@ResponseBody
-	public ResponseEntity<Void> updateBook(@PathVariable("book-id") Long id, @RequestBody BookUpdateRequest request, @RequestHeader(value = "Authorization") String auth){
-		log.info("jwt memberId: {}", jwtParser.jwtParseMemberId(auth));
+	@PostMapping("/{book-id}")
+	public String updateBook(@PathVariable("book-id") Long bookId, @ModelAttribute BookUpdateTmpRequest tmp) {
 		try {
-			bookApiClient.updateBook(id, request);
-			return ResponseEntity.ok().build();
+			List<Long> categoryIds = tmp.categoryIds() != null ? tmp.categoryIds() : List.of();
+			List<Long> tagIds = tmp.tagIds() != null ? tmp.tagIds() : List.of();
+			List<Long> contributorIds = tmp.contributorIds() != null ? tmp.contributorIds() : List.of();
+
+			if (tmp.images() != null && !tmp.images().isEmpty()) {
+				boolean hasNewImages = tmp.images().stream().anyMatch(img -> !img.isEmpty());
+				if (hasNewImages) {
+					try {
+						List<GetUrlResponse> existingImages = minioService.getImageUrl(ImageDomain.BOOK, bookId);
+						for (GetUrlResponse imageResponse : existingImages) {
+							try {
+								minioService.deleteImage(ImageDomain.BOOK, imageResponse.imageId());
+								log.info("기존 이미지 삭제: imageId={}", imageResponse.imageId());
+							} catch (Exception e) {
+								log.error("이미지 삭제 실패: imageId={}", imageResponse.imageId(), e);
+							}
+						}
+					} catch (Exception e) {
+						log.warn("기존 이미지 조회 실패 (이미지가 없을 수 있음): {}", e.getMessage());
+					}
+					for (MultipartFile image : tmp.images()) {
+						if (!image.isEmpty()) {
+							try {
+								minioService.uploadImage(ImageDomain.BOOK, bookId, image);
+								log.info("새 이미지 업로드 성공: bookId={}, fileName={}", bookId, image.getOriginalFilename());
+							} catch (Exception e) {
+								log.error("이미지 업로드 실패: fileName={}", image.getOriginalFilename(), e);
+							}
+						}
+					}
+				}
+			}
+
+			BookUpdateRequest request = new BookUpdateRequest(
+				tmp.bookName(),
+				tmp.toc(),
+				tmp.description(),
+				tmp.regularPrice(),
+				tmp.salePrice(),
+				tmp.publishDate(),
+				tmp.isPack() != null && tmp.isPack(),
+				tmp.bookStatus(),
+				tmp.stock(),
+				tmp.publisherId(),
+				categoryIds,
+				tagIds,
+				contributorIds
+			);
+			bookApiClient.updateBook(bookId, request);
+			return "redirect:/admin/books";
+
 		} catch (Exception e) {
-			return ResponseEntity.internalServerError().build();
+			log.error("도서 수정 실패: bookId={}", bookId, e);
+			return "redirect:/admin/books/update/" + bookId;
 		}
 	}
 
 	@GetMapping("/update/{book-id}")
 	public String bookUpdateForm(@PathVariable("book-id") Long id, Model model){
-		try {
-			BookResponse book = bookApiClient.getBook(id);
-			model.addAttribute("book", book);
-			model.addAttribute("categories", categoryApiClient.getRoots());
-			PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 1000).getBody();
-			List<AllTagsInfoResponse> allTags = tagsResponse != null ? tagsResponse.content() : new ArrayList<>();
-			model.addAttribute("allTags", allTags);
+		BookResponse book = bookApiClient.getBook(id);
+		model.addAttribute("book", book);
+		model.addAttribute(CATEGORIES, categoryApiClient.getRoots());
 
-			// 선택된 카테고리 ID 리스트 계산
-			List<Long> selectedCategoryIds = book.categories() != null
-				? book.categories().stream().map(CategoryLeafResponse::id).toList()
-				: Collections.emptyList();
-			model.addAttribute("selectedCategoryIds", selectedCategoryIds);
+		PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 100).getBody();
+		List<AllTagsInfoResponse> allTags = tagsResponse != null ? tagsResponse.content() : new ArrayList<>();
+		model.addAttribute(ALL_TAGS, allTags);
 
-			List<Long> selectedTagIds = book.tags() != null
-				? book.tags().stream().map(AllTagsInfoResponse::tagId).toList()
-				: Collections.emptyList();
-			model.addAttribute("selectedTagIds", selectedTagIds);
+		com.nhnacademy.byeol23front.bookset.contributor.dto.PageResponse<AllContributorResponse> contributorsResponse = contributorApiClient.getAllContributors(0, 1000).getBody();
+		List<AllContributorResponse> allContributors = contributorsResponse != null ? contributorsResponse.content() : new ArrayList<>();
+		model.addAttribute(ALL_CONTRIBUTORS, allContributors);
 
+		List<Long> selectedCategoryIds = book.categories() != null
+			? book.categories().stream().map(CategoryLeafResponse::id).toList()
+			: Collections.emptyList();
+		model.addAttribute("selectedCategoryIds", selectedCategoryIds);
 
-			return "admin/book/bookUpdateForm";
-		} catch (Exception e) {
-			// 에러 처리
-			e.printStackTrace();
-			model.addAttribute("categories", Collections.emptyList());
-			model.addAttribute("selectedCategoryIds", Collections.emptyList());
-			model.addAttribute("selectedTagIds", Collections.emptyList()); 
-			model.addAttribute("allTags", Collections.emptyList());
-			return "admin/book/bookUpdateForm";
-		}
+		List<Long> selectedTagIds = book.tags() != null
+			? book.tags().stream().map(AllTagsInfoResponse::tagId).toList()
+			: Collections.emptyList();
+		model.addAttribute("selectedTagIds", selectedTagIds);
+
+		List<Long> selectedContributorIds = book.contributors() != null
+			? book.contributors().stream().map(AllContributorResponse::contributorId).toList()
+			: Collections.emptyList();
+		model.addAttribute("selectedContributorIds", selectedContributorIds);
+
+		return "admin/book/bookUpdateForm";
 	}
 
 	@GetMapping
@@ -99,17 +195,16 @@ public class BookAdminController {
 
 	@GetMapping("/new")
 	public String bookForm(Model model) {
-		model.addAttribute("categories", categoryApiClient.getRoots());
-		
-		// 태그 목록 가져오기 추가
-		try {
-			PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 1000).getBody();
-			List<AllTagsInfoResponse> allTags = tagsResponse != null ? tagsResponse.content() : new ArrayList<>();
-			model.addAttribute("allTags", allTags);
-		} catch (Exception e) {
-			model.addAttribute("allTags", new ArrayList<>());
-		}
-		
+		model.addAttribute(CATEGORIES, categoryApiClient.getRoots());
+
+		PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 100).getBody();
+		List<AllTagsInfoResponse> allTags = tagsResponse != null ? tagsResponse.content() : new ArrayList<>();
+		model.addAttribute(ALL_TAGS, allTags);
+
+		com.nhnacademy.byeol23front.bookset.contributor.dto.PageResponse<AllContributorResponse> contributorsResponse = contributorApiClient.getAllContributors(0, 1000).getBody();
+		List<AllContributorResponse> allContributors = contributorsResponse != null ? contributorsResponse.content() : new ArrayList<>();
+		model.addAttribute(ALL_CONTRIBUTORS, allContributors);
+
 		return "admin/book/bookForm";
 	}
 

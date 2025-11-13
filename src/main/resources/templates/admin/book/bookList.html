@@ -50,7 +50,6 @@
                                     <th>재고</th>
                                     <th>카테고리</th>
                                     <th>상태</th>
-                                    <th>삭제 여부</th>
                                     <th>관리</th>
                                 </tr>
                                 </thead>
@@ -80,7 +79,6 @@
                                               th:text="${book.bookStatus}"></span>
                                         <span th:if="${book.bookStatus == null}" class="text-muted">-</span>
                                     </td>
-                                    <td th:text="${book.isDeleted} ? 'O' : 'X'"></td>
                                     <td>
                                         <div class="btn-group" role="group">
                                             <a th:href="@{/admin/books/update/{book-id}(book-id=${book.bookId})}" 

@@ -4,9 +4,10 @@ import java.security.PublicKey;
 
 import org.springframework.stereotype.Component;
 
+import com.nhnacademy.byeol23front.memberset.exception.DecodeingFailureException;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +23,6 @@ public class JwtParser {
 				jwt = jwt.substring(7);
 			}
 
-			// JWT 서명 검증 + 파싱
 			Jws<Claims> jws = Jwts.parserBuilder()
 				.setSigningKey(publicKey)
 				.build()
@@ -31,12 +31,13 @@ public class JwtParser {
 			Claims claims = jws.getBody();
 
 			Object memberIdObj = claims.get("memberId");
-			if (memberIdObj == null) return null;
+			if (memberIdObj == null) {
+				throw new DecodeingFailureException("memberID 필드가 존재하지 않습니다.");
+			}
 
 			return Long.parseLong(memberIdObj.toString());
-		} catch (JwtException e) {
-			System.err.println("Invalid JWT: " + e.getMessage());
-			return null;
+		} catch (DecodeingFailureException e) {
+			throw new DecodeingFailureException("RefreshToken 검증 실패: " + e.getMessage());
 		}
 	}
 }

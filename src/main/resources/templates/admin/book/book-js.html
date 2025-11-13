@@ -5,14 +5,14 @@
         let tocEditor = null;  // 목차 에디터 추가
 
         // 카테고리 트리 관련 함수들 - 전역 스코프로 이동
-        window.toggleCategory = function(element) {
+        globalThis.toggleCategory = function(element) {
             const categoryId = element.dataset.id;
             const isExpanded = element.dataset.expanded === 'true';
             const childrenUl = document.getElementById(`children-${categoryId}`);
             const icon = element.querySelector('i');
-            
+
             if (!childrenUl) return;
-            
+
             if (isExpanded) {
                 // 접기
                 childrenUl.style.display = 'none';
@@ -23,7 +23,7 @@
                 // 펼치기
                 if (childrenUl.dataset.loaded !== 'true') {
                     // 자식 카테고리 로드
-                    window.loadCategoryChildren(categoryId, childrenUl);
+                    globalThis.loadCategoryChildren(categoryId, childrenUl);
                 } else {
                     childrenUl.style.display = 'block';
                 }
@@ -38,12 +38,12 @@
             let selectedCategoryIds = [];
             
             // 전역 변수에서 가져오기
-            if (typeof window.selectedCategoryIds !== 'undefined' && window.selectedCategoryIds.length > 0) {
-                selectedCategoryIds = window.selectedCategoryIds;
+            if (typeof globalThis.selectedCategoryIds !== 'undefined' && globalThis.selectedCategoryIds.length > 0) {
+                selectedCategoryIds = globalThis.selectedCategoryIds;
             } else if (bookForm) {
                 // 이미 체크된 체크박스에서 수집 (fallback)
                 const checkedBoxes = bookForm.querySelectorAll('input[name="categoryIds"]:checked');
-                selectedCategoryIds = Array.from(checkedBoxes).map(cb => parseInt(cb.value, 10));
+                selectedCategoryIds = Array.from(checkedBoxes).map(cb => Number.parseInt(cb.value, 10));
             }
             
             console.log('loadCategoryChildren - 선택된 카테고리 ID:', selectedCategoryIds);
@@ -100,7 +100,7 @@
                             if (bookIdInput && bookIdInput.value) {
                                 // 수정 폼인 경우 자동으로 펼치기
                                 childUl.style.display = 'block';
-                                window.loadCategoryChildren(child.id, childUl);
+                                globalThis.loadCategoryChildren(child.id, childUl);
                             }
                         }
                     });
@@ -126,7 +126,7 @@
                         const childrenUl = document.getElementById(`children-${categoryId}`);
                         if (childrenUl && childrenUl.dataset.loaded !== 'true') {
                             // 자식 카테고리 로드
-                            window.loadCategoryChildren(categoryId, childrenUl);
+                            globalThis.loadCategoryChildren(categoryId, childrenUl);
                             // 화살표 아이콘 변경
                             toggle.dataset.expanded = 'true';
                             const icon = toggle.querySelector('i');
@@ -150,7 +150,7 @@
         }
 
         // 태그 선택 모달 열기 - 전역 스코프로 이동
-        window.openTagModal = function() {
+        globalThis.openTagModal = function() {
             const modalElement = document.getElementById('tagModal');
             if (modalElement) {
                 // 기존 선택된 태그 ID 가져오기
@@ -158,11 +158,11 @@
                 let selectedTagIdsList = [];
                 
                 if (tagIdsInput && tagIdsInput.value) {
-                    selectedTagIdsList = tagIdsInput.value.split(',').filter(id => id.trim()).map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id));
+                    selectedTagIdsList = tagIdsInput.value.split(',').filter(id => id.trim()).map(id => Number.parseInt(id.trim(), 10)).filter(id => !isNaN(id));
                 } else {
                     // JavaScript 변수에서 가져오기
-                    if (typeof window.selectedTagIds !== 'undefined' && window.selectedTagIds.length > 0) {
-                        selectedTagIdsList = window.selectedTagIds;
+                    if (typeof globalThis.selectedTagIds !== 'undefined' && globalThis.selectedTagIds.length > 0) {
+                        selectedTagIdsList = globalThis.selectedTagIds;
                     } else if (typeof selectedTagIds !== 'undefined' && selectedTagIds.length > 0) {
                         selectedTagIdsList = selectedTagIds;
                     }
@@ -180,9 +180,9 @@
                         }
                     });
                 }
-                
+
                 const modal = new bootstrap.Modal(modalElement);
-                
+
                 // 모달이 완전히 표시된 후에도 체크 상태 확인 및 재설정
                 modalElement.addEventListener('shown.bs.modal', function() {
                     console.log('태그 모달 완전히 표시됨');
@@ -203,7 +203,7 @@
                         }, 100);
                     }
                 }, { once: true });
-                
+
                 modal.show();
             } else {
                 console.error('태그 모달을 찾을 수 없습니다.');
@@ -211,17 +211,17 @@
         };
 
         // 선택된 태그 저장 - 전역 스코프로 이동
-        window.saveSelectedTags = function() {
+        globalThis.saveSelectedTags = function() {
             const checkedTags = document.querySelectorAll('.tag-checkbox:checked');
-            const selectedTagIds = Array.from(checkedTags).map(cb => parseInt(cb.value, 10));
+            const selectedTagIds = Array.from(checkedTags).map(cb => Number.parseInt(cb.value, 10));
             const selectedTagNames = Array.from(checkedTags).map(cb => cb.dataset.tagName);
-            
+
             // hidden input에 저장
             const tagIdsInput = document.getElementById('selectedTagIds');
             if (tagIdsInput) {
                 tagIdsInput.value = selectedTagIds.join(',');
             }
-            
+
             // 선택된 태그 표시
             const displayDiv = document.getElementById('selectedTagsDisplay');
             if (displayDiv) {
@@ -233,7 +233,7 @@
                     displayDiv.appendChild(badge);
                 });
             }
-            
+
             // 모달 닫기
             const modalElement = document.getElementById('tagModal');
             if (modalElement) {
@@ -244,20 +244,115 @@
             }
         };
 
+        // 기여자 선택 모달 열기 - 전역 스코프로 이동
+        globalThis.openContributorModal = function() {
+            const modalElement = document.getElementById('contributorModal');
+            if (modalElement) {
+                // 기존 선택된 기여자 ID 가져오기
+                const contributorIdsInput = document.getElementById('selectedContributorIds');
+                let selectedContributorIdsList = [];
+
+                if (contributorIdsInput && contributorIdsInput.value) {
+                    selectedContributorIdsList = contributorIdsInput.value.split(',').filter(id => id.trim()).map(id => Number.parseInt(id.trim(), 10)).filter(id => !isNaN(id));
+                } else {
+                    // JavaScript 변수에서 가져오기
+                    if (typeof globalThis.selectedContributorIds !== 'undefined' && globalThis.selectedContributorIds.length > 0) {
+                        selectedContributorIdsList = globalThis.selectedContributorIds;
+                    } else if (typeof selectedContributorIds !== 'undefined' && selectedContributorIds.length > 0) {
+                        selectedContributorIdsList = selectedContributorIds;
+                    }
+                }
+
+                console.log('기여자 모달 열기 - 기존 선택된 기여자 ID:', selectedContributorIdsList);
+
+                // 모달이 표시되기 전에 체크박스 상태 설정
+                if (selectedContributorIdsList.length > 0) {
+                    for (const contributorId of selectedContributorIdsList) {
+                        const contributorCheckbox = document.getElementById(`contributor_${contributorId}`);
+                        if (contributorCheckbox) {
+                            contributorCheckbox.checked = true;
+                            console.log('기여자 체크됨 (모달 열기 전):', contributorId);
+                        }
+                    }
+                }
+
+                const modal = new bootstrap.Modal(modalElement);
+
+                // 모달이 완전히 표시된 후에도 체크 상태 확인 및 재설정
+                modalElement.addEventListener('shown.bs.modal', function() {
+                    console.log('기여자 모달 완전히 표시됨');
+                    if (selectedContributorIdsList.length > 0) {
+                        // 약간의 지연을 두고 체크 (DOM이 완전히 렌더링된 후)
+                        setTimeout(() => {
+                            for (const contributorId of selectedContributorIdsList) {
+                                const contributorCheckbox = document.getElementById(`contributor_${contributorId}`);
+                                if (contributorCheckbox) {
+                                    if (!contributorCheckbox.checked) {
+                                        contributorCheckbox.checked = true;
+                                        console.log('기여자 체크됨 (모달 표시 후):', contributorId);
+                                    }
+                                } else {
+                                    console.warn('기여자 체크박스를 찾을 수 없음:', `contributor_${contributorId}`);
+                                }
+                            }
+                        }, 100);
+                    }
+                }, { once: true });
+
+                modal.show();
+            } else {
+                console.error('기여자 모달을 찾을 수 없습니다.');
+            }
+        };
+
+        // 선택된 기여자 저장 - 전역 스코프로 이동
+        globalThis.saveSelectedContributors = function() {
+            const checkedContributors = document.querySelectorAll('.contributor-checkbox:checked');
+            const selectedContributorIds = Array.from(checkedContributors).map(cb => Number.parseInt(cb.value, 10));
+            const selectedContributorNames = Array.from(checkedContributors).map(cb => cb.dataset.contributorName);
+
+            // hidden input에 저장
+            const contributorIdsInput = document.getElementById('selectedContributorIds');
+            if (contributorIdsInput) {
+                contributorIdsInput.value = selectedContributorIds.join(',');
+            }
+
+            // 선택된 기여자 표시
+            const displayDiv = document.getElementById('selectedContributorsDisplay');
+            if (displayDiv) {
+                displayDiv.innerHTML = '';
+                for (const name of selectedContributorNames) {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge bg-success me-1';
+                    badge.textContent = name;
+                    displayDiv.appendChild(badge);
+                }
+            }
+            
+            // 모달 닫기
+            const modalElement = document.getElementById('contributorModal');
+            if (modalElement) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) {
+                    modal.hide();
+                }
+            }
+        };
+
         // 카테고리 모달용 로드 함수 (자동으로 펼쳐진 상태)
-        window.loadCategoryChildrenInModal = function(parentId, parentUl) {
+        globalThis.loadCategoryChildrenInModal = function(parentId, parentUl) {
             let selectedCategoryIds = [];
             
             // 전역 변수에서 가져오기
-            if (typeof window.selectedCategoryIds !== 'undefined' && window.selectedCategoryIds.length > 0) {
-                selectedCategoryIds = window.selectedCategoryIds;
+            if (typeof globalThis.selectedCategoryIds !== 'undefined' && globalThis.selectedCategoryIds.length > 0) {
+                selectedCategoryIds = globalThis.selectedCategoryIds;
             } else if (typeof selectedCategoryIds !== 'undefined' && selectedCategoryIds.length > 0) {
                 selectedCategoryIds = selectedCategoryIds;
             } else {
                 // hidden input에서 가져오기
                 const categoryIdsInput = document.getElementById('selectedCategoryIds');
                 if (categoryIdsInput && categoryIdsInput.value) {
-                    selectedCategoryIds = categoryIdsInput.value.split(',').filter(id => id.trim()).map(id => parseInt(id.trim(), 10));
+                    selectedCategoryIds = categoryIdsInput.value.split(',').filter(id => id.trim()).map(id => Number.parseInt(id.trim(), 10));
                 }
             }
             
@@ -309,7 +404,7 @@
                         // 자식이 있으면 재귀적으로 자동 로드
                         if (hasChildren) {
                             const childUl = document.getElementById(`children-modal-${child.id}`);
-                            window.loadCategoryChildrenInModal(child.id, childUl);
+                            globalThis.loadCategoryChildrenInModal(child.id, childUl);
                         }
                     });
                     parentUl.dataset.loaded = 'true';
@@ -321,7 +416,7 @@
         };
 
         // 모달 내부 카테고리 토글
-        window.toggleCategoryInModal = function(element) {
+        globalThis.toggleCategoryInModal = function(element) {
             const categoryId = element.dataset.id;
             const isExpanded = element.dataset.expanded === 'true';
             const childrenUl = document.getElementById(`children-modal-${categoryId}`);
@@ -338,7 +433,7 @@
             } else {
                 // 펼치기
                 if (childrenUl.dataset.loaded !== 'true') {
-                    window.loadCategoryChildrenInModal(categoryId, childrenUl);
+                    globalThis.loadCategoryChildrenInModal(categoryId, childrenUl);
                 } else {
                     childrenUl.style.display = 'block';
                 }
@@ -349,7 +444,7 @@
         };
 
         // 카테고리 선택 모달 열기
-        window.openCategoryModal = function() {
+        globalThis.openCategoryModal = function() {
             const modalElement = document.getElementById('categoryModal');
             if (modalElement) {
                 // 기존 선택된 카테고리 ID 가져오기
@@ -357,11 +452,11 @@
                 let selectedCategoryIdsList = [];
                 
                 if (categoryIdsInput && categoryIdsInput.value) {
-                    selectedCategoryIdsList = categoryIdsInput.value.split(',').filter(id => id.trim()).map(id => parseInt(id.trim(), 10));
+                    selectedCategoryIdsList = categoryIdsInput.value.split(',').filter(id => id.trim()).map(id => Number.parseInt(id.trim(), 10));
                 } else {
                     // JavaScript 변수에서 가져오기
-                    if (typeof window.selectedCategoryIds !== 'undefined' && window.selectedCategoryIds.length > 0) {
-                        selectedCategoryIdsList = window.selectedCategoryIds;
+                    if (typeof globalThis.selectedCategoryIds !== 'undefined' && globalThis.selectedCategoryIds.length > 0) {
+                        selectedCategoryIdsList = globalThis.selectedCategoryIds;
                     } else if (typeof selectedCategoryIds !== 'undefined' && selectedCategoryIds.length > 0) {
                         selectedCategoryIdsList = selectedCategoryIds;
                     }
@@ -378,10 +473,10 @@
                             const categoryId = toggle.dataset.id;
                             const childrenUl = document.getElementById(`children-modal-${categoryId}`);
                             if (childrenUl && childrenUl.dataset.loaded !== 'true') {
-                                window.loadCategoryChildrenInModal(categoryId, childrenUl);
+                                globalThis.loadCategoryChildrenInModal(categoryId, childrenUl);
                             }
                         });
-                        
+
                         // 모든 카테고리가 로드된 후 체크박스 체크
                         setTimeout(() => {
                             if (selectedCategoryIdsList.length > 0) {
@@ -396,7 +491,7 @@
                         }, 500);
                     }
                 }, { once: true });
-                
+
                 const modal = new bootstrap.Modal(modalElement);
                 modal.show();
             } else {
@@ -405,17 +500,17 @@
         };
 
         // 선택된 카테고리 저장
-        window.saveSelectedCategories = function() {
+        globalThis.saveSelectedCategories = function() {
             const checkedCategories = document.querySelectorAll('#categoryModal .category-checkbox:checked:not(:disabled)');
-            const selectedCategoryIds = Array.from(checkedCategories).map(cb => parseInt(cb.value, 10));
+            const selectedCategoryIds = Array.from(checkedCategories).map(cb => Number.parseInt(cb.value, 10));
             const selectedCategoryNames = Array.from(checkedCategories).map(cb => cb.dataset.categoryName);
-            
+
             // hidden input에 저장
             const categoryIdsInput = document.getElementById('selectedCategoryIds');
             if (categoryIdsInput) {
                 categoryIdsInput.value = selectedCategoryIds.join(',');
             }
-            
+
             // 선택된 카테고리 표시
             const displayDiv = document.getElementById('selectedCategoriesDisplay');
             if (displayDiv) {
@@ -427,7 +522,7 @@
                     displayDiv.appendChild(badge);
                 });
             }
-            
+
             // 모달 닫기
             const modalElement = document.getElementById('categoryModal');
             if (modalElement) {
@@ -439,7 +534,7 @@
         };
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Toast UI Editor 초기화 - 설명
+            // Toast UI Editor 초기화
             const editorElement = document.querySelector('#descriptionEditor');
             if (editorElement && typeof toastui !== 'undefined' && toastui.Editor) {
                 const initialContent = document.getElementById('descriptionContent')?.value || '내용을 입력해 주세요.';
@@ -455,7 +550,7 @@
                 console.error('Toast UI Editor를 로드할 수 없습니다.');
             }
 
-            // Toast UI Editor 초기화 - 목차
+            // Toast UI Editor 초기화
             const tocEditorElement = document.querySelector('#tocEditor');
             if (tocEditorElement && typeof toastui !== 'undefined' && toastui.Editor) {
                 const initialTocContent = document.getElementById('tocContent')?.value || '목차를 입력해 주세요.';
@@ -474,8 +569,7 @@
             const bookForm = document.getElementById('bookForm');
             if (bookForm) {
                 bookForm.addEventListener('submit', function (event) {
-                    event.preventDefault();
-
+                    // 에디터 내용을 hidden input에 저장
                     if (editor) {
                         document.getElementById('description').value = editor.getHTML();
                     }
@@ -484,73 +578,43 @@
                         document.getElementById('toc').value = tocEditor.getHTML();
                     }
 
-                    const formData = new FormData(bookForm);
-                    const data = Object.fromEntries(formData.entries());
+                    return true;
+                });
+            }
 
-                    const bookId = data.bookId;
-                    const isUpdate = bookId && bookId.length > 0;
+            // 이미지 선택 시 미리보기 표시 (선택사항)
+            const bookImagesInput = document.getElementById('bookImages');
+            if (bookImagesInput) {
+                bookImagesInput.addEventListener('change', function(e) {
+                    const previewDiv = document.getElementById('imagePreviewList');
+                    if (previewDiv) {
+                        previewDiv.innerHTML = '';
+                        const files = Array.from(e.target.files);
 
-                    // 체크박스 방식 - disabled가 아닌 체크된 체크박스만 수집
-                    const categoryCheckboxes = bookForm.querySelectorAll('input[name="categoryIds"]:checked:not(:disabled)');
-                    const categoryIds = Array.from(categoryCheckboxes)
-                        .filter(cb => !cb.disabled)
-                        .map(cb => parseInt(cb.value, 10));
-                    
-                    // 또는 hidden input에서 가져오기
-                    const categoryIdsValue = document.getElementById('selectedCategoryIds')?.value || '';
-                    const categoryIdsFromInput = categoryIdsValue ? categoryIdsValue.split(',').filter(id => id.trim()).map(id => parseInt(id.trim(), 10)) : [];
-                    
-                    // hidden input 값이 있으면 그것을 우선 사용
-                    const finalCategoryIds = categoryIdsFromInput.length > 0 ? categoryIdsFromInput : categoryIds;
+                        if (files.length > 0) {
+                            files.forEach((file, index) => {
+                                if (file.type.startsWith('image/')) {
+                                    const reader = new FileReader();
+                                    reader.onload = function(event) {
+                                        const img = document.createElement('img');
+                                        img.src = event.target.result;
+                                        img.className = 'img-thumbnail';
+                                        img.style.width = '100px';
+                                        img.style.height = '100px';
+                                        img.style.objectFit = 'cover';
+                                        img.title = file.name;
+                                        previewDiv.appendChild(img);
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            });
 
-                    // 태그 ID 수집
-                    const tagIdsValue = document.getElementById('selectedTagIds')?.value || '';
-                    const tagIds = tagIdsValue ? tagIdsValue.split(',').filter(id => id.trim()).map(id => parseInt(id.trim(), 10)) : [];
-
-                    console.log('선택된 카테고리 ID:', finalCategoryIds);
-                    console.log('선택된 태그 ID:', tagIds);
-
-                    const requestBody = {
-                        bookName: data.bookName,
-                        toc: data.toc,
-                        description: data.description,
-                        regularPrice: parseFloat(data.regularPrice),
-                        salePrice: parseFloat(data.salePrice),
-                        publishDate: data.publishDate,
-                        isPack: bookForm.querySelector('#isPack').checked,
-                        bookStatus: data.bookStatus,
-                        stock: parseInt(data.stock, 10),
-                        publisherId: parseInt(data.publisherId, 10),
-                        categoryIds: finalCategoryIds,
-                        tagIds: tagIds
-                    };
-
-                    if (!isUpdate) {
-                        requestBody.isbn = data.isbn;
+                            const fileCount = document.createElement('small');
+                            fileCount.className = 'text-muted d-block mt-2';
+                            fileCount.textContent = `선택된 이미지: ${files.length}개`;
+                            previewDiv.appendChild(fileCount);
+                        }
                     }
-
-                    const url = isUpdate ? `/admin/books/${bookId}` : '/admin/books/new';
-                    const method = isUpdate ? 'PUT' : 'POST';
-
-                    fetch(url, {
-                        method: method,
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(requestBody),
-                    })
-                        .then(response => {
-                            if (response.ok) {
-                                alert(isUpdate ? '도서가 성공적으로 수정되었습니다.' : '도서가 성공적으로 생성되었습니다.');
-                                window.location.href = '/admin/books';
-                            } else {
-                                response.text().then(text => alert((isUpdate ? '도서 수정' : '도서 생성') + '에 실패했습니다: ' + text));
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('오류가 발생했습니다.');
-                        });
                 });
             }
 
@@ -560,29 +624,28 @@
                 // 기존 선택된 카테고리 처리
                 let selectedCategoryIdsList = [];
                 let selectedCategoriesList = [];
-                
-                if (typeof window.selectedCategoryIds !== 'undefined' && window.selectedCategoryIds.length > 0) {
-                    selectedCategoryIdsList = window.selectedCategoryIds;
+
+                if (typeof globalThis.selectedCategoryIds !== 'undefined' && globalThis.selectedCategoryIds.length > 0) {
+                    selectedCategoryIdsList = globalThis.selectedCategoryIds;
                 } else if (typeof selectedCategoryIds !== 'undefined' && selectedCategoryIds.length > 0) {
                     selectedCategoryIdsList = selectedCategoryIds;
                 }
-                
+
                 // 카테고리 이름 정보 가져오기
-                if (typeof window.selectedCategories !== 'undefined' && window.selectedCategories.length > 0) {
-                    selectedCategoriesList = window.selectedCategories;
+                if (typeof globalThis.selectedCategories !== 'undefined' && globalThis.selectedCategories.length > 0) {
+                    selectedCategoriesList = globalThis.selectedCategories;
                 } else if (typeof selectedCategories !== 'undefined' && selectedCategories.length > 0) {
                     selectedCategoriesList = selectedCategories;
                 }
-                
+
                 console.log('기존 선택된 카테고리 ID:', selectedCategoryIdsList);
                 console.log('기존 선택된 카테고리 정보:', selectedCategoriesList);
-                
-                // hidden input에 저장
+
                 const categoryIdsInput = document.getElementById('selectedCategoryIds');
                 if (categoryIdsInput && selectedCategoryIdsList.length > 0) {
                     categoryIdsInput.value = selectedCategoryIdsList.join(',');
                 }
-                
+
                 // 선택된 카테고리 표시
                 const categoryDisplayDiv = document.getElementById('selectedCategoriesDisplay');
                 if (categoryDisplayDiv && selectedCategoriesList.length > 0) {
@@ -594,33 +657,32 @@
                         categoryDisplayDiv.appendChild(badge);
                     });
                 }
-                
+
                 // 기존 선택된 태그 처리
                 let selectedTagIdsList = [];
                 let selectedTagsList = [];
-                
-                if (typeof window.selectedTagIds !== 'undefined' && window.selectedTagIds.length > 0) {
-                    selectedTagIdsList = window.selectedTagIds;
+
+                if (typeof globalThis.selectedTagIds !== 'undefined' && globalThis.selectedTagIds.length > 0) {
+                    selectedTagIdsList = globalThis.selectedTagIds;
                 } else if (typeof selectedTagIds !== 'undefined' && selectedTagIds.length > 0) {
                     selectedTagIdsList = selectedTagIds;
                 }
-                
+
                 // 태그 이름 정보 가져오기
-                if (typeof window.selectedTags !== 'undefined' && window.selectedTags.length > 0) {
-                    selectedTagsList = window.selectedTags;
+                if (typeof globalThis.selectedTags !== 'undefined' && globalThis.selectedTags.length > 0) {
+                    selectedTagsList = globalThis.selectedTags;
                 } else if (typeof selectedTags !== 'undefined' && selectedTags.length > 0) {
                     selectedTagsList = selectedTags;
                 }
-                
+
                 console.log('기존 선택된 태그 ID:', selectedTagIdsList);
                 console.log('기존 선택된 태그 정보:', selectedTagsList);
-                
-                // hidden input에 저장
+
                 const tagIdsInput = document.getElementById('selectedTagIds');
                 if (tagIdsInput && selectedTagIdsList.length > 0) {
                     tagIdsInput.value = selectedTagIdsList.join(',');
                 }
-                
+
                 // 선택된 태그 표시
                 const tagDisplayDiv = document.getElementById('selectedTagsDisplay');
                 if (tagDisplayDiv && selectedTagsList.length > 0) {
@@ -632,8 +694,8 @@
                         tagDisplayDiv.appendChild(badge);
                     });
                 }
-                
-                // 태그 모달 내부의 체크박스도 체크 (모달이 아직 열리지 않았어도)
+
+                // 태그 모달 내부의 체크박스도 체크
                 if (selectedTagIdsList.length > 0) {
                     setTimeout(() => {
                         selectedTagIdsList.forEach(tagId => {
@@ -645,12 +707,63 @@
                         });
                     }, 200);
                 }
+
+                // 기존 선택된 기여자 처리
+                let selectedContributorIdsList = [];
+                let selectedContributorsList = [];
+
+                if (typeof globalThis.selectedContributorIds !== 'undefined' && globalThis.selectedContributorIds.length > 0) {
+                    selectedContributorIdsList = globalThis.selectedContributorIds;
+                } else if (typeof selectedContributorIds !== 'undefined' && selectedContributorIds.length > 0) {
+                    selectedContributorIdsList = selectedContributorIds;
+                }
+
+                // 기여자 이름 정보 가져오기
+                if (typeof globalThis.selectedContributors !== 'undefined' && globalThis.selectedContributors.length > 0) {
+                    selectedContributorsList = globalThis.selectedContributors;
+                } else if (typeof selectedContributors !== 'undefined' && selectedContributors.length > 0) {
+                    selectedContributorsList = selectedContributors;
+                }
+
+                console.log('기존 선택된 기여자 ID:', selectedContributorIdsList);
+                console.log('기존 선택된 기여자 정보:', selectedContributorsList);
+
+                // hidden input에 저장
+                const contributorIdsInput = document.getElementById('selectedContributorIds');
+                if (contributorIdsInput && selectedContributorIdsList.length > 0) {
+                    contributorIdsInput.value = selectedContributorIdsList.join(',');
+                }
+
+                // 선택된 기여자 표시
+                const contributorDisplayDiv = document.getElementById('selectedContributorsDisplay');
+                if (contributorDisplayDiv && selectedContributorsList.length > 0) {
+                    contributorDisplayDiv.innerHTML = '';
+                    selectedContributorsList.forEach(contributor => {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge bg-success me-1 mb-1';
+                        badge.textContent = contributor.contributorName || contributor.name || `기여자 ${contributor.contributorId || contributor.id}`;
+                        contributorDisplayDiv.appendChild(badge);
+                    });
+                }
+
+                // 기여자 모달 내부의 체크박스도 체크
+                if (selectedContributorIdsList.length > 0) {
+                    setTimeout(() => {
+                        selectedContributorIdsList.forEach(contributorId => {
+                            const contributorCheckbox = document.getElementById(`contributor_${contributorId}`);
+                            if (contributorCheckbox) {
+                                contributorCheckbox.checked = true;
+                                console.log('기여자 모달 체크박스 체크됨:', contributorId);
+                            }
+                        });
+                    }, 200);
+                }
             }
 
         });
 
         // 도서 삭제 함수 - 전역 스코프
-        window.softDeleteBook = function(bookId) {
+        globalThis.softDeleteBook = function(bookId) {
             console.log('softDeleteBook 호출됨, bookId:', bookId);
             if (confirm('정말로 이 도서의 삭제 상태를 변경하시겠습니까?')) {
                 const url = '/admin/books/' + bookId;
@@ -662,7 +775,7 @@
                         console.log('응답 수신:', response.status, response.statusText);
                         if (response.ok) {
                             alert('도서의 삭제 상태가 변경되었습니다.');
-                            window.location.reload();
+                            globalThis.location.reload();
                         } else {
                             response.text().then(text => {
                                 console.error('삭제 실패:', text);
@@ -675,6 +788,6 @@
                         alert('오류가 발생했습니다: ' + error.message);
                     });
             }
-        };
+        }
     </script>
 </th:block>

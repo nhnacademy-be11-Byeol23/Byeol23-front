@@ -4,20 +4,28 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-public record BookCreateRequest(
+import org.springframework.web.multipart.MultipartFile;
+
+public record BookUpdateTmpRequest(
 	String bookName,
 	String toc,
 	String description,
 	BigDecimal regularPrice,
 	BigDecimal salePrice,
-	String isbn,
 	LocalDate publishDate,
-	boolean isPack,
+	Boolean isPack,
 	String bookStatus,
 	Integer stock,
 	Long publisherId,
 	List<Long> categoryIds,
 	List<Long> tagIds,
-	List<Long> contributorIds
+	List<Long> contributorIds,
+	List<MultipartFile> images
 ) {
+	public BookUpdateTmpRequest {
+		if (images == null) {
+			images = List.of();
+		}
+	}
 }
+
