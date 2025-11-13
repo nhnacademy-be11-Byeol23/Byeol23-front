@@ -91,10 +91,4 @@ public class MemberController {
 		return "/member/mypage";
 	}
 
-	@GetMapping("/mypage/{member-id}")
-	public String getMypage(@PathVariable(value = "member-id") Long memberId, Model model){
-		MyPageResponse resp = memberApiClient.getMember(memberId).getBody();
-		model.addAttribute("member", resp);
-		return "/member/mypage";
-	}
 }

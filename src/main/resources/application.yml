@@ -27,3 +27,14 @@ eureka:
 logging:
   level:
     root: info
+
+minio:
+  host: storage.java21.net
+  port: 8000
+  access-key: V2CnisSrBMa0w2QtE8cP
+  secret-key: Bfyx9qcRRI2J7LHF5r5ZoFFWIFSZ40d4K9FEpDnh
+  bucket-name: starlbookimg
+
+aladin:
+  base-url: https://www.aladin.co.kr/ttb/api/ItemSearch.aspx
+  ttb-key: ${ALADIN_TTB_KEY}
