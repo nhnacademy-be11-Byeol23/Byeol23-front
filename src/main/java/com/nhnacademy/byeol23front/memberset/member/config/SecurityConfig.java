@@ -17,7 +17,7 @@ public class SecurityConfig {
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
 			.formLogin(AbstractHttpConfigurer::disable)   // 기본 로그인 폼 비활성화
-			.httpBasic(AbstractHttpConfigurer::disable);  // 기본 인증도 끔
+			.httpBasic(AbstractHttpConfigurer::disable); // 기본 인증도 끔
 		return http.build();
 	}
 
