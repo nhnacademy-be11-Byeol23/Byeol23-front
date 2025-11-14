@@ -7,9 +7,6 @@ spring:
   profiles:
     active: dev
 
-backend:
-  api:
-    url: http://localhost:10333
 
 
 eureka:
