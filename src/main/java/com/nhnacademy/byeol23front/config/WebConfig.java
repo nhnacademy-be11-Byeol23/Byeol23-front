@@ -12,7 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(new CategoryHeaderInterceptor())
                 .addPathPatterns("/")
                 .addPathPatterns("/admin/**")
-                .addPathPatterns("/members/login")
+                .addPathPatterns("/members/**")
                 .addPathPatterns("/mypage/**")
                 .addPathPatterns("/wishlist")
                 .addPathPatterns("/carts");

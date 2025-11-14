@@ -161,7 +161,7 @@ public class BookAdminController {
 
 	@GetMapping("/update/{book-id}")
 	public String bookUpdateForm(@PathVariable("book-id") Long id, Model model){
-		BookResponse book = bookApiClient.getBook(id);
+		BookResponse book = bookApiClient.getBook(id).getBody();
 		model.addAttribute("book", book);
 		model.addAttribute(CATEGORIES, categoryApiClient.getRoots());
 
