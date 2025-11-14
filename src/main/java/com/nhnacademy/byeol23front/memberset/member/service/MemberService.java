@@ -9,6 +9,6 @@ import com.nhnacademy.byeol23front.memberset.member.dto.MemberRegisterResponse;
 
 @Service
 public interface MemberService {
-	MemberRegisterResponse register(MemberRegisterRequest request);
+	void register(MemberRegisterRequest request);
 	LoginResponse login(LoginRequest request);
 }

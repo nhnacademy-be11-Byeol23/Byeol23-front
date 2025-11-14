@@ -2,6 +2,7 @@ package com.nhnacademy.byeol23front.bookset.book.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public record BookCreateRequest(
 	String bookName,
@@ -14,6 +15,9 @@ public record BookCreateRequest(
 	boolean isPack,
 	String bookStatus,
 	Integer stock,
-	Long publisherId
+	Long publisherId,
+	List<Long> categoryIds,
+	List<Long> tagIds,
+	List<Long> contributorIds
 ) {
 }

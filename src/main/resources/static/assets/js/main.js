@@ -935,4 +935,11 @@
     });
   });
 
+  document.addEventListener("DOMContentLoaded", function() {
+        const navDropdowns = document.querySelectorAll('.navmenu .dropdown');
+        navDropdowns.forEach(drop => {
+            drop.addEventListener('show.bs.dropdown', e => e.preventDefault());
+            drop.addEventListener('hide.bs.dropdown', e => e.preventDefault());
+        });
+  });
 })();

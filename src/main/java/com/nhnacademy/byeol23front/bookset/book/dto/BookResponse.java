@@ -2,6 +2,13 @@ package com.nhnacademy.byeol23front.bookset.book.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+
+import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
+import com.nhnacademy.byeol23front.bookset.contributor.dto.AllContributorResponse;
+import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
+import com.nhnacademy.byeol23front.bookset.tag.dto.AllTagsInfoResponse;
+import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
 
 public record BookResponse(
 	Long bookId,
@@ -15,7 +22,11 @@ public record BookResponse(
 	boolean isPack,
 	String bookStatus,
 	Integer stock,
-	Long publisherId,
-	boolean isDeleted
+	AllPublishersInfoResponse publisher,
+	boolean isDeleted,
+	List<CategoryLeafResponse> categories,
+	List<AllTagsInfoResponse> tags,
+	List<AllContributorResponse> contributors,
+	List<GetUrlResponse> images
 ) {
 }
