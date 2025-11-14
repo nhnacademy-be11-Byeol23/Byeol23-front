@@ -72,7 +72,9 @@
               </div>
 
               <!-- Cart Item -->
-              <div th:each="cartBook : ${cart.cartBooks()}" class="cart-item" th:attr="data-cart-book-id=${cartBook.cartBookId()}">
+              <!-- 회원: itemId=cartBookId, 비회원: itemId=bookId -->
+              <div th:each="cartBook : ${cart.cartBooks()}" class="cart-item" 
+                   th:attr="data-item-id=${cartBook.cartBookId() == -1 ? cartBook.bookId() : cartBook.cartBookId()}">
                 <div class="row align-items-center">
                   <div class="col-lg-5 col-12 mt-3 mt-lg-0 mb-lg-0 mb-3">
                     <div class="product-info d-flex align-items-center">
@@ -81,7 +83,9 @@
                       </div>
                       <div class="product-details">
                         <h6 class="product-title" th:text="${cartBook.bookName()}"></h6>
-                        <button class="remove-item text-danger" type="button" th:attr="data-cart-book-id=${cartBook.cartBookId()}" style="color: #dc3545;">
+                        <button class="remove-item text-danger" type="button" 
+                                th:attr="data-item-id=${cartBook.cartBookId() == -1 ? cartBook.bookId() : cartBook.cartBookId()}" 
+                                style="color: #dc3545;">
                           <i class="bi bi-trash"></i> 삭제
                         </button>
                       </div>

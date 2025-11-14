@@ -6,15 +6,15 @@ $(document).ready(() => {
   // 삭제 버튼
   $('.remove-item').on('click', function(e) {
     e.preventDefault();
-    const cartBookId = $(this).data('cart-book-id');
+    const itemId = $(this).data('item-id');  // 회원: cartBookId, 비회원: bookId
     
     if (confirm('이 상품을 장바구니에서 삭제하시겠습니까?')) {
-      // 프론트엔드 서버로 Ajax 요청 (Feign Client를 통해 Gateway → Backend로 전달)
+      // 통합 API 호출 (컨트롤러에서 회원/비회원 자동 분기)
       $.ajax({
-        url: `/carts/cart-books/${cartBookId}`,
+        url: `/carts/items/${itemId}`,
         type: 'DELETE',
         success: function() {
-          console.log('삭제 성공:', cartBookId);
+          console.log('삭제 성공:', itemId);
           // 페이지 새로고침
           location.reload();
         },
@@ -70,7 +70,7 @@ $(document).ready(() => {
   // 수량 변경 처리
   const updateCartItem = ($quantityInput) => {
     const $cartItem = $quantityInput.closest('.cart-item');
-    const cartBookId = $cartItem.data('cart-book-id');
+    const itemId = $cartItem.data('item-id');  // 회원: cartBookId, 비회원: bookId
     const quantity = parseInt($quantityInput.val());
 
     // 먼저 UI를 즉시 업데이트 (사용자 경험 향상)
@@ -88,24 +88,19 @@ $(document).ready(() => {
 
     // 2초 후에 서버로 요청 (사용자가 수량 변경을 멈춘 후 전송)
     updateTimer = setTimeout(() => {
-      // 프론트엔드 서버로 Ajax 요청 (Feign Client를 통해 Gateway → Backend로 전달)
+      // 통합 API 호출 (컨트롤러에서 회원/비회원 자동 분기)
       $.ajax({
-        url: '/carts/cart-books',
+        url: `/carts/items/${itemId}?quantity=${quantity}`,
         type: 'PUT',
-        contentType: 'application/json',
-        data: JSON.stringify({
-          cartBookId: cartBookId,
-          quantity: quantity
-        }),
         success: function() {
-          console.log('수량 업데이트 성공:', cartBookId, quantity);
+          console.log('수량 업데이트 성공:', itemId, quantity);
         },
         error: function(xhr, status, error) {
           console.error('수량 업데이트 실패:', error);
           alert('수량 업데이트에 실패했습니다.');
         }
       });
-    }, 2000);
+    }, 1000);
   };
 
   // 개별 항목 합계 업데이트
