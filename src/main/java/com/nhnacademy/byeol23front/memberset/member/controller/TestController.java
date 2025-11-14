@@ -1,10 +1,10 @@
 package com.nhnacademy.byeol23front.memberset.member.controller;
 
+import io.jsonwebtoken.JwtParser;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.nhnacademy.byeol23front.memberset.JwtParser;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
