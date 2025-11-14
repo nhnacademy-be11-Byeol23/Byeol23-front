@@ -119,7 +119,7 @@ public class OrderController {
 
 	@PostMapping("/prepare")
 	@ResponseBody
-	public ResponseEntity<OrderPrepareResponse> prepareOrder(@RequestBody OrderPrepareRequest request, @CookieValue(name = "Access-Token") String accessToken) {
+	public ResponseEntity<OrderPrepareResponse> prepareOrder(@RequestBody OrderPrepareRequest request, @CookieValue(name = "Access-Token", required = false) String accessToken) {
 		ResponseEntity<OrderPrepareResponse> response = orderApiClient.prepareOrder(request, accessToken);
 
 		log.info("주문 준비 응답: {}", response.getBody());

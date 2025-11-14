@@ -617,10 +617,6 @@
     function updatePriceSummary() {
         // 1. 필요한 DOM 요소 가져오기
         const pointsInput = document.getElementById('points-to-use');
-        const pointsDiscountAmountEl = document.getElementById('points-discount-amount');
-        const pointsDiscountRowEl = document.querySelector('.order-points-discount'); // 할인 행 전체 div
-        // const couponDiscountAmountEl = document.getElementById('coupon-discount-amount'); // (쿠폰 구현 시)
-        // const couponDiscountRowEl = document.querySelector('.order-coupon-discount'); // (쿠폰 구현 시)
         const totalBookPriceEl = document.getElementById('total-book-price');
         const deliveryFeeEl = document.getElementById('delivery-fee');
         const actualOrderPriceEl = document.getElementById('actual-order-price');
@@ -642,10 +638,6 @@
             return parseInt(element.textContent.replace(/[^\d]/g, ''), 10) || 0;
         };
 
-        // 2. 현재 값 읽기
-        let usedPoints = (pointsInput) ? parseInt(pointsInput.value, 10) || 0 : 0;
-        const maxPoints = (pointsInput) ? parseInt(pointsInput.getAttribute('max') || '0', 10) : 0;
-        const currentPointsStr = document.getElementById('current-points')?.textContent.replace(/[^\d]/g, '');
 
         // ▼▼▼ [수정] 상품 금액(subtotal)과 포장비(packagingTotal) 계산 ▼▼▼
         let subtotal = 0;
