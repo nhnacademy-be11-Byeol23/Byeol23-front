@@ -29,4 +29,7 @@ public interface BookApiClient {
 	@DeleteMapping("/api/books/{book-id}")
 	void deleteBook(@PathVariable("book-id") Long bookId);
 
+	@GetMapping("/api/books/list")
+	List<BookResponse> getBooksByIds(@RequestParam("ids") List<Long> bookIds);
+
 }
