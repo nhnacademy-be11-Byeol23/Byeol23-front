@@ -20,15 +20,12 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
-import com.nhnacademy.byeol23front.memberset.JwtParser;
-import com.nhnacademy.byeol23front.minio.service.MinioService;
 import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
 import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
@@ -51,7 +48,6 @@ public class OrderController {
 	private final OrderApiClient orderApiClient;
 	private final DeliveryApiClient deliveryApiClient;
 	private final PackagingApiClient packagingApiClient;
-	private final JwtParser jwtParser;
 
 	@PostMapping("/direct")
 	@ResponseBody
