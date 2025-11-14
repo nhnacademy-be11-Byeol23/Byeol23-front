@@ -7,6 +7,13 @@ spring:
   profiles:
     active: dev
 
+  session:
+    store-type: redis
+    timeout: 30d
+    redis:
+      flush-mode: on_save
+      namespace: spring:session:front
+
 backend:
   api:
     url: http://localhost:10333

@@ -1,3 +1,11 @@
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:s4.java21.net}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:*N2vya7H@muDTwdNMR!}
+      database: ${REDIS_DATABASE:321}
+
 minio:
   host: storage.java21.net
   port: 8000
