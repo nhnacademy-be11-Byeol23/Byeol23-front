@@ -77,6 +77,13 @@
                     <i class="bi bi-arrow-right"></i>
                   </button>
 
+                  <a th:if="${bookId != null and quantity != null}"
+                     th:href="@{/orders/nonmember/direct(bookId=${bookId}, quantity=${quantity})}"
+                     class="auth-btn social-btn mb-3 w-100"
+                     role="button">
+                    비회원 주문
+                  </a>
+
                   <div class="divider">
                     <span>or</span>
                   </div>

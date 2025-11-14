@@ -15,5 +15,6 @@ public record OrderPrepareRequest(BigDecimal totalBookPrice,
 								  String receiverAddressExtra,
 								  String receiverPhone,
 								  LocalDate deliveryArrivedDate,
-								  List<BookInfoRequest> bookInfoRequestList) {
+								  List<BookInfoRequest> bookInfoRequestList,
+								  String orderPassword) {
 }
