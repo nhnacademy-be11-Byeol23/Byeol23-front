@@ -1,14 +1,8 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.TextStyle;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -24,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
 import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
 import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
@@ -48,6 +41,7 @@ public class OrderController {
 	private final OrderApiClient orderApiClient;
 	private final DeliveryApiClient deliveryApiClient;
 	private final PackagingApiClient packagingApiClient;
+	private final OrderUtil orderUtil;
 
 	@PostMapping("/direct")
 	@ResponseBody
@@ -66,18 +60,8 @@ public class OrderController {
 	}
 
 	@GetMapping("/direct")
-	public String getOrderFormDirect(@CookieValue(name = "Access-Token", required = false) String accessToken,
-		HttpSession session, Model model) {
-
-		if (Objects.isNull(accessToken) || accessToken.isEmpty()) {
-			return "redirect:/members/login";
-		}
-
-		// 토큰 유효성 검사 로직
-
-
+	public String getOrderFormDirect(HttpSession session, Model model) {
 		BookOrderRequest request = (BookOrderRequest)session.getAttribute("directOrderRequest");
-		List<PackagingInfoResponse> packagingOptions = packagingApiClient.getAllPackagingLists();
 
 		if (Objects.isNull(request)) {
 			return "redirect:/";
@@ -85,12 +69,12 @@ public class OrderController {
 
 		session.removeAttribute("directOrderRequest");
 
-		addTotalQuantity(model, request.bookList());
-		addDeliveryDatesToModel(model);
-		addOrderSummary(model, request.bookList());
-		addDeliveryFeeToModel(model, request);
+		orderUtil.addTotalQuantity(model, request.bookList());
+		orderUtil.addDeliveryDatesToModel(model);
+		orderUtil.addOrderSummary(model, request.bookList());
+		orderUtil.addDeliveryFeeToModel(model, request);
+		orderUtil.addPackagingOption(model);
 
-		model.addAttribute("packagingOptions", packagingOptions);
 		model.addAttribute("userPoint", 300_000);
 
 		return "order/checkout";
@@ -98,7 +82,7 @@ public class OrderController {
 
 	@GetMapping
 	public String getOrder(Model model) {
-		addDeliveryDatesToModel(model);
+		orderUtil.addDeliveryDatesToModel(model);
 
 		BigDecimal totalBookPrice = new BigDecimal(298000);
 
@@ -173,87 +157,5 @@ public class OrderController {
 		return "order/success";
 	}
 
-	private void addDeliveryDatesToModel(Model model) {
-		List<Map<String, String>> deliveryDate = new ArrayList<>();
-		LocalDate today = LocalDate.now();
-		LocalDate currentDate = today;
-		int businessDaysCount = 0;
-		LocalDate defaultDate = null;
 
-		DateTimeFormatter displayFormatter = DateTimeFormatter.ofPattern("M/d"); // 10/30
-		DateTimeFormatter valueFormatter = DateTimeFormatter.ISO_LOCAL_DATE;
-
-		while (businessDaysCount < 5) {
-			currentDate = currentDate.plusDays(1);
-			DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
-			if (dayOfWeek != DayOfWeek.SATURDAY && dayOfWeek != DayOfWeek.SUNDAY) {
-				businessDaysCount++;
-				String dayName = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN); // e.g 목
-				String displayDate = currentDate.format(displayFormatter); // e.g 10/30
-				String valueDate = currentDate.format(valueFormatter); // e.g 2025-10-30
-
-				deliveryDate.add(Map.of(
-					"dayName", dayName,
-					"displayDate", displayDate,
-					"valueDate", valueDate
-				));
-
-				if (businessDaysCount == 2) {
-					defaultDate = currentDate;
-				}
-			}
-		}
-
-		model.addAttribute("deliveryDates", deliveryDate);
-		model.addAttribute("defaultDeliveryDate", defaultDate != null ? defaultDate.format(valueFormatter) : "");
-	}
-
-	private void addDeliveryFeeToModel(Model model, BookOrderRequest request) {
-
-		BigDecimal totalBookPrice = BigDecimal.ZERO;
-
-		for (BookInfoRequest infoRequest : request.bookList()) {
-			BigDecimal quantity = BigDecimal.valueOf(infoRequest.quantity());
-			BigDecimal itemSubtotal = infoRequest.salePrice().multiply(quantity);
-			totalBookPrice = totalBookPrice.add(itemSubtotal);
-		}
-
-		ResponseEntity<DeliveryPolicyInfoResponse> response = deliveryApiClient.getCurrentDeliveryPolicy();
-		DeliveryPolicyInfoResponse deliveryPolicy = response.getBody();
-
-		BigDecimal deliveryFee = BigDecimal.ZERO;
-		BigDecimal actualOrderPrice = totalBookPrice;
-
-		if (deliveryPolicy != null) {
-			BigDecimal policyFee = deliveryPolicy.deliveryFee();
-			BigDecimal freeThreshold = deliveryPolicy.freeDeliveryCondition();
-
-			if (freeThreshold != null && freeThreshold.compareTo(BigDecimal.ZERO) > 0
-				&& totalBookPrice.compareTo(freeThreshold) >= 0) {
-				deliveryFee = BigDecimal.ZERO;
-			} else {
-				deliveryFee = policyFee != null ? policyFee : BigDecimal.ZERO;
-			}
-		} else {
-			log.warn("배송비 정책을 가져올 수 없습니다. 기본 배송비 0원으로 처리합니다.");
-		}
-
-		actualOrderPrice = totalBookPrice.add(deliveryFee);
-
-		model.addAttribute("totalBookPrice", totalBookPrice);
-		model.addAttribute("deliveryFee", deliveryFee);
-		model.addAttribute("actualOrderPrice", actualOrderPrice);
-	}
-
-	private void addOrderSummary(Model model, List<BookInfoRequest> requestList) {
-		model.addAttribute("orderItem", requestList);
-	}
-
-	private void addTotalQuantity(Model model, List<BookInfoRequest> requestList) {
-		int totalQuantity = requestList.stream()
-			.mapToInt(BookInfoRequest::quantity)
-			.sum();
-
-		model.addAttribute("totalQuantity", totalQuantity);
-	}
 }
