@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>관리자 - 도서 수정</title>
+    <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+    <th:block th:replace="~{admin/book/book-css :: bookCss}"></th:block>
+</head>
+<body>
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">도서 관리</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/admin}">관리자 홈</a></li>
+                    <li><a th:href="@{/admin/books}">도서 목록</a></li>
+                    <li class="current">도서 수정</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <section class="section">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-3">
+                    <div th:replace="~{fragments/admin_side_bar :: admin_side_bar}"></div>
+                </div>
+
+                <div class="col-lg-9">
+                    <div class="book-management-container">
+                        <h2>도서 수정</h2>
+                        <form id="bookForm" class="book-form" th:action="@{/admin/books/update/{id}/stock(id=${book.bookId})}" method="post" enctype="multipart/form-data" th:object="${book}">
+                            <input type="hidden" id="bookId" name="bookId" th:value="*{bookId}">
+
+                            <div class="mb-3">
+                                <label for="bookName" class="form-label">도서명</label>
+                                <input type="text" class="form-control" id="bookName" name="bookName" th:value="*{bookName}" required readonly>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="stock" class="form-label">재고</label>
+                                    <input type="number" class="form-control" id="stock" name="stock" th:value="*{stock}" required min="1">
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2">
+                                <a th:href="@{/admin/books}" class="btn btn-secondary">취소</a>
+                                <button type="submit" class="btn btn-primary">도서 수정</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<div id="preloader"></div>
+
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/js/main.js}"></script>
+
+<link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
+<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+
+
+<div th:replace="~{admin/book/book-js :: bookJs}"></div>
+
+</body>
+</html>

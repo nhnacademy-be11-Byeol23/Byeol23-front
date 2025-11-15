@@ -82,18 +82,18 @@
                                     <label for="publishDate" class="form-label">출판일</label>
                                     <input type="date" class="form-control" id="publishDate" name="publishDate" th:value="*{publishDate}" required>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="stock" class="form-label">재고</label>
-                                    <input type="number" class="form-control" id="stock" name="stock" th:value="*{stock}" required>
-                                </div>
+<!--                                <div class="col-md-6 mb-3">-->
+<!--                                    <label for="stock" class="form-label">재고</label>-->
+<!--                                    <input type="number" class="form-control" id="stock" name="stock" th:value="*{stock}" required>-->
+<!--                                </div>-->
                             </div>
                             <div class="row align-items-center">
                                 <div class="col-md-6 mb-3">
                                     <label for="bookStatus" class="form-label">도서 상태</label>
                                     <select class="form-select" id="bookStatus" name="bookStatus" th:field="*{bookStatus}">
                                         <option value="SALE" th:selected="${book.bookStatus == 'SALE'}">판매중</option>
-                                        <option value="SOLD_OUT" th:selected="${book.bookStatus == 'SOLD_OUT'}">품절</option>
-                                        <option value="DISCONTINUED" th:selected="${book.bookStatus == 'DISCONTINUED'}">절판</option>
+                                        <option value="SOLDOUT" th:selected="${book.bookStatus == 'SOLDOUT'}">품절</option>
+                                        <option value="OUTOFPRINT" th:selected="${book.bookStatus == 'OUTOFPRINT'}">절판</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">
