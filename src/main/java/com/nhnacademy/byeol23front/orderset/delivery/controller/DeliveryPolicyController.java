@@ -32,7 +32,7 @@ public class DeliveryPolicyController {
 		if (!response.getStatusCode().is2xxSuccessful()) {
 			String message = "배송비 정책 생성에 실패했습니다.: " + response.getStatusCode();
 			model.addAttribute("status", 400); // 400 Bad Request
-			model.addAttribute("error", "뀨");
+			model.addAttribute("error", "오류가 발생했습니다.");
 			model.addAttribute("message", message);
 			return "error";
 		}
@@ -51,7 +51,7 @@ public class DeliveryPolicyController {
 		if (!response.getStatusCode().is2xxSuccessful()) {
 			String message = "배송비 정책 생성에 실패했습니다.: " + response.getStatusCode();
 			model.addAttribute("status", 400); // 400 Bad Request
-			model.addAttribute("error", "뀨");
+			model.addAttribute("error", "오류가 발생했습니다.");
 			model.addAttribute("message", message);
 			return "error";
 		}

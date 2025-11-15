@@ -1,7 +1,6 @@
 package com.nhnacademy.byeol23front.orderset.payment.controller;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -10,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.payment.client.PaymentApiClient;
@@ -28,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 public class PaymentController {
 	private final PaymentApiClient paymentApiClient;
 	private final OrderApiClient orderApiClient;
-	private final ObjectMapper objectMapper;
 
 	@GetMapping("/confirm")
 	public String paymentConfirm(@RequestParam String orderId,
