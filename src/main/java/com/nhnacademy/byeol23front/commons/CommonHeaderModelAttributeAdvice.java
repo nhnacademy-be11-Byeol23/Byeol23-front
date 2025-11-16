@@ -12,10 +12,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CommonHeaderModelAttributeAdvice {
     private final CategoryApiClient categoryApiClient;
-
-    @ModelAttribute("tree")
-    public List<CategoryTreeResponse> getRootsWithChildren2Depth() {
-        return categoryApiClient.getRootsWithChildren2Depth();
-    }
+	// TODO: 차후 삭제
+    // @ModelAttribute("tree")
+    // public List<CategoryTreeResponse> getRootsWithChildren2Depth() {
+    //     return categoryApiClient.getRootsWithChildren2Depth();
+    // }
 }
 

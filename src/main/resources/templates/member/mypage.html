@@ -23,9 +23,7 @@
 <body class="mypage-page">
 <div th:replace="~{fragments/common_header :: commonHeader}"></div>
 
-
-<!--/*@thymesVar id="member" type="com.nhnacademy.byeol23front.memberset.member.dto.MyPageResponse"*/-->
-<main class="main" th:object="${member}">
+<main class="main">
     <!-- 상단 타이틀/빵부스러기 -->
     <div class="page-title light-background">
         <div class="container d-lg-flex justify-content-between align-items-center">
@@ -45,22 +43,19 @@
             <!-- 요약 카드 -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body d-flex align-items-center gap-3">
-                    <div class="avatar"
-                         th:text="*{nickname}">
-                    </div>
+                    <div class="avatar">GD</div>
                     <div class="flex-grow-1">
                         <div class="d-flex align-items-center gap-2 flex-wrap">
-                            <h4 class="mb-0" th:text="*{nickname}">사용자</h4>
-                            <span class="badge text-bg-dark badge-role" th:if="*{memberRole != null}" th:text="*{memberRole}">USER</span>
-                            <span class="badge text-bg-primary badge-grade" th:if="*{grade != null}" th:text="*{grade}">BRONZE</span>
+                            <h4 class="mb-0">gildong</h4>
+                            <span class="badge text-bg-dark badge-role">USER</span>
+                            <span class="badge text-bg-primary badge-grade">BRONZE</span>
                         </div>
-                        <div class="text-muted mt-1" th:text="'로그인 ID: ' + *{loginId}">로그인 ID: sample</div>
+                        <div class="text-muted mt-1">로그인 ID: sample_user</div>
                     </div>
 
                     <div class="text-end">
                         <div class="text-muted">보유 포인트</div>
-                        <div class="fs-4 fw-semibold"
-                             th:text="*{#numbers.formatDecimal(currentPoint, 1, 'COMMA', 0, 'POINT')}">0</div>
+                        <div class="fs-4 fw-semibold">12,345</div>
                         <div class="mt-2 d-flex gap-2 justify-content-end">
                             <a th:href="@{/points/charge}" class="btn btn-sm btn-outline-primary">충전</a>
                             <a th:href="@{/points/history}" class="btn btn-sm btn-outline-secondary">내역</a>
@@ -77,85 +72,122 @@
                     <div class="card-body">
                         <dl class="row mb-0">
                             <dt class="col-sm-4">이름</dt>
-                            <dd class="col-sm-8" th:text="*{memberName}">홍길동</dd>
+                            <dd class="col-sm-8">홍길동</dd>
 
                             <dt class="col-sm-4">닉네임</dt>
-                            <dd class="col-sm-8" th:text="*{nickname}">gildong</dd>
+                            <dd class="col-sm-8">gildong</dd>
 
                             <dt class="col-sm-4">이메일</dt>
                             <dd class="col-sm-8">
-                                <a th:href="*{'mailto:' + email}" th:text="*{email}">user@example.com</a>
+                                <a href="mailto:user@example.com">user@example.com</a>
                             </dd>
 
                             <dt class="col-sm-4">휴대폰</dt>
-                            <dd class="col-sm-8" th:text="*{phoneNumber}">010-0000-0000</dd>
+                            <dd class="col-sm-8">010-0000-0000</dd>
 
                             <dt class="col-sm-4">생년월일</dt>
-                            <dd class="col-sm-8"
-                                th:text="*{#temporals.format(birthDate, 'yyyy-MM-dd')}">1999-01-01</dd>
+                            <dd class="col-sm-8">1999-01-01</dd>
 
                             <dt class="col-sm-4">권한</dt>
-                            <dd class="col-sm-8" th:text="*{memberRole}">USER</dd>
+                            <dd class="col-sm-8">USER</dd>
 
                             <dt class="col-sm-4">등급</dt>
-                            <dd class="col-sm-8" th:text="*{grade}">BRONZE</dd>
+                            <dd class="col-sm-8">BRONZE</dd>
                         </dl>
                     </div>
                 </div>
+
 
                 <!-- 수정 폼 -->
                 <div class="card shadow-sm">
                     <div class="card-header fw-semibold">프로필 수정</div>
                     <div class="card-body">
-                        <form th:action="@{/mypage}" method="post" th:object="${member}">
-
-                            <!-- 글로벌 에러 -->
-                            <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger" role="alert"
-                                 th:each="err : ${#fields.globalErrors()}" th:text="${err}">입력 오류가 있습니다.</div>
-
+                        <div id="revise-form">
                             <div class="mb-3">
                                 <label class="form-label">닉네임</label>
-                                <input type="text" class="form-control" th:field="*{nickname}" maxlength="32"/>
-                                <div class="text-danger small" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}"></div>
+                                <input type="text" class="form-control" name="nickname" maxlength="32" value="gildong"/>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">비밀번호</label>
+                                <button class="btn btn-outline-dark" onclick="passwordUpdateModal()">비밀번호 변경</button>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">휴대폰 번호</label>
-                                <input type="tel" class="form-control" th:field="*{phoneNumber}" placeholder="010-0000-0000"/>
-                                <div class="text-danger small" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+                                <input type="tel" class="form-control" name="phoneNumber" placeholder="010-0000-0000" value="010-0000-0000"/>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">이메일</label>
-                                <input type="email" class="form-control" th:field="*{email}"/>
-                                <div class="text-danger small" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                                <input type="email" class="form-control" name="email" value="user@example.com"/>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label">생년월일</label>
-                                <input type="date" class="form-control"
-                                       th:value="*{#temporals.format(birthDate, 'yyyy-MM-dd')}"
-                                       name="birthDate"/>
-                                <div class="text-danger small" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}"></div>
+                                <input type="date" class="form-control" name="birthDate" value="1999-01-01"/>
                             </div>
 
                             <!-- 읽기 전용 노출 -->
                             <div class="mb-3">
                                 <label class="form-label">로그인 ID</label>
-                                <input type="text" class="form-control" th:value="${loginId}" disabled/>
+                                <input type="text" class="form-control" value="sample_user" disabled/>
                             </div>
 
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">저장</button>
-                                <a th:href="@{/mypage}" class="btn btn-outline-secondary">초기화</a>
+                                <button type="button" class="btn btn-primary">저장</button>
+                                <a href="/members/mypage" class="btn btn-outline-secondary">초기화</a>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
-
-        </div>
+        </div>e
     </section>
+    <!-- Password Update Modal -->
+    <div class="modal fade" id="passwordUpdateModal" tabindex="-1" style="display: none">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                        <div id="verifyHelp" class="form-text">본인 확인을 위해 현재 비밀번호를 입력하세요.</div>
+                        <div id="verifyError" class="text-danger small mt-2 d-none"></div>
+                    </div>
+
+                    <!-- Step 2: Enter new password -->
+                    <div id="pw-step-update" class="d-none">
+                        <label class="form-label">새 비밀번호</label>
+                        <div class="input-group mb-2">
+                            <input id="newPassword" type="password" class="form-control" autocomplete="new-password">
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePw('newPassword')">보기</button>
+                        </div>
+
+                        <label class="form-label">새 비밀번호 확인</label>
+                        <div class="input-group mb-2">
+                            <input id="confirmPassword" type="password" class="form-control" autocomplete="new-password">
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePw('confirmPassword')">보기</button>
+                        </div>
+
+                        <ul id="pwStrength" class="small mb-0">
+                            <li id="rule-length">8자 이상</li>
+                            <li id="rule-mix">영문 대/소문자, 숫자, 특수문자 중 3종류 이상</li>
+                            <li id="rule-match">비밀번호 확인 일치</li>
+                        </ul>
+
+                        <div id="updateError" class="text-danger small mt-2 d-none"></div>
+                        <div id="updateSuccess" class="text-success small mt-2 d-none"></div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button id="btnBack" type="button" class="btn btn-outline-secondary d-none" onclick="pwGoBack()">이전</button>
+                    <button id="btnVerify" type="button" class="btn btn-dark" onclick="verifyCurrentPassword()">확인</button>
+                    <button id="btnUpdate" type="button" class="btn btn-primary d-none" onclick="submitNewPassword()">변경</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
 </main>
 
 <div th:replace="~{fragments/common_footer :: commonFooter}"></div>
@@ -171,5 +203,7 @@
 <script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
 <script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
 <script th:src="@{/assets/js/main.js}"></script>
+
+<script th:src="@{/assets/js/mypage.js}"></script>
 </body>
 </html>

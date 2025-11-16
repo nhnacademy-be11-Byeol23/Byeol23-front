@@ -2,17 +2,21 @@ package com.nhnacademy.byeol23front.memberset.member.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.nhnacademy.byeol23front.memberset.member.dto.LoginRequest;
 import com.nhnacademy.byeol23front.memberset.member.dto.LoginResponse;
 import com.nhnacademy.byeol23front.memberset.member.dto.LogoutResponse;
+import com.nhnacademy.byeol23front.memberset.member.dto.MemberPasswordUpdateRequest;
+import com.nhnacademy.byeol23front.memberset.member.dto.MemberPasswordUpdateResponse;
 import com.nhnacademy.byeol23front.memberset.member.dto.MemberRegisterRequest;
 import com.nhnacademy.byeol23front.memberset.member.dto.MemberRegisterResponse;
+import com.nhnacademy.byeol23front.memberset.member.dto.MemberUpdateRequest;
+import com.nhnacademy.byeol23front.memberset.member.dto.MemberUpdateResponse;
 import com.nhnacademy.byeol23front.memberset.member.dto.MyPageResponse;
 
 @FeignClient(name = "BYEOL23-GATEWAY", contextId = "MemberApiClient")
@@ -32,6 +36,19 @@ public interface MemberApiClient {
 	@PostMapping("/auth/logout")
 	ResponseEntity<LogoutResponse> logout();
 
-	@GetMapping("/api/members/{member-id}")
-	ResponseEntity<MyPageResponse> getMember(@PathVariable(value = "member-id") Long memberId);
+	@GetMapping("/api/members")
+	ResponseEntity<MyPageResponse> getMember();
+
+	@PutMapping("/api/members")
+	ResponseEntity<MemberUpdateResponse> updateMember(@RequestBody MemberUpdateRequest request);
+
+	@PutMapping("/api/members/password")
+	ResponseEntity<MemberPasswordUpdateResponse> updateMemberPassword(@RequestBody MemberPasswordUpdateRequest request);
+
+	@PutMapping("api/members/reactivate")
+	ResponseEntity<Void> reactivateMember(@RequestBody MemberPasswordUpdateRequest request);
+
+	@DeleteMapping("/api/members")
+	ResponseEntity<Void> deleteMember();
+
 }

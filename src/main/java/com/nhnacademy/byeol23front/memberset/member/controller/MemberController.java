@@ -9,11 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 import com.nhnacademy.byeol23front.memberset.member.dto.LoginRequest;
@@ -84,11 +87,35 @@ public class MemberController {
 				.build().toString();
 	}
 
-	@GetMapping("/mypage/{member-id}")
-	public String getMypage(@PathVariable(value = "member-id") Long memberId, Model model){
-		MyPageResponse resp = memberApiClient.getMember(memberId).getBody();
-		model.addAttribute("member", resp);
+	@GetMapping("/mypage")
+	public String getMypage(Model model){
+		//TODO: 차후 삭제
+		//MyPageResponse resp = memberApiClient.getMember().getBody();
+		//model.addAttribute("member", resp);
 		return "/member/mypage";
 	}
 
+	@PutMapping("/mypage")
+	@ResponseBody
+	public ResponseEntity<MemberUpdateResponse> updateMember(@RequestBody MemberUpdateRequest request){
+		return memberApiClient.updateMember(request);
+	}
+
+	@PutMapping("/mypage/password")
+	@ResponseBody
+	public ResponseEntity<MemberPasswordUpdateResponse> updateMemberPassword(@RequestBody MemberPasswordUpdateRequest request){
+		return memberApiClient.updateMemberPassword(request);
+	}
+
+	@PutMapping("/mypage/reactivate")
+	@ResponseBody
+	public ResponseEntity<Void> reactivateMember(@RequestBody MemberPasswordUpdateRequest request){
+		return memberApiClient.reactivateMember(request);
+	}
+
+	@DeleteMapping("/mypage")
+	@ResponseBody
+	public ResponseEntity<Void> deleteMember(){
+		return memberApiClient.deleteMember();
+	}
 }
