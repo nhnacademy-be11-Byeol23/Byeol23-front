@@ -532,14 +532,6 @@
             const selectedDeliveryArrivedDate = document.querySelector('input[name="deliveryDate"]:checked');
             const deliveryDateValue = selectedDeliveryArrivedDate ? selectedDeliveryArrivedDate.value : null;
 
-            const tossPayRadio = document.getElementById('tossPay');
-
-            // 최종 금액이 0보다 크고, 토스페이 라디오 버튼이 선택되지 않았으면 알림 후 중단
-            if (currentFinalPrice > 0 && (!tossPayRadio || !tossPayRadio.checked)) {
-                alert("결제 방법을 선택해주세요.");
-                return; // 함수 실행 중단
-            }
-
             const orderPrepareRequest = {
                 totalBookPrice: totalBookPrice,
                 actualOrderPrice: currentFinalPrice,
@@ -552,6 +544,14 @@
                 deliveryArrivedDate: deliveryDateValue,
                 bookInfoRequestList: bookInfoRequestList
             };
+
+            const tossPayRadio = document.getElementById('tossPay');
+
+            // 최종 금액이 0보다 크고, 토스페이 라디오 버튼이 선택되지 않았으면 알림 후 중단
+            if (currentFinalPrice > 0 && (!tossPayRadio || !tossPayRadio.checked)) {
+                alert("결제 방법을 선택해주세요.");
+                return; // 함수 실행 중단
+            }
 
             console.log("전송할 객체:", orderPrepareRequest);
             console.log("실제 JSON:", JSON.stringify(orderPrepareRequest));
