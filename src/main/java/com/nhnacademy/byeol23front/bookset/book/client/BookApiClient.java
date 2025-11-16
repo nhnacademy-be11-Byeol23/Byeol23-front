@@ -4,6 +4,7 @@ import com.nhnacademy.byeol23front.bookset.book.dto.BookCreateRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookUpdateRequest;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +18,7 @@ public interface BookApiClient {
 	BookResponse createBook(@RequestBody BookCreateRequest request);
 
 	@GetMapping("/api/books/{book-id}")
-	BookResponse getBook(@PathVariable("book-id") Long bookId);
+    ResponseEntity<BookResponse> getBook(@PathVariable("book-id") Long bookId);
 
 	@PutMapping("/api/books/{book-id}")
 	BookResponse updateBook(@PathVariable("book-id") Long bookId,
@@ -28,5 +29,8 @@ public interface BookApiClient {
 
 	@DeleteMapping("/api/books/{book-id}")
 	void deleteBook(@PathVariable("book-id") Long bookId);
+
+	@GetMapping("/api/books/list")
+	List<BookResponse> getBooksByIds(@RequestParam("ids") List<Long> bookIds);
 
 }

@@ -17,11 +17,6 @@ public class FeignInterceptor {
 		@Bean
 		public RequestInterceptor authHeaderInterceptor() {
 			return template -> {
-				String path = template.path();
-				log.info(path);
-				if(!path.startsWith("/test") && !path.startsWith("/members")) {
-					return;
-				}
 
 				ServletRequestAttributes attrs =
 					(ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
@@ -45,6 +40,12 @@ public class FeignInterceptor {
 
 						template.header("Cookie", "Access-Token=" + tokenValue);
 					}
+                    if ("guestId".equals(cookie.getName())) {
+                        String guestId = cookie.getValue();
+                        log.info("guestId: {}", guestId);
+
+                        template.header("Cookie", "guestId=" + guestId);
+                    }
 				}
 			};
 		}

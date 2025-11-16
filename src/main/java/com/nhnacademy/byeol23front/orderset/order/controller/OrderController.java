@@ -12,9 +12,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +26,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
-import com.nhnacademy.byeol23front.minio.service.MinioService;
 import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
 import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
@@ -47,25 +48,39 @@ public class OrderController {
 	private final OrderApiClient orderApiClient;
 	private final DeliveryApiClient deliveryApiClient;
 	private final PackagingApiClient packagingApiClient;
-	private final MinioService minioService;
 
 	@PostMapping("/direct")
 	@ResponseBody
 	public ResponseEntity<Void> handleDirectOrder(@RequestBody BookOrderRequest request,
+		@CookieValue(name = "Access-Token", required = false) String accessToken,
 		HttpSession session) {
 
+		if (Objects.isNull(accessToken) || accessToken.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+
+		// 현재 액세스 토큰이 유효한지 검사하는 로직 jwtParser.jwtParserMemberId(accessToken) 이용 필요한지 확인할 필요가 있음
 		session.setAttribute("directOrderRequest", request);
 
 		return ResponseEntity.ok().build();
 	}
 
 	@GetMapping("/direct")
-	public String getOrderFormDirect(HttpSession session, Model model) {
+	public String getOrderFormDirect(@CookieValue(name = "Access-Token", required = false) String accessToken,
+		HttpSession session, Model model) {
+
+		if (Objects.isNull(accessToken) || accessToken.isEmpty()) {
+			return "redirect:/members/login";
+		}
+
+		// 토큰 유효성 검사 로직
+
+
 		BookOrderRequest request = (BookOrderRequest)session.getAttribute("directOrderRequest");
 		List<PackagingInfoResponse> packagingOptions = packagingApiClient.getAllPackagingLists();
 
 		if (Objects.isNull(request)) {
-			throw new IllegalArgumentException("주문 정보가 없습니다.");
+			return "redirect:/";
 		}
 
 		session.removeAttribute("directOrderRequest");
@@ -74,7 +89,6 @@ public class OrderController {
 		addDeliveryDatesToModel(model);
 		addOrderSummary(model, request.bookList());
 		addDeliveryFeeToModel(model, request);
-		
 
 		model.addAttribute("packagingOptions", packagingOptions);
 		model.addAttribute("userPoint", 300_000);
@@ -121,8 +135,9 @@ public class OrderController {
 
 	@PostMapping("/prepare")
 	@ResponseBody
-	public ResponseEntity<OrderPrepareResponse> prepareOrder(@RequestBody OrderPrepareRequest request) {
-		ResponseEntity<OrderPrepareResponse> response = orderApiClient.prepareOrder(request);
+	public ResponseEntity<OrderPrepareResponse> prepareOrder(@RequestBody OrderPrepareRequest request, @CookieValue(name = "Access-Token") String accessToken) {
+		ResponseEntity<OrderPrepareResponse> response = orderApiClient.prepareOrder(request, accessToken);
+
 		log.info("주문 준비 응답: {}", response.getBody());
 
 		if (!response.getStatusCode().is2xxSuccessful()) {
