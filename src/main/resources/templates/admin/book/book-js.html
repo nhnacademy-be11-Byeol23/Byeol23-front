@@ -52,7 +52,7 @@
                 .then(response => response.json())
                 .then(children => {
                     parentUl.innerHTML = '';
-                    c   `hildren.forEach(child => {
+                    children.forEach(child => {
                         const hasChildren = child.hasChildren;
                         const isChecked = selectedCategoryIds.includes(child.id);
                         
