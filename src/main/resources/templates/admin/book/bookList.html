@@ -75,7 +75,7 @@
                                     <td>
                                         <span th:if="${book.bookStatus != null}" 
                                               class="badge"
-                                              th:classappend="${book.bookStatus == 'SALE'} ? 'text-bg-success' : (${book.bookStatus == 'SOLD_OUT'} ? 'text-bg-warning' : 'text-bg-secondary')"
+                                              th:classappend="${book.bookStatus == 'SALE'} ? 'text-bg-success' : (${book.bookStatus == 'SOLDOUT'} ? 'text-bg-warning' : 'text-bg-secondary')"
                                               th:text="${book.bookStatus}"></span>
                                         <span th:if="${book.bookStatus == null}" class="text-muted">-</span>
                                     </td>

@@ -28,6 +28,12 @@ public interface PublisherApiClient {
 		@RequestParam(value = "size", defaultValue = "10") int size
 	);
 
+	@GetMapping(value = "/api/publishers/search")
+	ResponseEntity<AllPublishersInfoResponse> findPublisherByName(@RequestParam String publisherName);
+
+	@PostMapping(value = "/api/publishers/find-or-create")
+	ResponseEntity<AllPublishersInfoResponse> findOrCreatePublisher(@RequestBody PublisherCreateRequest request);
+
 	@DeleteMapping(value = "/api/publishers/{publisher-id}")
 	void deletePublisher(@PathVariable(name = "publisher-id") Long publisherId);
 

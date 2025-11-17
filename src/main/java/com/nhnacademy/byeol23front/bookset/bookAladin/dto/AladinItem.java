@@ -1,6 +1,8 @@
 package com.nhnacademy.byeol23front.bookset.bookAladin.dto;
 
 import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 public record AladinItem(
 	String title,
@@ -11,6 +13,8 @@ public record AladinItem(
 	int priceSales,
 	String isbn13,
 	String stockStatus,
-	Date pubDate
+	Date pubDate,
+	@JsonProperty("cover")
+	String imageUrl
 ) {
 }

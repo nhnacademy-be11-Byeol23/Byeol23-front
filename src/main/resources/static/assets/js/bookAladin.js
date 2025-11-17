@@ -17,16 +17,18 @@ function addApiBook(btn) {
         author: d.author || "",
         publisher: d.publisher || "",
         description: d.description || "",
-        priceSales: d.priceSales ? Number(d.priceSales) : null,
-        priceStandard: d.priceStandard ? Number(d.priceStandard) : null,
+        priceSales: d.priceSales ? String(d.priceSales) : "",
+        priceStandard: d.priceStandard ? String(d.priceStandard) : "",
         isbn13: d.isbn13 || "",
-        pubDate: toYmdFromJavaDate(d.pubDate) || ""
+        pubDate: toYmdFromJavaDate(d.pubDate) || "",
+        imageUrl: d.cover || btn.getAttribute("data-cover") || ""  // 여러 방법으로 시도
     };
 
-    // Store for the next page (survives navigation, cleared when tab closes)
+    // sessionStorage에 저장
     sessionStorage.setItem("aladinBookDraft", JSON.stringify(payload));
+    console.log("알라딘 데이터 저장:", payload);  // 디버깅용
 
-    // Go to your input page (adjust path if different)
+    // bookAladinCreate.html 페이지로 이동
     window.location.href = "/admin/bookApi/new";
 }
 
