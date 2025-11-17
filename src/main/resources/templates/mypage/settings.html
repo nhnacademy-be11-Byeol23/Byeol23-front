@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>계정 설정 - 별이삼shop</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+
+  <!-- Custom Styles -->
+  <style>
+    /* 저장 버튼 및 추가 버튼 스타일 */
+    .modal-footer .btn-primary,
+    .settings-form .btn-save,
+    .section-header .btn-primary {
+      background-color: #252223 !important;
+      border-color: #252223 !important;
+    }
+    
+    .modal-footer .btn-primary:hover,
+    .settings-form .btn-save:hover,
+    .section-header .btn-primary:hover {
+      background-color: #1a1819 !important;
+      border-color: #1a1819 !important;
+    }
+    
+    /* 토글 스위치 스타일 */
+    .form-check-input:checked {
+      background-color: #252223 !important;
+      border-color: #252223 !important;
+    }
+    
+    .form-check-input:focus {
+      border-color: #252223 !important;
+      box-shadow: 0 0 0 0.25rem rgba(37, 34, 35, 0.25) !important;
+    }
+  </style>
+
+  <!-- Daum Postcode API -->
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+</head>
+
+<body class="account-page">
+
+  <div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title light-background">
+      <div class="container d-lg-flex justify-content-between align-items-center">
+        <h1 class="mb-2 mb-lg-0">계정 설정</h1>
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a th:href="@{/}">홈</a></li>
+            <li><a th:href="@{/mypage}">마이페이지</a></li>
+            <li class="current">계정 설정</li>
+          </ol>
+        </nav>
+      </div>
+    </div><!-- End Page Title -->
+
+    <!-- Account Section -->
+    <section id="account" class="account section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <!-- Mobile Menu Toggle -->
+        <div class="mobile-menu d-lg-none mb-4">
+          <button class="mobile-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#profileMenu">
+            <i class="bi bi-grid"></i>
+            <span>Menu</span>
+          </button>
+        </div>
+
+        <div class="row g-4">
+          <!-- Profile Menu -->
+          <div class="col-lg-3">
+            <div th:replace="~{fragments/mypage_profile :: mypage_profile}"></div>
+          </div>
+
+          <!-- Content Area -->
+          <div class="col-lg-9">
+            <div class="content-area">
+              <div id="settings">
+                  <div class="section-header" data-aos="fade-up">
+                    <h2>Account Settings</h2>
+                  </div>
+
+                  <div class="settings-content">
+                    <!-- Personal Information -->
+                    <div class="settings-section" data-aos="fade-up">
+                      <h3>Personal Information</h3>
+                      <form class="php-email-form settings-form">
+                        <div class="row g-3">
+                          <div class="col-md-6">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" value="Sarah" required="">
+                          </div>
+                          <div class="col-md-6">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" value="Anderson" required="">
+                          </div>
+                          <div class="col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" value="sarah@example.com" required="">
+                          </div>
+                          <div class="col-md-6">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="phone" value="+1 (555) 123-4567">
+                          </div>
+                        </div>
+
+                        <div class="form-buttons">
+                          <button type="submit" class="btn-save">Save Changes</button>
+                        </div>
+
+                        <div class="loading">Loading</div>
+                        <div class="error-message"></div>
+                        <div class="sent-message">Your changes have been saved successfully!</div>
+                      </form>
+                    </div>
+
+                    <!-- Email Preferences -->
+                    <div class="settings-section" data-aos="fade-up" data-aos-delay="100">
+                      <h3>Email Preferences</h3>
+                      <div class="preferences-list">
+                        <div class="preference-item">
+                          <div class="preference-info">
+                            <h4>Order Updates</h4>
+                            <p>Receive notifications about your order status</p>
+                          </div>
+                          <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="orderUpdates" checked="">
+                          </div>
+                        </div>
+
+                        <div class="preference-item">
+                          <div class="preference-info">
+                            <h4>Promotions</h4>
+                            <p>Receive emails about new promotions and deals</p>
+                          </div>
+                          <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="promotions">
+                          </div>
+                        </div>
+
+                        <div class="preference-item">
+                          <div class="preference-info">
+                            <h4>Newsletter</h4>
+                            <p>Subscribe to our weekly newsletter</p>
+                          </div>
+                          <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="newsletter" checked="">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="settings-section" data-aos="fade-up" data-aos-delay="200">
+                      <h3>Security</h3>
+                      <form class="php-email-form settings-form">
+                        <div class="row g-3">
+                          <div class="col-md-12">
+                            <label for="currentPassword" class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="currentPassword" required="">
+                          </div>
+                          <div class="col-md-6">
+                            <label for="newPassword" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="newPassword" required="">
+                          </div>
+                          <div class="col-md-6">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" required="">
+                          </div>
+                        </div>
+
+                        <div class="form-buttons">
+                          <button type="submit" class="btn-save">Update Password</button>
+                        </div>
+
+                        <div class="loading">Loading</div>
+                        <div class="error-message"></div>
+                        <div class="sent-message">Your password has been updated successfully!</div>
+                      </form>
+                    </div>
+
+                    <!-- Delete Account -->
+                    <div class="settings-section danger-zone" data-aos="fade-up" data-aos-delay="300">
+                      <h3>Delete Account</h3>
+                      <div class="danger-zone-content">
+                        <p>Once you delete your account, there is no going back. Please be certain.</p>
+                        <button type="button" class="btn-danger">Delete Account</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /Account Section -->
+
+  </main>
+
+  <footer id="footer" class="footer dark-background">
+    <div class="footer-main">
+      <div class="container">
+        <div class="row gy-4">
+          <div class="col-lg-4 col-md-6">
+            <div class="footer-widget footer-about">
+              <a href="index.html" class="logo">
+                <span class="sitename">NiceShop</span>
+              </a>
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in nibh vehicula, facilisis magna ut, consectetur lorem. Proin eget tortor risus.</p>
+
+              <div class="social-links mt-4">
+                <h5>Connect With Us</h5>
+                <div class="social-icons">
+                  <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                  <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                  <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                  <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+                  <a href="#" aria-label="Pinterest"><i class="bi bi-pinterest"></i></a>
+                  <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-2 col-md-6 col-sm-6">
+            <div class="footer-widget">
+              <h4>Shop</h4>
+              <ul class="footer-links">
+                <li><a href="category.html">New Arrivals</a></li>
+                <li><a href="category.html">Bestsellers</a></li>
+                <li><a href="category.html">Women's Clothing</a></li>
+                <li><a href="category.html">Men's Clothing</a></li>
+                <li><a href="category.html">Accessories</a></li>
+                <li><a href="category.html">Sale</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-lg-2 col-md-6 col-sm-6">
+            <div class="footer-widget">
+              <h4>Support</h4>
+              <ul class="footer-links">
+                <li><a href="support.html">Help Center</a></li>
+                <li><a href="account.html">Order Status</a></li>
+                <li><a href="shiping-info.html">Shipping Info</a></li>
+                <li><a href="return-policy.html">Returns &amp; Exchanges</a></li>
+                <li><a href="#">Size Guide</a></li>
+                <li><a href="contact.html">Contact Us</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6">
+            <div class="footer-widget">
+              <h4>Contact Information</h4>
+              <div class="footer-contact">
+                <div class="contact-item">
+                  <i class="bi bi-geo-alt"></i>
+                  <span>123 Fashion Street, New York, NY 10001</span>
+                </div>
+                <div class="contact-item">
+                  <i class="bi bi-telephone"></i>
+                  <span>+1 (555) 123-4567</span>
+                </div>
+                <div class="contact-item">
+                  <i class="bi bi-envelope"></i>
+                  <span>hello@example.com</span>
+                </div>
+                <div class="contact-item">
+                  <i class="bi bi-clock"></i>
+                  <span>Monday-Friday: 9am-6pm<br>Saturday: 10am-4pm<br>Sunday: Closed</span>
+                </div>
+              </div>
+
+              <div class="app-buttons mt-4">
+                <a href="#" class="app-btn">
+                  <i class="bi bi-apple"></i>
+                  <span>App Store</span>
+                </a>
+                <a href="#" class="app-btn">
+                  <i class="bi bi-google-play"></i>
+                  <span>Google Play</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container">
+        <div class="row gy-3 align-items-center">
+          <div class="col-lg-6 col-md-12">
+            <div class="copyright">
+              <p>© <span>Copyright</span> <strong class="sitename">NiceShop</strong>. All Rights Reserved.</p>
+            </div>
+            <div class="credits mt-1">
+              <!-- All the links in the footer should remain intact. -->
+              <!-- You can delete the links only if you've purchased the pro version. -->
+              <!-- Licensing information: https://bootstrapmade.com/license/ -->
+              <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
+              Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+            </div>
+          </div>
+
+          <div class="col-lg-6 col-md-12">
+            <div class="d-flex flex-wrap justify-content-lg-end justify-content-center align-items-center gap-4">
+              <div class="payment-methods">
+                <div class="payment-icons">
+                  <i class="bi bi-credit-card" aria-label="Credit Card"></i>
+                  <i class="bi bi-paypal" aria-label="PayPal"></i>
+                  <i class="bi bi-apple" aria-label="Apple Pay"></i>
+                  <i class="bi bi-google" aria-label="Google Pay"></i>
+                  <i class="bi bi-shop" aria-label="Shop Pay"></i>
+                  <i class="bi bi-cash" aria-label="Cash on Delivery"></i>
+                </div>
+              </div>
+
+              <div class="legal-links">
+                <a href="tos.html">Terms</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="tos.html">Cookies</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/vendor/php-email-form/validate.js"></script>
+  <script src="/assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="/assets/vendor/aos/aos.js"></script>
+  <script src="/assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="/assets/vendor/drift-zoom/Drift.min.js"></script>
+  <script src="/assets/vendor/purecounter/purecounter_vanilla.js"></script>
+
+  <!-- Main JS File -->
+  <script src="/assets/js/main.js"></script>
+
+  </body>
+
+</html>
+              </body>
+
+</html>
