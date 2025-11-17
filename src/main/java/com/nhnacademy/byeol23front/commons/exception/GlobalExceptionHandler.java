@@ -86,10 +86,11 @@ public class GlobalExceptionHandler {
 
     private ModelAndView resolveErrorPage(ErrorResponse errorResponse) {
         ModelAndView modelAndView = new ModelAndView("error");
-        modelAndView.addObject("status", errorResponse.status());
+        int status = errorResponse.status() != -1 ? errorResponse.status() : 500;
+        modelAndView.addObject("status", status);
         modelAndView.addObject("message", errorResponse.message());
         modelAndView.addObject("timestamp", errorResponse.timestamp());
-        modelAndView.setStatus(HttpStatusCode.valueOf(errorResponse.status()));
+        modelAndView.setStatus(HttpStatusCode.valueOf(status));
 
         return modelAndView;
     }

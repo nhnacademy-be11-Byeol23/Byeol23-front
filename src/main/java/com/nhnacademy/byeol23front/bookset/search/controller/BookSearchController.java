@@ -7,6 +7,7 @@ import com.nhnacademy.byeol23front.bookset.search.dto.BookSearchResultResponse;
 import com.nhnacademy.byeol23front.bookset.search.dto.SearchCondition;
 import com.nhnacademy.byeol23front.bookset.search.dto.SearchPageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +27,7 @@ public class BookSearchController {
     public String searchBooksByQuery(SearchCondition condition, Model model) throws InterruptedException, ExecutionException {
         try(var taskScope = new StructuredTaskScope.ShutdownOnFailure()) {
             var searchResult = taskScope.fork(() -> searchApiClient.searchBooksByQuery(condition));
-            var backResult = taskScope.fork(() -> categoryApiClient.getRootsWithChildren2Depth());
+            var backResult = taskScope.fork(categoryApiClient::getRootsWithChildren2Depth);
 
             taskScope.join();
             taskScope.throwIfFailed();
@@ -40,9 +41,19 @@ public class BookSearchController {
     }
 
     @GetMapping("/categories/{category-id}/books")
-    public String searchBooksByCategory(@PathVariable("category-id") Long id, SearchCondition condition, Model model) {
-        SearchPageResponse<BookSearchResultResponse> result = searchApiClient.searchBooksByCategory(id, condition);
-        model.addAttribute("result", result);
-        return "book/search/category-search";
+    public String searchBooksByCategory(@PathVariable("category-id") Long id, SearchCondition condition, Pageable pageable, Model model) throws InterruptedException, ExecutionException{
+        try(var taskScope = new StructuredTaskScope.ShutdownOnFailure()) {
+            var searchResult = taskScope.fork(() -> searchApiClient.searchBooksByCategory(id, condition, pageable.getPageNumber(), pageable.getPageSize()));
+            var backResult = taskScope.fork(categoryApiClient::getRootsWithChildren2Depth);
+
+            taskScope.join();
+            taskScope.throwIfFailed();
+
+            model.addAttribute("roots", backResult.get());
+            model.addAttribute("results", searchResult.get());
+            model.addAttribute("categoryId", id);
+            model.addAttribute("pathId", condition.getPathId());
+            return "book/search/category-search";
+        }
     }
 }
