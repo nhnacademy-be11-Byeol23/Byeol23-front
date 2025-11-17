@@ -1,4 +1,7 @@
-<header id="header" class="header sticky-top" th:fragment="commonHeader">
+<header id="header" class="header sticky-top"
+        th:fragment="commonHeader"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
     <!-- Main Header -->
     <div class="main-header">
         <div class="container-fluid container-xl">
@@ -36,30 +39,38 @@
                                 <h6>별이삼shop</h6>
                                 <p class="mb-0">내 정보 &amp; 주문 내역</p>
                             </div>
-                            <div class="dropdown-body">
-                                <a class="dropdown-item d-flex align-items-center" href="/mypage">
-                                    <i class="bi bi-person-circle me-2"></i>
-                                    <span>마이페이지</span>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="/mypage/orders">
-                                    <i class="bi bi-bag-check me-2"></i>
-                                    <span>주문내역</span>
-                                </a>
-                                <a class="dropdown-item d-flex align-items-center" href="/wishlist">
-                                    <i class="bi bi-heart me-2"></i>
-                                    <span>위시리스트</span>
-                                </a>
-                            </div>
+
+                                <div class="dropdown-body" sec:authorize="isAuthenticated()">
+                                    <a class="dropdown-item d-flex align-items-center" href="/mypage">
+                                        <i class="bi bi-person-circle me-2"></i>
+                                        <span>마이페이지</span>
+                                    </a>
+
+                                    <a class="dropdown-item d-flex align-items-center" href="/mypage/orders">
+                                        <i class="bi bi-bag-check me-2"></i>
+                                        <span>주문내역</span>
+                                    </a>
+
+                                    <a class="dropdown-item d-flex align-items-center" href="/wishlist">
+                                        <i class="bi bi-heart me-2"></i>
+                                        <span>위시리스트</span>
+                                    </a>
+                                </div>
+
                             <div class="dropdown-footer">
-                                <a href="/members/login" class="btn btn-primary w-100 mb-2">로그인</a>
 
-                                <a href="/members/register" class="btn btn-outline-primary w-100">회원가입</a>
-
-                                <form action="/members/logout" method="post" style="margin: 0;">
+                                <form sec:authorize="isAuthenticated()" action="/members/logout"
+                                      method="post" style="margin: 0;">
                                     <button type="submit" class="btn btn-outline-primary w-100">
                                         로그아웃
                                     </button>
                                 </form>
+
+                                <a sec:authorize="!isAuthenticated()" href="/members/login"
+                                   class="btn btn-primary w-100 mb-2">로그인</a>
+
+                                <a sec:authorize="!isAuthenticated()" href="/members/register"
+                                   class="btn btn-outline-primary w-100">회원가입</a>
                             </div>
                         </div>
                     </div>
