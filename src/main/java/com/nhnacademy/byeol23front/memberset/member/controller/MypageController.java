@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/mypage")
 @RequiredArgsConstructor
-public class MypageControler {
+public class MypageController {
     @GetMapping
     public String getMypage() {
-        return "/account";
+        return "account";
     }
 }
