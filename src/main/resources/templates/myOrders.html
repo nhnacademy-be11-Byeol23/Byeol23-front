@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>마이페이지 - 주문내역</title>
+
+  <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+</head>
+
+<body class="account-page">
+
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+
+  <div class="page-title light-background">
+    <div class="container d-lg-flex justify-content-between align-items-center">
+      <h1 class="mb-2 mb-lg-0">마이페이지</h1>
+      <nav class="breadcrumbs">
+        <ol>
+          <li><a th:href="@{/}">홈</a></li>
+          <li class="current">마이페이지</li>
+        </ol>
+      </nav>
+    </div>
+  </div><section id="account" class="account section">
+  <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+    <div class="row g-4">
+
+      <div class="col-lg-3">
+
+        <div class="user-info" data-aos="fade-right">
+          <h4 th:text="${member.memberName()} + '님'">회원이름</h4>
+          <div class="user-status">
+            <i class="bi bi-award"></i>
+            <span th:text="${member.gradeName()}">로얄 등급</span>
+          </div>
+        </div>
+
+        <div th:replace="~{fragments/mypage_side_bar :: mypage_side_bar}"></div>
+
+      </div> <div class="col-lg-9">
+      <div class="content-area">
+        <div class="tab-content">
+
+          <div class="tab-pane fade show active" id="orders">
+            <div class="section-header" data-aos="fade-up">
+              <h2>My Orders</h2>
+            </div>
+
+<!--            <div class="orders-grid" th:if="${orderList != null and !orderList.isEmpty()}">-->
+
+<!--              <div class="order-card" data-aos="fade-up" data-aos-delay="100"-->
+<!--                   th:each="order : ${orderList}">-->
+
+<!--                <div class="order-header">-->
+<!--                  <div class="order-id">-->
+<!--                    <span class="label">Order ID:</span>-->
+<!--                    <span class="value" th:text="'#' + ${order.orderNumber}">#ORD-2024-1278</span>-->
+<!--                  </div>-->
+<!--                  <div class="order-date" th:text="${#temporals.format(order.orderDate, 'MMM dd, yyyy')}">Feb 20, 2025</div>-->
+<!--                </div>-->
+
+<!--                <div class="order-content">-->
+<!--                  <div class="product-grid">-->
+<!--                    <img th:each="item, iterStat : ${order.orderDetails}"-->
+<!--                         th:if="${iterStat.index < 3}"-->
+<!--                         th:src="@{/assets/img/product/{imgUrl}(imgUrl=${item.product.imageUrl})}"-->
+<!--                         alt="Product" loading="lazy">-->
+<!--                    <span class="more-items" th:if="${#lists.size(order.orderDetails) > 3}"-->
+<!--                          th:text="'+' + (${#lists.size(order.orderDetails)} - 3)">+2</span>-->
+<!--                  </div>-->
+<!--                  <div class="order-info">-->
+<!--                    <div class="info-row">-->
+<!--                      <span>Status</span>-->
+<!--                      <span class="status"-->
+<!--                            th:text="${order.status}"-->
+<!--                            th:classappend="${order.status == 'SHIPPED' ? 'shipped' : (order.status == 'PROCESSING' ? 'processing' : 'delivered')}"-->
+<!--                      >Processing</span>-->
+<!--                    </div>-->
+<!--                    <div class="info-row">-->
+<!--                      <span>Items</span>-->
+<!--                      <span th:text="${#lists.size(order.orderDetails)} + ' items'">3 items</span>-->
+<!--                    </div>-->
+<!--                    <div class="info-row">-->
+<!--                      <span>Total</span>-->
+<!--                      <span class="price" th:text="'$' + ${#numbers.formatDecimal(order.totalPrice, 1, 2)}">$789.99</span>-->
+<!--                    </div>-->
+<!--                  </div>-->
+<!--                </div>-->
+
+<!--                <div class="order-footer">-->
+<!--                  <button type="button" class="btn-track" data-bs-toggle="collapse"-->
+<!--                          th:data-bs-target="'#tracking-' + ${order.orderId}" aria-expanded="false">Track Order</button>-->
+<!--                  <button type="button" class="btn-details" data-bs-toggle="collapse"-->
+<!--                          th:data-bs-target="'#details-' + ${order.orderId}" aria-expanded="false">View Details</button>-->
+<!--                </div>-->
+
+<!--                <div class="collapse tracking-info" th:id="'tracking-' + ${order.orderId}">-->
+<!--                </div>-->
+
+<!--                <div class="collapse order-details" th:id="'details-' + ${order.orderId}">-->
+<!--                </div>-->
+<!--              </div>-->
+
+<!--            </div> <div class="alert alert-info" th:if="${orderList == null or orderList.isEmpty()}">-->
+<!--            주문 내역이 없습니다.-->
+<!--          </div>-->
+
+            <div class="pagination-wrapper" data-aos="fade-up">
+            </div>
+          </div> <div class="tab-pane fade" id="wishlist">
+          <div class="section-header" data-aos="fade-up">
+            <h2>My Wishlist</h2>
+          </div>
+          <div class="wishlist-grid">
+          </div>
+        </div> <div class="tab-pane fade" id="addresses">
+          <div class="section-header" data-aos="fade-up">
+            <h2>주소록</h2>
+          </div>
+          <div class="addresses-grid">
+          </div>
+        </div> </div> </div>
+    </div> </div> </div> </section></main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<div th:replace="~{fragments/address_modal :: addressModal}"></div>
+
+<div th:replace="~{fragments/file_script :: scriptInfo}"></div>
+
+</body>
+</html>

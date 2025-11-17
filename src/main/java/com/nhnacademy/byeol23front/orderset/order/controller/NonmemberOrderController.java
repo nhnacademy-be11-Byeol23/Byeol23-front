@@ -1,7 +1,5 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
-
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,20 +8,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
-import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareRequest;
-import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareResponse;
-import com.nhnacademy.byeol23front.orderset.order.exception.OrderPrepareFailException;
 import com.nhnacademy.byeol23front.orderset.packaging.client.PackagingApiClient;
 
 import lombok.RequiredArgsConstructor;
@@ -42,9 +34,9 @@ public class NonmemberOrderController {
 		@RequestParam(name = "quantity") int quantity,
 		Model model) {
 
-		BookResponse book = bookApiClient.getBook(bookId);
+		ResponseEntity<BookResponse> book = bookApiClient.getBook(bookId);
 
-		BookOrderRequest bookOrderRequest = getBookOrderRequest(quantity, book);
+		BookOrderRequest bookOrderRequest = getBookOrderRequest(quantity, book.getBody());
 
 		model.addAttribute("orderItem", bookOrderRequest.bookList());
 		model.addAttribute("quantity", quantity);
