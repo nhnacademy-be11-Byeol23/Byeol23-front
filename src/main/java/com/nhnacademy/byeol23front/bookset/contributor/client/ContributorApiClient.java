@@ -30,6 +30,7 @@ public interface ContributorApiClient {
 	@PostMapping(value = "/api/contributors/find-or-create")
 	ResponseEntity<AllContributorResponse> findOrCreateContributor(@RequestBody ContributorFindOrCreateRequest request);
 
+
 	@PutMapping(value = "/api/contributors/{contributor-id}")
 	ContributorUpdateResponse updateContributor(@PathVariable(name = "contributor-id") Long contributorId, @RequestBody ContributorUpdateRequest contributorUpdateRequest);
 
