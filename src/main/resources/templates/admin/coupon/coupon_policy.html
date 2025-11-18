@@ -111,6 +111,56 @@
                                             </button>
                                         </div>
                                     </div>
+<!--                                    카테고리 관련-->
+                                    <input type="hidden" id="couponScope" name="couponScope" value="">
+                                    <input type="hidden" id="selectedCategoryIds" name="categoryIds" value="">
+
+                                    <div id="categoryListContainer" class="col-12" style="display: none;">
+                                        <div class="card card-body shadow-sm pt-3">
+                                            <h6 class="fw-semibold mb-3">적용할 카테고리 선택</h6>
+                                            <p class="text-muted small mt-n2">최하위 카테고리만 선택 가능합니다.</p>
+
+                                            <div id="inlineSelectedCategoriesDisplay" class="mb-3"></div>
+
+                                            <ul id="category-tree" class="list-unstyled" style="padding-left: 0; max-height: 300px; overflow-y: auto;">
+                                                <li th:each="category : ${categories}">
+                                                    <div class="d-flex align-items-center mb-2">
+
+                                                        <button type="button" th:if="${category.hasChildren}"
+                                                                class="category-toggle me-2"
+                                                                th:data-id="${category.id}"
+                                                                data-expanded="false"
+                                                                onclick="globalThis.toggleCategory(this)"
+                                                                style="border: none; background: none; padding: 0; cursor: pointer; user-select: none; color: var(--bs-body-color);">
+                                                            <i class="bi bi-chevron-right"></i>
+                                                        </button>
+
+                                                        <span th:unless="${category.hasChildren}" style="width: 20px; display: inline-block;"></span>
+
+                                                        <div class="form-check">
+                                                            <input class="form-check-input category-tree-checkbox"
+                                                                   type="checkbox"
+                                                                   th:id="|category_tree_${category.id}|"
+                                                                   th:value="${category.id}"
+                                                                   th:data-category-name="${category.name}"
+                                                                   th:disabled="${category.hasChildren}"
+                                                                   onclick="globalThis.updateSelectedCategories()">
+                                                            <label class="form-check-label"
+                                                                   th:for="|category_tree_${category.id}|"
+                                                                   th:style="${category.hasChildren} ? 'font-weight: 600; color: #666;' : ''"
+                                                                   th:text="${category.name}">
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <ul th:if="${category.hasChildren}"
+                                                        th:id="|children-${category.id}|"
+                                                        class="ms-4"
+                                                        style="list-style: none; padding-left: 0; display: none;">
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
 
                                     <div class="col-12 text-end">
                                         <button type="submit" class="btn btn-dark">쿠폰 정책 저장</button>
