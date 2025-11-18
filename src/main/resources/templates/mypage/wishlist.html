@@ -10,35 +10,6 @@
 
   <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
 
-  <!-- Custom Styles -->
-  <style>
-    /* 저장 버튼 및 추가 버튼 스타일 */
-    .modal-footer .btn-primary,
-    .settings-form .btn-save,
-    .section-header .btn-primary {
-      background-color: #252223 !important;
-      border-color: #252223 !important;
-    }
-    
-    .modal-footer .btn-primary:hover,
-    .settings-form .btn-save:hover,
-    .section-header .btn-primary:hover {
-      background-color: #1a1819 !important;
-      border-color: #1a1819 !important;
-    }
-    
-    /* 토글 스위치 스타일 */
-    .form-check-input:checked {
-      background-color: #252223 !important;
-      border-color: #252223 !important;
-    }
-    
-    .form-check-input:focus {
-      border-color: #252223 !important;
-      box-shadow: 0 0 0 0.25rem rgba(37, 34, 35, 0.25) !important;
-    }
-  </style>
-
   <!-- Daum Postcode API -->
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
@@ -87,446 +58,114 @@
             <div class="content-area">
               <div id="wishlist">
                   <div class="section-header" data-aos="fade-up">
-                    <h2>My Wishlist</h2>
-                    <div class="header-actions">
-                      <button type="button" class="btn btn-primary">
-                        <i class="bi bi-cart-plus me-1"></i>
-                        Add All to Cart
-                      </button>
-                    </div>
+                    <h2>나의 위시리스트</h2>
                   </div>
 
                   <div class="wishlist-grid">
                     <!-- Wishlist Item 1 -->
-                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="100">
-                      <div class="wishlist-image">
-                        <img src="/assets/img/product/product-1.webp" alt="Product" loading="lazy">
-                        <button class="btn-remove" type="button" aria-label="Remove from wishlist">
+                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="100" data-book-id="1">
+                      <button class="btn-remove" type="button" aria-label="위시리스트에서 제거">
                           <i class="bi bi-trash"></i>
                         </button>
-                        <div class="sale-badge">-20%</div>
+                      <a th:href="@{http://localhost:10330/books/1}" class="wishlist-link">
+                        <div class="wishlist-image">
+                          <img src="https://image.yes24.com/goods/160408776/XL" alt="대형주 추세추종 투자법칙" loading="lazy">
+                          <div class="sale-badge">-13%</div>
                       </div>
                       <div class="wishlist-content">
-                        <h4>Lorem ipsum dolor sit amet</h4>
+                          <div class="product-category">이종호 저 | 사피엔테스</div>
+                          <h4>대형주 추세추종 투자법칙</h4>
                         <div class="product-meta">
                           <div class="rating">
                             <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-half"></i>
-                            <span>(4.5)</span>
+                              <span>4.5 (5)</span>
                           </div>
                           <div class="price">
-                            <span class="current">$79.99</span>
-                            <span class="original">$99.99</span>
+                              <span class="current">28,000원</span>
+                              <span class="original">32,000원</span>
+                            </div>
                           </div>
                         </div>
-                        <button type="button" class="btn-add-cart">Add to Cart</button>
-                      </div>
+                      </a>
                     </div>
 
                     <!-- Wishlist Item 2 -->
-                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="200">
-                      <div class="wishlist-image">
-                        <img src="/assets/img/product/product-2.webp" alt="Product" loading="lazy">
-                        <button class="btn-remove" type="button" aria-label="Remove from wishlist">
+                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="200" data-book-id="10">
+                      <button class="btn-remove" type="button" aria-label="위시리스트에서 제거">
                           <i class="bi bi-trash"></i>
                         </button>
+                      <a th:href="@{http://localhost:10330/books/10}" class="wishlist-link">
+                        <div class="wishlist-image">
+                          <img src="https://image.yes24.com/goods/136734901/XL" alt="돈의 심리학" loading="lazy">
+                          <div class="sale-badge">-10%</div>
                       </div>
                       <div class="wishlist-content">
-                        <h4>Consectetur adipiscing elit</h4>
+                          <div class="product-category">모건 하우절 저 | 인플루엔셜</div>
+                          <h4>돈의 심리학</h4>
                         <div class="product-meta">
                           <div class="rating">
                             <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                            <span>(4.0)</span>
+                              <span>4.0 (5)</span>
                           </div>
                           <div class="price">
-                            <span class="current">$149.99</span>
+                              <span class="current">18,000원</span>
+                              <span class="original">20,000원</span>
+                            </div>
                           </div>
                         </div>
-                        <button type="button" class="btn-add-cart">Add to Cart</button>
-                      </div>
+                      </a>
                     </div>
 
                     <!-- Wishlist Item 3 -->
-                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="300">
-                      <div class="wishlist-image">
-                        <img src="/assets/img/product/product-3.webp" alt="Product" loading="lazy">
-                        <button class="btn-remove" type="button" aria-label="Remove from wishlist">
+                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="300" data-book-id="11">
+                      <button class="btn-remove" type="button" aria-label="위시리스트에서 제거">
                           <i class="bi bi-trash"></i>
                         </button>
-                        <div class="out-of-stock-badge">Out of Stock</div>
+                      <a th:href="@{http://localhost:10330/books/11}" class="wishlist-link">
+                        <div class="wishlist-image">
+                          <img src="https://image.yes24.com/goods/96547408/XL" alt="용의자 X의 헌신" loading="lazy">
                       </div>
                       <div class="wishlist-content">
-                        <h4>Sed do eiusmod tempor</h4>
+                          <div class="product-category">히가시노 게이고 저 | 재인</div>
+                          <h4>용의자 X의 헌신</h4>
                         <div class="product-meta">
                           <div class="rating">
                             <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <span>(5.0)</span>
+                              <span>5.0 (5)</span>
                           </div>
                           <div class="price">
-                            <span class="current">$199.99</span>
+                              <span class="current">14,400원</span>
+                            </div>
                           </div>
                         </div>
-                        <button type="button" class="btn-notify">Notify When Available</button>
-                      </div>
-                    </div>
-                  </div>
+                      </a>
                 </div>
 
-                <!-- Payment Methods Tab -->
-                <div class="tab-pane fade" th:classappend="${activeTab == 'wallet' ? 'show active' : ''}" id="wallet">
-                  <div class="section-header" data-aos="fade-up">
-                    <h2>Payment Methods</h2>
-                    <div class="header-actions">
-                      <button type="button" class="btn btn-primary">
-                        <i class="bi bi-plus-lg me-1"></i>
-                        Add New Card
+                    <!-- Wishlist Item 4 -->
+                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="400" data-book-id="9">
+                      <button class="btn-remove" type="button" aria-label="위시리스트에서 제거">
+                        <i class="bi bi-trash"></i>
                       </button>
-                    </div>
-                  </div>
-
-                  <div class="payment-cards-grid">
-                    <!-- Payment Card 1 -->
-                    <div class="payment-card default" data-aos="fade-up" data-aos-delay="100">
-                      <div class="card-header">
-                        <i class="bi bi-credit-card"></i>
-                        <div class="card-badges">
-                          <span class="default-badge">Default</span>
-                          <span class="card-type">Visa</span>
+                      <a th:href="@{http://localhost:10330/books/9}" class="wishlist-link">
+                        <div class="wishlist-image">
+                          <img src="https://image.yes24.com/goods/147178677/XL" alt="단 한 줄만 내 마음에 새긴다고 해도" loading="lazy">
+                          <div class="sale-badge">-10%</div>
                         </div>
-                      </div>
-                      <div class="card-body">
-                        <div class="card-number">•••• •••• •••• 4589</div>
-                        <div class="card-info">
-                          <span>Expires 09/2026</span>
-                        </div>
-                      </div>
-                      <div class="card-actions">
-                        <button type="button" class="btn-edit">
-                          <i class="bi bi-pencil"></i>
-                          Edit
-                        </button>
-                        <button type="button" class="btn-remove">
-                          <i class="bi bi-trash"></i>
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-
-                    <!-- Payment Card 2 -->
-                    <div class="payment-card" data-aos="fade-up" data-aos-delay="200">
-                      <div class="card-header">
-                        <i class="bi bi-credit-card"></i>
-                        <div class="card-badges">
-                          <span class="card-type">Mastercard</span>
-                        </div>
-                      </div>
-                      <div class="card-body">
-                        <div class="card-number">•••• •••• •••• 7821</div>
-                        <div class="card-info">
-                          <span>Expires 05/2025</span>
-                        </div>
-                      </div>
-                      <div class="card-actions">
-                        <button type="button" class="btn-edit">
-                          <i class="bi bi-pencil"></i>
-                          Edit
-                        </button>
-                        <button type="button" class="btn-remove">
-                          <i class="bi bi-trash"></i>
-                          Remove
-                        </button>
-                        <button type="button" class="btn-make-default">Make Default</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Reviews Tab -->
-                <div class="tab-pane fade" th:classappend="${activeTab == 'reviews' ? 'show active' : ''}" id="reviews">
-                  <div class="section-header" data-aos="fade-up">
-                    <h2>My Reviews</h2>
-                    <div class="header-actions">
-                      <div class="dropdown">
-                        <button class="filter-btn" data-bs-toggle="dropdown">
-                          <i class="bi bi-funnel"></i>
-                          <span>Sort by: Recent</span>
-                        </button>
-                        <ul class="dropdown-menu">
-                          <li><a class="dropdown-item" href="#">Recent</a></li>
-                          <li><a class="dropdown-item" href="#">Highest Rating</a></li>
-                          <li><a class="dropdown-item" href="#">Lowest Rating</a></li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="reviews-grid">
-                    <!-- Review Card 1 -->
-                    <div class="review-card" data-aos="fade-up" data-aos-delay="100">
-                      <div class="review-header">
-                        <img src="/assets/img/product/product-1.webp" alt="Product" class="product-image" loading="lazy">
-                        <div class="review-meta">
-                          <h4>Lorem ipsum dolor sit amet</h4>
+                        <div class="wishlist-content">
+                          <div class="product-category">나민애 저 | 포레스트북스</div>
+                          <h4>단 한 줄만 내 마음에 새긴다고 해도</h4>
+                          <div class="product-meta">
                           <div class="rating">
                             <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <span>(5.0)</span>
+                              <span>4.5 (5)</span>
                           </div>
-                          <div class="review-date">Reviewed on Feb 15, 2025</div>
-                        </div>
-                      </div>
-                      <div class="review-content">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                      </div>
-                      <div class="review-footer">
-                        <button type="button" class="btn-edit">Edit Review</button>
-                        <button type="button" class="btn-delete">Delete</button>
-                      </div>
-                    </div>
-
-                    <!-- Review Card 2 -->
-                    <div class="review-card" data-aos="fade-up" data-aos-delay="200">
-                      <div class="review-header">
-                        <img src="/assets/img/product/product-2.webp" alt="Product" class="product-image" loading="lazy">
-                        <div class="review-meta">
-                          <h4>Consectetur adipiscing elit</h4>
-                          <div class="rating">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                            <span>(4.0)</span>
+                            <div class="price">
+                              <span class="current">8,100원</span>
+                              <span class="original">9,000원</span>
                           </div>
-                          <div class="review-date">Reviewed on Feb 10, 2025</div>
-                        </div>
-                      </div>
-                      <div class="review-content">
-                        <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-                      </div>
-                      <div class="review-footer">
-                        <button type="button" class="btn-edit">Edit Review</button>
-                        <button type="button" class="btn-delete">Delete</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Addresses Tab -->
-                <div class="tab-pane fade" th:classappend="${activeTab == 'addresses' ? 'show active' : ''}" id="addresses">
-                  <div class="section-header" data-aos="fade-up">
-                    <h2>주소록</h2>
-                    <div class="header-actions">
-                      <button type="button" class="btn-add-new btn btn-primary">
-                        <i class="bi bi-plus-lg me-1"></i>
-                        새 주소 추가
-                      </button>
-                    </div>
-                  </div>
-
-                  <div class="addresses-grid">
-                    <!-- Address Card 1 -->
-                    <div class="address-card default" data-aos="fade-up" data-aos-delay="100" 
-                         data-address-id="1"
-                         data-nickname="집"
-                         data-post-code="06234"
-                         data-address="서울특별시 강남구 테헤란로 152"
-                         data-address-detail="3층 301호"
-                         data-address-extra="(역삼동, 강남파이낸스센터)"
-                         data-is-default="true">
-                      <div class="card-header">
-                        <h4>집</h4>
-                        <span class="default-badge">기본 배송지</span>
-                      </div>
-                      <div class="card-body">
-                        <div class="address-info-row mb-2">
-                          <i class="bi bi-mailbox2 me-2"></i>
-                          <span class="text-muted">우편번호:</span>
-                          <strong class="ms-1">06234</strong>
-                        </div>
-                        <p class="address-text mb-2">
-                          서울특별시 강남구 테헤란로 152<br>
-                          3층 301호<br>
-                          <span class="text-muted">(역삼동, 강남파이낸스센터)</span>
-                        </p>
-                      </div>
-                      <div class="card-actions">
-                        <button type="button" class="btn-edit">
-                          <i class="bi bi-pencil"></i>
-                          수정
-                        </button>
-                        <button type="button" class="btn-remove">
-                          <i class="bi bi-trash"></i>
-                          삭제
-                        </button>
-                      </div>
-                    </div>
-
-                    <!-- Address Card 2 -->
-                    <div class="address-card" data-aos="fade-up" data-aos-delay="200" 
-                         data-address-id="2"
-                         data-nickname="회사"
-                         data-post-code="04524"
-                         data-address="서울특별시 중구 세종대로 110"
-                         data-address-detail="12층 1201호"
-                         data-address-extra="(태평로1가, 프레스센터빌딩)"
-                         data-is-default="false">
-                      <div class="card-header">
-                        <h4>회사</h4>
-                      </div>
-                      <div class="card-body">
-                        <div class="address-info-row mb-2">
-                          <i class="bi bi-mailbox2 me-2"></i>
-                          <span class="text-muted">우편번호:</span>
-                          <strong class="ms-1">04524</strong>
-                        </div>
-                        <p class="address-text mb-2">
-                          서울특별시 중구 세종대로 110<br>
-                          12층 1201호<br>
-                          <span class="text-muted">(태평로1가, 프레스센터빌딩)</span>
-                        </p>
-                      </div>
-                      <div class="card-actions">
-                        <button type="button" class="btn-edit">
-                          <i class="bi bi-pencil"></i>
-                          수정
-                        </button>
-                        <button type="button" class="btn-remove">
-                          <i class="bi bi-trash"></i>
-                          삭제
-                        </button>
-                        <button type="button" class="btn-make-default">기본 배송지로 설정</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Settings Tab -->
-                <div class="tab-pane fade" th:classappend="${activeTab == 'settings' ? 'show active' : ''}" id="settings">
-                  <div class="section-header" data-aos="fade-up">
-                    <h2>Account Settings</h2>
-                  </div>
-
-                  <div class="settings-content">
-                    <!-- Personal Information -->
-                    <div class="settings-section" data-aos="fade-up">
-                      <h3>Personal Information</h3>
-                      <form class="php-email-form settings-form">
-                        <div class="row g-3">
-                          <div class="col-md-6">
-                            <label for="firstName" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="firstName" value="Sarah" required="">
-                          </div>
-                          <div class="col-md-6">
-                            <label for="lastName" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="lastName" value="Anderson" required="">
-                          </div>
-                          <div class="col-md-6">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" value="sarah@example.com" required="">
-                          </div>
-                          <div class="col-md-6">
-                            <label for="phone" class="form-label">Phone</label>
-                            <input type="tel" class="form-control" id="phone" value="+1 (555) 123-4567">
                           </div>
                         </div>
-
-                        <div class="form-buttons">
-                          <button type="submit" class="btn-save">Save Changes</button>
-                        </div>
-
-                        <div class="loading">Loading</div>
-                        <div class="error-message"></div>
-                        <div class="sent-message">Your changes have been saved successfully!</div>
-                      </form>
-                    </div>
-
-                    <!-- Email Preferences -->
-                    <div class="settings-section" data-aos="fade-up" data-aos-delay="100">
-                      <h3>Email Preferences</h3>
-                      <div class="preferences-list">
-                        <div class="preference-item">
-                          <div class="preference-info">
-                            <h4>Order Updates</h4>
-                            <p>Receive notifications about your order status</p>
-                          </div>
-                          <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="orderUpdates" checked="">
-                          </div>
-                        </div>
-
-                        <div class="preference-item">
-                          <div class="preference-info">
-                            <h4>Promotions</h4>
-                            <p>Receive emails about new promotions and deals</p>
-                          </div>
-                          <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="promotions">
-                          </div>
-                        </div>
-
-                        <div class="preference-item">
-                          <div class="preference-info">
-                            <h4>Newsletter</h4>
-                            <p>Subscribe to our weekly newsletter</p>
-                          </div>
-                          <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="newsletter" checked="">
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Security Settings -->
-                    <div class="settings-section" data-aos="fade-up" data-aos-delay="200">
-                      <h3>Security</h3>
-                      <form class="php-email-form settings-form">
-                        <div class="row g-3">
-                          <div class="col-md-12">
-                            <label for="currentPassword" class="form-label">Current Password</label>
-                            <input type="password" class="form-control" id="currentPassword" required="">
-                          </div>
-                          <div class="col-md-6">
-                            <label for="newPassword" class="form-label">New Password</label>
-                            <input type="password" class="form-control" id="newPassword" required="">
-                          </div>
-                          <div class="col-md-6">
-                            <label for="confirmPassword" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="confirmPassword" required="">
-                          </div>
-                        </div>
-
-                        <div class="form-buttons">
-                          <button type="submit" class="btn-save">Update Password</button>
-                        </div>
-
-                        <div class="loading">Loading</div>
-                        <div class="error-message"></div>
-                        <div class="sent-message">Your password has been updated successfully!</div>
-                      </form>
-                    </div>
-
-                    <!-- Delete Account -->
-                    <div class="settings-section danger-zone" data-aos="fade-up" data-aos-delay="300">
-                      <h3>Delete Account</h3>
-                      <div class="danger-zone-content">
-                        <p>Once you delete your account, there is no going back. Please be certain.</p>
-                        <button type="button" class="btn-danger">Delete Account</button>
-                      </div>
+                      </a>
                     </div>
                   </div>
                 </div>

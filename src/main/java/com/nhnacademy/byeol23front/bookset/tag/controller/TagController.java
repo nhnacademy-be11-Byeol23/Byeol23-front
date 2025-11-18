@@ -18,6 +18,7 @@ import com.nhnacademy.byeol23front.bookset.tag.client.TagApiClient;
 import com.nhnacademy.byeol23front.bookset.tag.dto.AllTagsInfoResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.PageResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.TagCreateRequest;
+import com.nhnacademy.byeol23front.bookset.tag.dto.TagCreateResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.TagUpdateRequest;
 
 import lombok.RequiredArgsConstructor;
@@ -41,9 +42,10 @@ public class TagController {
 	}
 
 	@PostMapping
-	public String createTag(@RequestBody TagCreateRequest request){
-		feignClient.createTag(request);
-		return "redirect:/admin/tags";
+	@ResponseBody
+	public TagCreateResponse createTag(@RequestBody TagCreateRequest request){
+		ResponseEntity<TagCreateResponse> response = feignClient.createTag(request);
+		return response.getBody();
 	}
 
 	@ResponseBody

@@ -8,6 +8,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
@@ -73,6 +74,16 @@ public class GlobalExceptionHandler {
         return resolveErrorPage(ErrorResponse.defaultErrorResponse());
     }
 
+    //테스트 시 400에러가 500으로 처리되는 경우를 해결하기 위해 추가
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ModelAndView handleMissingServletRequestParameterException(MissingServletRequestParameterException e) {
+        log.warn("필수 파라미터 누락: {}", e.getParameterName());
+
+        ErrorResponse errorResponse = ErrorResponse.of(400, "필수 파라미터가 누락되었습니다: " + e.getParameterName());
+
+        return resolveErrorPage(errorResponse);
+    }
+
     private ModelAndView resolveGatewayErrorPage(GatewayErrorResponse errorResponse) {
         ModelAndView modelAndView = new ModelAndView("error");
         modelAndView.addObject("status", errorResponse.status());
@@ -102,4 +113,6 @@ public class GlobalExceptionHandler {
     private void jsonProcessingExceptionLog(JsonProcessingException e) {
         log.error("JsonProcessingException 발생: {}", e.getMessage());
     }
+
+
 }

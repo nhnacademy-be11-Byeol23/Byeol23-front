@@ -1,4 +1,4 @@
-package com.nhnacademy.byeol23front.Interceptor;
+package com.nhnacademy.byeol23front.commons.interceptor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
