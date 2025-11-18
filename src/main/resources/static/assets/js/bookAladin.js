@@ -21,14 +21,11 @@ function addApiBook(btn) {
         priceStandard: d.priceStandard ? String(d.priceStandard) : "",
         isbn13: d.isbn13 || "",
         pubDate: toYmdFromJavaDate(d.pubDate) || "",
-        imageUrl: d.cover || btn.getAttribute("data-cover") || ""  // 여러 방법으로 시도
+        imageUrl: d.cover || btn.getAttribute("data-cover") || ""
     };
 
-    // sessionStorage에 저장
     sessionStorage.setItem("aladinBookDraft", JSON.stringify(payload));
-    console.log("알라딘 데이터 저장:", payload);  // 디버깅용
-
-    // bookAladinCreate.html 페이지로 이동
+    console.log("알라딘 데이터 저장:", payload);
     window.location.href = "/admin/bookApi/new";
 }
 

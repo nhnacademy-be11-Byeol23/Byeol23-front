@@ -7,6 +7,7 @@ import java.util.List;
 public record BookAladinCreateRequest(
 	String bookName,
 	String author,
+	String translator,
 	String publisher,
 	String description,
 	BigDecimal regularPrice,

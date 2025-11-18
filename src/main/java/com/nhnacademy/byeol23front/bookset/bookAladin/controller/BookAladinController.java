@@ -18,6 +18,7 @@ import com.nhnacademy.byeol23front.bookset.bookAladin.service.BookAladinService;
 import com.nhnacademy.byeol23front.bookset.contributor.client.ContributorApiClient;
 import com.nhnacademy.byeol23front.bookset.contributor.dto.AllContributorResponse;
 import com.nhnacademy.byeol23front.bookset.contributor.dto.ContributorFindOrCreateRequest;
+import com.nhnacademy.byeol23front.bookset.contributor.dto.ContributorRole;
 import com.nhnacademy.byeol23front.bookset.publisher.client.PublisherApiClient;
 import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
 import com.nhnacademy.byeol23front.bookset.publisher.dto.PublisherCreateRequest;
@@ -28,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -88,25 +90,15 @@ public class BookAladinController {
 
 			// 2. 기여자 파싱 및 찾기 또는 생성
 			List<Long> contributorIds = new ArrayList<>();
-			if (request.author() != null && !request.author().isBlank()) {
+			log.info("저자 정보: {}",request.author());
+			log.info("역자 정보: {}",request.translator());
+			if (!request.author().isBlank()) {
 				try {
-					List<ContributorFindOrCreateRequest> parsedContributors = parseContributors(request.author());
-					log.info("파싱된 기여자 수: {}", parsedContributors.size());
-					
-					for (ContributorFindOrCreateRequest contrib : parsedContributors) {
-						try {
-							AllContributorResponse contribResponse = contributorApiClient
-								.findOrCreateContributor(contrib)
-								.getBody();
-							if (contribResponse != null) {
-								contributorIds.add(contribResponse.contributorId());
-								log.info("기여자 추가: {} (ID: {})", contrib.contributorName(), contribResponse.contributorId());
-							}
-						} catch (Exception e) {
-							log.error("기여자 찾기/생성 실패: {} - {}", contrib.contributorName(), e.getMessage());
-							// 기여자 실패해도 계속 진행
-						}
-					}
+					List<ContributorFindOrCreateRequest> parsedAuthors = parseContributors(request.author(), ContributorRole.AUTHOR);
+					List<ContributorFindOrCreateRequest> parsedTranslators = parseContributors(request.translator(), ContributorRole.TRANSLATOR);
+
+					contributorIds.addAll(findOrCreateContributors(parsedAuthors));
+					contributorIds.addAll(findOrCreateContributors(parsedTranslators));
 				} catch (Exception e) {
 					log.error("기여자 파싱 실패: {}", e.getMessage());
 					// 기여자 파싱 실패해도 계속 진행
@@ -168,39 +160,27 @@ public class BookAladinController {
 			return "redirect:/admin/bookApi/new?error=도서 생성에 실패했습니다.";
 		}
 	}
+	List<ContributorFindOrCreateRequest> parseContributors(String str, ContributorRole role) {
+		List<String> contributorName = Arrays.stream(str.split(",")).toList();
+		return contributorName.stream().map(contributor -> new ContributorFindOrCreateRequest(contributor, role)).toList();
+	}
 
-	private List<ContributorFindOrCreateRequest> parseContributors(String authorString) {
-		List<ContributorFindOrCreateRequest> result = new ArrayList<>();
-		
-		if (authorString == null || authorString.trim().isEmpty()) {
-			return result;
-		}
-		
-		String[] contributors = authorString.split(",");
-		
-		for (String contributor : contributors) {
-			contributor = contributor.trim();
-			if (contributor.isEmpty()) continue;
-			
-			String[] parts = contributor.split("\\s+");
-			if (parts.length == 0) continue;
-			
-			String role = parts[parts.length - 1];
-			StringBuilder nameBuilder = new StringBuilder();
-			for (int i = 0; i < parts.length - 1; i++) {
-				if (i > 0) nameBuilder.append(" ");
-				nameBuilder.append(parts[i]);
+	List<Long> findOrCreateContributors(List<ContributorFindOrCreateRequest> contributorList){
+		List<Long> contributorIds = new ArrayList<>();
+		for (ContributorFindOrCreateRequest contrib : contributorList) {
+			try {
+				AllContributorResponse contribResponse = contributorApiClient
+					.findOrCreateContributor(contrib)
+					.getBody();
+				if (contribResponse != null) {
+					contributorIds.add(contribResponse.contributorId());
+					log.info("기여자 추가: {} (ID: {})", contrib.contributorName(), contribResponse.contributorId());
+				}
+			} catch (Exception e) {
+				log.error("기여자 찾기/생성 실패: {} - {}", contrib.contributorName(), e.getMessage());
+				// 기여자 실패해도 계속 진행
 			}
-			String name = nameBuilder.toString().trim();
-			
-			if (name.isEmpty()) {
-				name = contributor;
-				role = "저자";
-			}
-			
-			result.add(new ContributorFindOrCreateRequest(name, role));
 		}
-		
-		return result;
+		return contributorIds;
 	}
 }

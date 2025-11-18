@@ -15,7 +15,6 @@
             el,
             height: "300px",
             initialEditType: "wysiwyg",
-            // previewStyle 제거 - WYSIWYG 모드에서는 필요 없음
             placeholder: "도서 설명을 입력하세요…",
             toolbarItems: [
                 ["heading", "bold", "italic", "strike"],
@@ -36,7 +35,6 @@
                 el: tocEditorElement,
                 height: "300px",
                 initialEditType: "wysiwyg",
-                // previewStyle 제거 - WYSIWYG 모드에서는 필요 없음 (회색 줄 제거)
                 placeholder: "도서 목차를 입력하세요…",
                 toolbarItems: [
                     ["heading", "bold", "italic", "strike"],
@@ -57,8 +55,7 @@
                 }
             });
             window.tocEditor = tocEditor; // 전역 변수로 저장
-            
-            // 에디터 초기화 후 스타일 조정 (회색 줄 제거)
+
             setTimeout(() => {
                 const editorWrapper = tocEditorElement.querySelector('.toastui-editor');
                 if (editorWrapper) {
@@ -117,8 +114,6 @@
             console.log("생성 버튼 눌림");
             bookForm.addEventListener('submit', function (event) {
                 event.preventDefault();
-
-                // 에디터 내용을 hidden input에 저장
                 if (editor) {
                     document.getElementById('description').value = editor.getHTML();
                 }
@@ -135,6 +130,7 @@
                 const requestBody = {
                     bookName: document.getElementById("bookName").value,
                     author: document.getElementById("author").value,  // 추가
+                    translator: document.getElementById("translator").value,
                     publisher: document.getElementById("publisherName").value,  // 추가
                     description: document.getElementById("description").value,
                     regularPrice: regularPriceStr ? parseFloat(regularPriceStr) : null,
@@ -253,12 +249,13 @@
 
 			// 기본 필드 설정
 			set("bookName", b.title);
-			set("author", b.author);
 			set("isbn", b.isbn13);
 			set("salePrice", b.priceSales);
 			set("regularPrice", b.priceStandard);
-			
-			// 이미지 URL 설정 - 더 자세한 디버깅
+            const authorDisplay = document.getElementById("authorDisplay");
+            if (authorDisplay) {
+                authorDisplay.textContent = b.author || "정보 없음";
+            }
 			console.log("이미지 URL 확인 - b.imageUrl:", b.imageUrl);
 			console.log("이미지 URL 확인 - typeof:", typeof b.imageUrl);
 			if (b.imageUrl) {

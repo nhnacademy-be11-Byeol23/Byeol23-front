@@ -41,8 +41,16 @@
                                 <input type="text"  class="form-control" id="bookName" name="bookName" required>
                             </div>
                             <div class="mb-3">
-                                <label for="author" class="form-label">작가</label>
+                                <div style="display: flex; align-items: center;">
+                                    <span style="margin-right: 6px;">작가 정보:</span>
+                                    <div id="authorDisplay" class="text-muted" style="font-weight: 600;"></div>
+                                </div>
+                                <label for="author" class="form-label mt-2">저자</label>
                                 <input type="text" class="form-control" id="author" name="author" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="translator" class="form-label">역자</label>
+                                <input type="text" class="form-control" id="translator" name="translator" required>
                             </div>
                             <div class="mb-3">
                                 <label for="descriptionEditor" class="form-label">설명</label>
@@ -79,9 +87,10 @@
                                     <label for="stock" class="form-label">재고</label>
                                     <input type="number" class="form-control" id="stock" name="stock" required>
                                 </div>
+
                                 <div class="col-md-4 mb-3">
                                     <label for="bookStatus" class="form-label">도서 상태</label>
-                                    <select class="form-select" id="bookStatus" name="bookStatus">
+                                    <select class="form-select equal-height" id="bookStatus" name="bookStatus">
                                         <option value="SALE" selected>판매중</option>
                                         <option value="SOLDOUT">품절</option>
                                         <option value="OUTOFPRINT">절판</option>
@@ -128,24 +137,6 @@
 
 <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
 <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-
-<style>
-/* 목차 에디터 빈 상태 회색 줄 제거 */
-#tocEditor .toastui-editor-contents {
-    border: none !important;
-    min-height: 0 !important;
-}
-
-#tocEditor .toastui-editor-contents div[contenteditable="true"] {
-    outline: none !important;
-    border: none !important;
-}
-
-#tocEditor .toastui-editor-contents:empty::before {
-    content: attr(data-placeholder);
-    color: #999;
-}
-</style>
 
 <script th:src="@{/assets/js/bookAladinCreate.js}"></script>
 
