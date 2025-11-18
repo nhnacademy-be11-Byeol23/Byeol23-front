@@ -34,4 +34,4 @@ minio:
 
 aladin:
   base-url: https://www.aladin.co.kr/ttb/api/ItemSearch.aspx
-  ttb-key: ${ALADIN_TTB_KEY}
+  ttb-key: ${ALADIN_TTB_KEY:ttbrhw25741714001}
