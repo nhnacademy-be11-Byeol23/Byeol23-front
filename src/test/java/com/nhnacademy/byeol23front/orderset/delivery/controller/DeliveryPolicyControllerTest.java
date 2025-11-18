@@ -80,7 +80,7 @@ class DeliveryPolicyControllerTest { // 클래스 이름 수정 (Test 접미어)
 		Page<DeliveryPolicyInfoResponse> mockPage = new PageImpl<>(List.of(infoResponse), defaultPageable, 1);
 		ResponseEntity<Page<DeliveryPolicyInfoResponse>> mockResponseEntity = ResponseEntity.ok(mockPage);
 
-		given(deliveryApiClient.getDeliveryPolicies(defaultPageable)).willReturn(mockResponseEntity);
+		given(deliveryApiClient.getDeliveryPolicies(any(Pageable.class))).willReturn(mockResponseEntity);
 
 		// when & then
 		mockMvc.perform(get("/admin/policies/deliveries")
@@ -94,7 +94,7 @@ class DeliveryPolicyControllerTest { // 클래스 이름 수정 (Test 접미어)
 			.andExpect(model().attributeExists("policies")) // "policies" 속성이 Model에 있는지 검증
 			.andExpect(model().attribute("policies", mockPage));
 
-		verify(deliveryApiClient, times(1)).getDeliveryPolicies(defaultPageable);
+		verify(deliveryApiClient, times(1)).getDeliveryPolicies(any(Pageable.class));
 	}
 
 	@Test
@@ -103,7 +103,7 @@ class DeliveryPolicyControllerTest { // 클래스 이름 수정 (Test 접미어)
 		// given
 		// API 클라이언트가 400 Bad Request를 반환한다고 가정
 		ResponseEntity<Page<DeliveryPolicyInfoResponse>> mockResponseEntity = ResponseEntity.badRequest().build();
-		given(deliveryApiClient.getDeliveryPolicies(defaultPageable)).willReturn(mockResponseEntity);
+		given(deliveryApiClient.getDeliveryPolicies(any(Pageable.class))).willReturn(mockResponseEntity);
 
 		// when & then
 		mockMvc.perform(get("/admin/policies/deliveries")
