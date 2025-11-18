@@ -1,99 +1,100 @@
 <th:block xmlns:th="http://www.thymeleaf.org" th:fragment="admin_side_bar">
-  <div class="profile-menu collapse d-lg-block" id="profileMenu">
-    <nav class="menu-nav">
-      <ul class="nav flex-column" role="tablist">
+    <div class="profile-menu collapse d-lg-block" id="profileMenu">
+        <nav class="menu-nav">
+            <ul class="nav flex-column" role="tablist">
 
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/admin}">
-            <span>관리자 홈</span>
-          </a>
-        </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin}">
+                        <span>관리자 홈</span>
+                    </a>
+                </li>
 
-        <li class="utility-group"><h4>도서 관리</h4></li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/admin/books}">
-            <span>도서 조회</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/admin/books/new}">
-            <span>도서 생성</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/admin/categories}">
-              <span>카테고리 관리</span>
-          </a>
-        </li>
-        <li>
-          <a class="nav-link" th:href="@{/admin/tags}">
-              <span>태그 관리</span>
-          </a>
-         </li>
-          <li class="nav-item">
-              <a class="nav-link" th:href="@{/admin/contributors}">
-                  <span>기여자 관리</span>
-              </a>
-          </li>
-          <li>
-              <a class="nav-link" th:href="@{/admin/publishers}">
-                  <span>출판사 관리</span>
-              </a>
-          </li>
 
-        <li class="utility-group"><h4>회원 관리</h4></li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/admin/members/test1}">
-            <span>테스트 메뉴1</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/admin/members/test2}">
-            <span>테스트 메뉴2</span>
-          </a>
-        </li>
+                <li class="utility-group"><h4>도서 관리</h4></li>
+                <li class="nav-item">
+                  <a class="nav-link" th:href="@{/admin/books}">
+                    <span>도서 조회</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" th:href="@{/admin/books/new}">
+                    <span>도서 생성</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" th:href="@{/admin/categories}">
+                    <span>카테고리 관리</span>
+                  </a>
+                </li>
+                <li>
+                  <a class="nav-link" th:href="@{/admin/tags}">
+                    <span>태그 관리</span>
+                  </a>
+                </li>
+                <li>
+                  <a class="nav-link" th:href="@{/admin/packagings}">
+                    <span>포장지 관리</span>
+                  </a>
+                </li>
+                <li>
+                  <a class="nav-link" th:href="@{/admin/publishers}">
+                      <span>출판사 관리</span>
+                  </a>
+                 </li>
 
-        <li class="utility-group"><h4>주문 관리</h4></li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/admin/orders}">
-            <span>주문 내역</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/admin/orders/test2}">
-            <span>테스트 메뉴2</span>
-          </a>
-        </li>
+                <li class="utility-group"><h4>회원 관리</h4></li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/members/test1}">
+                        <span>테스트 메뉴1</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/members/test2}">
+                        <span>테스트 메뉴2</span>
+                    </a>
+                </li>
 
-        <li class="utility-group"><h4>쿠폰 관리</h4></li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/admin/coupon/register}">
-            <span>쿠폰 등록</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/admin/coupons/test2}">
-            <span>테스트 메뉴2</span>
-          </a>
-        </li>
+                <li class="utility-group"><h4>주문 관리</h4></li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/orders}">
+                        <span>주문 내역</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/orders/test2}">
+                        <span>테스트 메뉴2</span>
+                    </a>
+                </li>
 
-        <li class="utility-group"><h4>정책 관리</h4></li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/admin/policies/deliveries}">
-            <span>배송비 정책</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/admin/policies/refunds}">
-            <span>환불 정책</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/admin/coupon-policy}">
-            <span>쿠폰 정책</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-  </div>
+                <li class="utility-group"><h4>쿠폰 관리</h4></li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/coupon/register}">
+                        <span>쿠폰 등록</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/coupons/test2}">
+                        <span>테스트 메뉴2</span>
+                    </a>
+                </li>
+
+                <li class="utility-group"><h4>정책 관리</h4></li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/policies/deliveries}">
+                        <span>배송비 정책</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/coupon-policy}">
+                        <span>쿠폰 정책</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/admin/point-policy}">
+                        <span>포인트 정책</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </th:block>

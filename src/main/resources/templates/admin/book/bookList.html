@@ -39,7 +39,7 @@
                                 <a th:href="@{/admin/books/new}" class="btn btn-primary">+ 새 도서 추가</a>
                             </div>
 
-                            <table class="table table-hover">
+                            <table class="table table-striped table-sm">
                                 <thead class="table-light">
                                 <tr>
                                     <th>ID</th>
@@ -48,8 +48,8 @@
                                     <th>ISBN</th>
                                     <th>출판일</th>
                                     <th>재고</th>
+                                    <th>카테고리</th>
                                     <th>상태</th>
-                                    <th>삭제 여부</th>
                                     <th>관리</th>
                                 </tr>
                                 </thead>
@@ -62,19 +62,37 @@
                                     <td th:text="${book.publishDate}"></td>
                                     <td th:text="${book.stock}"></td>
                                     <td>
-                                        <span class="badge"
-                                              th:classappend="${book.bookStatus == 'SALE'} ? 'text-bg-success' : (${book.bookStatus == 'SOLD_OUT'} ? 'text-bg-warning' : 'text-bg-secondary')"
-                                              th:text="${book.bookStatus}"></span>
+                                        <div th:if="${book.categories != null and !#lists.isEmpty(book.categories)}" class="d-flex flex-wrap gap-1">
+                                            <span th:each="category : ${book.categories}" 
+                                                  class="badge bg-secondary"
+                                                  th:text="${category.categoryName}"
+                                                  title="${category.pathName}">
+                                            </span>
+                                        </div>
+                                        <span th:if="${book.categories == null or #lists.isEmpty(book.categories)}"
+                                              class="text-muted">-</span>
                                     </td>
-                                    <td th:text="${book.isDeleted} ? 'O' : 'X'"></td>
                                     <td>
-                                        <a th:href="@{/admin/books/update/{book-id}(book-id=${book.bookId})}" class="btn btn-sm btn-outline-primary">수정</a>
-                                        <button type="button" class="btn btn-sm btn-outline-danger"
-                                                th:onclick="|softDeleteBook(${book.bookId})|">삭제</button>
+                                        <span th:if="${book.bookStatus != null}" 
+                                              class="badge"
+                                              th:classappend="${book.bookStatus == 'SALE'} ? 'text-bg-success' : (${book.bookStatus == 'SOLDOUT'} ? 'text-bg-warning' : 'text-bg-secondary')"
+                                              th:text="${book.bookStatus}"></span>
+                                        <span th:if="${book.bookStatus == null}" class="text-muted">-</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a th:href="@{/admin/books/update/{book-id}/stock(book-id=${book.bookId})}"
+                                               class="btn btn-sm btn-outline-primary">재고 수정</a>
+                                            <a th:href="@{/admin/books/update/{book-id}(book-id=${book.bookId})}"
+                                               class="btn btn-sm btn-outline-primary">수정</a>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    th:onclick="|softDeleteBook(${book.bookId})|">삭제</button>
+                                        </div>
                                     </td>
                                 </tr>
                                 <tr th:if="${books == null or #lists.isEmpty(books)}">
-                                    <td colspan="9" class="text-center py-4">등록된 도서가 없습니다.</td>
+                                    <td colspan="10" class="text-center py-4">등록된 도서가 없습니다.</td>
                                 </tr>
                                 </tbody>
                             </table>

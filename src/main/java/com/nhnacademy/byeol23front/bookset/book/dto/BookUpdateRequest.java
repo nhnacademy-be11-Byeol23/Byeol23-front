@@ -2,6 +2,7 @@ package com.nhnacademy.byeol23front.bookset.book.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public record BookUpdateRequest(
 	String bookName,
@@ -11,8 +12,10 @@ public record BookUpdateRequest(
 	BigDecimal salePrice,
 	LocalDate publishDate,
 	boolean isPack,
-	String bookStatus,
-	Integer stock,
-	Long publisherId
+	BookStatus bookStatus,
+	Long publisherId,
+	List<Long> categoryIds,
+	List<Long> tagIds,
+	List<Long> contributorIds
 ) {
 }
