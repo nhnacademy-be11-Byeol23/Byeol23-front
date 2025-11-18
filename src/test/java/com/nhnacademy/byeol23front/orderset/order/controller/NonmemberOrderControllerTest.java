@@ -1,37 +1,39 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
-import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookStatus;
-import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
-import com.nhnacademy.byeol23front.bookset.contributor.dto.AllContributorResponse;
-import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
-import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
-import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
-import com.nhnacademy.byeol23front.orderset.packaging.client.PackagingApiClient;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.ui.Model;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookStatus;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.ui.Model;
+
+import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
+import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
+import com.nhnacademy.byeol23front.bookset.contributor.dto.AllContributorResponse;
+import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
+import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
+import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
+import com.nhnacademy.byeol23front.orderset.packaging.client.PackagingApiClient;
 
 @WebMvcTest(NonmemberOrderController.class)
 class NonmemberOrderControllerTest {
@@ -40,16 +42,16 @@ class NonmemberOrderControllerTest {
 	private MockMvc mockMvc;
 
 	// --- Controller Dependencies (실제 의존성만 Mocking) ---
-	@MockitoBean
+	@MockBean
 	private BookApiClient bookApiClient;
-    @MockitoBean
+	@MockBean
 	private OrderApiClient orderApiClient;
-    @MockitoBean
+	@MockBean
 	private PackagingApiClient packagingApiClient;
-    @MockitoBean
+	@MockBean
 	private OrderUtil orderUtil;
 
-    @MockitoBean
+	@MockBean
 	private CategoryApiClient categoryApiClient;
 
 	// --- Test Data ---
