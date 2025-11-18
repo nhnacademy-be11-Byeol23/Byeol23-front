@@ -78,7 +78,7 @@
                                         </div>
                                     </div>
 
-                                    <div id="rateOptions" class="col-12 row g-3 m-0 p-0">
+                                    <div id="rateOptions" class="col-12 row g-3 m-0 p-0" style="display: flex;">
                                         <div class="col-md-6">
                                             <label for="discountRate" class="form-label">할인률 (%)</label>
                                             <input type="number" class="form-control" id="discountRate" name="discountRate"
@@ -111,14 +111,15 @@
                                             </button>
                                         </div>
                                     </div>
-<!--                                    카테고리 관련-->
+
                                     <input type="hidden" id="couponScope" name="couponScope" value="">
                                     <input type="hidden" id="selectedCategoryIds" name="categoryIds" value="">
+                                    <input type="hidden" id="selectedBookId" name="bookId" value="">
 
                                     <div id="categoryListContainer" class="col-12" style="display: none;">
                                         <div class="card card-body shadow-sm pt-3">
                                             <h6 class="fw-semibold mb-3">적용할 카테고리 선택</h6>
-                                            <p class="text-muted small mt-n2">최하위 카테고리만 선택 가능합니다.</p>
+                                            <p class="text-muted small mt-n2">하나의 카테고리만 선택할 수 있습니다.</p>
 
                                             <div id="inlineSelectedCategoriesDisplay" class="mb-3"></div>
 
@@ -138,12 +139,12 @@
                                                         <span th:unless="${category.hasChildren}" style="width: 20px; display: inline-block;"></span>
 
                                                         <div class="form-check">
-                                                            <input class="form-check-input category-tree-checkbox"
-                                                                   type="checkbox"
+                                                            <input class="form-check-input category-tree-radio"
+                                                                   type="radio"
+                                                                   name="selectedCategory"
                                                                    th:id="|category_tree_${category.id}|"
                                                                    th:value="${category.id}"
                                                                    th:data-category-name="${category.name}"
-                                                                   th:disabled="${category.hasChildren}"
                                                                    onclick="globalThis.updateSelectedCategories()">
                                                             <label class="form-check-label"
                                                                    th:for="|category_tree_${category.id}|"
@@ -161,6 +162,58 @@
                                             </ul>
                                         </div>
                                     </div>
+
+                                    <div id="bookListContainer" class="col-12" style="display: none;">
+                                        <div class="card card-body shadow-sm pt-3">
+                                            <h6 class="fw-semibold mb-3">적용할 도서 선택</h6>
+
+                                            <div class="input-group mb-3">
+                                                <input type="text" class="form-control" placeholder="도서 ID 또는 이름으로 검색...">
+                                                <button class="btn btn-outline-secondary" type="button">검색</button>
+                                            </div>
+
+                                            <div style="max-height: 300px; overflow-y: auto;">
+                                                <table class="table table-hover align-middle">
+                                                    <thead>
+                                                    <tr>
+                                                        <th scope="col" style="width: 10%;">선택</th>
+                                                        <th scope="col">도서명</th>
+                                                        <th scope="col" style="width: 30%;">기여자</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr th:if="${#lists.isEmpty(books)}">
+                                                        <td colspan="3" class="text-center">등록된 도서가 없습니다.</td>
+                                                    </tr>
+                                                    <tr th:each="book : ${books}">
+                                                        <td>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input book-radio"
+                                                                       type="radio"
+                                                                       name="selectedBook"
+                                                                       th:id="|book_${book.bookId}|"
+                                                                       th:value="${book.bookId}"
+                                                                       onclick="globalThis.updateSelectedBook(this.value)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <label th:for="|book_${book.bookId}|" style="cursor: pointer;" th:text="${book.bookName}">
+                                                                도서 제목
+                                                            </label>
+                                                        </td>
+                                                        <td th:text="${not #lists.isEmpty(book.contributors) ? book.contributors[0].contributorName : '기여자 미상'}">
+                                                            저자
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <p class="text-muted small mt-2">
+                                                현재 첫 10개 페이지만 표시됩니다. (추후 검색 및 페이징 기능 추가)
+                                            </p>
+                                        </div>
+                                    </div>
+
 
                                     <div class="col-12 text-end">
                                         <button type="submit" class="btn btn-dark">쿠폰 정책 저장</button>

@@ -5,9 +5,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
-            // ===================================================================
-            // 1. 할인 유형 (정률/정액) 로직 (기존)
-            // ===================================================================
             const rateRadio = document.getElementById('rateDiscount');
             const fixedRadio = document.getElementById('fixedDiscount');
 
@@ -22,7 +19,7 @@
                 if (!rateRadio || !fixedRadio || !rateOptions || !fixedOptions) return;
 
                 if (rateRadio.checked) {
-                    rateOptions.style.display = 'flex'; // [수정] row 클래스이므로 'flex'
+                    rateOptions.style.display = 'flex';
                     fixedOptions.style.display = 'none';
 
                     if (discountRateInput) discountRateInput.disabled = false;
@@ -34,7 +31,7 @@
                     }
                 } else if (fixedRadio.checked) {
                     rateOptions.style.display = 'none';
-                    fixedOptions.style.display = 'flex'; // [수정] row 클래스이므로 'flex'
+                    fixedOptions.style.display = 'flex';
 
                     if (discountRateInput) {
                         discountRateInput.disabled = true;
@@ -55,13 +52,9 @@
             if (fixedRadio) {
                 fixedRadio.addEventListener('change', toggleDiscountOptions);
             }
-            // 페이지 로드 시 초기 상태 실행
             toggleDiscountOptions();
 
 
-            // ===================================================================
-            // 2. 적용 대상 (카테고리/도서) 로직 (추가)
-            // ===================================================================
             const categoryBtn = document.getElementById('showCategoryTarget');
             const bookBtn = document.getElementById('showBookTarget');
 
@@ -74,33 +67,49 @@
             const policyNameInput = document.getElementById('policyName');
             const originalPolicyNamePlaceholder = policyNameInput ? policyNameInput.placeholder : '';
 
-            // 카테고리 쿠폰 버튼 클릭 시
             if (categoryBtn) {
                 categoryBtn.addEventListener('click', function() {
                     if (categorySection) categorySection.style.display = 'block';
                     if (bookSection) bookSection.style.display = 'none';
                     if (scopeInput) scopeInput.value = 'CATEGORY';
-                    if (bookIdInput) bookIdInput.value = ''; // 다른 섹션 값 초기화
+                    if (bookIdInput) bookIdInput.value = '';
                     if (policyNameInput) policyNameInput.placeholder = '예: IT/컴퓨터 10% 할인';
 
                     categoryBtn.classList.remove('btn-outline-info');
                     categoryBtn.classList.add('btn-info');
                     bookBtn.classList.remove('btn-dark');
                     bookBtn.classList.add('btn-outline-dark');
+
+                    const rootUl = document.getElementById('category-tree');
+                    if (rootUl && categorySection.dataset.allLoaded !== 'true') {
+                        console.log('최초 1회, 모든 카테고리 로드를 시작합니다...');
+
+                        const topLevelToggles = rootUl.querySelectorAll(':scope > li > div > button.category-toggle');
+
+                        topLevelToggles.forEach(toggle => {
+                            const categoryId = toggle.dataset.id;
+                            const childrenUl = document.getElementById(`children-${categoryId}`);
+                            if (childrenUl) {
+                                globalThis.loadCategoryChildren(categoryId, childrenUl, true);
+                            }
+                        });
+
+                        categorySection.dataset.allLoaded = 'true';
+                    }
+
                 });
             }
 
-            // 도서 쿠폰 버튼 클릭 시 (요청하신 대로 카테고리 로직 위주로 작성)
             if (bookBtn) {
                 bookBtn.addEventListener('click', function() {
                     if (categorySection) categorySection.style.display = 'none';
                     if (bookSection) bookSection.style.display = 'block';
                     if (scopeInput) scopeInput.value = 'BOOK';
-                    if (categoryIdsInput) categoryIdsInput.value = ''; // 다른 섹션 값 초기화
+                    if (categoryIdsInput) categoryIdsInput.value = '';
                     if (globalThis.updateSelectedCategories) {
-                        globalThis.updateSelectedCategories(); // 카테고리 배지 초기화
+                        globalThis.updateSelectedCategories();
                     }
-                    if (policyNameInput) policyNameInput.placeholder = '예: '이펙티브 자바' 1,000원 할인';
+                    if (policyNameInput) policyNameInput.placeholder = '예: "이펙티브 자바" 1,000원 할인';
 
                     categoryBtn.classList.add('btn-outline-info');
                     categoryBtn.classList.remove('btn-info');
@@ -109,18 +118,12 @@
                 });
             }
 
-
-            // ===================================================================
-            // 3. 폼 핸들러 (기존 + 추가 로직 통합)
-            // ===================================================================
             const form = document.querySelector('form[action="/admin/coupon-policy"]');
             if (form) {
 
-                // [통합] 폼 유효성 검사 (Submit)
                 form.addEventListener('submit', function (event) {
                     event.preventDefault();
 
-                    // 1. (기존) 할인 유형 검사
                     const discountType = document.querySelector('input[name="discountType"]:checked').value;
                     let isValid = false;
                     let alertMessage = '';
@@ -144,7 +147,6 @@
                         }
                     }
 
-                    // 2. (추가) 적용 대상 검사
                     if (isValid) {
                         const scope = scopeInput.value;
                         const categoryIds = categoryIdsInput.value;
@@ -155,14 +157,13 @@
                             alertMessage = '카테고리 쿠폰을 선택했으나, 적용할 카테고리를 선택하지 않았습니다.';
                         } else if (scope === 'BOOK' && (!bookId || bookId.trim() === '')) {
                             isValid = false;
-                            alertMessage = '도서 쿠폰을 선택했으나, 적용할 도서 ID를 입력하지 않았습니다.';
+                            alertMessage = '도서 쿠폰을 선택했으나, 적용할 도서를 선택하지 않았습니다.';
                         } else if (scope === '') {
                             isValid = false;
                             alertMessage = '쿠폰 적용 대상(카테고리 또는 도서)을 선택해주세요.';
                         }
                     }
 
-                    // 3. 최종 제출
                     if (isValid) {
                         event.target.submit();
                     } else {
@@ -170,22 +171,30 @@
                     }
                 });
 
-                // [통합] 폼 리셋 (Reset)
                 form.addEventListener('reset', function() {
-                    // 1. (기존) 할인 유형 리셋
                     document.getElementById('rateDiscount').checked = true;
                     document.getElementById('fixedDiscount').checked = false;
                     if(rateOptions) rateOptions.style.display = 'flex';
                     if(fixedOptions) fixedOptions.style.display = 'none';
 
-                    // 2. (추가) 적용 대상 리셋
                     if (categorySection) categorySection.style.display = 'none';
                     if (bookSection) bookSection.style.display = 'none';
                     if (scopeInput) scopeInput.value = '';
                     if (categoryIdsInput) categoryIdsInput.value = '';
                     if (bookIdInput) bookIdInput.value = '';
+
+                    const checkedCategoryRadio = document.querySelector('.category-tree-radio:checked');
+                    if (checkedCategoryRadio) {
+                        checkedCategoryRadio.checked = false;
+                    }
+
+                    const checkedBookRadio = document.querySelector('.book-radio:checked');
+                    if (checkedBookRadio) {
+                        checkedBookRadio.checked = false;
+                    }
+
                     if (globalThis.updateSelectedCategories) {
-                        globalThis.updateSelectedCategories(); // 배지 초기화
+                        globalThis.updateSelectedCategories();
                     }
                     if (policyNameInput) policyNameInput.placeholder = originalPolicyNamePlaceholder;
                     if (categoryBtn) {
@@ -199,16 +208,8 @@
                 });
             }
 
-        }); // DOMContentLoaded 끝
+        });
 
-
-        // ===================================================================
-        // 4. 전역 함수: 카테고리 트리 제어 로직 (추가)
-        // ===================================================================
-
-        /**
-         * 카테고리 토글 (펼치기/접기)
-         */
         globalThis.toggleCategory = function(element) {
             const categoryId = element.dataset.id;
             const isExpanded = element.dataset.expanded === 'true';
@@ -218,15 +219,13 @@
             if (!childrenUl) return;
 
             if (isExpanded) {
-                // 접기
                 childrenUl.style.display = 'none';
                 icon.classList.remove('bi-chevron-down');
                 icon.classList.add('bi-chevron-right');
                 element.dataset.expanded = 'false';
             } else {
-                // 펼치기
                 if (childrenUl.dataset.loaded !== 'true') {
-                    globalThis.loadCategoryChildren(categoryId, childrenUl);
+                    globalThis.loadCategoryChildren(categoryId, childrenUl, false);
                 } else {
                     childrenUl.style.display = 'block';
                 }
@@ -236,10 +235,20 @@
             }
         };
 
-        /**
-         * 자식 카테고리 동적 로드 (fetch API 사용)
-         */
-        globalThis.loadCategoryChildren = function(parentId, parentUl) {
+        globalThis.loadCategoryChildren = function(parentId, parentUl, expandAll = false) {
+
+            if (expandAll) {
+                const toggleButton = document.querySelector(`button.category-toggle[data-id="${parentId}"]`);
+                if (toggleButton) {
+                    const icon = toggleButton.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('bi-chevron-right');
+                        icon.classList.add('bi-chevron-down');
+                    }
+                    toggleButton.dataset.expanded = 'true';
+                }
+            }
+
             fetch(`/categories/${parentId}/children`)
                 .then(response => {
                     if (!response.ok) {
@@ -248,12 +257,11 @@
                     return response.json();
                 })
                 .then(children => {
-                    parentUl.innerHTML = ''; // 중복 로드 방지
+                    parentUl.innerHTML = '';
                     children.forEach(child => {
-                        const hasChildren = child.hasChildren; // API 응답에 hasChildren 플래그가 필요합니다.
+                        const hasChildren = child.hasChildren;
                         const li = document.createElement('li');
 
-                        // 접근성을 위해 <button> 태그 사용
                         li.innerHTML = `
                             <div class="d-flex align-items-center mb-2">
                                 ${hasChildren ?
@@ -267,12 +275,12 @@
                             '<span style="width: 20px; display: inline-block;"></span>'
                         }
                                 <div class="form-check">
-                                    <input class="form-check-input category-tree-checkbox"
-                                           type="checkbox"
+                                    <input class="form-check-input category-tree-radio"
+                                           type="radio"
+                                           name="selectedCategory"
                                            id="category_tree_${child.id}"
                                            value="${child.id}"
                                            data-category-name="${child.name}"
-                                           ${hasChildren ? 'disabled' : ''}
                                            onclick="globalThis.updateSelectedCategories()">
                                     <label class="form-check-label"
                                            for="category_tree_${child.id}"
@@ -289,6 +297,13 @@
                         }
                         `;
                         parentUl.appendChild(li);
+
+                        if (child.hasChildren && expandAll) {
+                            const newChildrenUl = document.getElementById(`children-${child.id}`);
+                            if (newChildrenUl) {
+                                globalThis.loadCategoryChildren(child.id, newChildrenUl, true);
+                            }
+                        }
                     });
                     parentUl.dataset.loaded = 'true';
                     parentUl.style.display = 'block';
@@ -300,34 +315,32 @@
                 });
         };
 
-        /**
-         * 체크된 카테고리 ID를 hidden input에 반영
-         */
         globalThis.updateSelectedCategories = function() {
-            const checkedCategories = document.querySelectorAll('.category-tree-checkbox:checked:not(:disabled)');
-            const selectedCategoryIds = Array.from(checkedCategories).map(cb => cb.value);
-
+            const checkedRadio = document.querySelector('.category-tree-radio:checked');
             const categoryIdsInput = document.getElementById('selectedCategoryIds');
-            if (categoryIdsInput) {
-                categoryIdsInput.value = selectedCategoryIds.join(',');
-            }
-
             const displayDiv = document.getElementById('inlineSelectedCategoriesDisplay');
-            if (displayDiv) {
-                displayDiv.innerHTML = ''; // 초기화
-                const selectedCategoryNames = Array.from(checkedCategories).map(cb => cb.dataset.categoryName);
-                selectedCategoryNames.forEach((name) => {
-                    const badge = document.createElement('span');
-                    badge.className = 'badge bg-info me-1 mb-1';
-                    badge.textContent = name;
-                    displayDiv.appendChild(badge);
-                });
+
+            if (checkedRadio) {
+                const selectedId = checkedRadio.value;
+                const selectedName = checkedRadio.dataset.categoryName;
+
+                if (categoryIdsInput) {
+                    categoryIdsInput.value = selectedId;
+                }
+
+                if (displayDiv) {
+                    displayDiv.innerHTML = `<span class="badge bg-info me-1 mb-1">${selectedName}</span>`;
+                }
+            } else {
+                if (categoryIdsInput) {
+                    categoryIdsInput.value = '';
+                }
+                if (displayDiv) {
+                    displayDiv.innerHTML = '';
+                }
             }
         };
 
-        /**
-         * 도서 ID를 hidden input에 반영 (도서 버튼 클릭 시 사용)
-         */
         globalThis.updateSelectedBook = function(bookId) {
             const bookIdInput = document.getElementById('selectedBookId');
             if (bookIdInput) {
