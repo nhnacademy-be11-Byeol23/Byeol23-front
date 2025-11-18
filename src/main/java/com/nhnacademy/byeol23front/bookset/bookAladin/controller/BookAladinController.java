@@ -126,7 +126,7 @@ public class BookAladinController {
 				request.isbn(),
 				request.publishDate(),
 				request.isPack(),
-				request.bookStatus() != null ? request.bookStatus() : "SALE",  // 기본값
+				request.bookStatus(),  // 기본값
 				request.stock() != null ? request.stock() : 0,  // 기본값
 				publisherId,
 				request.categoryIds() != null ? request.categoryIds() : List.of(),

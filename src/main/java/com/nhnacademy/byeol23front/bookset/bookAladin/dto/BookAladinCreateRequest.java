@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.nhnacademy.byeol23front.bookset.book.dto.BookStatus;
+
 public record BookAladinCreateRequest(
 	String bookName,
 	String author,
@@ -19,7 +21,7 @@ public record BookAladinCreateRequest(
 	String toc,
 	Integer stock,
 	boolean isPack,
-	String bookStatus,
+	BookStatus bookStatus,
 
 	List<Long> categoryIds,
 	List<Long> tagIds,
@@ -34,9 +36,6 @@ public record BookAladinCreateRequest(
 		}
 		if (contributorIds == null) {
 			contributorIds = List.of();
-		}
-		if (bookStatus == null || bookStatus.isBlank()) {
-			bookStatus = "SALE";
 		}
 	}
 }
