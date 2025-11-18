@@ -1,81 +1,49 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<!--
-  This file is a Thymeleaf fragment containing JavaScript.
-  It is intended to be included in the coupon policy creation/editing page.
-  It adds event listeners to the discount type radio buttons (Rate vs. Fixed)
-  to dynamically show, hide, and disable the relevant input fields.
--->
 <body>
-
-<!--
-  JavaScript Fragment for Coupon Policy Type Toggle
-
-  This script adds event listeners to the 'discountType' radio buttons.
-  - When 'Rate' is selected, it shows rate-related inputs and hides fixed inputs.
-  - When 'Fixed' is selected, it shows fixed-related inputs and hides rate inputs.
-
-  It also correctly sets the 'disabled' attribute on the inputs that are hidden
-  to ensure their values are not submitted with the form.
--->
 <th:block th:fragment="couponPolicyTypeJs">
     <script>
-        // Wait for the DOM to be fully loaded before attaching event listeners
         document.addEventListener('DOMContentLoaded', function () {
 
-            // Get references to the radio buttons
             const rateRadio = document.getElementById('rateDiscount');
             const fixedRadio = document.getElementById('fixedDiscount');
 
-            // Get references to the sections to toggle
             const rateOptions = document.getElementById('rateOptions');
             const fixedOptions = document.getElementById('fixedOptions');
 
-            // Get references to the inputs within those sections
             const discountRateInput = document.getElementById('discountRate');
             const discountLimitInput = document.getElementById('discountLimit');
             const discountAmountInput = document.getElementById('discountAmount');
 
-            /**
-             * Toggles the visibility and 'disabled' state of form sections
-             * based on the selected discount type radio button.
-             */
             function toggleDiscountOptions() {
                 if (rateRadio.checked) {
-                    // Show Rate options, Hide Fixed options
                     rateOptions.style.display = 'block';
                     fixedOptions.style.display = 'none';
 
-                    // Enable Rate inputs
                     if (discountRateInput) discountRateInput.disabled = false;
                     if (discountLimitInput) discountLimitInput.disabled = false;
 
-                    // Disable Fixed input and clear its value
                     if (discountAmountInput) {
                         discountAmountInput.disabled = true;
-                        discountAmountInput.value = ''; // Clear value when hidden
+                        discountAmountInput.value = '';
                     }
                 } else if (fixedRadio.checked) {
-                    // Hide Rate options, Show Fixed options
                     rateOptions.style.display = 'none';
                     fixedOptions.style.display = 'block';
 
-                    // Disable Rate inputs and clear their values
                     if (discountRateInput) {
                         discountRateInput.disabled = true;
-                        discountRateInput.value = ''; // Clear value when hidden
+                        discountRateInput.value = '';
                     }
                     if (discountLimitInput) {
                         discountLimitInput.disabled = true;
-                        discountLimitInput.value = ''; // Clear value when hidden
+                        discountLimitInput.value = '';
                     }
 
-                    // Enable Fixed input
                     if (discountAmountInput) discountAmountInput.disabled = false;
                 }
             }
 
-            // Add event listeners to both radio buttons
             if (rateRadio) {
                 rateRadio.addEventListener('change', toggleDiscountOptions);
             }
@@ -83,10 +51,57 @@
                 fixedRadio.addEventListener('change', toggleDiscountOptions);
             }
 
-            // Run the function once on page load to set the initial state
-            // (based on the 'checked' attribute in the HTML)
             toggleDiscountOptions();
+
+            // 폼 유효성 검사 로직은 그대로 유지
+            const form = document.querySelector('form[action="/admin/coupon-policy"]');
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const discountType = document.querySelector('input[name="discountType"]:checked').value;
+                const discountRate = document.getElementById('discountRate').value;
+                const discountLimit = document.getElementById('discountLimit').value;
+                const discountAmount = document.getElementById('discountAmount').value;
+
+                let isValid = false;
+                let alertMessage = '';
+
+                if (discountType === 'RATE') {
+                    if (discountRate && discountLimit) {
+                        isValid = true;
+                    } else {
+                        alertMessage = '할인률(%)과 최대 할인 금액(원)을 모두 입력해주세요.';
+                    }
+                } else if (discountType === 'FIXED') {
+                    if (discountAmount) {
+                        isValid = true;
+                    } else {
+                        alertMessage = '할인액(원)을 입력주세요.';
+                    }
+                }
+
+                if (isValid) {
+                    event.target.submit();
+                } else {
+                    alert(alertMessage);
+                }
+            });
+
+            // '취소' 버튼(type="reset")은 폼 필드만 초기화합니다.
+            // 만약 라디오 버튼 등 JS로 제어되는 항목의 초기화가 필요하면 여기에 추가합니다.
+            form.addEventListener('reset', function() {
+                // 라디오 버튼을 '정률 할인'으로, 폼 표시를 초기 상태로 되돌림
+                document.getElementById('rateDiscount').checked = true;
+                document.getElementById('fixedDiscount').checked = false;
+                document.getElementById('rateOptions').style.display = 'flex'; // row는 flex
+                document.getElementById('fixedOptions').style.display = 'none';
+            });
+
+
         });
+
+
     </script>
 </th:block>
 

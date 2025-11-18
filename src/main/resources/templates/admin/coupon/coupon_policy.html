@@ -100,6 +100,18 @@
                                         </div>
                                     </div>
 
+                                    <div class="col-12">
+                                        <label class="form-label">적용 대상</label>
+                                        <div>
+                                            <button type="button" id="showCategoryTarget" class="btn btn-outline-info me-2">
+                                                <i class="bi bi-tags"></i> 카테고리
+                                            </button>
+                                            <button type="button" id="showBookTarget" class="btn btn-outline-dark">
+                                                <i class="bi bi-book"></i> 도서
+                                            </button>
+                                        </div>
+                                    </div>
+
                                     <div class="col-12 text-end">
                                         <button type="submit" class="btn btn-dark">쿠폰 정책 저장</button>
                                     </div>
@@ -165,55 +177,6 @@
 <script th:src="@{/assets/js/main.js}"></script>
 
 <th:block th:replace="~{'admin/coupon/coupon-policy-type-js' :: couponPolicyTypeJs}"></th:block>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // 폼 유효성 검사 로직은 그대로 유지
-        const form = document.querySelector('form[action="/admin/coupon-policy"]');
-
-        form.addEventListener('submit', function (event) {
-            event.preventDefault();
-
-            const discountType = document.querySelector('input[name="discountType"]:checked').value;
-            const discountRate = document.getElementById('discountRate').value;
-            const discountLimit = document.getElementById('discountLimit').value;
-            const discountAmount = document.getElementById('discountAmount').value;
-
-            let isValid = false;
-            let alertMessage = '';
-
-            if (discountType === 'RATE') {
-                if (discountRate && discountLimit) {
-                    isValid = true;
-                } else {
-                    alertMessage = '할인률(%)과 최대 할인 금액(원)을 모두 입력해주세요.';
-                }
-            } else if (discountType === 'FIXED') {
-                if (discountAmount) {
-                    isValid = true;
-                } else {
-                    alertMessage = '할인액(원)을 입력주세요.';
-                }
-            }
-
-            if (isValid) {
-                event.target.submit();
-            } else {
-                alert(alertMessage);
-            }
-        });
-
-        // '취소' 버튼(type="reset")은 폼 필드만 초기화합니다.
-        // 만약 라디오 버튼 등 JS로 제어되는 항목의 초기화가 필요하면 여기에 추가합니다.
-        form.addEventListener('reset', function() {
-            // 라디오 버튼을 '정률 할인'으로, 폼 표시를 초기 상태로 되돌림
-            document.getElementById('rateDiscount').checked = true;
-            document.getElementById('fixedDiscount').checked = false;
-            document.getElementById('rateOptions').style.display = 'flex'; // row는 flex
-            document.getElementById('fixedOptions').style.display = 'none';
-        });
-    });
-</script>
 
 </body>
 </html>

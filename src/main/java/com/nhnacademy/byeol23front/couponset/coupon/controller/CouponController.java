@@ -20,6 +20,10 @@ public class CouponController {
         List<CouponPolicyInfoResponse> couponPolicyInfoResponseList
                 = couponPolicyApiClient.getCouponPolicies().getBody();
         model.addAttribute("policies", couponPolicyInfoResponseList);
+
+        //카테고리 리스트, 도서 리스트 가져옴
+
+
         return "admin/coupon/coupon_register";
     }
 }
