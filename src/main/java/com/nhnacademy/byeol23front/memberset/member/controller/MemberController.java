@@ -76,7 +76,7 @@ public class MemberController {
 		response.addHeader("Set-Cookie", deleteCookie("Access-Token", "/"));
 		response.addHeader("Set-Cookie", deleteCookie("Refresh-Token", "/members"));
 
-		return "redirect:/members/login";
+		return "redirect:/";
 	}
 
 	private String deleteCookie(String name, String path) {
