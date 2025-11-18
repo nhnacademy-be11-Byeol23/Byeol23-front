@@ -15,6 +15,8 @@ import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
 import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
+import com.nhnacademy.byeol23front.reviewset.client.ReviewFeignClient;
+import com.nhnacademy.byeol23front.reviewset.dto.ReviewResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +31,7 @@ import java.util.Optional;
 public class BookController {
 	private final BookApiClient bookApiClient;
 	private final DeliveryApiClient deliveryApiClient;
+	private final ReviewFeignClient reviewFeignClient;
 
 	@GetMapping("/{book-id}")
 	public String getBookById(@PathVariable(name = "book-id") Long bookId, Model model, HttpServletResponse response) {
@@ -42,9 +45,12 @@ public class BookController {
         }
 
         DeliveryPolicyInfoResponse currentDeliveryPolicy = deliveryApiClient.getCurrentDeliveryPolicy().getBody();
+		List<ReviewResponse> reviews = reviewFeignClient.getReviewsByProductId(bookId).getBody();
 
 		model.addAttribute("book", book.getBody());
 		model.addAttribute("delivery", currentDeliveryPolicy);
+		// log.info("reviews: {}", reviews);
+		model.addAttribute("reviews", reviews);
 
 		return "book/book-details";
 	}
