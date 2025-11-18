@@ -6997,7 +6997,7 @@ section,
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 4px 18px;
   background-color: color-mix(in srgb, var(--accent-color), transparent 92%);
   color: var(--accent-color);
   border-radius: 20px;
