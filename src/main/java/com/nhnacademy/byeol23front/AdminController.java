@@ -12,17 +12,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 @RequiredArgsConstructor
 public class AdminController {
 
-
-    @GetMapping("/")
-    public String mainPage() {
-        return "index";
-    }
-
-    @GetMapping("/error")
-    public String showError() {
-        return "error";
-    }
-
     @GetMapping("/admin")
     public String adminMainPage(Model model) {
         model.addAttribute("pageTitle", "관리자 메인");

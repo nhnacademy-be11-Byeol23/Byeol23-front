@@ -196,7 +196,7 @@
           <nav class="tabs-navigation nav">
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-overview" type="button">도서 소개</button>
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-details" type="button">상세 정보</button>
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-reviews" type="button">리뷰 (0)</button>
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-reviews" type="button" th:text="|리뷰 (${reviews.size()})|">리뷰 (0)</button>
           </nav>
 
           <div class="tab-content">
@@ -259,23 +259,58 @@
               </div>
             </div>
 
-            <div class="tab-pane fade" id="tab-reviews">
-              <div class="reviews-content">
-                <div class="reviews-header">
-                  <div class="rating-overview">
-                    ...
+              <!-- language: html -->
+              <div class="tab-pane fade" id="tab-reviews">
+                  <div class="reviews-content">
+<!--                      <div class="reviews-header">-->
+<!--                          <div class="rating-overview">-->
+<!--                              &lt;!&ndash; 필요시 전체 평점/통계 추가 가능 &ndash;&gt;-->
+<!--                          </div>-->
+<!--                          <div class="write-review-cta">-->
+<!--                              <h4>리뷰 남기기</h4>-->
+<!--                              <p>고객님의 소중한 리뷰를 남겨주세요</p>-->
+<!--                              <button class="btn review-btn">리뷰 작성하기</button>-->
+<!--                          </div>-->
+<!--                      </div>-->
+
+                      <div class="customer-reviews-list">
+                          <div th:if="${reviews == null or #lists.isEmpty(reviews)}" class="no-reviews text-center py-4">
+                              <p>등록된 리뷰가 없습니다.</p>
+                          </div>
+
+                          <div th:each="review : ${reviews}" class="review-item card mb-3">
+                              <div class="card-body">
+                                  <div class="d-flex justify-content-between align-items-start mb-2">
+                                      <div>
+                                          <strong th:text="${review.reviewerName}">작성자명</strong>
+                                          <div class="small text-muted" th:text="${#temporals.format(review.revisedAt, 'yyyy-MM-dd HH:mm')}">2025-01-01 12:00</div>
+                                      </div>
+                                      <div class="review-rate">
+              <span th:each="i : ${#numbers.sequence(1,5)}"
+                    th:classappend="${i <= review.reviewRate} ? 'text-warning' : 'text-muted'">
+                <i class="bi" th:classappend="${i <= review.reviewRate} ? ' bi-star-fill' : ' bi-star'"></i>
+              </span>
+                                      </div>
+                                  </div>
+
+                                  <p class="review-content mb-2" th:text="${review.reviewContent}">리뷰 내용이 표시됩니다.</p>
+
+                                  <div class="review-images mt-2" th:if="${review.reviewImageUrls != null and !#lists.isEmpty(review.reviewImageUrls)}">
+                                      <div class="d-flex flex-wrap">
+                                          <img th:each="imgUrl : ${review.reviewImageUrls}"
+                                               th:src="${imgUrl}"
+                                               alt="리뷰 이미지"
+                                               class="img-thumbnail me-2 mb-2"
+                                               style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;"
+                                               th:attr="data-full-src=${imgUrl}">
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+
                   </div>
-                  <div class="write-review-cta">
-                    <h4>리뷰 남기기</h4>
-                    <p>고객님의 소중한 리뷰를 남겨주세요</p>
-                    <button class="btn review-btn">리뷰 작성하기</button>
-                  </div>
-                </div>
-                <div class="customer-reviews-list">
-                  ...
-                </div>
               </div>
-            </div>
           </div>
         </div>
       </div>
@@ -349,7 +384,7 @@
             if (response.status === 401) {
               // 1. (POST) 컨트롤러가 401(Unauthorized)을 반환한 경우
               alert("로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.");
-              window.location.href = "/members/login"; // (로그인 URL로 변경하세요)
+              window.location.href = `/members/login?bookId=${bookId}&quantity=${quantity}`;
             } else {
               // 2. 기타 404, 500 에러
               alert('주문 페이지로 이동하는 데 실패했습니다.');

@@ -1,17 +1,20 @@
 package com.nhnacademy.byeol23front.memberset.member.controller;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.nhnacademy.byeol23front.memberset.member.dto.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 
@@ -41,7 +44,15 @@ public class MemberController {
 	}
 
 	@GetMapping("/login")
-	public String showLoginForm() {
+	public String showLoginForm(@RequestParam(name = "bookId", required = false) Long bookId,
+		@RequestParam(name = "quantity", required = false) Integer quantity,
+		Model model) {
+
+		if (!Objects.isNull(bookId) && !Objects.isNull(quantity)) {
+			model.addAttribute("bookId", bookId);
+			model.addAttribute("quantity", quantity);
+		}
+
 		return "member/login";
 	}
 
@@ -65,7 +76,7 @@ public class MemberController {
 		response.addHeader("Set-Cookie", deleteCookie("Access-Token", "/"));
 		response.addHeader("Set-Cookie", deleteCookie("Refresh-Token", "/members"));
 
-		return "redirect:/members/login";
+		return "redirect:/";
 	}
 
 	private String deleteCookie(String name, String path) {

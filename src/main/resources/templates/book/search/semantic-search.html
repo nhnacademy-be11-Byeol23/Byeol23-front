@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>도서 검색 결과</title>
+    <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+
+    <style>
+        .search-page {
+            padding: 40px 0;
+        }
+
+        .search-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 24px;
+        }
+
+        .category-sidebar {
+            background: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        .category-sidebar ul { list-style: none; margin: 0; padding-left: 0; }
+        .category-sidebar li { margin-bottom: 8px; }
+        .category-sidebar a { color: #333; font-weight: 500; }
+
+        .book-card {
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
+            gap: 18px;
+            padding: 18px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #e9e9e9;
+            margin-bottom: 16px;
+            transition: box-shadow 0.2s;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .book-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .book-thumb {
+            width: 120px;
+            height: 170px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #777;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .book-info h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .book-meta {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .price-box {
+            margin-top: 6px;
+        }
+
+        .price-sale { color: #d32f2f; font-weight: bold; font-size: 17px; }
+        .price-regular { text-decoration: line-through; margin-left: 8px; color: #777; }
+
+    </style>
+</head>
+
+<body>
+
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main search-page">
+    <div class="container">
+        <div class="search-layout">
+
+            <aside class="category-sidebar">
+                <h5 class="mb-3">카테고리</h5>
+                <ul>
+                    <li th:each="root : ${roots}">
+                        <a th:href="@{'/categories/' + ${root.categoryId} + '/books'(pathId=${root.pathId})}"
+                           th:text="${root.categoryName}"></a>
+                    </li>
+                </ul>
+            </aside>
+
+            <section>
+                <div th:if="${#lists.isEmpty(results)}">
+                    <p class="text-muted"
+                       th:text="${#strings.isEmpty(query)} ? '검색어를 입력해주세요.' : ${query} + ' 에 대한 검색 결과가 없습니다.'">
+                    </p>
+                </div>
+
+                <div th:each="book : ${results}" class="book-card" th:attr="data-book-id=${book.id}">
+                    <div class="book-thumb">
+                        이미지 없음
+                    </div>
+                    <div class="book-info">
+                        <h4 th:text="${book.title}"></h4>
+
+                        <div class="book-meta">
+                            <span th:text="${#strings.arrayJoin(book.author, ', ')}"></span> |
+                            <span th:text="${book.publisher}"></span> |
+                            <span th:text="${book.publishedAt}"></span>
+                        </div>
+
+                        <div class="price-box">
+                            <span class="price-sale" th:text="${#numbers.formatInteger(book.salePrice, 3, 'COMMA')} + '원'"></span>
+                            <span class="price-regular" th:text="${#numbers.formatInteger(book.regularPrice, 3, 'COMMA')} + '원'"></span>
+                        </div>
+
+                        <div class="mt-2">
+                            리뷰 <span th:text="${book.reviewCount}"></span>개 · 평점 <span th:text="${book.ratingAverage}"></span>
+                        </div>
+                    </div>
+
+                    <div class="button-column mt-3 d-flex flex-column gap-2 align-items-end">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" style="width: 120px">장바구니</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" style="width: 120px">바로구매</button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".book-card").forEach(card => {
+            card.addEventListener("click", function () {
+                const bookId = this.dataset.bookId;
+                window.location.href = "/books/" + bookId;
+            });
+        });
+    });
+</script>
+</body>
+</html>

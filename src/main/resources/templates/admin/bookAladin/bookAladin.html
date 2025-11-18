@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>관리자 - 도서api</title>
+    <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+    <link rel="stylesheet" th:href="@{/assets/css/bookAladin.css}">
+</head>
+<body>
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">도서API 검색</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a th:href="@{/}">Home</a></li>
+                    <li><a th:href="@{/admin}">관리자 홈</a></li>
+                    <li class="current">도서API 검색</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <section class="section">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-3">
+                    <div th:replace="~{fragments/admin_side_bar :: admin_side_bar}"></div>
+                </div>
+
+
+
+                <div class="col-lg-9">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <h5 class="fw-semibold mb-3">도서API 검색</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <input id="keyword" type="text" name="keyword" class="form-control" placeholder="예시: 봄, 모비딕 ...." required>
+                                    <input id="page" type="hidden" th:value="${page}">
+                                    <input id="size" type="hidden" th:value="${size}">
+                                </div>
+                                <div class="col-md-1 d-grid">
+                                    <button onclick="apiSearch()" class="btn btn-dark">검색</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title fw-semibold mb-0">검색 결과</h5>
+                            </div>
+
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>도서명</th>
+                                    <th>저자</th>
+                                    <th>출판사</th>
+                                    <th>설명</th>
+                                    <th>판매가</th>
+                                    <th>정가</th>
+                                    <th>ISBN</th>
+                                    <th>출판일</th>
+                                    <th>추가</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="book : ${books}">
+                                    <td th:text="${book.title}"></td>
+                                    <td th:text="${book.author}"></td>
+                                    <td th:text="${book.publisher}"></td>
+                                    <td th:text="${book.description}"></td>
+                                    <td th:text="${#numbers.formatInteger(book.priceSales, 0, 'COMMA') + '원'}"></td>
+                                    <td th:text="${#numbers.formatInteger(book.priceStandard, 0, 'COMMA') + '원'}"></td>
+                                    <td th:text="${book.isbn13}"></td>
+                                    <td th:text="${book.pubDate}"></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-warning"
+                                                th:data-title="${book.title}"
+                                                th:data-author="${book.author}"
+                                                th:data-publisher="${book.publisher}"
+                                                th:data-description="${book.description}"
+                                                th:data-price-sales="${book.priceSales}"
+                                                th:data-price-standard="${book.priceStandard}"
+                                                th:data-isbn13="${book.isbn13}"
+                                                th:data-pub-date="${book.pubDate}"
+                                                th:data-cover="${book.imageUrl}"
+                                                onclick="addApiBook(this)">추가</button>
+                                    </td>
+                                </tr>
+                                <tr th:if="${books == null or #lists.isEmpty(books)}">
+                                    <td colspan="9" class="text-center py-4">검색된 도서가 없습니다.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <div th:if="${books != null and !#lists.isEmpty(books)}"
+                                 th:with="start=${page - 5 > 1 ? page - 5 : 1},
+              end=${page + 5 < lastPage ? page + 5 : lastPage}">
+                                <ul class="pagination justify-content-center">
+
+                                    <!-- Prev -->
+                                    <li class="page-item" th:classappend="${page <= 1} ? 'disabled'">
+                                        <a class="page-link"
+                                           th:href="@{/admin/bookApi(keyword=${keyword}, page=${page - 1}, size=${size})}">
+                                            이전
+                                        </a>
+                                    </li>
+
+                                    <!-- Page numbers (current ±5, clamped to [1, lastPage]) -->
+                                    <li class="page-item"
+                                        th:each="i : ${#numbers.sequence(start, end)}"
+                                        th:classappend="${i == page} ? ' active'">
+                                        <a class="page-link"
+                                           th:text="${i}"
+                                           th:href="@{/admin/bookApi(keyword=${keyword}, page=${i}, size=${size})}">1</a>
+                                    </li>
+                                    <!-- Next -->
+                                    <li class="page-item" th:classappend="${page >= lastPage} ? 'disabled'">
+                                        <a class="page-link"
+                                           th:href="@{/admin/bookApi(keyword=${keyword}, page=${page + 1}, size=${size})}">
+                                            다음
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<div id="preloader"></div>
+
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/js/main.js}"></script>
+<script th:src="@{/assets/js/bookAladin.js}"></script>
+</body>
+</html>
