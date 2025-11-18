@@ -59,12 +59,21 @@ public class PackagingController {
 
 		ResponseEntity<PackagingCreateResponse> response = packagingApiClient.createPackaging(request);
 
-		minioService.uploadImage(ImageDomain.PACKAGING, response.getBody().packagingId(), tmp.imageFile());
-
 		if(!response.getStatusCode().is2xxSuccessful()) {
 			model.addAttribute("status", 400); // 400 Bad Request
 			model.addAttribute("error", "포장지 저장 실패");
 			model.addAttribute("message", "포장지 저장에 실패했습니니다.");
+			return "error";
+		}
+
+		PackagingCreateResponse createResponse = response.getBody();
+		if (createResponse != null) {
+			minioService.uploadImage(ImageDomain.PACKAGING, createResponse.packagingId(), tmp.imageFile());
+		} else {
+			// (2xx 응답인데 body가 null인 비상 상황)
+			model.addAttribute("status", 500);
+			model.addAttribute("error", "API 응답 오류");
+			model.addAttribute("message", "포장지 저장은 성공했으나, 응답 본문이 비어있습니다.");
 			return "error";
 		}
 
