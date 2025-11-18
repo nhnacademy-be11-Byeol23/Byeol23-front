@@ -28,11 +28,11 @@
     <section class="section">
         <div class="container">
             <div class="row g-4">
-                <div class="col-lg-3">
+                <div class="col-lg-2">
                     <div th:replace="~{fragments/admin_side_bar :: admin_side_bar}"></div>
                 </div>
 
-                <div class="col-lg-9">
+                <div class="col-lg-10">
                     <div class="book-management-container">
                         <h2>도서 수정</h2>
                         <form id="bookForm" class="book-form" th:action="@{/admin/books/{id}(id=${book.bookId})}" method="post" enctype="multipart/form-data" th:object="${book}">

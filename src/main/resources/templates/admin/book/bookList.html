@@ -27,11 +27,11 @@
     <section class="section">
         <div class="container">
             <div class="row g-4">
-                <div class="col-lg-3">
+                <div class="col-lg-2">
                     <div th:replace="~{fragments/admin_side_bar :: admin_side_bar}"></div>
                 </div>
 
-                <div class="col-lg-9">
+                <div class="col-lg-10">
                     <div class="card shadow-sm">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -56,7 +56,9 @@
                                 <tbody>
                                 <tr th:each="book : ${books}">
                                     <td th:text="${book.bookId}"></td>
-                                    <td th:text="${book.bookName}"></td>
+                                    <td class="book-name-cell">
+                                        <span class="book-name-text" th:text="${book.bookName}"></span>
+                                    </td>
                                     <td th:text="${#numbers.formatInteger(book.salePrice, 0, 'COMMA') + '원'}"></td>
                                     <td th:text="${book.isbn}"></td>
                                     <td th:text="${book.publishDate}"></td>

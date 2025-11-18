@@ -12971,3 +12971,19 @@ section,
     justify-content: center !important;
   }
 }
+
+/* 관리자 페이지 도서명 줄바꿈 처리 */
+.book-name-cell {
+    max-width: 340px;
+    padding: 8px;
+}
+
+.book-name-cell .book-name-text {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    line-height: 1.5em;
+}
