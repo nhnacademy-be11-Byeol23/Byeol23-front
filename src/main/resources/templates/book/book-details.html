@@ -309,7 +309,11 @@
     const salePrice = /*[[${book.salePrice}]]*/ null;
     const postUrl = /*[[@{/orders/direct}]]*/ '/orders/direct';
     const successUrl = /*[[@{/orders/direct}]]*/ '/orders/direct';
-
+    const imageUrl = /*[[${
+            (book.images != null and !#lists.isEmpty(book.images))
+            ? book.images.get(0).imageUrl()
+            : 'https://image.yes24.com/momo/Noimg_L.jpg'
+        }]]*/ null;
     if (buyNowButton) {
       buyNowButton.addEventListener('click', () => {
         console.log("버튼 클릭");
@@ -324,7 +328,7 @@
         const bookInfoRequest = {
           bookId: bookId,
           bookName: bookName,
-          imageUrl: "https://image.aladin.co.kr/product/33566/83/cover100/8937456486_1.jpg",
+          imageUrl: imageUrl,
           isPack: isPack,
           regularPrice: regularPrice,
           salePrice: salePrice,
