@@ -537,12 +537,20 @@
                     // 에디터 내용을 hidden input에 저장
                     if (editor) {
                         document.getElementById('description').value =
-                            editor.getHTML().replace(/<[^>]*>/g, '').trim();
+                            editor.getHTML()
+                                .replaceAll(/<\/p>/gi, '\n')
+                                .replaceAll(/<br\s*\/?>/gi, '\n')
+                                .replaceAll(/<[^>]*>/g, '')
+                                .trim();
                     }
 
                     if (tocEditor) {
                         document.getElementById('toc').value =
-                            tocEditor.getHTML().replace(/<[^>]*>/g, '').trim();
+                            tocEditor.getHTML()
+                                .replaceAll(/<\/p>/gi, '\n')
+                                .replaceAll(/<br\s*\/?>/gi, '\n')
+                                .replaceAll(/<[^>]*>/g, '')
+                                .trim();
                     }
 
                     return true;
