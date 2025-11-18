@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.nhnacademy.byeol23front.bookset.book.dto.BookStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -75,7 +76,7 @@ class NonmemberOrderControllerTest {
 		mockBookResponse = new BookResponse(
 			bookId, "Test Book", "TOC", "Desc",
 			new BigDecimal("20000"), new BigDecimal("18000"),
-			"1234567890123", LocalDate.now(), true, "SALE", 10,
+			"1234567890123", LocalDate.now(), true, BookStatus.SALE, 10,
 			publisher, false, null, null, contributors, images
 		);
 	}
@@ -124,7 +125,7 @@ class NonmemberOrderControllerTest {
 		BookResponse bookWithNoImages = new BookResponse(
 			bookId, "No Image Book", "TOC", "Desc",
 			new BigDecimal("20000"), new BigDecimal("18000"),
-			"1234567890123", LocalDate.now(), true, "SALE", 10,
+			"1234567890123", LocalDate.now(), true, BookStatus.SALE, 10,
 			new AllPublishersInfoResponse(1L, "Test Publisher"),
 			false, null, null,
 			new ArrayList<>(), // 빈 리스트

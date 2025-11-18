@@ -32,7 +32,7 @@ public class NonmemberOrderController {
 
 		BookResponse book = bookApiClient.getBook(bookId).getBody();
 
-		BookOrderRequest bookOrderRequest = getBookOrderRequest(quantity, book.getBody());
+		BookOrderRequest bookOrderRequest = getBookOrderRequest(quantity, book);
 
 		model.addAttribute("orderItem", bookOrderRequest.bookList());
 		model.addAttribute("quantity", quantity);
