@@ -1,4 +1,4 @@
-package com.nhnacademy.byeol23front.config;
+package com.nhnacademy.byeol23front.commons.config;
 
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
