@@ -16,6 +16,7 @@ import com.nhnacademy.byeol23front.bookset.contributor.dto.ContributorCreateResp
 import com.nhnacademy.byeol23front.bookset.contributor.dto.ContributorUpdateRequest;
 import com.nhnacademy.byeol23front.bookset.contributor.dto.ContributorUpdateResponse;
 import com.nhnacademy.byeol23front.bookset.contributor.dto.PageResponse;
+import com.nhnacademy.byeol23front.bookset.contributor.dto.ContributorFindOrCreateRequest;
 
 @FeignClient(name = "BYEOL23-GATEWAY", contextId = "contributorApiClient")
 public interface ContributorApiClient {
@@ -25,6 +26,10 @@ public interface ContributorApiClient {
 
 	@PostMapping(value = "/api/contributors")
 	ResponseEntity<ContributorCreateResponse> createContributor(@RequestBody ContributorCreateRequest contributorCreateRequest);
+
+	@PostMapping(value = "/api/contributors/find-or-create")
+	ResponseEntity<AllContributorResponse> findOrCreateContributor(@RequestBody ContributorFindOrCreateRequest request);
+
 
 	@PutMapping(value = "/api/contributors/{contributor-id}")
 	ContributorUpdateResponse updateContributor(@PathVariable(name = "contributor-id") Long contributorId, @RequestBody ContributorUpdateRequest contributorUpdateRequest);

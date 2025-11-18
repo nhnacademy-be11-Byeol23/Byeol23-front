@@ -217,7 +217,10 @@ public class BookAdminController {
 	}
 
 	@GetMapping("/new")
-	public String bookForm(Model model) {
+	public String bookForm(
+		@RequestParam(required = false) String fromAladin,
+		Model model
+	) {
 		model.addAttribute(CATEGORIES, categoryApiClient.getRoots());
 
 		PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 100).getBody();
@@ -232,6 +235,10 @@ public class BookAdminController {
 		List<AllPublishersInfoResponse> allPublishers = publishersResponse != null ? publishersResponse.content() : new ArrayList<>();
 		model.addAttribute(ALL_PUBLISHERS, allPublishers);
 
+		if ("true".equals(fromAladin)) {
+			model.addAttribute("fromAladin", true);
+		}
+		
 		return "admin/book/bookForm";
 	}
 

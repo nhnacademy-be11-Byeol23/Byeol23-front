@@ -30,7 +30,7 @@ public class NonmemberOrderController {
 		@RequestParam(name = "quantity") int quantity,
 		Model model) {
 
-		ResponseEntity<BookResponse> book = bookApiClient.getBook(bookId);
+		BookResponse book = bookApiClient.getBook(bookId).getBody();
 
 		BookOrderRequest bookOrderRequest = getBookOrderRequest(quantity, book.getBody());
 
