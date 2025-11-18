@@ -3,6 +3,8 @@ package com.nhnacademy.byeol23front.bookset.book.controller;
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookCreateRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookCreateTmpRequest;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookStockResponse;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookStockUpdateRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookUpdateRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookUpdateTmpRequest;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
@@ -144,7 +146,6 @@ public class BookAdminController {
 				tmp.publishDate(),
 				tmp.isPack() != null && tmp.isPack(),
 				tmp.bookStatus(),
-				tmp.stock(),
 				tmp.publisherId(),
 				categoryIds,
 				tagIds,
@@ -161,7 +162,7 @@ public class BookAdminController {
 
 	@GetMapping("/update/{book-id}")
 	public String bookUpdateForm(@PathVariable("book-id") Long id, Model model){
-		BookResponse book = bookApiClient.getBook(id);
+		BookResponse book = bookApiClient.getBook(id).getBody();
 		model.addAttribute("book", book);
 		model.addAttribute(CATEGORIES, categoryApiClient.getRoots());
 
@@ -195,14 +196,31 @@ public class BookAdminController {
 		return "admin/book/bookUpdateForm";
 	}
 
+	@GetMapping("/update/{book-id}/stock")
+	public String getBookStock(Model model, @PathVariable("book-id")Long bookId){
+		BookStockResponse bookStock = bookApiClient.getBookStock(bookId);
+		model.addAttribute("book",bookStock);
+		return "admin/book/bookStockUpdateForm";
+	}
+
+	@PostMapping("/update/{book-id}/stock")
+	public String updateBookStock(@PathVariable("book-id")Long bookId, BookStockUpdateRequest request){
+		bookApiClient.updateBookStock(bookId, request);
+		return "redirect:/admin/books";
+	}
+
+
 	@GetMapping
 	public String getBooks(Model model){
-		model.addAttribute("books", bookApiClient.getBooks());
+		model.addAttribute("books", bookApiClient.getBooks(0,20));
 		return "admin/book/bookList";
 	}
 
 	@GetMapping("/new")
-	public String bookForm(Model model) {
+	public String bookForm(
+		@RequestParam(required = false) String fromAladin,
+		Model model
+	) {
 		model.addAttribute(CATEGORIES, categoryApiClient.getRoots());
 
 		PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 100).getBody();
@@ -217,6 +235,10 @@ public class BookAdminController {
 		List<AllPublishersInfoResponse> allPublishers = publishersResponse != null ? publishersResponse.content() : new ArrayList<>();
 		model.addAttribute(ALL_PUBLISHERS, allPublishers);
 
+		if ("true".equals(fromAladin)) {
+			model.addAttribute("fromAladin", true);
+		}
+		
 		return "admin/book/bookForm";
 	}
 

@@ -47,14 +47,12 @@
     <div style="margin-top: 30px;">
       <a th:href="@{/}" class="btn btn-primary btn-lg">홈으로 가기</a>
     </div>
-
     <div th:if="${timestamp != null and path != null}" style="margin-top: 40px; color: #888; font-size: 0.9rem;">
       <p>
         <span th:text="'오류 발생 시간: ' + ${timestamp}"></span><br>
         <span th:text="'요청 경로: ' + ${path}"></span>
       </p>
     </div>
-
   </div>
 </section>
 
