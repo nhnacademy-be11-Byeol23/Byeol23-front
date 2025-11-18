@@ -5,6 +5,7 @@ import java.util.List;
 
 public record BookSearchResultResponse(
         String id,
+        String imageUrl,
         String title,
         List<String> author,
         String publisher,

@@ -1,11 +1,8 @@
 package com.nhnacademy.byeol23front.bookset.search.controller;
 
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
-import com.nhnacademy.byeol23front.bookset.category.dto.CategoryListResponse;
 import com.nhnacademy.byeol23front.bookset.search.client.SearchApiClient;
-import com.nhnacademy.byeol23front.bookset.search.dto.BookSearchResultResponse;
 import com.nhnacademy.byeol23front.bookset.search.dto.SearchCondition;
-import com.nhnacademy.byeol23front.bookset.search.dto.SearchPageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
@@ -13,7 +10,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.StructuredTaskScope;
 

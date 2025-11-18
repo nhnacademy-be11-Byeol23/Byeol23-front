@@ -1,38 +1,37 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.ui.Model;
-
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookStatus;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 import com.nhnacademy.byeol23front.bookset.contributor.dto.AllContributorResponse;
 import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
 import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.packaging.client.PackagingApiClient;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.ui.Model;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(NonmemberOrderController.class)
 class NonmemberOrderControllerTest {
@@ -41,16 +40,16 @@ class NonmemberOrderControllerTest {
 	private MockMvc mockMvc;
 
 	// --- Controller Dependencies (실제 의존성만 Mocking) ---
-	@MockBean
+	@MockitoBean
 	private BookApiClient bookApiClient;
-	@MockBean
+    @MockitoBean
 	private OrderApiClient orderApiClient;
-	@MockBean
+    @MockitoBean
 	private PackagingApiClient packagingApiClient;
-	@MockBean
+    @MockitoBean
 	private OrderUtil orderUtil;
 
-	@MockBean
+    @MockitoBean
 	private CategoryApiClient categoryApiClient;
 
 	// --- Test Data ---
@@ -75,7 +74,7 @@ class NonmemberOrderControllerTest {
 		mockBookResponse = new BookResponse(
 			bookId, "Test Book", "TOC", "Desc",
 			new BigDecimal("20000"), new BigDecimal("18000"),
-			"1234567890123", LocalDate.now(), true, "SALE", 10,
+			"1234567890123", LocalDate.now(), true, BookStatus.SALE, 10,
 			publisher, false, null, null, contributors, images
 		);
 	}
@@ -124,7 +123,7 @@ class NonmemberOrderControllerTest {
 		BookResponse bookWithNoImages = new BookResponse(
 			bookId, "No Image Book", "TOC", "Desc",
 			new BigDecimal("20000"), new BigDecimal("18000"),
-			"1234567890123", LocalDate.now(), true, "SALE", 10,
+			"1234567890123", LocalDate.now(), true, BookStatus.SALE, 10,
 			new AllPublishersInfoResponse(1L, "Test Publisher"),
 			false, null, null,
 			new ArrayList<>(), // 빈 리스트

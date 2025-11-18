@@ -107,7 +107,10 @@
 
                 <div th:each="book : ${results.content}" class="book-card" th:attr="data-book-id=${book.id}">
                     <div class="book-thumb">
-                        이미지 없음
+                        <img th:src="${book.imageUrl != null ? book.imageUrl : 'https://image.yes24.com/momo/Noimg_L.jpg'}"
+                             alt="도서 커버"
+                             class="img-fluid main-product-image"
+                             id="main-product-image">
                     </div>
                     <div class="book-info">
                         <h4 th:text="${book.title}"></h4>
