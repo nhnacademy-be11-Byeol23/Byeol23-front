@@ -1,7 +1,14 @@
 <th:block xmlns:th="http://www.thymeleaf.org" th:fragment="mypage_profile">
     <div class="profile-menu collapse d-lg-block" id="profileMenu">
         <!-- User Info -->
-        m
+        <div class="user-info" data-aos="fade-right">
+            <h4 th:text="${member.memberName} + '님'">회원이름</h4>
+
+            <div class="user-status">
+                <i class="bi bi-award"></i>
+                <span th:text="${member.gradeName}">로얄 등급</span>
+            </div>
+        </div>
         <!-- Navigation Menu -->
         <nav class="menu-nav">
             <ul class="nav flex-column" role="tablist">

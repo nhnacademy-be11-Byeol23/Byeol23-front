@@ -15,8 +15,6 @@ import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
-import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
-import com.nhnacademy.byeol23front.orderset.packaging.client.PackagingApiClient;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,8 +23,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NonmemberOrderController {
 	private final BookApiClient bookApiClient;
-	private final OrderApiClient orderApiClient;
-	private final PackagingApiClient packagingApiClient;
 	private final OrderUtil orderUtil;
 
 	@GetMapping("/direct")

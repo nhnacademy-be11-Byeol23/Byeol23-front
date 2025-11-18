@@ -13,7 +13,7 @@ import com.nhnacademy.byeol23front.point.dto.PointPolicyDTO;
 
 import io.swagger.v3.oas.annotations.Operation;
 
-@Authorized(role = Role.ADMIN)
+@Authorized(role = Role.ADMIN) // 인가처리를 백엔드에서 하기 때문에 삭제해야 됨
 @RestController
 @RequestMapping("/api/front/point-policies")
 public class PointPolicyProxyController {

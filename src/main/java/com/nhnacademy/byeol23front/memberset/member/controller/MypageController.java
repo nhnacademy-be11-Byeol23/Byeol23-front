@@ -1,9 +1,12 @@
 package com.nhnacademy.byeol23front.memberset.member.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,19 +14,26 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 import com.nhnacademy.byeol23front.memberset.member.dto.MemberMyPageResponse;
+import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
+import com.nhnacademy.byeol23front.minio.service.MinioService;
+import com.nhnacademy.byeol23front.minio.util.ImageDomain;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
 
+@Slf4j
 @Controller
 @RequestMapping("/mypage")
 @RequiredArgsConstructor
 public class MypageController {
 	private final MemberApiClient memberApiClient;
 	private final OrderApiClient orderApiClient;
+	private final MinioService minioService;
 
 	@ModelAttribute("activeTab")
 	public String addActiveTabToModel(HttpServletRequest request) {
@@ -34,6 +44,12 @@ public class MypageController {
 			return null;
 		}
 		return activeTab;
+	}
+
+	@ModelAttribute("member")
+	public MemberMyPageResponse addMemberInfoToModel() {
+		ResponseEntity<MemberMyPageResponse> response = memberApiClient.getMember();
+		return response.getBody();
 	}
 
 	@GetMapping
@@ -47,12 +63,44 @@ public class MypageController {
 
 	@GetMapping("/orders")
 	public String getOrder(Model model) {
+		ResponseEntity<List<OrderDetailResponse>> response = orderApiClient.getOrders();
+		List<OrderDetailResponse> orders = response.getBody();
 
-		ResponseEntity<List<OrderDetailResponse>> orders = orderApiClient.getOrders();
+		List<OrderViewModel> orderViewModels = new ArrayList<>();
+		String defaultImageUrl = "https://image.yes24.com/momo/Noimg_L.jpg";
 
-		model.addAttribute("orders", orders.getBody());
+		if (!Objects.isNull(orders)) {
+			for (OrderDetailResponse order : orders) {
+				String imageUrl = defaultImageUrl;
+
+				if (order.items() != null && !order.items().isEmpty()) {
+					Long firstBookId = order.items().get(0).bookId();
+
+					try {
+						List<GetUrlResponse> images = minioService.getImageUrl(ImageDomain.BOOK, firstBookId);
+
+						if (images != null && !images.isEmpty()) {
+							imageUrl = images.get(0).imageUrl();
+						}
+					} catch (Exception e) {
+						log.warn("Failed to get image for bookId {}: {}", firstBookId, e.getMessage());
+					}
+				}
+				orderViewModels.add(new OrderViewModel(order, imageUrl));
+			}
+		}
+
+		model.addAttribute("orders", orderViewModels);
 
 		return "mypage/orders";
+	}
+
+	@GetMapping("/orders/{order-number}")
+	@ResponseBody
+	public OrderDetailResponse getOrderDetails(@PathVariable(name = "order-number")String orderNumber) {
+		ResponseEntity<OrderDetailResponse> response = orderApiClient.getOrderByOrderNumber(orderNumber);
+
+		return response.getBody();
 	}
 
 	@GetMapping("/wishlist")
@@ -86,5 +134,8 @@ public class MypageController {
 
 		return "mypage/settings";
 	}
+
+
+	public record OrderViewModel(OrderDetailResponse order, String firstImageUrl) { }
 
 }

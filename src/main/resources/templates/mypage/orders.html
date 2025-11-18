@@ -37,10 +37,162 @@
             border-color: #252223 !important;
             box-shadow: 0 0 0 0.25rem rgba(37, 34, 35, 0.25) !important;
         }
+        .order-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 1.25rem; /* 20px */
+        }
+
+        /* .order-content를 flex 컨테이너로 변경
+          (이미지 | 텍스트 정보) 2단 레이아웃
+        */
+        .order-content {
+            display: flex;
+            align-items: flex-start; /* 상단 정렬 */
+            gap: 1.25rem; /* 20px 간격 */
+            padding: 1.25rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            border-top: 1px solid #f0f0f0;
+            margin-top: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        /* ... (이전 CSS는 그대로 둠) ... */
+
+        /* 1. 이미지 컨테이너 (크기 키우기) */
+        .product-image-container {
+            width: 90px;
+            height: 120px;
+            flex-shrink: 0;
+            background-color: #f8f8f8;
+        }
+
+        .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        /* 2. 모든 텍스트 정보 컨테이너 (Flexbox + 양쪽 정렬) */
+        .product-details-container {
+            flex-grow: 1; /* 남은 공간 모두 차지 */
+            display: flex; /* ✨ 자식 요소(상품정보, 주문요약)를 가로로 배치 */
+            justify-content: space-between; /* ✨ 양쪽 끝으로 정렬 */
+            align-items: flex-start; /* 상단 정렬 */
+        }
+
+        /* 2-1. 왼쪽 텍스트 그룹 (상품 정보) */
+        .product-details-container .product-info-group {
+            /* (별도 스타일 불필요) */
+        }
+
+        .product-details-container .book-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .product-details-container .item-meta {
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .product-details-container .item-meta .separator { margin: 0 5px; }
+        .product-details-container .item-meta .price { font-weight: 500; }
+
+        .product-details-container .more-items {
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        /* 2-2. 오른쪽 텍스트 그룹 (주문 요약) */
+        .product-details-container .order-info {
+            /* margin-top: 1.5rem; /* flex-item이므로 상단 마진 제거 */
+            flex-shrink: 0; /* 요약 정보가 찌그러지지 않도록 */
+        }
+
+        .order-info .info-row {
+            display: flex;
+            justify-content: flex-end !important; /* ✨ 오른쪽 끝 정렬 */
+            gap: 10px;                   /* ✨ 라벨과 값 사이의 간격 */
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .order-info .info-row .label {
+            color: #6c757d;
+            text-align: right; /* 라벨도 오른쪽 정렬 */
+        }
+
+        .order-info .info-row .value {
+            font-weight: 500;
+            text-align: right;
+            min-width: 60px; /* 값의 최소 너비를 주어 정렬을 맞춤 */
+        }
+
+        .order-info .info-row.total {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .order-info .info-row.total .label {
+            font-weight: 600;
+            color: #000;
+        }
+        .order-info .info-row.total .value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #000;
+        }
+
+        /* 3. 주문 요약 정보 (오른쪽 정렬) */
+        .product-details-container .order-info {
+            margin-top: 1.5rem; /* 상품 정보와 간격 띄우기 */
+        }
+
+        /* ✨ .product-details-container를 앞에 붙여 CSS 우선순위 확보 */
+        .product-details-container .order-info .info-row {
+            display: flex;
+            justify-content: flex-end !important; /* 👈 오른쪽 끝 정렬 (space-between -> flex-end) */
+            gap: 10px;                   /* ✨ 라벨과 값 사이의 간격을 10px로 고정 */
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        /* 4. 라벨('Status', 'Items', 'Total') 스타일 */
+        .product-details-container .order-info .info-row .label {
+            color: #6c757d;
+            /* width: 60px; /* 고정 너비 제거 (flex-end이므로 불필요) */
+            flex-shrink: 0; /* 라벨이 줄어들지 않도록 */
+        }
+
+        /* 5. 값('대기', '1 items' 등) 스타일 */
+        .product-details-container .order-info .info-row .value {
+            font-weight: 500;
+        }
+
+        /* 6. Total 행만 강조 */
+        .product-details-container .order-info .info-row.total {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .product-details-container .order-info .info-row.total .label {
+            font-weight: 600;
+            color: #000;
+        }
+        .product-details-container .order-info .info-row.total .value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #000;
+        }
     </style>
 
-    <!-- Daum Postcode API -->
-    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 
 <body class="account-page">
@@ -88,80 +240,73 @@
                     <div class="content-area">
                         <div id="orders">
                             <div class="section-header" data-aos="fade-up">
-                                <h2>My Orders</h2>
-                                <div class="header-actions">
-                                    <div class="search-box">
-                                        <i class="bi bi-search"></i>
-                                        <input type="text" placeholder="Search orders...">
-                                    </div>
-                                    <div class="dropdown">
-                                        <button class="filter-btn" data-bs-toggle="dropdown">
-                                            <i class="bi bi-funnel"></i>
-                                            <span>Filter</span>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li><a class="dropdown-item" href="#">All Orders</a></li>
-                                            <li><a class="dropdown-item" href="#">Processing</a></li>
-                                            <li><a class="dropdown-item" href="#">Shipped</a></li>
-                                            <li><a class="dropdown-item" href="#">Delivered</a></li>
-                                            <li><a class="dropdown-item" href="#">Cancelled</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
+                                <h2>주문 내역</h2>
                             </div>
 
                             <div class="orders-grid" th:if="${orders != null and !orders.isEmpty()}">
                                 <div class="order-card" data-aos="fade-up" data-aos-delay="100"
-                                     th:each="order : ${orders}">
+                                     th:each="viewModel : ${orders}">
 
                                     <div class="order-header">
                                         <div class="order-id">
-                                            <span class="label">Order ID:</span>
-                                            <span class="value" th:text="${order.orderNumber}">#ORD-2024-1278</span>
+                                            <span class="label">주문 번호:</span>
+                                            <span class="value" th:text="${viewModel.order.orderNumber}">...</span>
                                         </div>
                                         <div class="order-date"
-                                             th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd')}">Feb 20, 2025
+                                             th:text="${#temporals.format(viewModel.order.orderDate, 'yyyy-MM-dd')}">...
                                         </div>
                                     </div>
 
                                     <div class="order-content">
                                         <div class="product-grid">
-                                            <div th:each="item, iterStat : ${order.items}" th:if="${iterStat.index < 3}"
-                                                 class="product-title-preview">
-                                                <span th:text="${item.bookTitle}">Book Title</span>
-                                            </div>
-                                            <span class="more-items" th:if="${#lists.size(order.items) > 3}"
-                                                  th:text="'+' + (${#lists.size(order.items)} - 3)"></span>
+                                            <img th:src="${viewModel.firstImageUrl}"
+                                                 th:alt="${viewModel.order.items[0].bookTitle}"
+                                                 alt="Product Image" loading="lazy">
                                         </div>
+                                        <div class="product-details-container"
+                                             th:if="${!#lists.isEmpty(viewModel.order.items)}"
+                                             th:with="firstItem = ${viewModel.order.items[0]},
+                                                    totalItems = ${#lists.size(viewModel.order.items)}">
 
-                                        <div class="order-info">
-                                            <div class="info-row">
-                                                <span>Status</span>
-                                                <span class="status" th:text="${order.orderStatus}"
-                                                      th:classappend="${#strings.toLowerCase(order.orderStatus)}">Processing</span>
+                                            <div class="product-info-group">
+                                                <h6 class="book-title" th:text="${firstItem.bookTitle}">Book Title</h6>
+                                                <div class="item-meta">
+                                                    <span th:text="'수량: ' + ${firstItem.quantity}">수량: 1</span>
+                                                    <span class="separator">|</span>
+                                                    <span class="price" th:text="${#numbers.formatCurrency(firstItem.price)}">₩15,000</span>
+                                                </div>
+                                                <div class="more-items" th:if="${totalItems > 1}">
+                                                    <span th:text="'외 ' + (${totalItems} - 1) + '건'">외 2건</span>
+                                                </div>
                                             </div>
-                                            <div class="info-row">
-                                                <span>Items</span>
-                                                <span th:text="${#lists.size(order.items)} + ' items'">3 items</span>
-                                            </div>
-                                            <div class="info-row">
-                                                <span>Total</span>
-                                                <span class="price"
-                                                      th:text="${#numbers.formatCurrency(order.actualOrderPrice)}">$789.99</span>
+
+                                            <div class="order-info">
+                                                <div class="info-row">
+                                                    <span class="value" th:text="${viewModel.order.orderStatus}">...</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="value" th:text="${#lists.size(viewModel.order.items)} + ' items'">...</span>
+                                                </div>
+                                                <div class="info-row total">
+                                                    <span class="label">전체 주문 금액</span>
+                                                    <span class="value price"
+                                                          th:text="${#numbers.formatCurrency(viewModel.order.actualOrderPrice)}">...</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="order-footer">
-                                        <button type="button" class="btn-details"
+                                        <button type="button" class="btn btn-light w-100"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#orderDetailsModal"
-                                                th:data-order-id="${order.orderNumber}">
+                                                th:data-order-id="${viewModel.order.orderNumber}">
                                             View Details
                                         </button>
                                     </div>
 
-                                    <div class="collapse tracking-info" th:id="'tracking-' + ${order.orderNumber}">
+                                    <div class="collapse tracking-info"
+                                         th:id="'tracking-' + ${viewModel.order.orderNumber}">
                                     </div>
 
                                 </div>
@@ -229,70 +374,148 @@
         </div>
     </div>
 </div>
+
 <script th:inline="javascript">
+
+    // DTO의 price(숫자)를 통화 형식(예: ₩3,024)으로 변환하는 헬퍼 함수
+    function formatCurrency(price) {
+        if (price == null) return '';
+        return new Intl.NumberFormat('ko-KR', {
+            style: 'currency',
+            currency: 'KRW'
+        }).format(price);
+    }
+
+    // 로딩 스피너를 생성하는 헬퍼 함수
+    function createLoadingSpinner() {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'text-center p-5';
+
+        const spinner = document.createElement('div');
+        spinner.className = 'spinner-border text-dark';
+        spinner.setAttribute('role', 'status');
+
+        const visuallyHidden = document.createElement('span');
+        visuallyHidden.className = 'visually-hidden';
+        visuallyHidden.textContent = 'Loading...';
+
+        spinner.appendChild(visuallyHidden);
+        wrapper.appendChild(spinner);
+        return wrapper;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         const orderDetailsModal = document.getElementById('orderDetailsModal');
 
         orderDetailsModal.addEventListener('show.bs.modal', async (event) => {
             const button = event.relatedTarget;
-
-            // ✨ 1. th:data-order-id에서 주문번호(orderNumber)를 가져옵니다.
             const orderNumber = button.getAttribute('data-order-id');
 
             const modalBody = document.getElementById('modal-order-body');
             const modalOrderNum = document.getElementById('modal-order-number');
 
-            // 2. 모달 내용을 로딩 스피너로 초기화
-            modalBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-dark" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+            // 1. 모달 내용을 로딩 스피너로 초기화 (DOM API 사용)
+            while (modalBody.firstChild) {
+                modalBody.removeChild(modalBody.firstChild);
+            }
+            modalBody.appendChild(createLoadingSpinner());
             modalOrderNum.textContent = '...';
 
             try {
-                // 3. 서버에 주문 상세 정보 요청 (orderNumber 사용)
-                // (참고: 이 API는 /api/orders/{orderNumber} 형식으로 JSON을 반환해야 합니다)
-                const response = await fetch(`/api/orders/${orderNumber}`);
+                // 2. 서버에 주문 상세 정보 요청
+                const response = await fetch(`/mypage/orders/${orderNumber}`);
                 if (!response.ok) throw new Error('주문 정보를 불러오는 데 실패했습니다.');
 
                 const orderData = await response.json();
 
-                // ✨ 4. 모달 내용 HTML 생성 (DTO 필드명에 맞게 수정)
+                // 3. 모달 내용 HTML 생성 (DOM API 사용)
                 modalOrderNum.textContent = orderData.orderNumber;
 
-                // (DTO에 items가 없으면 orderData.items?.length로 안전하게 체크)
+                // 로딩 스피너 제거
+                while (modalBody.firstChild) {
+                    modalBody.removeChild(modalBody.firstChild);
+                }
+
                 const items = orderData.items || [];
 
-                modalBody.innerHTML = `
-                    <h5>주문 상품 (${items.length}개)</h5>
-                    <div class="order-items">
-                        ${items.map(item => `
-                            <div class="item">
-                                <div class="item-info" style="width: 70%;"> <h6>${item.bookTitle}</h6>
-                                    <div class="item-meta">
-                                        <span>Qty: ${item.quantity}</span>
-                                    </div>
-                                </div>
-                                <div class="item-price">$${item.price}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <hr>
-                    <h5>배송지 정보</h5>
-                    <div class="address-info">
-                        <p>
-                            <strong>${orderData.receiver}</strong><br>
-                            ${orderData.receiverAddress} ${orderData.receiverAddressDetail}<br>
-                            (${orderData.postCode})<br>
-                            ${orderData.receiverPhone}
-                        </p>
-                    </div>
-                `;
+                // --- "주문 상품" 섹션 ---
+                const h5Items = document.createElement('h5');
+                h5Items.textContent = `주문 상품 (${items.length}개)`;
+                modalBody.appendChild(h5Items);
+
+                const orderItemsDiv = document.createElement('div');
+                orderItemsDiv.className = 'order-items';
+
+                items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'item';
+
+                    const itemInfoDiv = document.createElement('div');
+                    itemInfoDiv.className = 'item-info';
+                    itemInfoDiv.style.width = '70%';
+
+                    const h6Title = document.createElement('h6');
+                    h6Title.textContent = item.bookTitle; // .textContent로 XSS 방지
+                    itemInfoDiv.appendChild(h6Title);
+
+                    const itemMetaDiv = document.createElement('div');
+                    itemMetaDiv.className = 'item-meta';
+
+                    const spanQty = document.createElement('span');
+                    spanQty.textContent = `수량 : ${item.quantity}`; // .textContent로 XSS 방지
+                    itemMetaDiv.appendChild(spanQty);
+                    itemInfoDiv.appendChild(itemMetaDiv);
+
+                    const itemPriceDiv = document.createElement('div');
+                    itemPriceDiv.className = 'item-price';
+                    itemPriceDiv.textContent = formatCurrency(item.price); // 헬퍼 함수 사용
+
+                    itemDiv.appendChild(itemInfoDiv);
+                    itemDiv.appendChild(itemPriceDiv);
+                    orderItemsDiv.appendChild(itemDiv);
+                });
+                modalBody.appendChild(orderItemsDiv);
+
+                modalBody.appendChild(document.createElement('hr'));
+
+                // --- "배송지 정보" 섹션 ---
+                const h5Shipping = document.createElement('h5');
+                h5Shipping.textContent = '배송지 정보';
+                modalBody.appendChild(h5Shipping);
+
+                const addressInfoDiv = document.createElement('div');
+                addressInfoDiv.className = 'address-info';
+
+                const pAddress = document.createElement('p');
+
+                const strongReceiver = document.createElement('strong');
+                strongReceiver.textContent = orderData.receiver; // .textContent
+                pAddress.appendChild(strongReceiver);
+                pAddress.appendChild(document.createElement('br'));
+
+                // .createTextNode를 사용해 순수 텍스트로 삽입 (XSS 방지)
+                pAddress.appendChild(document.createTextNode(`${orderData.receiverAddress} ${orderData.receiverAddressDetail}`));
+                pAddress.appendChild(document.createElement('br'));
+                pAddress.appendChild(document.createTextNode(`(${orderData.postCode})`));
+                pAddress.appendChild(document.createElement('br'));
+                pAddress.appendChild(document.createTextNode(orderData.receiverPhone));
+
+                addressInfoDiv.appendChild(pAddress);
+                modalBody.appendChild(addressInfoDiv);
 
             } catch (error) {
-                modalBody.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+                // --- 에러 처리 (DOM API 사용) ---
+                while (modalBody.firstChild) {
+                    modalBody.removeChild(modalBody.firstChild);
+                }
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger';
+                errorDiv.textContent = error.message; // .textContent
+                modalBody.appendChild(errorDiv);
             }
         });
     });
 </script>
-
 </body>
 
 </html>
