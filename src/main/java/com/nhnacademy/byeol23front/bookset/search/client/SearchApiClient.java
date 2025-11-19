@@ -5,7 +5,6 @@ import com.nhnacademy.byeol23front.bookset.search.dto.SearchCondition;
 import com.nhnacademy.byeol23front.bookset.search.dto.SearchPageResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,4 +21,10 @@ public interface SearchApiClient {
 
     @GetMapping("/search-api/categories/{category-id}/books")
     SearchPageResponse<BookSearchResultResponse> searchBooksByCategory(@PathVariable("category-id") Long id, @SpringQueryMap SearchCondition condition, @RequestParam("page") int page, @RequestParam("size") int size);
+
+    @GetMapping("/search-api/best")
+    SearchPageResponse<BookSearchResultResponse> searchBestBooks(@RequestParam("page") int page, @RequestParam("size") int size);
+
+    @GetMapping("/search-api/new")
+    SearchPageResponse<BookSearchResultResponse> searchNewBooks(@SpringQueryMap SearchCondition condition, @RequestParam("page") int page, @RequestParam("size") int size);
 }
