@@ -1,12 +1,8 @@
 package com.nhnacademy.byeol23front.bookset.book.controller;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookCreateRequest;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookCreateTmpRequest;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookStockResponse;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookStockUpdateRequest;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookUpdateRequest;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookUpdateTmpRequest;
+import com.nhnacademy.byeol23front.bookset.book.client.BookDocumentSyncApiClient;
+import com.nhnacademy.byeol23front.bookset.book.dto.*;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
 import com.nhnacademy.byeol23front.bookset.publisher.client.PublisherApiClient;
 import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
@@ -47,6 +42,7 @@ public class BookAdminController {
 	private final ContributorApiClient contributorApiClient;
 	private final PublisherApiClient publisherApiClient;
 	private final MinioService minioService;
+    private final BookDocumentSyncApiClient bookDocumentSyncApiClient;
 
 	private static final String ALL_CONTRIBUTORS = "allContributors";
 	private static final String CATEGORIES = "categories";
@@ -93,6 +89,8 @@ public class BookAdminController {
 					}
 				}
 			}
+            bookDocumentSyncApiClient.publishBookOutbox(bookId, BookOutboxEventType.ADD);
+            log.info("도서 아웃박스 이벤트 발행: {}", bookId);
 			return "redirect:/admin/books";
 			
 		} catch (Exception e) {
