@@ -78,7 +78,7 @@
                                         </div>
                                     </div>
 
-                                    <div id="rateOptions" class="col-12 row g-3 m-0 p-0">
+                                    <div id="rateOptions" class="col-12 row g-3 m-0 p-0" style="display: flex;">
                                         <div class="col-md-6">
                                             <label for="discountRate" class="form-label">할인률 (%)</label>
                                             <input type="number" class="form-control" id="discountRate" name="discountRate"
@@ -99,6 +99,121 @@
                                                    name="discountAmount" placeholder="5000" min="0">
                                         </div>
                                     </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label">적용 대상</label>
+                                        <div>
+                                            <button type="button" id="showCategoryTarget" class="btn btn-outline-info me-2">
+                                                <i class="bi bi-tags"></i> 카테고리
+                                            </button>
+                                            <button type="button" id="showBookTarget" class="btn btn-outline-dark">
+                                                <i class="bi bi-book"></i> 도서
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" id="couponScope" name="couponScope" value="">
+                                    <input type="hidden" id="selectedCategoryIds" name="categoryIds" value="">
+                                    <input type="hidden" id="selectedBookId" name="bookId" value="">
+
+                                    <div id="categoryListContainer" class="col-12" style="display: none;">
+                                        <div class="card card-body shadow-sm pt-3">
+                                            <h6 class="fw-semibold mb-3">적용할 카테고리 선택</h6>
+                                            <p class="text-muted small mt-n2">하나의 카테고리만 선택할 수 있습니다.</p>
+
+                                            <div id="inlineSelectedCategoriesDisplay" class="mb-3"></div>
+
+                                            <ul id="category-tree" class="list-unstyled" style="padding-left: 0; max-height: 300px; overflow-y: auto;">
+                                                <li th:each="category : ${categories}">
+                                                    <div class="d-flex align-items-center mb-2">
+
+                                                        <button type="button" th:if="${category.hasChildren}"
+                                                                class="category-toggle me-2"
+                                                                th:data-id="${category.id}"
+                                                                data-expanded="false"
+                                                                onclick="globalThis.toggleCategory(this)"
+                                                                style="border: none; background: none; padding: 0; cursor: pointer; user-select: none; color: var(--bs-body-color);">
+                                                            <i class="bi bi-chevron-right"></i>
+                                                        </button>
+
+                                                        <span th:unless="${category.hasChildren}" style="width: 20px; display: inline-block;"></span>
+
+                                                        <div class="form-check">
+                                                            <input class="form-check-input category-tree-radio"
+                                                                   type="radio"
+                                                                   name="selectedCategory"
+                                                                   th:id="|category_tree_${category.id}|"
+                                                                   th:value="${category.id}"
+                                                                   th:data-category-name="${category.name}"
+                                                                   onclick="globalThis.updateSelectedCategories()">
+                                                            <label class="form-check-label"
+                                                                   th:for="|category_tree_${category.id}|"
+                                                                   th:style="${category.hasChildren} ? 'font-weight: 600; color: #666;' : ''"
+                                                                   th:text="${category.name}">
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <ul th:if="${category.hasChildren}"
+                                                        th:id="|children-${category.id}|"
+                                                        class="ms-4"
+                                                        style="list-style: none; padding-left: 0; display: none;">
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div id="bookListContainer" class="col-12" style="display: none;">
+                                        <div class="card card-body shadow-sm pt-3">
+                                            <h6 class="fw-semibold mb-3">적용할 도서 선택</h6>
+
+                                            <div class="input-group mb-3">
+                                                <input type="text" class="form-control" placeholder="도서 ID 또는 이름으로 검색...">
+                                                <button class="btn btn-outline-secondary" type="button">검색</button>
+                                            </div>
+
+                                            <div style="max-height: 300px; overflow-y: auto;">
+                                                <table class="table table-hover align-middle">
+                                                    <thead>
+                                                    <tr>
+                                                        <th scope="col" style="width: 10%;">선택</th>
+                                                        <th scope="col">도서명</th>
+                                                        <th scope="col" style="width: 30%;">기여자</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr th:if="${#lists.isEmpty(books)}">
+                                                        <td colspan="3" class="text-center">등록된 도서가 없습니다.</td>
+                                                    </tr>
+                                                    <tr th:each="book : ${books}">
+                                                        <td>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input book-radio"
+                                                                       type="radio"
+                                                                       name="selectedBook"
+                                                                       th:id="|book_${book.bookId}|"
+                                                                       th:value="${book.bookId}"
+                                                                       onclick="globalThis.updateSelectedBook(this.value)">
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <label th:for="|book_${book.bookId}|" style="cursor: pointer;" th:text="${book.bookName}">
+                                                                도서 제목
+                                                            </label>
+                                                        </td>
+                                                        <td th:text="${not #lists.isEmpty(book.contributors) ? book.contributors[0].contributorName : '기여자 미상'}">
+                                                            저자
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <p class="text-muted small mt-2">
+                                                현재 첫 10개 페이지만 표시됩니다. (추후 검색 및 페이징 기능 추가)
+                                            </p>
+                                        </div>
+                                    </div>
+
 
                                     <div class="col-12 text-end">
                                         <button type="submit" class="btn btn-dark">쿠폰 정책 저장</button>
@@ -165,55 +280,6 @@
 <script th:src="@{/assets/js/main.js}"></script>
 
 <th:block th:replace="~{'admin/coupon/coupon-policy-type-js' :: couponPolicyTypeJs}"></th:block>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // 폼 유효성 검사 로직은 그대로 유지
-        const form = document.querySelector('form[action="/admin/coupon-policy"]');
-
-        form.addEventListener('submit', function (event) {
-            event.preventDefault();
-
-            const discountType = document.querySelector('input[name="discountType"]:checked').value;
-            const discountRate = document.getElementById('discountRate').value;
-            const discountLimit = document.getElementById('discountLimit').value;
-            const discountAmount = document.getElementById('discountAmount').value;
-
-            let isValid = false;
-            let alertMessage = '';
-
-            if (discountType === 'RATE') {
-                if (discountRate && discountLimit) {
-                    isValid = true;
-                } else {
-                    alertMessage = '할인률(%)과 최대 할인 금액(원)을 모두 입력해주세요.';
-                }
-            } else if (discountType === 'FIXED') {
-                if (discountAmount) {
-                    isValid = true;
-                } else {
-                    alertMessage = '할인액(원)을 입력주세요.';
-                }
-            }
-
-            if (isValid) {
-                event.target.submit();
-            } else {
-                alert(alertMessage);
-            }
-        });
-
-        // '취소' 버튼(type="reset")은 폼 필드만 초기화합니다.
-        // 만약 라디오 버튼 등 JS로 제어되는 항목의 초기화가 필요하면 여기에 추가합니다.
-        form.addEventListener('reset', function() {
-            // 라디오 버튼을 '정률 할인'으로, 폼 표시를 초기 상태로 되돌림
-            document.getElementById('rateDiscount').checked = true;
-            document.getElementById('fixedDiscount').checked = false;
-            document.getElementById('rateOptions').style.display = 'flex'; // row는 flex
-            document.getElementById('fixedOptions').style.display = 'none';
-        });
-    });
-</script>
 
 </body>
 </html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>마이페이지</title>
+  <meta name="description" content="마이페이지">
+  <meta name="keywords" content="">
+  <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+
+  <style>
+    .mypage-wrap { max-width: 980px; margin: 24px auto; }
+    .avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: #e9ecef; display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 700; color: #6c757d; text-transform: uppercase;
+    }
+    .grid-two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 992px) { .grid-two { grid-template-columns: 1fr; } }
+    .badge-role, .badge-grade { font-size: .85rem; }
+  </style>
+</head>
+
+<body class="mypage-page">
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+  <!-- 상단 타이틀/빵부스러기 -->
+  <div class="page-title light-background">
+    <div class="container d-lg-flex justify-content-between align-items-center">
+      <h1 class="mb-2 mb-lg-0">마이페이지</h1>
+      <nav class="breadcrumbs">
+        <ol>
+          <li><a th:href="@{/}">Home</a></li>
+          <li class="current">마이페이지</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- 본문 -->
+  <section id="mypage" class="section">
+    <div th:replace="~{fragments/mypage_profile :: mypage_profile}"></div>
+    <div class="container mypage-wrap" data-aos="fade-up" data-aos-delay="100">
+      <!-- 요약 카드 -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="avatar">GD</div>
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <h4 class="mb-0">gildong</h4>
+              <span class="badge text-bg-dark badge-role">USER</span>
+              <span class="badge text-bg-primary badge-grade">BRONZE</span>
+            </div>
+            <div class="text-muted mt-1">로그인 ID: sample_user</div>
+          </div>
+
+          <div class="text-end">
+            <div class="text-muted">보유 포인트</div>
+            <div class="fs-4 fw-semibold">12,345</div>
+            <div class="mt-2 d-flex gap-2 justify-content-end">
+              <a th:href="@{/points/charge}" class="btn btn-sm btn-outline-primary">충전</a>
+              <a th:href="@{/points/history}" class="btn btn-sm btn-outline-secondary">내역</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 상세/수정 -->
+      <div class="grid-two">
+        <!-- 상세 정보 -->
+        <div class="card shadow-sm">
+          <div class="card-header fw-semibold">계정 정보</div>
+          <div class="card-body">
+            <dl class="row mb-0">
+              <dt class="col-sm-4">이름</dt>
+              <dd class="col-sm-8">홍길동</dd>
+
+              <dt class="col-sm-4">닉네임</dt>
+              <dd class="col-sm-8">gildong</dd>
+
+              <dt class="col-sm-4">이메일</dt>
+              <dd class="col-sm-8">
+                <a href="mailto:user@example.com">user@example.com</a>
+              </dd>
+
+              <dt class="col-sm-4">휴대폰</dt>
+              <dd class="col-sm-8">010-0000-0000</dd>
+
+              <dt class="col-sm-4">생년월일</dt>
+              <dd class="col-sm-8">1999-01-01</dd>
+
+              <dt class="col-sm-4">권한</dt>
+              <dd class="col-sm-8">USER</dd>
+
+              <dt class="col-sm-4">등급</dt>
+              <dd class="col-sm-8">BRONZE</dd>
+            </dl>
+          </div>
+        </div>
+
+
+        <!-- 수정 폼 -->
+        <form id="profile-form">
+          <div class="card shadow-sm">
+            <div class="card-header fw-semibold">프로필 수정</div>
+            <div class="card-body">
+              <div id="revise-form">
+                <div class="mb-3">
+                  <label class="form-label">닉네임</label>
+                  <input type="text" class="form-control" name="nickname" maxlength="32" value="gildong"/>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">비밀번호</label>
+                  <button class="btn btn-outline-dark" onclick="passwordUpdateModal()">비밀번호 변경</button>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">휴대폰 번호</label>
+                  <input type="tel" class="form-control" name="phoneNumber" placeholder="010-0000-0000" value="010-0000-0000"/>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">이메일</label>
+                  <input type="email" class="form-control" name="email" value="user@example.com"/>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">생년월일</label>
+                  <input type="date" class="form-control" name="birthDate" value="1999-01-01"/>
+                </div>
+
+                <!-- 읽기 전용 노출 -->
+                <div class="mb-3">
+                  <label class="form-label">로그인 ID</label>
+                  <input type="text" class="form-control" value="sample_user" disabled/>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button type="submit" class="btn btn-primary">저장</button>
+                  <a href="/members/mypage" class="btn btn-outline-secondary">초기화</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+
+      </div>
+    </div>e
+  </section>
+  <!-- Password Update Modal -->
+  <div class="modal fade" id="passwordUpdateModal" tabindex="-1" style="display: none">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div id="verifyHelp" class="form-text">본인 확인을 위해 현재 비밀번호를 입력하세요.</div>
+        <div id="verifyError" class="text-danger small mt-2 d-none"></div>
+      </div>
+
+      <!-- Step 2: Enter new password -->
+      <div id="pw-step-update" class="d-none">
+        <label class="form-label">새 비밀번호</label>
+        <div class="input-group mb-2">
+          <input id="newPassword" type="password" class="form-control" autocomplete="new-password">
+          <button class="btn btn-outline-secondary" type="button" onclick="togglePw('newPassword')">보기</button>
+        </div>
+
+        <label class="form-label">새 비밀번호 확인</label>
+        <div class="input-group mb-2">
+          <input id="confirmPassword" type="password" class="form-control" autocomplete="new-password">
+          <button class="btn btn-outline-secondary" type="button" onclick="togglePw('confirmPassword')">보기</button>
+        </div>
+
+        <ul id="pwStrength" class="small mb-0">
+          <li id="rule-length">8자 이상</li>
+          <li id="rule-mix">영문 대/소문자, 숫자, 특수문자 중 3종류 이상</li>
+          <li id="rule-match">비밀번호 확인 일치</li>
+        </ul>
+
+        <div id="updateError" class="text-danger small mt-2 d-none"></div>
+        <div id="updateSuccess" class="text-success small mt-2 d-none"></div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button id="btnBack" type="button" class="btn btn-outline-secondary d-none" onclick="pwGoBack()">이전</button>
+      <button id="btnVerify" type="button" class="btn btn-dark" onclick="verifyCurrentPassword()">확인</button>
+      <button id="btnUpdate" type="button" class="btn btn-primary d-none" onclick="submitNewPassword()">변경</button>
+    </div>
+
+  </div>
+  </div>
+  </div>
+
+
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<div id="preloader"></div>
+
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+<script th:src="@{/assets/js/main.js}"></script>
+
+</body>
+</html>
