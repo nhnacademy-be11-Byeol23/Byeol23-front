@@ -405,7 +405,8 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         initPhoneHyphen();
-        initTossPayments();
+        const TOSS_CLIENT_KEY = /*[[${tossClientIKey}]]*/ 'test_ck_nRQoOaPz8L4QRwM6lGa58y47BMw6';
+        initTossPayments(TOSS_CLIENT_KEY);
         initPointInputListener();
         initApplyAllPointsButton();
         initPackagingModal();
@@ -439,7 +440,7 @@
         });
     }
 
-    function initTossPayments() {
+    function initTossPayments(clientKey) {
         const paymentButton = document.getElementById('payment-button');
         const actualOrderPriceEl = document.getElementById('actual-order-price'); // 요소 미리 찾아두기
 
@@ -447,9 +448,6 @@
             console.error("결제 버튼 또는 최종 금액 요소를 찾을 수 없습니다!");
             return;
         }
-
-        const clientKey = "test_ck_nRQoOaPz8L4QRwM6lGa58y47BMw6";
-
         var tossPayments = TossPayments(clientKey);
 
         // 결제 금액 가져오기
@@ -460,7 +458,7 @@
             return Number(priceString.replace(/[^\d]/g, '')) || 0;
         };
 
-        paymentButton.addEventListener('click', function () {
+        paymentButton.addEventListener('click', async function () {
 
             const bookInfoRequestList = []; // 백엔드로 보낼 최종 리스트
             const orderItemElements = document.querySelectorAll('.order-item');
@@ -556,49 +554,31 @@
             console.log("전송할 객체:", orderPrepareRequest);
             console.log("실제 JSON:", JSON.stringify(orderPrepareRequest));
 
-            if (currentFinalPrice === 0) {
-                console.log("최종 결제 금액이 0원이므로 결제창 호출을 건너뛰고 주문 준비만 진행합니다.");
-                // fetch만 호출하고 tossPayments.requestPayment는 호출하지 않음
-                fetch('/orders/prepare', {
+            try {
+                const response = await fetch('/orders/prepare', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(orderPrepareRequest)
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('주문 준비에 실패했습니다.');
-                        }
-                        return response.json();
-                    })
-                    .then(prepareResponse => {
-                        // 결제가 필요 없으므로 바로 성공 페이지로 이동 (orderId 전달)
-                        window.location.href = window.location.origin + `/orders/success?orderNumber=${prepareResponse.orderNumber}`;
-                    })
-                    .catch(error => {
-                        console.error('0원 주문 처리 중 오류:', error);
-                        alert(error.message);
-                    });
-                return; // 토스 결제 로직 실행 방지
-            }
+                });
 
-            fetch('/orders/prepare', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(orderPrepareRequest)
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('주문 준비에 실패했습니다.');
-                    }
-                    return response.json();
-                })
-                .then(prepareResponse => {
-                    // 4. 서버로부터 orderId를 성공적으로 받으면 토스페이먼츠 호출
-                    const orderIdFromServer = prepareResponse.orderNumber;
-                    if (!orderIdFromServer) {
-                        throw new Error('주문 ID를 받지 못했습니다.');
-                    }
 
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({message: '주문 준비 API 응답 실패.'}));
+                    throw new Error(err.message || '주문 준비에 실패했습니다.');
+                }
+                const prepareResponse = await response.json();
+                const orderIdFromServer = prepareResponse.orderNumber;
+                if (!orderIdFromServer) {
+                    throw new Error('주문 ID를 서버로부터 받지 못했습니다.');
+                }
+
+                if (currentFinalPrice === 0) {
+                    // 회원 주문일 경우에만 0원 처리 (비회원은 위에서 이미 차단됨)
+                    console.log("0원 주문: 성공 처리.");
+                    window.location.href = window.location.origin + `/orders/success?orderNumber=${orderIdFromServer}`;
+                } else {
+                    // 유료 주문: 토스페이먼츠 호출
+                    console.log("유료 주문: 토스페이먼츠 호출");
                     tossPayments.requestPayment('토스페이', {
                         orderId: orderIdFromServer,
                         amount: currentFinalPrice,
@@ -607,11 +587,11 @@
                         successUrl: window.location.origin + "/payments/confirm",
                         failUrl: window.location.origin + "/payments/fail"
                     });
-                })
-                .catch(error => {
-                    console.error('주문 처리 중 오류:', error);
-                    alert(error.message);
-                });
+                }
+            } catch (error) {
+                console.error('주문 처리 중 오류: ', error);
+                alert(error.message || '알 수 없는 오류가 발생하였습니다.');
+            }
         });
     }
 
