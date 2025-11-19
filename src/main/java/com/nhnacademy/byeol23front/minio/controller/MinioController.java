@@ -97,14 +97,9 @@ public class MinioController {
 		List<GetUrlResponse> proxiedResponses = responses.stream()
 			.map(response -> {
 				try {
-					// 원본 URL 파싱 (예: http://minio:9000/bucket/file.jpg)
 					URI uri = URI.create(response.imageUrl());
 					String path = uri.getPath(); // 결과: "/bucket/file.jpg"
-
-					// 프록시 URL로 재조립
-					// 결과 예시: "https://your-domain.com/img-proxy/bucket/file.jpg"
-					// (프론트엔드와 같은 도메인을 쓴다면 도메인 생략하고 "/img-proxy" + path 만 써도 됩니다)
-					String newUrl = "https://byeol23.shop" + path;
+					String newUrl = "/img-proxy" + path;
 
 					// 새 record 생성하여 반환
 					return new GetUrlResponse(response.imageId(), newUrl);
