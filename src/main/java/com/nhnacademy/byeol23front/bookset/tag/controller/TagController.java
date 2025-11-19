@@ -43,9 +43,9 @@ public class TagController {
 
 	@PostMapping
 	@ResponseBody
-	public ResponseEntity<TagCreateResponse> createTag(@RequestBody TagCreateRequest request){
-		return feignClient.createTag(request);
-
+	public TagCreateResponse createTag(@RequestBody TagCreateRequest request){
+		ResponseEntity<TagCreateResponse> response = feignClient.createTag(request);
+		return response.getBody();
 	}
 
 	@ResponseBody

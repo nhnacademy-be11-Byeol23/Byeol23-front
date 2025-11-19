@@ -20,7 +20,7 @@ public record BookResponse(
 	String isbn,
 	LocalDate publishDate,
 	boolean isPack,
-	String bookStatus,
+	BookStatus bookStatus,
 	Integer stock,
 	AllPublishersInfoResponse publisher,
 	boolean isDeleted,

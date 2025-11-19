@@ -12759,3 +12759,215 @@ section,
         margin-left: 8px;
     }
 }
+
+/* Wishlist Page Styles */
+/* 저장 버튼 및 추가 버튼 스타일 */
+.modal-footer .btn-primary,
+.settings-form .btn-save,
+.section-header .btn-primary {
+  background-color: #252223 !important;
+  border-color: #252223 !important;
+}
+
+.modal-footer .btn-primary:hover,
+.settings-form .btn-save:hover,
+.section-header .btn-primary:hover {
+  background-color: #1a1819 !important;
+  border-color: #1a1819 !important;
+}
+
+/* 토글 스위치 스타일 */
+.form-check-input:checked {
+  background-color: #252223 !important;
+  border-color: #252223 !important;
+}
+
+.form-check-input:focus {
+  border-color: #252223 !important;
+  box-shadow: 0 0 0 0.25rem rgba(37, 34, 35, 0.25) !important;
+}
+
+/* 위시리스트 세로 리스트 레이아웃 */
+.wishlist-grid {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1rem !important;
+}
+
+/* 위시리스트 카드 - 가로 레이아웃 */
+.wishlist-card {
+  position: relative !important;
+  display: flex !important;
+  background: white !important;
+  border: 1px solid #e9ecef !important;
+  border-radius: 8px !important;
+  transition: box-shadow 0.3s !important;
+  overflow: hidden !important;
+}
+
+.wishlist-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 위시리스트 링크 */
+.wishlist-link {
+  display: flex !important;
+  gap: 0.75rem !important;
+  padding: 0.75rem !important;
+  text-decoration: none !important;
+  color: inherit !important;
+  flex: 1 !important;
+}
+
+/* 이미지 컨테이너 */
+.wishlist-image {
+  position: relative !important;
+  flex-shrink: 0 !important;
+  width: 100px !important;
+  height: 140px !important;
+  overflow: hidden !important;
+  border-radius: 4px !important;
+  background-color: #f8f9fa !important;
+}
+
+.wishlist-image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+
+/* 위시리스트 콘텐츠 영역 */
+.wishlist-content {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+}
+
+.wishlist-content .product-category {
+  font-size: 0.75rem !important;
+  color: #6c757d !important;
+  margin-bottom: 0.25rem !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.wishlist-content h4 {
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+  line-height: 1.3 !important;
+  color: #252223 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+}
+
+.wishlist-content .product-meta {
+  margin-top: auto !important;
+}
+
+.wishlist-content .rating {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  font-size: 0.75rem !important;
+  margin-bottom: 0.25rem !important;
+  color: #ffc107 !important;
+}
+
+.wishlist-content .rating span {
+  color: #6c757d !important;
+  margin-left: 0.1rem !important;
+}
+
+.wishlist-content .price {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 0.25rem !important;
+}
+
+.wishlist-content .price .current {
+  font-size: 1.1rem !important;
+  font-weight: bold !important;
+  color: #252223 !important;
+}
+
+.wishlist-content .price .original {
+  font-size: 0.85rem !important;
+  color: #999 !important;
+  text-decoration: line-through !important;
+}
+
+/* 삭제 버튼 - 카드 우측 상단 */
+.wishlist-card .btn-remove {
+  position: absolute !important;
+  top: 0.5rem !important;
+  right: 0.5rem !important;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #666 !important;
+  border: 1px solid #dee2e6 !important;
+  border-radius: 50% !important;
+  cursor: pointer !important;
+  transition: all 0.3s !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.9rem !important;
+  z-index: 10 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.wishlist-card .btn-remove:hover {
+  background-color: #ff4444 !important;
+  color: white !important;
+  border-color: #ff4444 !important;
+}
+
+/* 할인 배지 */
+.wishlist-image .sale-badge {
+  position: absolute !important;
+  top: 0.25rem !important;
+  left: 0.25rem !important;
+  background-color: #ff4444 !important;
+  color: white !important;
+  padding: 0.15rem 0.4rem !important;
+  border-radius: 3px !important;
+  font-size: 0.65rem !important;
+  font-weight: bold !important;
+  z-index: 5 !important;
+}
+
+/* 반응형 - 모바일 */
+@media (max-width: 768px) {
+  .wishlist-link {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
+  .wishlist-image {
+    width: 150px !important;
+    height: 210px !important;
+  }
+  
+  .wishlist-content {
+    width: 100% !important;
+    text-align: center !important;
+    align-items: center !important;
+  }
+  
+  .wishlist-content .product-category,
+  .wishlist-content h4 {
+    text-align: center !important;
+  }
+  
+  .wishlist-content .price {
+    justify-content: center !important;
+  }
+}

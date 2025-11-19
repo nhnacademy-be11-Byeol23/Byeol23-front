@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +29,7 @@ public class NonmemberOrderController {
 		@RequestParam(name = "quantity") int quantity,
 		Model model) {
 
-		ResponseEntity<BookResponse> book = bookApiClient.getBook(bookId);
+		BookResponse book = bookApiClient.getBook(bookId).getBody();
 
 		BookOrderRequest bookOrderRequest = getBookOrderRequest(quantity, book.getBody());
 

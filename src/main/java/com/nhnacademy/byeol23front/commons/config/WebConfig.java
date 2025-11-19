@@ -1,6 +1,6 @@
-package com.nhnacademy.byeol23front.config;
+package com.nhnacademy.byeol23front.commons.config;
 
-import com.nhnacademy.byeol23front.Interceptor.CategoryHeaderInterceptor;
+import com.nhnacademy.byeol23front.commons.interceptor.CategoryHeaderInterceptor;
 import com.nhnacademy.byeol23front.resolver.PageableResolver;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -23,6 +23,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/search/**")
                 .addPathPatterns("/categories/**")
                 .addPathPatterns("/books/*")
+                .addPathPatterns("/best")
+                .addPathPatterns("/new")
+                .addPathPatterns("/error/**")
         ;
     }
 

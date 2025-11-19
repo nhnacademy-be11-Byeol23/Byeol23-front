@@ -60,10 +60,9 @@
         }
 
         .book-info h4 {
-            margin: 0;
             font-size: 18px;
             font-weight: 600;
-            margin-bottom: 6px;
+            margin: 0 0 6px;
         }
 
         .book-meta {
@@ -105,9 +104,29 @@
                     <p class="text-muted">카테고리 검색 결과가 없습니다.</p>
                 </div>
 
+                <div class="d-flex justify-content-end mb-3">
+                    <select id="sortSelect" class="form-select" style="width: 200px;"
+                            onchange="changeSort()">
+                        <option th:value="POPULAR"
+                                th:selected="${sort == 'POPULAR'}">인기순</option>
+                        <option th:value="NEWEST"
+                                th:selected="${sort == 'NEWEST'}">신상품순</option>
+                        <option th:value="LOW_PRICE"
+                                th:selected="${sort == 'LOW_PRICE'}">낮은 가격순</option>
+                        <option th:value="HIGH_PRICE"
+                                th:selected="${sort == 'HIGH_PRICE'}">높은 가격순</option>
+                        <option th:value="REVIEW"
+                                th:selected="${sort == 'REVIEW'}">리뷰 많은 순</option>
+                        <option th:value="RATING"
+                                th:selected="${sort == 'RATING'}">평점순</option>
+                    </select>
+                </div>
                 <div th:each="book : ${results.content}" class="book-card" th:attr="data-book-id=${book.id}">
                     <div class="book-thumb">
-                        이미지 없음
+                        <img th:src="${book.imageUrl != null ? book.imageUrl : 'https://image.yes24.com/momo/Noimg_L.jpg'}"
+                             alt="도서 커버"
+                             class="img-fluid main-product-image"
+                             id="main-product-image">
                     </div>
                     <div class="book-info">
                         <h4 th:text="${book.title}"></h4>
@@ -138,7 +157,7 @@
                     <ul class="pagination justify-content-center">
                         <li class="page-item" th:classappend="${results.page == 0} ? 'disabled'">
                             <a class="page-link"
-                               th:href="@{|?pathId=${pathId}&page=${results.page - 1}&size=${results.size}|}">
+                               th:href="@{|?pathId=${pathId}&sort=${sort}&page=${results.page - 1}&size=${results.size}|}">
                                 이전
                             </a>
                         </li>
@@ -147,7 +166,7 @@
                             th:each="i : ${#numbers.sequence(0, results.totalPages - 1)}"
                             th:classappend="${i == results.page} ? 'active'">
                             <a class="page-link"
-                               th:href="@{|?pathId=${pathId}&page=${i}&size=${results.size}|}"
+                               th:href="@{|?pathId=${pathId}&sort=${sort}&page=${i}&size=${results.size}|}"
                                th:text="${i + 1}">
                             </a>
                         </li>
@@ -155,11 +174,10 @@
                         <li class="page-item"
                             th:classappend="${results.page + 1 >= results.totalPages} ? 'disabled'">
                             <a class="page-link"
-                               th:href="@{|?pathId=${pathId}&page=${results.page + 1}&size=${results.size}|}">
+                               th:href="@{|?pathId=${pathId}&sort=${sort}&page=${results.page + 1}&size=${results.size}|}">
                                 다음
                             </a>
                         </li>
-
                     </ul>
                 </nav>
 
@@ -171,7 +189,7 @@
 
 <div th:replace="~{fragments/common_footer :: commonFooter}"></div>
 
-<script>
+<script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll(".book-card").forEach(card => {
             card.addEventListener("click", function () {
@@ -180,6 +198,11 @@
             });
         });
     });
+    function changeSort() {
+        const sort = document.getElementById("sortSelect").value;
+        const pathId = /*[[${pathId}]]*/ '';
+        window.location.href = `?pathId=${pathId}&sort=${sort}&page=0&size=20`;
+    }
 </script>
 
 </body>

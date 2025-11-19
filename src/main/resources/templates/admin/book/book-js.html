@@ -112,42 +112,7 @@
                     alert('카테고리를 불러오는데 실패했습니다.');
                 });
         };
-
-        // 페이지 로드 시 모든 카테고리 트리 자동 펼치기
-        function expandAllCategories() {
-            const bookIdInput = document.getElementById('bookId');
-            if (bookIdInput && bookIdInput.value) {
-                // 수정 폼인 경우에만 자동 펼치기
-                const categoryTree = document.getElementById('category-tree');
-                if (categoryTree) {
-                    const rootCategories = categoryTree.querySelectorAll('li > div > .category-toggle');
-                    rootCategories.forEach(toggle => {
-                        const categoryId = toggle.dataset.id;
-                        const childrenUl = document.getElementById(`children-${categoryId}`);
-                        if (childrenUl && childrenUl.dataset.loaded !== 'true') {
-                            // 자식 카테고리 로드
-                            globalThis.loadCategoryChildren(categoryId, childrenUl);
-                            // 화살표 아이콘 변경
-                            toggle.dataset.expanded = 'true';
-                            const icon = toggle.querySelector('i');
-                            if (icon) {
-                                icon.classList.remove('bi-chevron-right');
-                                icon.classList.add('bi-chevron-down');
-                            }
-                        } else if (childrenUl) {
-                            // 이미 로드된 경우 화살표만 변경
-                            childrenUl.style.display = 'block';
-                            toggle.dataset.expanded = 'true';
-                            const icon = toggle.querySelector('i');
-                            if (icon) {
-                                icon.classList.remove('bi-chevron-right');
-                                icon.classList.add('bi-chevron-down');
-                            }
-                        }
-                    });
-                }
-            }
-        }
+        
 
         // 태그 선택 모달 열기 - 전역 스코프로 이동
         globalThis.openTagModal = function() {
@@ -571,11 +536,21 @@
                 bookForm.addEventListener('submit', function (event) {
                     // 에디터 내용을 hidden input에 저장
                     if (editor) {
-                        document.getElementById('description').value = editor.getHTML();
+                        document.getElementById('description').value =
+                            editor.getHTML()
+                                .replaceAll(/<\/p>/gi, '\n')
+                                .replaceAll(/<br\s*\/?>/gi, '\n')
+                                .replaceAll(/<[^>]*>/g, '')
+                                .trim();
                     }
 
                     if (tocEditor) {
-                        document.getElementById('toc').value = tocEditor.getHTML();
+                        document.getElementById('toc').value =
+                            tocEditor.getHTML()
+                                .replaceAll(/<\/p>/gi, '\n')
+                                .replaceAll(/<br\s*\/?>/gi, '\n')
+                                .replaceAll(/<[^>]*>/g, '')
+                                .trim();
                     }
 
                     return true;

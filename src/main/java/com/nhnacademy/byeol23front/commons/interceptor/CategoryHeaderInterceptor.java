@@ -1,4 +1,4 @@
-package com.nhnacademy.byeol23front.Interceptor;
+package com.nhnacademy.byeol23front.commons.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
