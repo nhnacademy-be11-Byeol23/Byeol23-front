@@ -79,10 +79,10 @@
 
         /* 2. 모든 텍스트 정보 컨테이너 (Flexbox + 양쪽 정렬) */
         .product-details-container {
-            flex-grow: 1; /* 남은 공간 모두 차지 */
-            display: flex; /* ✨ 자식 요소(상품정보, 주문요약)를 가로로 배치 */
-            justify-content: space-between; /* ✨ 양쪽 끝으로 정렬 */
-            align-items: flex-start; /* 상단 정렬 */
+            flex-grow: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* ✨ Top alignment. 이 부분이 반드시 필요합니다. */
         }
 
         /* 2-1. 왼쪽 텍스트 그룹 (상품 정보) */
@@ -152,7 +152,8 @@
 
         /* 3. 주문 요약 정보 (오른쪽 정렬) */
         .product-details-container .order-info {
-            margin-top: 1.5rem; /* 상품 정보와 간격 띄우기 */
+            margin-top: 0 !important;
+            flex-shrink: 0;
         }
 
         /* ✨ .product-details-container를 앞에 붙여 CSS 우선순위 확보 */
@@ -245,7 +246,7 @@
 
                             <div class="orders-grid" th:if="${orders != null and !orders.isEmpty()}">
                                 <div class="order-card" data-aos="fade-up" data-aos-delay="100"
-                                     th:each="viewModel : ${orders}">
+                                     th:each="viewModel : ${viewModels}">
 
                                     <div class="order-header">
                                         <div class="order-id">
@@ -315,11 +316,37 @@
                             <div class="alert alert-info" th:if="${orders == null or orders.isEmpty()}">
                                 주문 내역이 없습니다.
                             </div>
+                            <div class="pagination-wrapper" data-aos="fade-up" th:if="${orders.totalPages > 1}">
 
-                            <div class="pagination-wrapper" data-aos="fade-up">
+                                <a th:if="${orders.hasPrevious()}"
+                                   th:href="@{/mypage/orders(page=${orders.number - 1})}"
+                                   class="btn-prev">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                                <button type="button" class="btn-prev" th:unless="${orders.hasPrevious()}" disabled>
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+
+                                <div class="page-numbers">
+                                    <th:block th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}">
+                                        <a th:href="@{/mypage/orders(page=${i})}"
+                                           th:text="${i + 1}"
+                                           th:classappend="${i == orders.number ? 'active' : ''}">
+                                            1
+                                        </a>
+                                    </th:block>
+                                </div>
+
+                                <a th:if="${orders.hasNext()}"
+                                   th:href="@{/mypage/orders(page=${orders.number + 1})}"
+                                   class="btn-next">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                                <button type="button" class="btn-next" th:unless="${orders.hasNext()}" disabled>
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
                             </div>
-
-
+                            </div>
                         </div>
                     </div>
                 </div>

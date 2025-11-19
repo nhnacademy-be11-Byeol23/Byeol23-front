@@ -53,6 +53,6 @@ public interface OrderApiClient {
 	ResponseEntity<Void> updateBulkOrderStatus(@RequestBody OrderBulkUpdateRequest request);
 
 	@GetMapping("/api/orders/members")
-	ResponseEntity<List<OrderDetailResponse>> getOrders();
+	ResponseEntity<Page<OrderDetailResponse>> getOrders(Pageable pageable);
 
 }

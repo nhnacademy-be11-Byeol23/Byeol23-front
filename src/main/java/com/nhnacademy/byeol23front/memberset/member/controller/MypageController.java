@@ -8,6 +8,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -62,9 +65,9 @@ public class MypageController {
 	}
 
 	@GetMapping("/orders")
-	public String getOrder(Model model) {
-		ResponseEntity<List<OrderDetailResponse>> response = orderApiClient.getOrders();
-		List<OrderDetailResponse> orders = response.getBody();
+	public String getOrder(@PageableDefault(size = 10) Pageable pageable, Model model) {
+		ResponseEntity<Page<OrderDetailResponse>> response = orderApiClient.getOrders(pageable);
+		Page<OrderDetailResponse> orders = response.getBody();
 
 		List<OrderViewModel> orderViewModels = new ArrayList<>();
 		String defaultImageUrl = "https://image.yes24.com/momo/Noimg_L.jpg";
@@ -90,7 +93,8 @@ public class MypageController {
 			}
 		}
 
-		model.addAttribute("orders", orderViewModels);
+		model.addAttribute("viewModels", orderViewModels);
+		model.addAttribute("orders", orders);
 
 		return "mypage/orders";
 	}
@@ -134,7 +138,6 @@ public class MypageController {
 
 		return "mypage/settings";
 	}
-
 
 	public record OrderViewModel(OrderDetailResponse order, String firstImageUrl) { }
 
