@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>도서 검색 결과</title>
+    <title>신상품</title>
     <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
 
     <style>
@@ -77,7 +77,6 @@
 
         .price-sale { color: #d32f2f; font-weight: bold; font-size: 17px; }
         .price-regular { text-decoration: line-through; margin-left: 8px; color: #777; }
-
     </style>
 </head>
 
@@ -88,7 +87,6 @@
 <main class="main search-page">
     <div class="container">
         <div class="search-layout">
-
             <aside class="category-sidebar">
                 <h5 class="mb-3">카테고리</h5>
                 <ul>
@@ -100,17 +98,13 @@
             </aside>
 
             <section>
-                <div th:if="${#lists.isEmpty(results.content)}">
-                    <p class="text-muted">카테고리 검색 결과가 없습니다.</p>
-                </div>
-
                 <div class="d-flex justify-content-end mb-3">
                     <select id="sortSelect" class="form-select" style="width: 200px;"
                             onchange="changeSort()">
-                        <option th:value="POPULAR"
-                                th:selected="${sort == 'POPULAR'}">인기순</option>
                         <option th:value="NEWEST"
                                 th:selected="${sort == 'NEWEST'}">신상품순</option>
+                        <option th:value="POPULAR"
+                                th:selected="${sort == 'POPULAR'}">인기순</option>
                         <option th:value="LOW_PRICE"
                                 th:selected="${sort == 'LOW_PRICE'}">낮은 가격순</option>
                         <option th:value="HIGH_PRICE"
@@ -121,12 +115,13 @@
                                 th:selected="${sort == 'RATING'}">평점순</option>
                     </select>
                 </div>
-                <div th:each="book : ${results.content}" class="book-card" th:attr="data-book-id=${book.id}">
+
+                <div th:each="book : ${results.content}" class="book-card"
+                     th:attr="data-book-id=${book.id}">
                     <div class="book-thumb">
                         <img th:src="${book.imageUrl != null ? book.imageUrl : 'https://image.yes24.com/momo/Noimg_L.jpg'}"
                              alt="도서 커버"
-                             class="img-fluid main-product-image"
-                             id="main-product-image">
+                             class="img-fluid main-product-image">
                     </div>
                     <div class="book-info">
                         <h4 th:text="${book.title}"></h4>
@@ -157,7 +152,7 @@
                     <ul class="pagination justify-content-center">
                         <li class="page-item" th:classappend="${results.page == 0} ? 'disabled'">
                             <a class="page-link"
-                               th:href="@{|?pathId=${pathId}&sort=${sort}&page=${results.page - 1}&size=${results.size}|}">
+                               th:href="@{|/new?sort=${sort}&page=${results.page - 1}&size=${results.size}|}">
                                 이전
                             </a>
                         </li>
@@ -166,7 +161,7 @@
                             th:each="i : ${#numbers.sequence(0, results.totalPages - 1)}"
                             th:classappend="${i == results.page} ? 'active'">
                             <a class="page-link"
-                               th:href="@{|?pathId=${pathId}&sort=${sort}&page=${i}&size=${results.size}|}"
+                               th:href="@{|/new?sort=${sort}&page=${i}&size=${results.size}|}"
                                th:text="${i + 1}">
                             </a>
                         </li>
@@ -174,13 +169,12 @@
                         <li class="page-item"
                             th:classappend="${results.page + 1 >= results.totalPages} ? 'disabled'">
                             <a class="page-link"
-                               th:href="@{|?pathId=${pathId}&sort=${sort}&page=${results.page + 1}&size=${results.size}|}">
+                               th:href="@{|/new?sort=${sort}&page=${results.page + 1}&size=${results.size}|}">
                                 다음
                             </a>
                         </li>
                     </ul>
                 </nav>
-
             </section>
 
         </div>
@@ -189,7 +183,7 @@
 
 <div th:replace="~{fragments/common_footer :: commonFooter}"></div>
 
-<script th:inline="javascript">
+<script>
     document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll(".book-card").forEach(card => {
             card.addEventListener("click", function () {
@@ -198,12 +192,11 @@
             });
         });
     });
+
     function changeSort() {
         const sort = document.getElementById("sortSelect").value;
-        const pathId = /*[[${pathId}]]*/ '';
-        window.location.href = `?pathId=${pathId}&sort=${sort}&page=0&size=20`;
+        window.location.href = `/new?sort=${sort}&page=0&size=20`;
     }
 </script>
-
 </body>
 </html>

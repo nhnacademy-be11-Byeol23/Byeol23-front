@@ -10,7 +10,7 @@ public class SearchCondition {
     private String pathId;
     private SortOption sort;
 
-    enum SortOption {
+    public enum SortOption {
         POPULAR,
         NEWEST,
         LOW_PRICE,
