@@ -71,7 +71,7 @@ class OrderAdminControllerTest {
 		testOrderDetailResponse = new OrderDetailResponse(
 			testOrderNumber, LocalDateTime.now(), "ORDERED", new BigDecimal("15000"),
 			"홍길동", "01012345678", "주소", "상세주소", "12345",
-			List.of(new BookOrderInfoResponse("테스트 책", 1, new BigDecimal("15000")))
+			List.of(new BookOrderInfoResponse(1L, "테스트 책", 1, new BigDecimal("15000")))
 		);
 
 		// GET / 응답 DTO
