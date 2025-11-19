@@ -93,8 +93,8 @@
         <div class="container-fluid container-xl position-relative">
             <nav id="navmenu" class="navmenu">
                 <ul>
-                    <li><a href="#">베스트</a></li>
-                    <li><a href="#">신상품</a></li>
+                    <li><a href="/best">베스트</a></li>
+                    <li><a href="/new">신상품</a></li>
 
                     <li th:each="root : ${tree}" class="dropdown">
                         <a th:href="@{'/categories/' + ${root.categoryId} + '/books'(pathId=${root.pathId})}"> <span th:text="${root.categoryName}"></span> </a>

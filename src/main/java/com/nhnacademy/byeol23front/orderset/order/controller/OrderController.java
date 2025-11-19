@@ -2,7 +2,6 @@ package com.nhnacademy.byeol23front.orderset.order.controller;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -26,8 +25,6 @@ import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.PointOrderResponse;
 import com.nhnacademy.byeol23front.orderset.order.exception.OrderPrepareFailException;
-import com.nhnacademy.byeol23front.orderset.packaging.client.PackagingApiClient;
-import com.nhnacademy.byeol23front.orderset.packaging.dto.PackagingInfoResponse;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +37,6 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderController {
 	private final OrderApiClient orderApiClient;
 	private final DeliveryApiClient deliveryApiClient;
-	private final PackagingApiClient packagingApiClient;
 	private final OrderUtil orderUtil;
 
 	@PostMapping("/direct")

@@ -23,6 +23,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/search/**")
                 .addPathPatterns("/categories/**")
                 .addPathPatterns("/books/*")
+                .addPathPatterns("/best")
+                .addPathPatterns("/new")
+                .addPathPatterns("/error/**")
         ;
     }
 

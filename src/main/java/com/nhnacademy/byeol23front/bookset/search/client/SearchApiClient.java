@@ -21,4 +21,10 @@ public interface SearchApiClient {
 
     @GetMapping("/search-api/categories/{category-id}/books")
     SearchPageResponse<BookSearchResultResponse> searchBooksByCategory(@PathVariable("category-id") Long id, @SpringQueryMap SearchCondition condition, @RequestParam("page") int page, @RequestParam("size") int size);
+
+    @GetMapping("/search-api/best")
+    SearchPageResponse<BookSearchResultResponse> searchBestBooks(@RequestParam("page") int page, @RequestParam("size") int size);
+
+    @GetMapping("/search-api/new")
+    SearchPageResponse<BookSearchResultResponse> searchNewBooks(@SpringQueryMap SearchCondition condition, @RequestParam("page") int page, @RequestParam("size") int size);
 }

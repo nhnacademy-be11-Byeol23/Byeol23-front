@@ -14,7 +14,7 @@ document.getElementById("tagCreateForm").addEventListener("submit", e => {
         .then(res => {
             if (!res.ok) throw new Error("등록 실패");
             // 👇 [수정] 새로고침 전 해시(#)를 설정
-            location.hash = '#tags';
+            location.hash = window.location.href;
             location.reload();
         })
         .catch(err => alert(err));
