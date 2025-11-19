@@ -2,6 +2,7 @@ package com.nhnacademy.byeol23front.orderset.order.client;
 
 import java.util.List;
 
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.data.domain.Page;
@@ -50,4 +51,8 @@ public interface OrderApiClient {
 
 	@PostMapping("/api/orders/bulk-status")
 	ResponseEntity<Void> updateBulkOrderStatus(@RequestBody OrderBulkUpdateRequest request);
+
+	@GetMapping("/api/orders/members")
+	ResponseEntity<Page<OrderDetailResponse>> getOrders(Pageable pageable);
+
 }
