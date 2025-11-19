@@ -54,12 +54,12 @@ public class BookAladinController {
 		model.addAttribute("keyword", result.keyword());
 		model.addAttribute("total", result.total());
 
-		return "/admin/bookAladin/bookAladin";
+		return "admin/bookAladin/bookAladin";
 	}
 
 	@GetMapping("/new")
 	public String createBook(){
-		return "/admin/bookAladin/bookAladinCreate";
+		return "admin/bookAladin/bookAladinCreate";
 	}
 
 	@PostMapping("/new")

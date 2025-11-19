@@ -119,4 +119,8 @@ public class OrderUtil {
 		List<PackagingInfoResponse> packagingOptions = packagingApiClient.getAllPackagingLists();
 		model.addAttribute("packagingOptions", packagingOptions);
 	}
+
+	public void addUserCurrentPoint(Model model) {
+
+	}
 }

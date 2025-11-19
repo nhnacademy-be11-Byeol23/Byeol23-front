@@ -1,92 +1,352 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-<!--
-  This file is a Thymeleaf fragment containing JavaScript.
-  It is intended to be included in the coupon policy creation/editing page.
-  It adds event listeners to the discount type radio buttons (Rate vs. Fixed)
-  to dynamically show, hide, and disable the relevant input fields.
--->
 <body>
-
-<!--
-  JavaScript Fragment for Coupon Policy Type Toggle
-
-  This script adds event listeners to the 'discountType' radio buttons.
-  - When 'Rate' is selected, it shows rate-related inputs and hides fixed inputs.
-  - When 'Fixed' is selected, it shows fixed-related inputs and hides rate inputs.
-
-  It also correctly sets the 'disabled' attribute on the inputs that are hidden
-  to ensure their values are not submitted with the form.
--->
 <th:block th:fragment="couponPolicyTypeJs">
     <script>
-        // Wait for the DOM to be fully loaded before attaching event listeners
         document.addEventListener('DOMContentLoaded', function () {
 
-            // Get references to the radio buttons
             const rateRadio = document.getElementById('rateDiscount');
             const fixedRadio = document.getElementById('fixedDiscount');
 
-            // Get references to the sections to toggle
             const rateOptions = document.getElementById('rateOptions');
             const fixedOptions = document.getElementById('fixedOptions');
 
-            // Get references to the inputs within those sections
             const discountRateInput = document.getElementById('discountRate');
             const discountLimitInput = document.getElementById('discountLimit');
             const discountAmountInput = document.getElementById('discountAmount');
 
-            /**
-             * Toggles the visibility and 'disabled' state of form sections
-             * based on the selected discount type radio button.
-             */
             function toggleDiscountOptions() {
+                if (!rateRadio || !fixedRadio || !rateOptions || !fixedOptions) return;
+
                 if (rateRadio.checked) {
-                    // Show Rate options, Hide Fixed options
-                    rateOptions.style.display = 'block';
+                    rateOptions.style.display = 'flex';
                     fixedOptions.style.display = 'none';
 
-                    // Enable Rate inputs
                     if (discountRateInput) discountRateInput.disabled = false;
                     if (discountLimitInput) discountLimitInput.disabled = false;
 
-                    // Disable Fixed input and clear its value
                     if (discountAmountInput) {
                         discountAmountInput.disabled = true;
-                        discountAmountInput.value = ''; // Clear value when hidden
+                        discountAmountInput.value = '';
                     }
                 } else if (fixedRadio.checked) {
-                    // Hide Rate options, Show Fixed options
                     rateOptions.style.display = 'none';
-                    fixedOptions.style.display = 'block';
+                    fixedOptions.style.display = 'flex';
 
-                    // Disable Rate inputs and clear their values
                     if (discountRateInput) {
                         discountRateInput.disabled = true;
-                        discountRateInput.value = ''; // Clear value when hidden
+                        discountRateInput.value = '';
                     }
                     if (discountLimitInput) {
                         discountLimitInput.disabled = true;
-                        discountLimitInput.value = ''; // Clear value when hidden
+                        discountLimitInput.value = '';
                     }
 
-                    // Enable Fixed input
                     if (discountAmountInput) discountAmountInput.disabled = false;
                 }
             }
 
-            // Add event listeners to both radio buttons
             if (rateRadio) {
                 rateRadio.addEventListener('change', toggleDiscountOptions);
             }
             if (fixedRadio) {
                 fixedRadio.addEventListener('change', toggleDiscountOptions);
             }
-
-            // Run the function once on page load to set the initial state
-            // (based on the 'checked' attribute in the HTML)
             toggleDiscountOptions();
+
+
+            const categoryBtn = document.getElementById('showCategoryTarget');
+            const bookBtn = document.getElementById('showBookTarget');
+
+            const categorySection = document.getElementById('categoryListContainer');
+            const bookSection = document.getElementById('bookListContainer');
+
+            const scopeInput = document.getElementById('couponScope');
+            const categoryIdsInput = document.getElementById('selectedCategoryIds');
+            const bookIdInput = document.getElementById('selectedBookId');
+            const policyNameInput = document.getElementById('policyName');
+            const originalPolicyNamePlaceholder = policyNameInput ? policyNameInput.placeholder : '';
+
+            if (categoryBtn) {
+                categoryBtn.addEventListener('click', function() {
+                    if (categorySection) categorySection.style.display = 'block';
+                    if (bookSection) bookSection.style.display = 'none';
+                    if (scopeInput) scopeInput.value = 'CATEGORY';
+                    if (bookIdInput) bookIdInput.value = '';
+                    if (policyNameInput) policyNameInput.placeholder = '예: IT/컴퓨터 10% 할인';
+
+                    categoryBtn.classList.remove('btn-outline-info');
+                    categoryBtn.classList.add('btn-info');
+                    bookBtn.classList.remove('btn-dark');
+                    bookBtn.classList.add('btn-outline-dark');
+
+                    const rootUl = document.getElementById('category-tree');
+                    if (rootUl && categorySection.dataset.allLoaded !== 'true') {
+                        console.log('최초 1회, 모든 카테고리 로드를 시작합니다...');
+
+                        const topLevelToggles = rootUl.querySelectorAll(':scope > li > div > button.category-toggle');
+
+                        topLevelToggles.forEach(toggle => {
+                            const categoryId = toggle.dataset.id;
+                            const childrenUl = document.getElementById(`children-${categoryId}`);
+                            if (childrenUl) {
+                                globalThis.loadCategoryChildren(categoryId, childrenUl, true);
+                            }
+                        });
+
+                        categorySection.dataset.allLoaded = 'true';
+                    }
+
+                });
+            }
+
+            if (bookBtn) {
+                bookBtn.addEventListener('click', function() {
+                    if (categorySection) categorySection.style.display = 'none';
+                    if (bookSection) bookSection.style.display = 'block';
+                    if (scopeInput) scopeInput.value = 'BOOK';
+                    if (categoryIdsInput) categoryIdsInput.value = '';
+                    if (globalThis.updateSelectedCategories) {
+                        globalThis.updateSelectedCategories();
+                    }
+                    if (policyNameInput) policyNameInput.placeholder = '예: "이펙티브 자바" 1,000원 할인';
+
+                    categoryBtn.classList.add('btn-outline-info');
+                    categoryBtn.classList.remove('btn-info');
+                    bookBtn.classList.add('btn-dark');
+                    bookBtn.classList.remove('btn-outline-dark');
+                });
+            }
+
+            const form = document.querySelector('form[action="/admin/coupon-policy"]');
+            if (form) {
+
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    const discountType = document.querySelector('input[name="discountType"]:checked').value;
+                    let isValid = false;
+                    let alertMessage = '';
+
+                    if (discountType === 'RATE') {
+                        const discountRate = document.getElementById('discountRate').value;
+                        const discountLimit = document.getElementById('discountLimit').value;
+                        if (discountRate && discountRate > 0 && discountLimit && discountLimit >= 0) {
+                            isValid = true;
+                        } else {
+                            alertMessage = '할인률(%)과 최대 할인 금액(원)을 모두 올바르게 입력해주세요.';
+                            isValid = false;
+                        }
+                    } else if (discountType === 'FIXED') {
+                        const discountAmount = document.getElementById('discountAmount').value;
+                        if (discountAmount && discountAmount > 0) {
+                            isValid = true;
+                        } else {
+                            alertMessage = '할인액(원)을 올바르게 입력주세요.';
+                            isValid = false;
+                        }
+                    }
+
+                    if (isValid) {
+                        const scope = scopeInput.value;
+                        const categoryIds = categoryIdsInput.value;
+                        const bookId = bookIdInput.value;
+
+                        if (scope === 'CATEGORY' && (!categoryIds || categoryIds.trim() === '')) {
+                            isValid = false;
+                            alertMessage = '카테고리 쿠폰을 선택했으나, 적용할 카테고리를 선택하지 않았습니다.';
+                        } else if (scope === 'BOOK' && (!bookId || bookId.trim() === '')) {
+                            isValid = false;
+                            alertMessage = '도서 쿠폰을 선택했으나, 적용할 도서를 선택하지 않았습니다.';
+                        } else if (scope === '') {
+                            isValid = false;
+                            alertMessage = '쿠폰 적용 대상(카테고리 또는 도서)을 선택해주세요.';
+                        }
+                    }
+
+                    if (isValid) {
+                        event.target.submit();
+                    } else {
+                        alert(alertMessage);
+                    }
+                });
+
+                form.addEventListener('reset', function() {
+                    document.getElementById('rateDiscount').checked = true;
+                    document.getElementById('fixedDiscount').checked = false;
+                    if(rateOptions) rateOptions.style.display = 'flex';
+                    if(fixedOptions) fixedOptions.style.display = 'none';
+
+                    if (categorySection) categorySection.style.display = 'none';
+                    if (bookSection) bookSection.style.display = 'none';
+                    if (scopeInput) scopeInput.value = '';
+                    if (categoryIdsInput) categoryIdsInput.value = '';
+                    if (bookIdInput) bookIdInput.value = '';
+
+                    const checkedCategoryRadio = document.querySelector('.category-tree-radio:checked');
+                    if (checkedCategoryRadio) {
+                        checkedCategoryRadio.checked = false;
+                    }
+
+                    const checkedBookRadio = document.querySelector('.book-radio:checked');
+                    if (checkedBookRadio) {
+                        checkedBookRadio.checked = false;
+                    }
+
+                    if (globalThis.updateSelectedCategories) {
+                        globalThis.updateSelectedCategories();
+                    }
+                    if (policyNameInput) policyNameInput.placeholder = originalPolicyNamePlaceholder;
+                    if (categoryBtn) {
+                        categoryBtn.classList.add('btn-outline-info');
+                        categoryBtn.classList.remove('btn-info');
+                    }
+                    if (bookBtn) {
+                        bookBtn.classList.add('btn-outline-dark');
+                        bookBtn.classList.remove('btn-dark');
+                    }
+                });
+            }
+
         });
+
+        globalThis.toggleCategory = function(element) {
+            const categoryId = element.dataset.id;
+            const isExpanded = element.dataset.expanded === 'true';
+            const childrenUl = document.getElementById(`children-${categoryId}`);
+            const icon = element.querySelector('i');
+
+            if (!childrenUl) return;
+
+            if (isExpanded) {
+                childrenUl.style.display = 'none';
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-right');
+                element.dataset.expanded = 'false';
+            } else {
+                if (childrenUl.dataset.loaded !== 'true') {
+                    globalThis.loadCategoryChildren(categoryId, childrenUl, false);
+                } else {
+                    childrenUl.style.display = 'block';
+                }
+                icon.classList.remove('bi-chevron-right');
+                icon.classList.add('bi-chevron-down');
+                element.dataset.expanded = 'true';
+            }
+        };
+
+        globalThis.loadCategoryChildren = function(parentId, parentUl, expandAll = false) {
+
+            if (expandAll) {
+                const toggleButton = document.querySelector(`button.category-toggle[data-id="${parentId}"]`);
+                if (toggleButton) {
+                    const icon = toggleButton.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('bi-chevron-right');
+                        icon.classList.add('bi-chevron-down');
+                    }
+                    toggleButton.dataset.expanded = 'true';
+                }
+            }
+
+            fetch(`/categories/${parentId}/children`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('카테고리 정보를 불러오는데 실패했습니다.');
+                    }
+                    return response.json();
+                })
+                .then(children => {
+                    parentUl.innerHTML = '';
+                    children.forEach(child => {
+                        const hasChildren = child.hasChildren;
+                        const li = document.createElement('li');
+
+                        li.innerHTML = `
+                            <div class="d-flex align-items-center mb-2">
+                                ${hasChildren ?
+                            `<button type="button" class="category-toggle me-2"
+                                             data-id="${child.id}"
+                                             data-expanded="false"
+                                             onclick="globalThis.toggleCategory(this)"
+                                             style="border: none; background: none; padding: 0; cursor: pointer; user-select: none; color: var(--bs-body-color);">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </button>` :
+                            '<span style="width: 20px; display: inline-block;"></span>'
+                        }
+                                <div class="form-check">
+                                    <input class="form-check-input category-tree-radio"
+                                           type="radio"
+                                           name="selectedCategory"
+                                           id="category_tree_${child.id}"
+                                           value="${child.id}"
+                                           data-category-name="${child.name}"
+                                           onclick="globalThis.updateSelectedCategories()">
+                                    <label class="form-check-label"
+                                           for="category_tree_${child.id}"
+                                           style="${hasChildren ? 'font-weight: 600; color: #666;' : ''}">
+                                        ${child.name}
+                                    </label>
+                                </div>
+                            </div>
+                            ${hasChildren ?
+                            `<ul id="children-${child.id}"
+                                     class="ms-4"
+                                     style="list-style: none; padding-left: 0; display: none;">
+                                </ul>` : ''
+                        }
+                        `;
+                        parentUl.appendChild(li);
+
+                        if (child.hasChildren && expandAll) {
+                            const newChildrenUl = document.getElementById(`children-${child.id}`);
+                            if (newChildrenUl) {
+                                globalThis.loadCategoryChildren(child.id, newChildrenUl, true);
+                            }
+                        }
+                    });
+                    parentUl.dataset.loaded = 'true';
+                    parentUl.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('카테고리 로드 실패:', error);
+                    parentUl.innerHTML = `<li class="text-danger small">${error.message}</li>`;
+                    parentUl.style.display = 'block';
+                });
+        };
+
+        globalThis.updateSelectedCategories = function() {
+            const checkedRadio = document.querySelector('.category-tree-radio:checked');
+            const categoryIdsInput = document.getElementById('selectedCategoryIds');
+            const displayDiv = document.getElementById('inlineSelectedCategoriesDisplay');
+
+            if (checkedRadio) {
+                const selectedId = checkedRadio.value;
+                const selectedName = checkedRadio.dataset.categoryName;
+
+                if (categoryIdsInput) {
+                    categoryIdsInput.value = selectedId;
+                }
+
+                if (displayDiv) {
+                    displayDiv.innerHTML = `<span class="badge bg-info me-1 mb-1">${selectedName}</span>`;
+                }
+            } else {
+                if (categoryIdsInput) {
+                    categoryIdsInput.value = '';
+                }
+                if (displayDiv) {
+                    displayDiv.innerHTML = '';
+                }
+            }
+        };
+
+        globalThis.updateSelectedBook = function(bookId) {
+            const bookIdInput = document.getElementById('selectedBookId');
+            if (bookIdInput) {
+                bookIdInput.value = bookId;
+            }
+        };
     </script>
 </th:block>
 

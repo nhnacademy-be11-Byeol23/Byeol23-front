@@ -15,11 +15,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CouponController {
     private final CouponPolicyApiClient couponPolicyApiClient;
+
     @GetMapping("/register")
     public String couponRegister(Model model){
         List<CouponPolicyInfoResponse> couponPolicyInfoResponseList
                 = couponPolicyApiClient.getCouponPolicies().getBody();
         model.addAttribute("policies", couponPolicyInfoResponseList);
+
+
+
+
         return "admin/coupon/coupon_register";
     }
 }
