@@ -104,7 +104,7 @@ public class MinioController {
 					// 프록시 URL로 재조립
 					// 결과 예시: "https://your-domain.com/img-proxy/bucket/file.jpg"
 					// (프론트엔드와 같은 도메인을 쓴다면 도메인 생략하고 "/img-proxy" + path 만 써도 됩니다)
-					String newUrl = "http://byeol23.shop/img-proxy" + path;
+					String newUrl = "https://byeol23.shop/img-proxy" + path;
 
 					// 새 record 생성하여 반환
 					return new GetUrlResponse(response.imageId(), newUrl);
