@@ -2,16 +2,19 @@ package com.nhnacademy.byeol23front.orderset.order.client;
 
 import java.util.List;
 
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderBulkUpdateRequest;
@@ -29,7 +32,7 @@ import com.nhnacademy.byeol23front.orderset.order.dto.PointOrderResponse;
 public interface OrderApiClient {
 
 	@PostMapping(value = "/api/orders")
-	ResponseEntity<OrderPrepareResponse> prepareOrder(@RequestBody OrderPrepareRequest request);
+	ResponseEntity<OrderPrepareResponse> prepareOrder(@RequestBody OrderPrepareRequest request, @CookieValue(name = "Access-Token") String accessToken);
 
 	@PutMapping("/api/orders")
 	ResponseEntity<OrderCreateResponse> updateOrderStatus(@RequestParam String orderNumber, @RequestParam String orderStatus);
@@ -48,4 +51,8 @@ public interface OrderApiClient {
 
 	@PostMapping("/api/orders/bulk-status")
 	ResponseEntity<Void> updateBulkOrderStatus(@RequestBody OrderBulkUpdateRequest request);
+
+	@GetMapping("/api/orders/members")
+	ResponseEntity<Page<OrderDetailResponse>> getOrders(Pageable pageable);
+
 }

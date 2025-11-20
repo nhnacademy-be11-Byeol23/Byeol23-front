@@ -13,11 +13,12 @@ public record BookCreateRequest(
 	String isbn,
 	LocalDate publishDate,
 	boolean isPack,
-	String bookStatus,
+	BookStatus bookStatus,
 	Integer stock,
 	Long publisherId,
 	List<Long> categoryIds,
 	List<Long> tagIds,
-	List<Long> contributorIds
+	List<Long> contributorIds,
+	String imageUrl
 ) {
 }

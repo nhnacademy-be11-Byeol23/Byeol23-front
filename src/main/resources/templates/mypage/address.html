@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>주소록 - 별이삼shop</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+
+    <!-- Daum Postcode API -->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+</head>
+
+<body class="account-page">
+
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">주소록</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a th:href="@{/}">홈</a></li>
+                    <li><a th:href="@{/mypage}">마이페이지</a></li>
+                    <li class="current">주소록</li>
+                </ol>
+            </nav>
+        </div>
+    </div><!-- End Page Title -->
+
+    <!-- Account Section -->
+    <section id="account" class="account section">
+
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+            <!-- Mobile Menu Toggle -->
+            <div class="mobile-menu d-lg-none mb-4">
+                <button class="mobile-menu-toggle" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#profileMenu">
+                    <i class="bi bi-grid"></i>
+                    <span>Menu</span>
+                </button>
+            </div>
+
+            <div class="row g-4">
+                <!-- Profile Menu -->
+                <div class="col-lg-3">
+                    <div th:replace="~{fragments/mypage_profile :: mypage_profile}"></div>
+                </div>
+
+                <!-- Content Area -->
+                <div class="col-lg-9">
+                    <div class="content-area">
+                        <div id="addresses">
+                            <th:block th:with="addressCount = ${#lists.size(addresses)}">
+                                <div class="section-header" data-aos="fade-up">
+                                    <h2>주소록</h2>
+                                    <div class="header-actions">
+                                        <button type="button"
+                                                class="btn-add-new btn"
+                                                th:classappend="${addressCount >= 10 ? 'btn-secondary' : 'btn-primary'}"
+                                                th:disabled="${addressCount >= 10}"
+                                                onclick="if(!this.disabled) openAddressModal('add');">
+                                            <i class="bi bi-plus-lg me-1"></i>
+                                            새 주소 추가
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div th:if="${addressCount >= 10}" class="text-danger mb-3" style="font-size: 0.9em;">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> 주소는 최대 10개까지만 등록 가능합니다.
+                                </div>
+                            </th:block>
+
+                            <div class="addresses-grid" th:if="${addresses != null and !#lists.isEmpty(addresses)}">
+
+                                <div class="address-card"
+                                     th:each="addr, iterStat : ${addresses}"
+                                     data-aos="fade-up"
+                                     th:data-aos-delay="${iterStat.index * 100}"
+
+                                     th:data-address-id="${addr.addressId}"
+                                     th:data-nickname="${addr.addressAlias}"
+                                     th:data-post-code="${addr.postCode}"
+                                     th:data-address="${addr.addressInfo}"
+                                     th:data-address-detail="${addr.addressDetail}"
+                                     th:data-address-extra="${addr.addressExtra}"
+                                     th:data-is-default="${addr.isDefault}"
+
+                                     th:classappend="${addr.isDefault ? 'default' : ''}"
+                                >
+
+                                    <div class="card-header">
+                                        <h4 th:text="${addr.addressAlias}">집</h4>
+                                        <span class="default-badge" th:if="${addr.isDefault}">기본 배송지</span>
+                                    </div>
+
+                                    <div class="card-body">
+                                        <div class="address-info-row mb-2">
+                                            <i class="bi bi-mailbox2 me-2"></i>
+                                            <span class="text-muted">우편번호:</span>
+                                            <strong class="ms-1" th:text="${addr.postCode}">06234</strong>
+                                        </div>
+
+                                        <p class="address-text mb-2">
+                                            <span th:text="${addr.addressInfo}">서울특별시 강남구 테헤란로 152</span><br>
+                                            <span th:text="${addr.addressDetail}">3층 301호</span><br>
+                                            <span class="text-muted" th:text="${addr.addressExtra}"></span>
+                                        </p>
+                                    </div>
+
+                                    <div class="card-actions">
+                                        <button type="button" class="btn-edit">
+                                            <i class="bi bi-pencil"></i>
+                                            수정
+                                        </button>
+                                        <button type="button" class="btn-remove">
+                                            <i class="bi bi-trash"></i>
+                                            삭제
+                                        </button>
+                                        <button type="button" class="btn-make-default" th:unless="${addr.isDefault}">
+                                            기본 배송지로 설정
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info" th:if="${addresses == null or #lists.isEmpty(addresses)}">
+                                등록된 주소록 정보가 없습니다.
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </section><!-- /Account Section -->
+
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+
+<!-- Vendor JS Files -->
+<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/php-email-form/validate.js"></script>
+<script src="/assets/vendor/swiper/swiper-bundle.min.js"></script>
+<script src="/assets/vendor/aos/aos.js"></script>
+<script src="/assets/vendor/glightbox/js/glightbox.min.js"></script>
+<script src="/assets/vendor/drift-zoom/Drift.min.js"></script>
+<script src="/assets/vendor/purecounter/purecounter_vanilla.js"></script>
+
+<!-- Main JS File -->
+<script src="/assets/js/main.js"></script>
+
+<!-- Address Management Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        initAddressManagement();
+    });
+
+    function initAddressManagement() {
+        const addAddressBtn = document.querySelector('#addresses .btn-primary');
+        const addressModal = document.getElementById('addressModal');
+
+        if (addAddressBtn && addressModal) {
+            addAddressBtn.addEventListener('click', () => {
+                openAddressModal('add');
+            });
+        }
+
+        // 주소 수정 버튼들
+        document.querySelectorAll('.address-card .btn-edit').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const addressCard = e.target.closest('.address-card');
+                openAddressModal('edit', addressCard);
+            });
+        });
+
+        // 기본 배송지 설정 버튼들
+        document.querySelectorAll('.address-card .btn-make-default').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const addressCard = e.target.closest('.address-card');
+                setDefaultAddress(addressCard);
+            });
+        });
+
+        // 주소 삭제 버튼들
+        document.querySelectorAll('.address-card .btn-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const addressCard = e.target.closest('.address-card');
+                deleteAddress(addressCard);
+            });
+        });
+    }
+
+    function openAddressModal(mode, addressCard = null) {
+        const modal = document.getElementById('addressModal');
+        const modalTitle = modal.querySelector('.modal-title');
+        const form = document.getElementById('addressForm');
+
+        form.reset();
+
+        if (mode === 'add') {
+            modalTitle.textContent = '새 배송지 추가';
+            form.dataset.mode = 'add';
+            delete form.dataset.addressId;
+        } else if (mode === 'edit' && addressCard) {
+            modalTitle.textContent = '배송지 수정';
+            form.dataset.mode = 'edit';
+
+            // 주소 ID 저장
+            form.dataset.addressId = addressCard.dataset.addressId;
+
+            // 기존 데이터 로드 (data 속성에서)
+            form.querySelector('#addressNickname').value = addressCard.dataset.nickname || '';
+            form.querySelector('#postCode').value = addressCard.dataset.postCode || '';
+            form.querySelector('#addressMain').value = addressCard.dataset.address || '';
+            form.querySelector('#addressDetail').value = addressCard.dataset.addressDetail || '';
+            form.querySelector('#addressExtra').value = addressCard.dataset.addressExtra || '';
+            form.querySelector('#isDefaultAddress').checked = addressCard.dataset.isDefault === 'true';
+        }
+
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+    }
+
+    function execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function (data) {
+                var addr = '';
+                var extraAddr = '';
+
+                // 사용자가 지번 주소를 선택한 경우 경고
+                if (data.userSelectedType !== 'R') {
+                    alert('지번 주소가 선택되었습니다. 도로명 주소로 반영됩니다.');
+                }
+
+                addr = data.roadAddress;
+
+                // 도로명 주소인 경우 참고항목 조합
+                if (data.userSelectedType === 'R') {
+                    if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                        extraAddr += data.bname;
+                    }
+                    if (data.buildingName !== '' && data.apartment === 'Y') {
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    if (extraAddr !== '') {
+                        extraAddr = ' (' + extraAddr + ')';
+                    }
+                    document.getElementById("addressExtra").value = extraAddr;
+                } else {
+                    document.getElementById("addressExtra").value = '';
+                }
+
+                document.getElementById('postCode').value = data.zonecode;
+                document.getElementById("addressMain").value = addr;
+                document.getElementById("addressDetail").focus();
+            }
+        }).open();
+    }
+
+    async function saveAddress() {
+        const form = document.getElementById('addressForm');
+        const mode = form.dataset.mode;
+
+        // 폼 유효성 검사
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        const addressId = form.dataset.addressId ? parseInt(form.dataset.addressId, 10) : null;
+
+        const addressData = {
+            addressId: addressId,
+            addressAlias: form.querySelector('#addressNickname').value,
+            postCode: form.querySelector('#postCode').value,
+            addressInfo: form.querySelector('#addressMain').value,
+            addressDetail: form.querySelector('#addressDetail').value,
+            addressExtra: form.querySelector('#addressExtra').value,
+            isDefault: form.querySelector('#isDefaultAddress').checked
+        };
+
+        console.log('주소 저장:', mode, addressData);
+
+        const url = '/addresses'
+        const method = (mode === 'add') ? 'POST' : 'PUT';
+        console.log(`주소 ${mode}:`, url, addressData);
+
+        try {
+            // 2. 서버로 데이터 전송 (API 호출)
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(addressData)
+            });
+
+            if (!response.ok) {
+                // 서버에서 에러 메시지(JSON)를 보냈을 경우 처리
+                const errorBody = await response.json().catch(() => ({message: '서버 오류'}));
+                throw new Error(`주소 ${mode === 'add' ? '추가' : '수정'} 실패: ${errorBody.message || response.status}`);
+            }
+
+            // 4. 성공 알림
+            const action = mode === 'add' ? '추가' : '수정';
+            alert(`배송지가 성공적으로 ${action}되었습니다.`);
+
+            // 5. 페이지 새로고침 (간단한 처리)
+            window.location.reload();
+
+        } catch (error) {
+            console.error('주소 저장/수정 오류:', error);
+            alert(error.message);
+        } finally {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addressModal'));
+            modal.hide();
+        }
+    }
+
+    async function setDefaultAddress(addressCard) { // ✨ async 키워드 추가
+        console.log('기본 배송지 설정:', addressCard);
+
+        // 1. 주소 ID 가져오기
+        const addressId = addressCard.dataset.addressId;
+
+        if (!addressId) {
+            alert('주소 ID를 찾을 수 없습니다.');
+            return;
+        }
+
+        // 2. 사용자에게 최종 확인
+        if (!confirm('이 주소를 기본 배송지로 설정하시겠습니까?')) {
+            return;
+        }
+
+        // 3. API URL 설정
+        const url = `/addresses/${addressId}`;
+
+        try {
+            // 4. 서버로 PUT 요청 전송 (Body 없이 ID만으로 액션 지정)
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok || response.status === 204) {
+                // 5. 성공: 알림 후 페이지 새로고침 (기본 배송지 변경 사항 반영)
+                alert('기본 배송지가 성공적으로 설정되었습니다.');
+                window.location.reload();
+
+            } else {
+                // 6. 실패: 서버 응답을 파싱하여 에러 메시지 표시
+                let errorMessage = `기본 배송지 설정에 실패했습니다. (HTTP 상태 코드: ${response.status})`;
+                try {
+                    const errorBody = await response.json();
+                    errorMessage = errorBody.message || errorMessage;
+                } catch (e) {
+                    // JSON 파싱 실패 시 기본 메시지 사용
+                }
+                throw new Error(errorMessage);
+            }
+
+        } catch (error) {
+            console.error('기본 배송지 설정 오류:', error);
+            alert(error.message || '서버와의 통신 중 오류가 발생했습니다.');
+        }
+    }
+
+    // ** 3. 주소 삭제 로직 **
+    async function deleteAddress(addressCard) {
+        if (!confirm('이 배송지를 삭제하시겠습니까? (되돌릴 수 없습니다)')) {
+            return;
+        }
+
+        const addressId = addressCard.dataset.addressId;
+
+        if (!addressId) {
+            alert('삭제할 주소 ID를 찾을 수 없습니다.');
+            return;
+        }
+
+        const url = `/addresses/${addressId}`;
+
+        try {
+            // 4. 서버로 DELETE 요청 전송
+            const response = await fetch(url, {
+                method: 'DELETE'
+            });
+
+            if (response.ok || response.status === 204) {
+
+                alert('배송지가 성공적으로 삭제되었습니다.');
+                addressCard.remove();
+
+            } else {
+                let errorMessage = `삭제에 실패했습니다. (HTTP 상태 코드: ${response.status})`;
+                try {
+                    const errorBody = await response.json();
+                    errorMessage = errorBody.message || errorMessage;
+                } catch (e) {
+                    // JSON 파싱 실패 시 기본 메시지 사용
+                }
+                throw new Error(errorMessage);
+            }
+        } catch (error) {
+            console.error('주소 삭제 오류:', error);
+            alert(error.message || '서버와의 통신 중 오류가 발생했습니다.');
+        }
+    }
+</script>
+
+<!-- Address Modal -->
+<div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addressModalLabel">새 배송지 추가</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addressForm" data-mode="add">
+                    <div class="mb-3">
+                        <label for="addressNickname" class="form-label">배송지 별칭 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="addressNickname" name="addressAlias"
+                               placeholder="예: 집, 회사, 부모님댁" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="postCode" class="form-label">우편번호 <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="postCode" name="postCode"
+                                   placeholder="우편번호" required readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="execDaumPostcode()">
+                                우편번호 찾기
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="addressMain" class="form-label">주소 <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="addressMain" name="addressInfo"
+                               placeholder="기본 주소" required readonly>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="addressDetail" class="form-label">상세주소 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="addressDetail" name="addressDetail"
+                                   placeholder="상세주소 (아파트 동, 호수 등)" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="addressExtra" class="form-label">참고 항목</label>
+                            <input type="text" class="form-control" id="addressExtra" name="addressExtra"
+                                   placeholder="참고항목" readonly>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="isDefaultAddress" name="isDefault">
+                            <label class="form-check-label" for="isDefaultAddress">
+                                <strong>기본 배송지로 설정</strong>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="saveAddress()">
+                    <i class="bi bi-check-lg me-1"></i>저장
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+</html>

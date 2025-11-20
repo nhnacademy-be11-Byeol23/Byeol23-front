@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>주문내역 - 별이삼shop</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+
+    <!-- Custom Styles -->
+    <style>
+        /* 저장 버튼 및 추가 버튼 스타일 */
+        .modal-footer .btn-primary,
+        .settings-form .btn-save,
+        .section-header .btn-primary {
+            background-color: #252223 !important;
+            border-color: #252223 !important;
+        }
+
+        .modal-footer .btn-primary:hover,
+        .settings-form .btn-save:hover,
+        .section-header .btn-primary:hover {
+            background-color: #1a1819 !important;
+            border-color: #1a1819 !important;
+        }
+
+        /* 토글 스위치 스타일 */
+        .form-check-input:checked {
+            background-color: #252223 !important;
+            border-color: #252223 !important;
+        }
+
+        .form-check-input:focus {
+            border-color: #252223 !important;
+            box-shadow: 0 0 0 0.25rem rgba(37, 34, 35, 0.25) !important;
+        }
+        .order-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 1.25rem; /* 20px */
+        }
+
+        /* .order-content를 flex 컨테이너로 변경
+          (이미지 | 텍스트 정보) 2단 레이아웃
+        */
+        .order-content {
+            display: flex;
+            align-items: flex-start; /* 상단 정렬 */
+            gap: 1.25rem; /* 20px 간격 */
+            padding: 1.25rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            border-top: 1px solid #f0f0f0;
+            margin-top: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        /* ... (이전 CSS는 그대로 둠) ... */
+
+        /* 1. 이미지 컨테이너 (크기 키우기) */
+        .product-image-container {
+            width: 90px;
+            height: 120px;
+            flex-shrink: 0;
+            background-color: #f8f8f8;
+        }
+
+        .product-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        /* 2. 모든 텍스트 정보 컨테이너 (Flexbox + 양쪽 정렬) */
+        .product-details-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* ✨ Top alignment. 이 부분이 반드시 필요합니다. */
+        }
+
+        /* 2-1. 왼쪽 텍스트 그룹 (상품 정보) */
+        .product-details-container .product-info-group {
+            /* (별도 스타일 불필요) */
+        }
+
+        .product-details-container .book-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .product-details-container .item-meta {
+            font-size: 0.95rem;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .product-details-container .item-meta .separator { margin: 0 5px; }
+        .product-details-container .item-meta .price { font-weight: 500; }
+
+        .product-details-container .more-items {
+            font-size: 0.9rem;
+            color: #333;
+        }
+
+        /* 2-2. 오른쪽 텍스트 그룹 (주문 요약) */
+        .product-details-container .order-info {
+            /* margin-top: 1.5rem; /* flex-item이므로 상단 마진 제거 */
+            flex-shrink: 0; /* 요약 정보가 찌그러지지 않도록 */
+        }
+
+        .order-info .info-row {
+            display: flex;
+            justify-content: flex-end !important; /* ✨ 오른쪽 끝 정렬 */
+            gap: 10px;                   /* ✨ 라벨과 값 사이의 간격 */
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .order-info .info-row .label {
+            color: #6c757d;
+            text-align: right; /* 라벨도 오른쪽 정렬 */
+        }
+
+        .order-info .info-row .value {
+            font-weight: 500;
+            text-align: right;
+            min-width: 60px; /* 값의 최소 너비를 주어 정렬을 맞춤 */
+        }
+
+        .order-info .info-row.total {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .order-info .info-row.total .label {
+            font-weight: 600;
+            color: #000;
+        }
+        .order-info .info-row.total .value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #000;
+        }
+
+        /* 3. 주문 요약 정보 (오른쪽 정렬) */
+        .product-details-container .order-info {
+            margin-top: 0 !important;
+            flex-shrink: 0;
+        }
+
+        /* ✨ .product-details-container를 앞에 붙여 CSS 우선순위 확보 */
+        .product-details-container .order-info .info-row {
+            display: flex;
+            justify-content: flex-end !important; /* 👈 오른쪽 끝 정렬 (space-between -> flex-end) */
+            gap: 10px;                   /* ✨ 라벨과 값 사이의 간격을 10px로 고정 */
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        /* 4. 라벨('Status', 'Items', 'Total') 스타일 */
+        .product-details-container .order-info .info-row .label {
+            color: #6c757d;
+            /* width: 60px; /* 고정 너비 제거 (flex-end이므로 불필요) */
+            flex-shrink: 0; /* 라벨이 줄어들지 않도록 */
+        }
+
+        /* 5. 값('대기', '1 items' 등) 스타일 */
+        .product-details-container .order-info .info-row .value {
+            font-weight: 500;
+        }
+
+        /* 6. Total 행만 강조 */
+        .product-details-container .order-info .info-row.total {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+        }
+        .product-details-container .order-info .info-row.total .label {
+            font-weight: 600;
+            color: #000;
+        }
+        .product-details-container .order-info .info-row.total .value {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #000;
+        }
+    </style>
+
+</head>
+
+<body class="account-page">
+
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">주문내역</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a th:href="@{/}">홈</a></li>
+                    <li><a th:href="@{/mypage}">마이페이지</a></li>
+                    <li class="current">주문내역</li>
+                </ol>
+            </nav>
+        </div>
+    </div><!-- End Page Title -->
+
+    <!-- Account Section -->
+    <section id="account" class="account section">
+
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+            <!-- Mobile Menu Toggle -->
+            <div class="mobile-menu d-lg-none mb-4">
+                <button class="mobile-menu-toggle" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#profileMenu">
+                    <i class="bi bi-grid"></i>
+                    <span>Menu</span>
+                </button>
+            </div>
+
+            <div class="row g-4">
+                <!-- Profile Menu -->
+                <div class="col-lg-3">
+                    <div th:replace="~{fragments/mypage_profile :: mypage_profile}"></div>
+                </div>
+
+                <!-- Content Area -->
+                <div class="col-lg-9">
+                    <div class="content-area">
+                        <div id="orders">
+                            <div class="section-header" data-aos="fade-up">
+                                <h2>주문 내역</h2>
+                            </div>
+
+                            <div class="orders-grid" th:if="${orders != null and !orders.isEmpty()}">
+                                <div class="order-card" data-aos="fade-up" data-aos-delay="100"
+                                     th:each="viewModel : ${viewModels}">
+
+                                    <div class="order-header">
+                                        <div class="order-id">
+                                            <span class="label">주문 번호:</span>
+                                            <span class="value" th:text="${viewModel.order.orderNumber}">...</span>
+                                        </div>
+                                        <div class="order-date"
+                                             th:text="${#temporals.format(viewModel.order.orderDate, 'yyyy-MM-dd')}">...
+                                        </div>
+                                    </div>
+
+                                    <div class="order-content">
+                                        <div class="product-grid">
+                                            <img th:src="${viewModel.firstImageUrl}"
+                                                 th:alt="${viewModel.order.items[0].bookTitle}"
+                                                 alt="Product Image" loading="lazy">
+                                        </div>
+                                        <div class="product-details-container"
+                                             th:if="${!#lists.isEmpty(viewModel.order.items)}"
+                                             th:with="firstItem = ${viewModel.order.items[0]},
+                                                    totalItems = ${#lists.size(viewModel.order.items)}">
+
+                                            <div class="product-info-group">
+                                                <h6 class="book-title" th:text="${firstItem.bookTitle}">Book Title</h6>
+                                                <div class="item-meta">
+                                                    <span th:text="'수량: ' + ${firstItem.quantity}">수량: 1</span>
+                                                    <span class="separator">|</span>
+                                                    <span class="price" th:text="${#numbers.formatCurrency(firstItem.price)}">₩15,000</span>
+                                                </div>
+                                                <div class="more-items" th:if="${totalItems > 1}">
+                                                    <span th:text="'외 ' + (${totalItems} - 1) + '건'">외 2건</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="order-info">
+                                                <div class="info-row">
+                                                    <span class="value" th:text="${viewModel.order.orderStatus}">...</span>
+                                                </div>
+                                                <div class="info-row">
+                                                    <span class="value" th:text="${#lists.size(viewModel.order.items)} + ' items'">...</span>
+                                                </div>
+                                                <div class="info-row total">
+                                                    <span class="label">전체 주문 금액</span>
+                                                    <span class="value price"
+                                                          th:text="${#numbers.formatCurrency(viewModel.order.actualOrderPrice)}">...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="order-footer">
+                                        <button type="button" class="btn btn-light w-100"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#orderDetailsModal"
+                                                th:data-order-id="${viewModel.order.orderNumber}">
+                                            View Details
+                                        </button>
+                                    </div>
+
+                                    <div class="collapse tracking-info"
+                                         th:id="'tracking-' + ${viewModel.order.orderNumber}">
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info" th:if="${orders == null or orders.isEmpty()}">
+                                주문 내역이 없습니다.
+                            </div>
+                            <div class="pagination-wrapper" data-aos="fade-up" th:if="${orders.totalPages > 1}">
+
+                                <a th:if="${orders.hasPrevious()}"
+                                   th:href="@{/mypage/orders(page=${orders.number - 1})}"
+                                   class="btn-prev">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                                <button type="button" class="btn-prev" th:unless="${orders.hasPrevious()}" disabled>
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+
+                                <div class="page-numbers">
+                                    <th:block th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}">
+                                        <a th:href="@{/mypage/orders(page=${i})}"
+                                           th:text="${i + 1}"
+                                           th:classappend="${i == orders.number ? 'active' : ''}">
+                                            1
+                                        </a>
+                                    </th:block>
+                                </div>
+
+                                <a th:if="${orders.hasNext()}"
+                                   th:href="@{/mypage/orders(page=${orders.number + 1})}"
+                                   class="btn-next">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                                <button type="button" class="btn-next" th:unless="${orders.hasNext()}" disabled>
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section><!-- /Account Section -->
+
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+
+<!-- Vendor JS Files -->
+<script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/vendor/php-email-form/validate.js"></script>
+<script src="/assets/vendor/swiper/swiper-bundle.min.js"></script>
+<script src="/assets/vendor/aos/aos.js"></script>
+<script src="/assets/vendor/glightbox/js/glightbox.min.js"></script>
+<script src="/assets/vendor/drift-zoom/Drift.min.js"></script>
+<script src="/assets/vendor/purecounter/purecounter_vanilla.js"></script>
+
+<!-- Main JS File -->
+<script src="/assets/js/main.js"></script>
+
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailsModalLabel">
+                    주문 상세 (<span id="modal-order-number">#ORD-XXXX</span>)
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modal-order-body">
+                <div class="text-center p-5">
+                    <div class="spinner-border text-dark" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+
+    // DTO의 price(숫자)를 통화 형식(예: ₩3,024)으로 변환하는 헬퍼 함수
+    function formatCurrency(price) {
+        if (price == null) return '';
+        return new Intl.NumberFormat('ko-KR', {
+            style: 'currency',
+            currency: 'KRW'
+        }).format(price);
+    }
+
+    // 로딩 스피너를 생성하는 헬퍼 함수
+    function createLoadingSpinner() {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'text-center p-5';
+
+        const spinner = document.createElement('div');
+        spinner.className = 'spinner-border text-dark';
+        spinner.setAttribute('role', 'status');
+
+        const visuallyHidden = document.createElement('span');
+        visuallyHidden.className = 'visually-hidden';
+        visuallyHidden.textContent = 'Loading...';
+
+        spinner.appendChild(visuallyHidden);
+        wrapper.appendChild(spinner);
+        return wrapper;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const orderDetailsModal = document.getElementById('orderDetailsModal');
+
+        orderDetailsModal.addEventListener('show.bs.modal', async (event) => {
+            const button = event.relatedTarget;
+            const orderNumber = button.getAttribute('data-order-id');
+
+            const modalBody = document.getElementById('modal-order-body');
+            const modalOrderNum = document.getElementById('modal-order-number');
+
+            // 1. 모달 내용을 로딩 스피너로 초기화 (DOM API 사용)
+            while (modalBody.firstChild) {
+                modalBody.removeChild(modalBody.firstChild);
+            }
+            modalBody.appendChild(createLoadingSpinner());
+            modalOrderNum.textContent = '...';
+
+            try {
+                // 2. 서버에 주문 상세 정보 요청
+                const response = await fetch(`/mypage/orders/${orderNumber}`);
+                if (!response.ok) throw new Error('주문 정보를 불러오는 데 실패했습니다.');
+
+                const orderData = await response.json();
+
+                // 3. 모달 내용 HTML 생성 (DOM API 사용)
+                modalOrderNum.textContent = orderData.orderNumber;
+
+                // 로딩 스피너 제거
+                while (modalBody.firstChild) {
+                    modalBody.removeChild(modalBody.firstChild);
+                }
+
+                const items = orderData.items || [];
+
+                // --- "주문 상품" 섹션 ---
+                const h5Items = document.createElement('h5');
+                h5Items.textContent = `주문 상품 (${items.length}개)`;
+                modalBody.appendChild(h5Items);
+
+                const orderItemsDiv = document.createElement('div');
+                orderItemsDiv.className = 'order-items';
+
+                items.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'item';
+
+                    const itemInfoDiv = document.createElement('div');
+                    itemInfoDiv.className = 'item-info';
+                    itemInfoDiv.style.width = '70%';
+
+                    const h6Title = document.createElement('h6');
+                    h6Title.textContent = item.bookTitle; // .textContent로 XSS 방지
+                    itemInfoDiv.appendChild(h6Title);
+
+                    const itemMetaDiv = document.createElement('div');
+                    itemMetaDiv.className = 'item-meta';
+
+                    const spanQty = document.createElement('span');
+                    spanQty.textContent = `수량 : ${item.quantity}`; // .textContent로 XSS 방지
+                    itemMetaDiv.appendChild(spanQty);
+                    itemInfoDiv.appendChild(itemMetaDiv);
+
+                    const itemPriceDiv = document.createElement('div');
+                    itemPriceDiv.className = 'item-price';
+                    itemPriceDiv.textContent = formatCurrency(item.price); // 헬퍼 함수 사용
+
+                    itemDiv.appendChild(itemInfoDiv);
+                    itemDiv.appendChild(itemPriceDiv);
+                    orderItemsDiv.appendChild(itemDiv);
+                });
+                modalBody.appendChild(orderItemsDiv);
+
+                modalBody.appendChild(document.createElement('hr'));
+
+                // --- "배송지 정보" 섹션 ---
+                const h5Shipping = document.createElement('h5');
+                h5Shipping.textContent = '배송지 정보';
+                modalBody.appendChild(h5Shipping);
+
+                const addressInfoDiv = document.createElement('div');
+                addressInfoDiv.className = 'address-info';
+
+                const pAddress = document.createElement('p');
+
+                const strongReceiver = document.createElement('strong');
+                strongReceiver.textContent = orderData.receiver; // .textContent
+                pAddress.appendChild(strongReceiver);
+                pAddress.appendChild(document.createElement('br'));
+
+                // .createTextNode를 사용해 순수 텍스트로 삽입 (XSS 방지)
+                pAddress.appendChild(document.createTextNode(`${orderData.receiverAddress} ${orderData.receiverAddressDetail}`));
+                pAddress.appendChild(document.createElement('br'));
+                pAddress.appendChild(document.createTextNode(`(${orderData.postCode})`));
+                pAddress.appendChild(document.createElement('br'));
+                pAddress.appendChild(document.createTextNode(orderData.receiverPhone));
+
+                addressInfoDiv.appendChild(pAddress);
+                modalBody.appendChild(addressInfoDiv);
+
+            } catch (error) {
+                // --- 에러 처리 (DOM API 사용) ---
+                while (modalBody.firstChild) {
+                    modalBody.removeChild(modalBody.firstChild);
+                }
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger';
+                errorDiv.textContent = error.message; // .textContent
+                modalBody.appendChild(errorDiv);
+            }
+        });
+    });
+</script>
+</body>
+
+</html>

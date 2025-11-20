@@ -35,6 +35,7 @@
                 <div class="col-lg-9">
                     <div class="book-management-container">
                         <h2>도서 수정</h2>
+                        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
                         <form id="bookForm" class="book-form" th:action="@{/admin/books/{id}(id=${book.bookId})}" method="post" enctype="multipart/form-data" th:object="${book}">
                             <input type="hidden" id="bookId" name="bookId" th:value="*{bookId}">
                             <!-- 선택된 카테고리 ID 목록을 JavaScript에서 사용할 수 있도록 추가 -->
@@ -82,18 +83,18 @@
                                     <label for="publishDate" class="form-label">출판일</label>
                                     <input type="date" class="form-control" id="publishDate" name="publishDate" th:value="*{publishDate}" required>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="stock" class="form-label">재고</label>
-                                    <input type="number" class="form-control" id="stock" name="stock" th:value="*{stock}" required>
-                                </div>
+<!--                                <div class="col-md-6 mb-3">-->
+<!--                                    <label for="stock" class="form-label">재고</label>-->
+<!--                                    <input type="number" class="form-control" id="stock" name="stock" th:value="*{stock}" required>-->
+<!--                                </div>-->
                             </div>
                             <div class="row align-items-center">
                                 <div class="col-md-6 mb-3">
                                     <label for="bookStatus" class="form-label">도서 상태</label>
                                     <select class="form-select" id="bookStatus" name="bookStatus" th:field="*{bookStatus}">
                                         <option value="SALE" th:selected="${book.bookStatus == 'SALE'}">판매중</option>
-                                        <option value="SOLD_OUT" th:selected="${book.bookStatus == 'SOLD_OUT'}">품절</option>
-                                        <option value="DISCONTINUED" th:selected="${book.bookStatus == 'DISCONTINUED'}">절판</option>
+                                        <option value="SOLDOUT" th:selected="${book.bookStatus == 'SOLDOUT'}">품절</option>
+                                        <option value="OUTOFPRINT" th:selected="${book.bookStatus == 'OUTOFPRINT'}">절판</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">

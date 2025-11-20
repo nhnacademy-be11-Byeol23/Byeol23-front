@@ -35,6 +35,7 @@
                 <div class="col-lg-9">
                     <div class="book-management-container">
                         <h2>새 도서 추가</h2>
+                        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
                         <form id="bookForm" class="book-form" th:action="@{/admin/books/new}" method="post" enctype="multipart/form-data">
                             <div class="mb-3">
                                 <label for="bookName" class="form-label">도서명</label>
@@ -42,9 +43,8 @@
                             </div>
                             <div class="mb-3">
                                 <label for="descriptionEditor" class="form-label">설명</label>
-                                <textarea id="descriptionContent" style="display:none;" th:text="${book != null} ? ${book.description} : ''"></textarea>
+                                <div id="descriptionEditor" class="form-control p-0"></div>
                                 <input type="hidden" id="description" name="description">
-                                <div id="descriptionEditor"></div>
                             </div>
                             <div class="mb-3">
                                 <label for="tocEditor" class="form-label">목차</label>
@@ -81,8 +81,8 @@
                                     <label for="bookStatus" class="form-label">도서 상태</label>
                                     <select class="form-select" id="bookStatus" name="bookStatus">
                                         <option value="SALE" selected>판매중</option>
-                                        <option value="SOLD_OUT">품절</option>
-                                        <option value="DISCONTINUED">절판</option>
+                                        <option value="SOLDOUT">품절</option>
+                                        <option value="OUTOFPRINT">절판</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4 mb-3">

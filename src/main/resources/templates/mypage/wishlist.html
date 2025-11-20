@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>위시리스트 - 별이삼shop</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+
+  <!-- Daum Postcode API -->
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+</head>
+
+<body class="account-page">
+
+  <div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title light-background">
+      <div class="container d-lg-flex justify-content-between align-items-center">
+        <h1 class="mb-2 mb-lg-0">위시리스트</h1>
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a th:href="@{/}">홈</a></li>
+            <li><a th:href="@{/mypage}">마이페이지</a></li>
+            <li class="current">위시리스트</li>
+          </ol>
+        </nav>
+      </div>
+    </div><!-- End Page Title -->
+
+    <!-- Account Section -->
+    <section id="account" class="account section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <!-- Mobile Menu Toggle -->
+        <div class="mobile-menu d-lg-none mb-4">
+          <button class="mobile-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#profileMenu">
+            <i class="bi bi-grid"></i>
+            <span>Menu</span>
+          </button>
+        </div>
+
+        <div class="row g-4">
+          <!-- Profile Menu -->
+          <div class="col-lg-3">
+            <div th:replace="~{fragments/mypage_profile :: mypage_profile}"></div>
+          </div>
+
+          <!-- Content Area -->
+          <div class="col-lg-9">
+            <div class="content-area">
+              <div id="wishlist">
+                  <div class="section-header" data-aos="fade-up">
+                    <h2>나의 위시리스트</h2>
+                  </div>
+
+                  <div class="wishlist-grid">
+                    <!-- Wishlist Item 1 -->
+                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="100" data-book-id="1">
+                      <button class="btn-remove" type="button" aria-label="위시리스트에서 제거">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      <a th:href="@{http://localhost:10330/books/1}" class="wishlist-link">
+                        <div class="wishlist-image">
+                          <img src="https://image.yes24.com/goods/160408776/XL" alt="대형주 추세추종 투자법칙" loading="lazy">
+                          <div class="sale-badge">-13%</div>
+                      </div>
+                      <div class="wishlist-content">
+                          <div class="product-category">이종호 저 | 사피엔테스</div>
+                          <h4>대형주 추세추종 투자법칙</h4>
+                        <div class="product-meta">
+                          <div class="rating">
+                            <i class="bi bi-star-fill"></i>
+                              <span>4.5 (5)</span>
+                          </div>
+                          <div class="price">
+                              <span class="current">28,000원</span>
+                              <span class="original">32,000원</span>
+                            </div>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+
+                    <!-- Wishlist Item 2 -->
+                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="200" data-book-id="10">
+                      <button class="btn-remove" type="button" aria-label="위시리스트에서 제거">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      <a th:href="@{http://localhost:10330/books/10}" class="wishlist-link">
+                        <div class="wishlist-image">
+                          <img src="https://image.yes24.com/goods/136734901/XL" alt="돈의 심리학" loading="lazy">
+                          <div class="sale-badge">-10%</div>
+                      </div>
+                      <div class="wishlist-content">
+                          <div class="product-category">모건 하우절 저 | 인플루엔셜</div>
+                          <h4>돈의 심리학</h4>
+                        <div class="product-meta">
+                          <div class="rating">
+                            <i class="bi bi-star-fill"></i>
+                              <span>4.0 (5)</span>
+                          </div>
+                          <div class="price">
+                              <span class="current">18,000원</span>
+                              <span class="original">20,000원</span>
+                            </div>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+
+                    <!-- Wishlist Item 3 -->
+                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="300" data-book-id="11">
+                      <button class="btn-remove" type="button" aria-label="위시리스트에서 제거">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      <a th:href="@{http://localhost:10330/books/11}" class="wishlist-link">
+                        <div class="wishlist-image">
+                          <img src="https://image.yes24.com/goods/96547408/XL" alt="용의자 X의 헌신" loading="lazy">
+                      </div>
+                      <div class="wishlist-content">
+                          <div class="product-category">히가시노 게이고 저 | 재인</div>
+                          <h4>용의자 X의 헌신</h4>
+                        <div class="product-meta">
+                          <div class="rating">
+                            <i class="bi bi-star-fill"></i>
+                              <span>5.0 (5)</span>
+                          </div>
+                          <div class="price">
+                              <span class="current">14,400원</span>
+                            </div>
+                          </div>
+                        </div>
+                      </a>
+                </div>
+
+                    <!-- Wishlist Item 4 -->
+                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="400" data-book-id="9">
+                      <button class="btn-remove" type="button" aria-label="위시리스트에서 제거">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                      <a th:href="@{http://localhost:10330/books/9}" class="wishlist-link">
+                        <div class="wishlist-image">
+                          <img src="https://image.yes24.com/goods/147178677/XL" alt="단 한 줄만 내 마음에 새긴다고 해도" loading="lazy">
+                          <div class="sale-badge">-10%</div>
+                        </div>
+                        <div class="wishlist-content">
+                          <div class="product-category">나민애 저 | 포레스트북스</div>
+                          <h4>단 한 줄만 내 마음에 새긴다고 해도</h4>
+                          <div class="product-meta">
+                          <div class="rating">
+                            <i class="bi bi-star-fill"></i>
+                              <span>4.5 (5)</span>
+                          </div>
+                            <div class="price">
+                              <span class="current">8,100원</span>
+                              <span class="original">9,000원</span>
+                          </div>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /Account Section -->
+
+  </main>
+
+  <footer id="footer" class="footer dark-background">
+    <div class="footer-main">
+      <div class="container">
+        <div class="row gy-4">
+          <div class="col-lg-4 col-md-6">
+            <div class="footer-widget footer-about">
+              <a href="index.html" class="logo">
+                <span class="sitename">NiceShop</span>
+              </a>
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in nibh vehicula, facilisis magna ut, consectetur lorem. Proin eget tortor risus.</p>
+
+              <div class="social-links mt-4">
+                <h5>Connect With Us</h5>
+                <div class="social-icons">
+                  <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                  <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                  <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                  <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+                  <a href="#" aria-label="Pinterest"><i class="bi bi-pinterest"></i></a>
+                  <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-2 col-md-6 col-sm-6">
+            <div class="footer-widget">
+              <h4>Shop</h4>
+              <ul class="footer-links">
+                <li><a href="category.html">New Arrivals</a></li>
+                <li><a href="category.html">Bestsellers</a></li>
+                <li><a href="category.html">Women's Clothing</a></li>
+                <li><a href="category.html">Men's Clothing</a></li>
+                <li><a href="category.html">Accessories</a></li>
+                <li><a href="category.html">Sale</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-lg-2 col-md-6 col-sm-6">
+            <div class="footer-widget">
+              <h4>Support</h4>
+              <ul class="footer-links">
+                <li><a href="support.html">Help Center</a></li>
+                <li><a href="account.html">Order Status</a></li>
+                <li><a href="shiping-info.html">Shipping Info</a></li>
+                <li><a href="return-policy.html">Returns &amp; Exchanges</a></li>
+                <li><a href="#">Size Guide</a></li>
+                <li><a href="contact.html">Contact Us</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-md-6">
+            <div class="footer-widget">
+              <h4>Contact Information</h4>
+              <div class="footer-contact">
+                <div class="contact-item">
+                  <i class="bi bi-geo-alt"></i>
+                  <span>123 Fashion Street, New York, NY 10001</span>
+                </div>
+                <div class="contact-item">
+                  <i class="bi bi-telephone"></i>
+                  <span>+1 (555) 123-4567</span>
+                </div>
+                <div class="contact-item">
+                  <i class="bi bi-envelope"></i>
+                  <span>hello@example.com</span>
+                </div>
+                <div class="contact-item">
+                  <i class="bi bi-clock"></i>
+                  <span>Monday-Friday: 9am-6pm<br>Saturday: 10am-4pm<br>Sunday: Closed</span>
+                </div>
+              </div>
+
+              <div class="app-buttons mt-4">
+                <a href="#" class="app-btn">
+                  <i class="bi bi-apple"></i>
+                  <span>App Store</span>
+                </a>
+                <a href="#" class="app-btn">
+                  <i class="bi bi-google-play"></i>
+                  <span>Google Play</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container">
+        <div class="row gy-3 align-items-center">
+          <div class="col-lg-6 col-md-12">
+            <div class="copyright">
+              <p>© <span>Copyright</span> <strong class="sitename">NiceShop</strong>. All Rights Reserved.</p>
+            </div>
+            <div class="credits mt-1">
+              <!-- All the links in the footer should remain intact. -->
+              <!-- You can delete the links only if you've purchased the pro version. -->
+              <!-- Licensing information: https://bootstrapmade.com/license/ -->
+              <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
+              Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+            </div>
+          </div>
+
+          <div class="col-lg-6 col-md-12">
+            <div class="d-flex flex-wrap justify-content-lg-end justify-content-center align-items-center gap-4">
+              <div class="payment-methods">
+                <div class="payment-icons">
+                  <i class="bi bi-credit-card" aria-label="Credit Card"></i>
+                  <i class="bi bi-paypal" aria-label="PayPal"></i>
+                  <i class="bi bi-apple" aria-label="Apple Pay"></i>
+                  <i class="bi bi-google" aria-label="Google Pay"></i>
+                  <i class="bi bi-shop" aria-label="Shop Pay"></i>
+                  <i class="bi bi-cash" aria-label="Cash on Delivery"></i>
+                </div>
+              </div>
+
+              <div class="legal-links">
+                <a href="tos.html">Terms</a>
+                <a href="privacy.html">Privacy</a>
+                <a href="tos.html">Cookies</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="/assets/vendor/php-email-form/validate.js"></script>
+  <script src="/assets/vendor/swiper/swiper-bundle.min.js"></script>
+  <script src="/assets/vendor/aos/aos.js"></script>
+  <script src="/assets/vendor/glightbox/js/glightbox.min.js"></script>
+  <script src="/assets/vendor/drift-zoom/Drift.min.js"></script>
+  <script src="/assets/vendor/purecounter/purecounter_vanilla.js"></script>
+
+  <!-- Main JS File -->
+  <script src="/assets/js/main.js"></script>
+
+  </body>
+
+</html>
+              </body>
+
+</html>

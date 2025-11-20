@@ -14,8 +14,8 @@ public record BookCreateTmpRequest(
 	BigDecimal salePrice,
 	String isbn,
 	LocalDate publishDate,
-	boolean isPack,
-	String bookStatus,
+	Boolean isPack,
+	BookStatus bookStatus,
 	Integer stock,
 	Long publisherId,
 	List<Long> categoryIds,
@@ -23,10 +23,12 @@ public record BookCreateTmpRequest(
 	List<Long> contributorIds,
 	List<MultipartFile> images
 ) {
-	// null-safe 생성자
 	public BookCreateTmpRequest {
 		if (images == null) {
 			images = List.of();
+		}
+		if (isPack == null) {
+			isPack = false;
 		}
 	}
 }

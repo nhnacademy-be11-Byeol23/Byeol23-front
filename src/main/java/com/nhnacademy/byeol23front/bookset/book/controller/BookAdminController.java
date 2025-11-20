@@ -1,12 +1,11 @@
 package com.nhnacademy.byeol23front.bookset.book.controller;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookCreateRequest;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookCreateTmpRequest;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookUpdateRequest;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookUpdateTmpRequest;
+import com.nhnacademy.byeol23front.bookset.book.client.BookDocumentSyncApiClient;
+import com.nhnacademy.byeol23front.bookset.book.dto.*;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
 import com.nhnacademy.byeol23front.bookset.publisher.client.PublisherApiClient;
 import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
@@ -45,6 +43,7 @@ public class BookAdminController {
 	private final ContributorApiClient contributorApiClient;
 	private final PublisherApiClient publisherApiClient;
 	private final MinioService minioService;
+    private final BookDocumentSyncApiClient bookDocumentSyncApiClient;
 
 	private static final String ALL_CONTRIBUTORS = "allContributors";
 	private static final String CATEGORIES = "categories";
@@ -52,12 +51,17 @@ public class BookAdminController {
 	private static final String ALL_PUBLISHERS = "allPublishers";
 
 	@PostMapping("/new")
-	public String createBook(@ModelAttribute BookCreateTmpRequest tmp) {
+	public String createBook(@ModelAttribute BookCreateTmpRequest tmp, RedirectAttributes redirectAttributes) {
+		List<Long> categoryIds = tmp.categoryIds() != null ? tmp.categoryIds() : List.of();
+		List<Long> tagIds = tmp.tagIds() != null ? tmp.tagIds() : List.of();
+		List<Long> contributorIds = tmp.contributorIds() != null ? tmp.contributorIds() : List.of();
+
+		if (categoryIds.isEmpty()) {
+			redirectAttributes.addFlashAttribute("errorMessage", "카테고리를 최소 한 개 이상 선택해야 합니다.");
+			return "redirect:/admin/books/new";
+		}
+
 		try {
-			List<Long> categoryIds = tmp.categoryIds() != null ? tmp.categoryIds() : List.of();
-			List<Long> tagIds = tmp.tagIds() != null ? tmp.tagIds() : List.of();
-			List<Long> contributorIds = tmp.contributorIds() != null ? tmp.contributorIds() : List.of();
-			
 			BookCreateRequest request = new BookCreateRequest(
 				tmp.bookName(),
 				tmp.toc(),
@@ -66,13 +70,14 @@ public class BookAdminController {
 				tmp.salePrice(),
 				tmp.isbn(),
 				tmp.publishDate(),
-				tmp.isPack(),
+				Boolean.TRUE.equals(tmp.isPack()),
 				tmp.bookStatus(),
 				tmp.stock(),
 				tmp.publisherId(),
 				categoryIds,
 				tagIds,
-				contributorIds
+				contributorIds,
+				null  // imageUrl은 BookAdminController에서는 사용하지 않음 (MultipartFile로 처리)
 			);
 
 			BookResponse createdBook = bookApiClient.createBook(request);
@@ -91,21 +96,33 @@ public class BookAdminController {
 					}
 				}
 			}
+			bookDocumentSyncApiClient.publishBookOutbox(bookId, BookOutboxEventType.ADD);
+			log.info("도서 아웃박스 이벤트 발행: {}", bookId);
 			return "redirect:/admin/books";
-			
+
+		} catch (FeignException.BadRequest e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "카테고리를 최소 한 개 이상 선택해야 합니다.");
+			return "redirect:/admin/books/new";
 		} catch (Exception e) {
 			log.error("도서 생성 실패", e);
+			redirectAttributes.addFlashAttribute("errorMessage", "도서 생성 중 오류가 발생했습니다.");
 			return "redirect:/admin/books/new";
 		}
 	}
 
 	@PostMapping("/{book-id}")
-	public String updateBook(@PathVariable("book-id") Long bookId, @ModelAttribute BookUpdateTmpRequest tmp) {
+	public String updateBook(@PathVariable("book-id") Long bookId, @ModelAttribute BookUpdateTmpRequest tmp,
+		RedirectAttributes redirectAttributes) {
+		List<Long> categoryIds = tmp.categoryIds() != null ? tmp.categoryIds() : List.of();
+		List<Long> tagIds = tmp.tagIds() != null ? tmp.tagIds() : List.of();
+		List<Long> contributorIds = tmp.contributorIds() != null ? tmp.contributorIds() : List.of();
+
+		if (categoryIds.isEmpty()) {
+			redirectAttributes.addFlashAttribute("errorMessage", "카테고리를 최소 한 개 이상 선택해야 합니다.");
+			return "redirect:/admin/books/update/" + bookId;
+		}
+
 		try {
-			List<Long> categoryIds = tmp.categoryIds() != null ? tmp.categoryIds() : List.of();
-			List<Long> tagIds = tmp.tagIds() != null ? tmp.tagIds() : List.of();
-			List<Long> contributorIds = tmp.contributorIds() != null ? tmp.contributorIds() : List.of();
-			
 			if (tmp.images() != null && !tmp.images().isEmpty()) {
 				boolean hasNewImages = tmp.images().stream().anyMatch(img -> !img.isEmpty());
 				if (hasNewImages) {
@@ -144,7 +161,6 @@ public class BookAdminController {
 				tmp.publishDate(),
 				tmp.isPack() != null && tmp.isPack(),
 				tmp.bookStatus(),
-				tmp.stock(),
 				tmp.publisherId(),
 				categoryIds,
 				tagIds,
@@ -153,15 +169,19 @@ public class BookAdminController {
 			bookApiClient.updateBook(bookId, request);
 			return "redirect:/admin/books";
 			
+		} catch (FeignException.BadRequest e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "카테고리를 최소 한 개 이상 선택해야 합니다.");
+			return "redirect:/admin/books/update/" + bookId;
 		} catch (Exception e) {
 			log.error("도서 수정 실패: bookId={}", bookId, e);
+			redirectAttributes.addFlashAttribute("errorMessage", "도서 수정 중 오류가 발생했습니다.");
 			return "redirect:/admin/books/update/" + bookId;
 		}
 	}
 
 	@GetMapping("/update/{book-id}")
 	public String bookUpdateForm(@PathVariable("book-id") Long id, Model model){
-		BookResponse book = bookApiClient.getBook(id);
+		BookResponse book = bookApiClient.getBook(id).getBody();
 		model.addAttribute("book", book);
 		model.addAttribute(CATEGORIES, categoryApiClient.getRoots());
 
@@ -195,14 +215,41 @@ public class BookAdminController {
 		return "admin/book/bookUpdateForm";
 	}
 
+	@GetMapping("/update/{book-id}/stock")
+	public String getBookStock(Model model, @PathVariable("book-id")Long bookId){
+		BookStockResponse bookStock = bookApiClient.getBookStock(bookId);
+		model.addAttribute("book",bookStock);
+		return "admin/book/bookStockUpdateForm";
+	}
+
+	@PostMapping("/update/{book-id}/stock")
+	public String updateBookStock(@PathVariable("book-id")Long bookId, BookStockUpdateRequest request){
+		bookApiClient.updateBookStock(bookId, request);
+		return "redirect:/admin/books";
+	}
+
+
 	@GetMapping
-	public String getBooks(Model model){
-		model.addAttribute("books", bookApiClient.getBooks());
+	public String getBooks(
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "20") int size,
+		Model model
+	){
+		PageResponse<BookResponse> response = bookApiClient.getBooks(page, size).getBody();
+		if (response == null) {
+			response = new PageResponse<>(List.of(), page, size, 0, 0, true, true);
+		}
+		
+		model.addAttribute("books", response.content());
+		model.addAttribute("paging", response);
 		return "admin/book/bookList";
 	}
 
 	@GetMapping("/new")
-	public String bookForm(Model model) {
+	public String bookForm(
+		@RequestParam(required = false) String fromAladin,
+		Model model
+	) {
 		model.addAttribute(CATEGORIES, categoryApiClient.getRoots());
 
 		PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 100).getBody();
@@ -217,6 +264,10 @@ public class BookAdminController {
 		List<AllPublishersInfoResponse> allPublishers = publishersResponse != null ? publishersResponse.content() : new ArrayList<>();
 		model.addAttribute(ALL_PUBLISHERS, allPublishers);
 
+		if ("true".equals(fromAladin)) {
+			model.addAttribute("fromAladin", true);
+		}
+		
 		return "admin/book/bookForm";
 	}
 

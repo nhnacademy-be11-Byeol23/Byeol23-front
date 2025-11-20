@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Checkout - NiceShop Bootstrap Template</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+    <script src="https://js.tosspayments.com/v1"></script>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+</head>
+
+<body class="checkout-page">
+
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+<main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">비회원 주문</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a th:hred="@{/}">Home</a></li>
+                    <li class="current">비회원 주문</li>
+                </ol>
+            </nav>
+        </div>
+    </div><!-- End Page Title -->
+
+    <!-- Checkout Section -->
+    <section id="checkout" class="checkout section">
+
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+            <form id="checkout-form">
+                <div class="row">
+                    <div class="col-lg-7">
+                        <div class="checkout-container" data-aos="fade-up">
+                            <div class="checkout-section" id="order-items-list">
+                                <div class="section-header">
+                                    <div class="section-number">1</div>
+                                    <h3>주문 상품</h3>
+                                </div>
+                                <div class="section-content">
+                                    <div class="order-items-container">
+
+                                        <div class="order-item"
+                                             th:each="item : ${orderItem}"
+                                             th:data-book-id="${item.bookId}"
+                                             th:data-quantity="${quantity}"
+                                             th:data-sale-price="${item.salePrice}"
+                                             th:data-regular-price="${item.regularPrice}"
+                                             th:data-book-name="${item.bookName}"
+
+                                             th:data-image-url="${(!#strings.isEmpty(item.imageUrl))
+                                                 ? item.imageUrl
+                                                 : 'https://image.yes24.com/momo/Noimg_L.jpg'}"
+                                             th:data-publisher-id="${item.publisher().publisherId()}"
+                                             th:data-publisher-name="${item.publisher().publisherName()}"
+                                        >
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="order-item-image me-3">
+                                                    <img th:src="${(!#strings.isEmpty(item.imageUrl))
+                                                           ? item.imageUrl
+                                                           : 'https://image.yes24.com/momo/Noimg_L.jpg'}"
+                                                         alt="Product" class="img-fluid"
+                                                         style="width: 80px; height: auto;">
+                                                </div>
+
+                                                <div class="order-item-details flex-grow-1 me-3">
+                                                    <h5 class="mb-1" th:text="${item.bookName}">도서 제목</h5>
+
+                                                    <p class="text-muted small mb-0">
+                                                        <span th:text="${item.publisher().publisherName()}">출판사</span>
+                                                        <span class="mx-1">|</span>
+                                                        <th:block th:each="contributor, iter : ${item.contributors()}">
+                                                            <span th:text="${contributor.contributorName()}">저자명</span>
+                                                            <span th:text="${contributor.contributorRole()} ? ' (' + ${contributor.contributorRole()} + ')' : ''">(저)</span>
+                                                            <span th:if="!${iter.last}">, </span>
+                                                        </th:block>
+                                                    </p>
+
+                                                </div>
+
+                                                <div class="order-item-price mb-2">
+                                                    <div class="mb-1">
+                                                        <span class="quantity"
+                                                              th:text="${quantity} + ' ×'">1 ×</span>
+                                                    </div>
+                                                    <span class="price-sale fw-bold fs-5"
+                                                          th:text="${#numbers.formatInteger(item.salePrice, 0, 'COMMA') + '원'}">
+                                                      10,000원
+                                                    </span>
+                                                    <span class="price-regular text-muted text-decoration-line-through ms-1"
+                                                          style="font-size: 0.9em;"
+                                                          th:if="${item.regularPrice > item.salePrice}"
+                                                          th:text="${#numbers.formatInteger(item.regularPrice, 0, 'COMMA') + '원'}">
+                                                      16,000원
+                                                    </span>
+                                                </div>
+
+                                                <div th:if="${item.isPack}">
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#packagingSelectModal"
+                                                            th:data-order-item-id="${item.bookId}"><i
+                                                            class="bi bi-box-seam me-1"></i> 포장 선택
+                                                    </button>
+                                                </div>
+
+                                                <div class="contributor-data" style="display: none;">
+                                                    <div class="contributor"
+                                                         th:each="c : ${item.contributors()}"
+                                                         th:data-contributor-id="${c.contributorId()}"
+                                                         th:data-contributor-name="${c.contributorName()}"
+                                                         th:data-contributor-role="${c.contributorRole()}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="checkout-section" id="customer-info">
+                                <div class="section-header">
+                                    <div class="section-number">2</div>
+                                    <h3>주문자 정보</h3>
+                                </div>
+                                <div class="section-content">
+                                    <div class="row">
+                                        <div class="col-md-12 form-group">
+                                            <label for="name">이름</label>
+                                            <input type="text" name="name" class="form-control" id="name"
+                                                   placeholder="주문자 이름" required="">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="phone">연락처</label>
+                                        <input type="tel" class="form-control" name="phone" id="phone"
+                                               placeholder="010-1234-5678" required="">
+                                    </div>
+                                    <div class="form-group mt-3">
+                                        <label for="orderPassword">주문 비밀번호</label>
+                                        <input type="password" class="form-control" name="orderPassword"
+                                               id="orderPassword"
+                                               placeholder="비회원 주문 조회 시 사용할 비밀번호" required="">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="orderPasswordConfirm">주문 비밀번호 확인</label>
+                                        <input type="password" class="form-control" name="orderPasswordConfirm"
+                                               id="orderPasswordConfirm"
+                                               placeholder="비밀번호를 다시 입력하세요" required="">
+                                        <div id="password-mismatch-error" class="invalid-feedback"
+                                             style="display: none;">
+                                            비밀번호가 일치하지 않습니다.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="checkout-section" id="shipping-address">
+                                <div class="section-header">
+                                    <div class="section-number">3</div>
+                                    <h3>배송지 정보</h3>
+                                </div>
+                                <div class="section-content">
+                                    <div class="form-group">
+                                        <label for="zip">우편번호</label>
+                                        <div class="input-group">
+                                            <input type="text" name="zip" class="form-control" id="zip"
+                                                   placeholder="우편번호" required="" readonly>
+                                            <button class="btn btn-outline-secondary" type="button" id="find-zip-btn">
+                                                우편번호 찾기
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="address">주소</label>
+                                        <input type="text" class="form-control" name="address" id="address"
+                                               placeholder="기본 주소" readonly>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="address-detail">상세주소</label>
+                                                <input type="text" class="form-control" name="address-detail"
+                                                       id="address-detail" placeholder="상세주소 (아파트 동, 호수 등)">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="address-extra">참고 항목</label>
+                                                <input type="text" class="form-control" name="address-extra"
+                                                       id="address-extra" placeholder="참고항목" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="section-content">
+                                        <div class="form-group mt-3">
+                                            <label class="form-label">배송일 선택 <small class="text-muted">(도착 예상일)</small></label>
+                                            <div class="delivery-date-buttons d-flex flex-wrap gap-2">
+                                                <th:block th:each="dateInfo, iterStat : ${deliveryDates}">
+                                                    <input type="radio" class="btn-check" name="deliveryDate"
+                                                           th:id="'date-' + ${dateInfo.valueDate}"
+                                                           th:value="${dateInfo.valueDate}"
+                                                           th:checked="${iterStat.first}"
+                                                           autocomplete="off">
+                                                    <label class="btn btn-outline-secondary"
+                                                           th:for="'date-' + ${dateInfo.valueDate}"
+                                                           th:text="${dateInfo.dayName} + ' (' + ${dateInfo.displayDate} + ')'">
+                                                        날짜 버튼
+                                                    </label>
+                                                </th:block>
+                                            </div>
+                                            <small class="text-muted d-block mt-1">주말 및 공휴일 제외, 5 영업일 이내 선택
+                                                가능합니다.</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <div class="order-summary" data-aos="fade-left" data-aos-delay="200">
+                            <div class="order-summary-header">
+                                <h3>주문 요약</h3>
+                                <span class="item-count" th:text="${totalQuantity} + '개 상품'">0개 상품</span>
+                            </div>
+
+                            <div class="order-summary-content">
+                                <div class="order-totals">
+                                    <div class="order-subtotal d-flex justify-content-between">
+                                        <span>상품 금액</span>
+                                        <span id="total-book-price"
+                                              th:text="${#numbers.formatInteger(totalBookPrice, 0, 'COMMA') + '원'}">0원</span>
+                                    </div>
+
+                                    <div class="order-shipping d-flex justify-content-between">
+                                        <span>배송비</span>
+                                        <span id="delivery-fee"
+                                              th:text="${deliveryFee != null ? #numbers.formatInteger(deliveryFee, 0, 'COMMA') : '0'} + '원'">0원</span>
+                                    </div>
+
+                                    <div class="order-points-discount d-flex justify-content-between text-danger"
+                                         style="display: none;">
+                                        <span>포인트 할인</span>
+                                        <span id="points-discount-amount">-0원</span>
+                                    </div>
+
+                                    <div class="order-coupon-discount d-flex justify-content-between text-danger"
+                                         style="display: none;">
+                                        <span>쿠폰 할인</span>
+                                        <span id="coupon-discount-amount">-0원</span>
+                                    </div>
+                                    <hr class="my-2">
+
+                                    <div class="order-total d-flex justify-content-between fw-bold">
+                                        <span>최종 결제 금액</span>
+                                        <span id="actual-order-price"
+                                              th:text="${actualOrderPrice != null ? #numbers.formatInteger(actualOrderPrice, 0, 'COMMA') : '0'} + '원'">
+                      0원
+                    </span>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid mt-4">
+                                    <button type="button" id="payment-button" class="btn btn-primary btn-lg"
+                                            th:text="${#numbers.formatInteger(actualOrderPrice, 0, 'COMMA') + '원 결제하기'}">
+                                        0원 결제하기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="checkout-section" id="payment-method">
+                        <div class="section-header">
+                            <div class="section-number">4</div>
+                            <h3>결제 방법</h3>
+                        </div>
+                        <div class="section-content">
+
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="tossPay"
+                                       value="TOSS_EASY_PAY">
+                                <label class="form-check-label" for="tossPay">
+                                    <strong>토스 간편 결제</strong>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <!-- Terms and Privacy Modals -->
+            <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="termsModalLabel">Terms and Conditions</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus
+                                hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut
+                                eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non
+                                venenatis nisl tempor.</p>
+                            <p>Suspendisse in orci enim. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor
+                                neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie
+                                magna non est bibendum non venenatis nisl tempor.</p>
+                            <p>Suspendisse in orci enim. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor
+                                neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie
+                                magna non est bibendum non venenatis nisl tempor.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Understand</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="privacyModalLabel">Privacy Policy</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus
+                                hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut
+                                eleifend nibh porttitor. Ut in nulla enim.</p>
+                            <p>Suspendisse in orci enim. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor
+                                neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie
+                                magna non est bibendum non venenatis nisl tempor.</p>
+                            <p>Suspendisse in orci enim. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor
+                                neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie
+                                magna non est bibendum non venenatis nisl tempor.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">I Understand</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- /Checkout Section -->
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+        class="bi bi-arrow-up-short"></i></a>
+<!-- Preloader -->
+<div id="preloader"></div>
+
+<!-- Vendor JS Files -->
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+
+<!-- Main JS File -->
+<script th:src="@{/assets/js/main.js}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        initPhoneHyphen();
+        const TOSS_CLIENT_KEY = /*[[${tossClientIKey}]]*/ 'test_ck_nRQoOaPz8L4QRwM6lGa58y47BMw6';
+        initTossPayments(TOSS_CLIENT_KEY);
+        initPackagingModal();
+        initPasswordValidation();
+        const findZipBtn = document.getElementById('find-zip-btn');
+        if (findZipBtn) {
+            findZipBtn.addEventListener('click', sample6_execDaumPostcode);
+        }
+    });
+
+    function initPhoneHyphen() {
+        const phoneInput = document.getElementById('phone');
+        if (!phoneInput) return;
+
+        const formatPhoneNumber = (value) => {
+            if (!value) return value;
+            let phoneNumber = value.replace(/[^\d]/g, '');
+            if (phoneNumber.length > 11) phoneNumber = phoneNumber.slice(0, 11);
+            const len = phoneNumber.length;
+            if (len < 4) return phoneNumber;
+            if (len < 8) return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
+            return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;
+        };
+
+        phoneInput.addEventListener('input', (e) => {
+            const target = e.target;
+            const originalValue = target.value;
+            const formattedValue = formatPhoneNumber(originalValue);
+            // 커서 계산은 간단하게 처리 (정교화 가능)
+            target.value = formattedValue;
+        });
+    }
+
+
+    function initTossPayments(clientKey) {
+        const paymentButton = document.getElementById('payment-button');
+        const actualOrderPriceEl = document.getElementById('actual-order-price');
+
+        if (!paymentButton || !actualOrderPriceEl) {
+            console.error("결제 버튼 또는 최종 금액 요소를 찾을 수 없습니다!");
+            return;
+        }
+
+        var tossPayments = TossPayments(clientKey);
+
+        // 결제 금액 가져오기
+        // 금액 파싱 함수 (이 함수 스코프 안에도 정의)
+        const parsePrice = (priceValue) => {
+            if (priceValue == null) return 0;
+            const priceString = String(priceValue);
+            return Number(priceString.replace(/[^\d]/g, '')) || 0;
+        };
+
+        paymentButton.addEventListener('click', async function () {
+
+            const bookInfoRequestList = []; // 백엔드로 보낼 최종 리스트
+            const orderItemElements = document.querySelectorAll('.order-item');
+
+            orderItemElements.forEach(item => {
+                const dataset = item.dataset;
+
+                const publisher = {
+                    publisherId: parseInt(dataset.publisherId, 10),
+                    publisherName: dataset.publisherName
+                };
+
+                const contributors = [];
+                const contributorElements = item.querySelectorAll('.contributor-data .contributor');
+
+                contributorElements.forEach(c_item => {
+                    contributors.push({
+                        contributorId: parseInt(c_item.dataset.contributorId, 10),
+                        contributorName: c_item.dataset.contributorName,
+                        contributorRole: c_item.dataset.contributorRole
+                    });
+                });
+
+                bookInfoRequestList.push({
+                    bookId: parseInt(dataset.bookId, 10),
+                    bookName: dataset.bookName,
+                    imageUrl: dataset.imageUrl,
+                    isPack: (dataset.isPack === 'true'),
+                    regularPrice: parseFloat(dataset.regularPrice),
+                    salePrice: parseFloat(dataset.salePrice),
+                    publisher: publisher,
+                    quantity: parseInt(dataset.quantity, 10),
+                    contributors: contributors,
+                    packagingId: parseInt(dataset.packagingId || '0', 10)
+                });
+            });
+
+            console.log("bookInfoRequestList:", bookInfoRequestList);
+
+            if (bookInfoRequestList.length === 0) {
+                alert("주문할 상품이 없습니다.");
+                return;
+            }
+
+            const orderPasswordInput = document.getElementById('orderPassword');
+            const orderPasswordConfirmInput = document.getElementById('orderPasswordConfirm');
+            const passwordErrorEl = document.getElementById('password-mismatch-error');
+
+            let orderPassword = null;
+
+            if (orderPasswordInput) {
+                orderPassword = orderPasswordInput.value;
+                const orderPasswordConfirm = orderPasswordConfirmInput.value;
+
+                if (!orderPassword || !orderPasswordConfirm) {
+                    alert("주문 비밀번호를 입력해주세요.");
+                    orderPasswordInput.focus();
+                    return; // 전송 중단
+                }
+
+                if (orderPassword !== orderPasswordConfirm) {
+                    alert("비밀번호가 일치하지 않습니다.");
+                    passwordErrorEl.style.display = 'block'; // 에러 메시지 보이기
+                    orderPasswordConfirmInput.classList.add('is-invalid');
+                    orderPasswordConfirmInput.focus();
+                    return; // 전송 중단
+                }
+
+                // 일치하면 에러 스타일 제거
+                passwordErrorEl.style.display = 'none';
+                orderPasswordConfirmInput.classList.remove('is-invalid');
+            }
+            const customerName = document.getElementById('name')?.value.trim();
+            const rawPhone = document.getElementById('phone')?.value;
+            const phoneNumber = rawPhone ? rawPhone.replace(/[^\d]/g, '') : '';
+            const zip = document.getElementById('zip')?.value;
+            const address = document.getElementById('address')?.value;
+            const addressDetail = document.getElementById('address-detail')?.value;
+            const addressExtra = document.getElementById('address-extra')?.value;
+            const totalBookPrice = parsePrice(document.getElementById('total-book-price')?.textContent);
+
+            const currentFinalPrice = parsePrice(actualOrderPriceEl.textContent); // 미리 찾아둔 요소 사용
+
+            const orderItems = document.querySelectorAll('.order-summary-content .order-item');
+            let orderName = "주문 상품"; // 기본값
+            if (orderItems.length > 0) {
+                const firstItemName = orderItems[0].querySelector('.order-item-details h4')?.textContent.trim();
+                if (firstItemName) {
+                    if (orderItems.length > 1) {
+                        orderName = `${firstItemName} 외 ${orderItems.length - 1}건`;
+                    } else {
+                        orderName = firstItemName;
+                    }
+                }
+            }
+
+            const selectedDeliveryArrivedDate = document.querySelector('input[name="deliveryDate"]:checked');
+            const deliveryDateValue = selectedDeliveryArrivedDate ? selectedDeliveryArrivedDate.value : null;
+
+            const orderPrepareRequest = {
+                totalBookPrice: totalBookPrice,
+                actualOrderPrice: currentFinalPrice,
+                receiver: customerName,
+                postCode: `${zip}`,
+                receiverAddress: `${address}`,
+                receiverAddressDetail: addressDetail,
+                receiverAddressExtra: addressExtra,
+                receiverPhone: phoneNumber,
+                deliveryArrivedDate: deliveryDateValue,
+                bookInfoRequestList: bookInfoRequestList,
+                orderPassword: orderPassword
+            };
+
+            const tossPayRadio = document.getElementById('tossPay');
+
+            // 최종 금액이 0보다 크고, 토스페이 라디오 버튼이 선택되지 않았으면 알림 후 중단
+            if (currentFinalPrice > 0 && (!tossPayRadio || !tossPayRadio.checked)) {
+                alert("결제 방법을 선택해주세요.");
+                return; // 함수 실행 중단
+            }
+
+            console.log("전송할 객체:", orderPrepareRequest);
+            console.log("실제 JSON:", JSON.stringify(orderPrepareRequest));
+
+            try {
+                const response = await fetch('/orders/prepare', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(orderPrepareRequest)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({message: '주문 준비 API 응답 실패.'}));
+                    throw new Error(err.message || '주문 준비에 실패했습니다.');
+                }
+                const prepareResponse = await response.json();
+                const orderIdFromServer = prepareResponse.orderNumber;
+                if (!orderIdFromServer) {
+                    throw new Error('주문 ID를 서버로부터 받지 못했습니다.');
+                }
+
+                console.log("토스페이먼츠 호출");
+                tossPayments.requestPayment('토스페이', {
+                    orderId: orderIdFromServer,
+                    amount: currentFinalPrice,
+                    orderName: orderName,
+                    customerName: prepareResponse.receiver,
+                    successUrl: window.location.origin + "/payments/confirm",
+                    failUrl: window.location.origin + "/payments/fail"
+                });
+
+            } catch (error) {
+                console.error('주문 처리 중 오류: ', error);
+                alert(error.message || '알 수 없는 오류가 발생하였습니다.');
+            }
+        });
+    }
+
+    /**
+     * 최종 결제 금액 및 할인 내역을 업데이트하는 함수
+     */
+    function updatePriceSummary() {
+        // 1. 필요한 DOM 요소 가져오기
+        const totalBookPriceEl = document.getElementById('total-book-price');
+        const deliveryFeeEl = document.getElementById('delivery-fee');
+        const actualOrderPriceEl = document.getElementById('actual-order-price');
+        const paymentButton = document.getElementById('payment-button');
+
+        let packagingTotalRow = document.getElementById('order-packaging-total');
+        // 포장비 행이 없으면 동적으로 생성
+        if (!packagingTotalRow) {
+            packagingTotalRow = document.createElement('div');
+            packagingTotalRow.id = 'order-packaging-total';
+            packagingTotalRow.className = 'order-shipping d-flex justify-content-between'; // 배송비와 같은 스타일 적용
+            // 배송비(deliveryFeeEl)의 부모(order-totals)를 찾아 그 다음에 삽입
+            deliveryFeeEl.parentNode.insertAdjacentElement('afterend', packagingTotalRow);
+        }
+
+        // 금액 파싱 함수 (쉼표, '원' 제거)
+        const parsePrice = (element) => {
+            if (!element || !element.textContent) return 0;
+            return parseInt(element.textContent.replace(/[^\d]/g, ''), 10) || 0;
+        };
+
+
+        // ▼▼▼ [수정] 상품 금액(subtotal)과 포장비(packagingTotal) 계산 ▼▼▼
+        let subtotal = 0;
+        let packagingTotal = 0;
+        document.querySelectorAll('.order-item').forEach(item => {
+            const salePrice = parseFloat(item.dataset.salePrice) || 0;
+            const quantity = parseInt(item.dataset.quantity, 10) || 0;
+            subtotal += salePrice * quantity;
+
+            // 각 아이템에 저장된 포장지 가격 * 수량
+            const packagingPrice = parseFloat(item.dataset.packagingPrice) || 0;
+            packagingTotal += packagingPrice * quantity;
+        });
+
+        // 화면에 상품 금액 업데이트
+        totalBookPriceEl.textContent = `${subtotal.toLocaleString('ko-KR')}원`;
+
+        // 화면에 포장비 업데이트
+        packagingTotalRow.innerHTML = `<span>포장비</span><span>+${packagingTotal.toLocaleString('ko-KR')}원</span>`;
+        if (packagingTotal === 0) {
+            packagingTotalRow.style.display = 'none'; // 포장비가 0원이면 숨김
+        } else {
+            packagingTotalRow.style.display = 'flex'; // 0원 아니면 표시
+        }
+        // ▲▲▲ [수정] 상품 금액(subtotal)과 포장비(packagingTotal) 계산 ▲▲▲
+        const deliveryFee = parsePrice(deliveryFeeEl);
+
+        const totalBeforeDiscount = subtotal + packagingTotal + deliveryFee;
+
+        // (상품금액 + 포장비 + 배송비) - 할인
+        const finalPrice = Math.max(0, totalBeforeDiscount);
+
+        // 7. 최종 결제 금액 및 버튼 텍스트 업데이트
+        actualOrderPriceEl.textContent = `${finalPrice.toLocaleString('ko-KR')}원`;
+        paymentButton.textContent = `${finalPrice.toLocaleString('ko-KR')}원 결제하기`;
+    }
+
+    function sample6_execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function (data) {
+                //  팝업에서 검색 결과 항목을 클릭했을 때 실행할 코드를 작성하는 부분
+                var addr = '';
+                var extraAddr = '';
+
+                // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져옴
+                if (data.userSelectedType !== 'R') { // 사용자가 도로명을 선택하지 않았을 경우
+                    alert('지번 주소가 선택되었습니다. 도로명 주소로 반영됩니다.');
+                }
+
+                addr = data.roadAddress;
+
+                // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                if (data.userSelectedType === 'R') {
+                    // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                    // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                    if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                        extraAddr += data.bname;
+                    }
+                    // 건물명이 있고, 공동주택일 경우 추가한다.
+                    if (data.buildingName !== '' && data.apartment === 'Y') {
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                    if (extraAddr !== '') {
+                        extraAddr = ' (' + extraAddr + ')';
+                    }
+                    // 조합된 참고항목을 해당 필드에 넣는다.
+                    document.getElementById("address-extra").value = extraAddr;
+
+                } else {
+                    document.getElementById("address-extra").value = '';
+                }
+
+                document.getElementById('zip').value = data.zonecode;
+                document.getElementById("address").value = addr;
+                document.getElementById("address-detail").focus();
+            }
+        }).open();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. "포장지 선택" 모달 요소를 가져옵니다.
+        const packagingModal = document.getElementById('packagingSelectModal');
+        if (packagingModal) {
+            // 2. 모달이 열리기 '직전'에 실행되는 이벤트를 감지합니다.
+            packagingModal.addEventListener('show.bs.modal', function (event) {
+                // 3. 어떤 버튼이 모달을 열었는지 가져옵니다.
+                const button = event.relatedTarget;
+                // 4. 버튼에 심어둔 'data-order-item-id' 속성 값을 읽어옵니다.
+                const orderItemId = button.dataset.orderItemId;
+                // 5. 모달 안의 숨겨진(hidden) input을 찾습니다.
+                const hiddenInput = document.getElementById('modal_order_item_id');
+                // 6. 숨겨진 input의 값(value)에 상품 ID를 설정합니다.
+                hiddenInput.value = orderItemId;
+                // 7. (선택) 모달이 열릴 때마다 "포장 안 함"을 기본으로 체크
+                const defaultRadio = packagingModal.querySelector('input[name="packagingId"][value="0"]');
+                if (defaultRadio) {
+                    defaultRadio.checked = true;
+                }
+            });
+        }
+    });
+
+    function initPackagingModal() {
+        const packagingModal = document.getElementById('packagingSelectModal');
+        const savePackagingButton = document.getElementById('savePackagingButton');
+        if (!packagingModal || !savePackagingButton) return;
+
+        // ... (모달 열릴 때 로직은 그대로) ...
+
+        // '적용' 버튼 클릭 시
+        savePackagingButton.addEventListener('click', () => {
+            const bookId = document.getElementById('modal_order_item_id').value;
+            const selectedRadio = packagingModal.querySelector('input[name="packagingId"]:checked');
+            if (!selectedRadio) return;
+
+            const packagingId = selectedRadio.value;
+            const label = selectedRadio.closest('label');
+
+            const priceText = label.querySelector('.text-muted').textContent;
+            const packagingPrice = parseInt(priceText.replace(/[^\d]/g, ''), 10) || 0;
+
+            const nameElement = label.querySelector('strong, span:not(.text-muted)');
+            const packagingName = nameElement ? nameElement.textContent : '포장 선택됨';
+
+            const orderItemDiv = document.querySelector(`.order-item[data-book-id="${bookId}"]`);
+            const triggerButton = document.querySelector(`button[data-order-item-id="${bookId}"]`);
+
+            if (orderItemDiv && triggerButton) {
+                orderItemDiv.dataset.packagingId = packagingId;
+                orderItemDiv.dataset.packagingPrice = packagingPrice;
+
+                // 모든 색상 클래스를 제거하여 초기화합니다.
+                triggerButton.classList.remove('btn-success', 'btn-dark', 'btn-outline-secondary', 'text-white');
+
+                if (packagingId === '0') {
+                    // '포장 안 함' 선택 시 (기본값)
+                    triggerButton.innerHTML = '<i class="bi bi-box-seam me-1"></i> 포장 선택';
+                    triggerButton.classList.add('btn-outline-secondary'); // 기본 회색 테두리 버튼
+                } else {
+                    // 포장 선택 시
+                    triggerButton.innerHTML = `<i class="bi bi-check-lg me-1"></i> ${packagingName}`;
+                    triggerButton.classList.add('btn', 'btn-dark', 'text-white'); // 검은색 배경, 흰색 텍스트
+                }
+            }
+
+            updatePriceSummary();
+
+            const modalInstance = bootstrap.Modal.getInstance(packagingModal);
+            modalInstance.hide();
+
+            if (triggerButton) {
+                triggerButton.focus();
+            }
+        });
+    }
+
+    function initPasswordValidation() {
+        const orderPasswordInput = document.getElementById('orderPassword');
+        const orderPasswordConfirmInput = document.getElementById('orderPasswordConfirm');
+        const passwordErrorEl = document.getElementById('password-mismatch-error');
+
+        // 이 페이지가 비회원 페이지가 아니면(요소가 없으면) 실행 중지
+        if (!orderPasswordInput || !orderPasswordConfirmInput) {
+            return;
+        }
+
+        const validatePasswords = () => {
+            const pass = orderPasswordInput.value;
+            const confirmPass = orderPasswordConfirmInput.value;
+
+            // '비밀번호 확인'란이 비어있지 않고, 두 비밀번호가 다를 경우
+            if (confirmPass && pass !== confirmPass) {
+                passwordErrorEl.style.display = 'block'; // 에러 메시지 보이기
+                orderPasswordConfirmInput.classList.add('is-invalid'); // 입력창 빨간색
+            } else {
+                // 비밀번호가 일치하거나, 아직 입력 중인 경우
+                passwordErrorEl.style.display = 'none'; // 에러 메시지 숨기기
+                orderPasswordConfirmInput.classList.remove('is-invalid'); // 입력창 정상
+            }
+        };
+
+        // 두 입력창에서 키보드를 뗄 때마다 검사 실행
+        orderPasswordInput.addEventListener('keyup', validatePasswords);
+        orderPasswordConfirmInput.addEventListener('keyup', validatePasswords);
+    }
+</script>
+<div class="modal fade" id="packagingSelectModal" tabindex="-1" aria-labelledby="packagingModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="packagingModalLabel">포장지 선택</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <p>이 상품에 적용할 포장지를 선택하세요.</p>
+
+                <form id="packagingSelectForm">
+
+                    <input type="hidden" id="modal_order_item_id" name="orderItemId">
+
+                    <div class="list-group">
+                        <label class="list-group-item list-group-item-action d-flex align-items-center">
+                            <input class="form-check-input me-3" type="radio" name="packagingId" value="0" checked>
+                            <i class="bi bi-x-circle me-2 text-danger"></i>
+                            <strong>포장 안 함</strong>
+                            <span class="text-muted ms-auto">(0원)</span>
+                        </label>
+
+                        <th:block th:each="pack : ${packagingOptions}">
+                            <label class="list-group-item list-group-item-action d-flex align-items-center">
+                                <input class="form-check-input me-3" type="radio" name="packagingId"
+                                       th:value="${pack.packagingId}">
+
+                                <img th:src="${pack.packagingImageUrl}" class="img-thumbnail me-2"
+                                     style="width: 50px; height: 50px; object-fit: cover;"
+                                     th:if="${pack.packagingImageUrl != null and pack.packagingImageUrl != ''}">
+
+                                <span th:text="${pack.packagingName}">포장지 이름</span>
+
+                                <span class="text-muted ms-auto"
+                                      th:text="'(+' + ${#numbers.formatInteger(pack.packagingPrice, 0, 'COMMA')} + '원)'">
+                  (+1,000원)
+                </span>
+                            </label>
+                        </th:block>
+
+                        <tr th:if="${packagingOptions == null or #lists.isEmpty(packagingOptions)}">
+                            <td colspan="4" class="text-center py-4">
+                                등록된 포장지 정책이 없습니다.
+                            </td>
+                        </tr>
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="savePackagingButton">적용</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

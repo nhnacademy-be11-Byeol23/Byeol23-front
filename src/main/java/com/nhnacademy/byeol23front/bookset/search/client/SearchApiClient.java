@@ -7,13 +7,24 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @FeignClient(
         name = "BYEOL23-GATEWAY",
         contextId = "searchApiClient"
 )
 public interface SearchApiClient {
+    @GetMapping("/search-api/search")
+    List<BookSearchResultResponse> searchBooksByQuery(@SpringQueryMap SearchCondition condition);
 
     @GetMapping("/search-api/categories/{category-id}/books")
-    SearchPageResponse<BookSearchResultResponse> searchBooksByCategory(@PathVariable("category-id") Long id, @SpringQueryMap SearchCondition condition);
+    SearchPageResponse<BookSearchResultResponse> searchBooksByCategory(@PathVariable("category-id") Long id, @SpringQueryMap SearchCondition condition, @RequestParam("page") int page, @RequestParam("size") int size);
+
+    @GetMapping("/search-api/best")
+    SearchPageResponse<BookSearchResultResponse> searchBestBooks(@RequestParam("page") int page, @RequestParam("size") int size);
+
+    @GetMapping("/search-api/new")
+    SearchPageResponse<BookSearchResultResponse> searchNewBooks(@SpringQueryMap SearchCondition condition, @RequestParam("page") int page, @RequestParam("size") int size);
 }
