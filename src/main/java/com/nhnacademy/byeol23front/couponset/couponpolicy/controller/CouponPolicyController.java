@@ -37,7 +37,7 @@ public class CouponPolicyController {
         model.addAttribute("categories", roots);
         
         //도서 리스트
-        List<BookResponse> books = bookApiClient.getBooks(0, 10);
+        List<BookResponse> books = (List<BookResponse>)bookApiClient.getBooks(0, 10);
         model.addAttribute("books", books);
 
         return "admin/coupon/coupon_policy";
