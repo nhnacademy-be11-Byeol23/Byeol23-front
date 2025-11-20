@@ -102,7 +102,7 @@
                                 <ul class="pagination justify-content-center">
                                     <!-- 첫 페이지 그룹 버튼 (<<) - 10페이지 초과이고 현재 10페이지 이상일 때만 표시 -->
                                     <li class="page-item" 
-                                        th:if="${lastPage > 10 and page >= 11}">
+                                        th:if="${lastPage > 10 and page >= 10}">
                                         <a class="page-link" 
                                            th:href="@{/admin/bookApi(keyword=${keyword}, page=${T(java.lang.Math).max(1, (page / 10) * 10 - 9)}, size=${size})}">
                                             <span>&laquo;&laquo;</span>
