@@ -43,6 +43,7 @@ public class OrderController {
 	@Value("${tossPayment.client-key}")
 	private String tossClientKey;
 
+	// 여기에 access token 삭제할 필요 있음
 	@PostMapping("/direct")
 	@ResponseBody
 	public ResponseEntity<Void> handleDirectOrder(@RequestBody BookOrderRequest request,
@@ -59,6 +60,8 @@ public class OrderController {
 		return ResponseEntity.ok().build();
 	}
 
+
+	// 세션 쓰면 안 될 것 같음 -> toss payment 결제 창 띄우면 수정..?
 	@GetMapping("/direct")
 	public String getOrderFormDirect(HttpSession session, Model model) {
 		BookOrderRequest request = (BookOrderRequest)session.getAttribute("directOrderRequest");
