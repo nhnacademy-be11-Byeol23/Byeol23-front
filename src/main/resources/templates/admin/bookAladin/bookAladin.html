@@ -98,35 +98,53 @@
                                 </tr>
                                 </tbody>
                             </table>
-                            <div th:if="${books != null and !#lists.isEmpty(books)}"
-                                 th:with="start=${page - 5 > 1 ? page - 5 : 1},
-              end=${page + 5 < lastPage ? page + 5 : lastPage}">
+                            <div th:if="${books != null and !#lists.isEmpty(books)}">
                                 <ul class="pagination justify-content-center">
-
-                                    <!-- Prev -->
+                                    <!-- 첫 페이지 그룹 버튼 (<<) - 10페이지 초과이고 현재 10페이지 이상일 때만 표시 -->
+                                    <li class="page-item" 
+                                        th:if="${lastPage > 10 and page >= 11}">
+                                        <a class="page-link" 
+                                           th:href="@{/admin/bookApi(keyword=${keyword}, page=${T(java.lang.Math).max(1, (page / 10) * 10 - 9)}, size=${size})}">
+                                            <span>&laquo;&laquo;</span>
+                                        </a>
+                                    </li>
+                                    
+                                    <!-- 이전 페이지 버튼 -->
                                     <li class="page-item" th:classappend="${page <= 1} ? 'disabled'">
                                         <a class="page-link"
                                            th:href="@{/admin/bookApi(keyword=${keyword}, page=${page - 1}, size=${size})}">
                                             이전
                                         </a>
                                     </li>
-
-                                    <!-- Page numbers (current ±5, clamped to [1, lastPage]) -->
+                                    
+                                    <!-- 10페이지씩 끊어서 표시 -->
                                     <li class="page-item"
-                                        th:each="i : ${#numbers.sequence(start, end)}"
+                                        th:each="i : ${#numbers.sequence(
+                                            T(java.lang.Math).max(1, (page / 10) * 10),
+                                            T(java.lang.Math).min((page / 10) * 10 + 9, lastPage)
+                                        )}"
                                         th:classappend="${i == page} ? ' active'">
                                         <a class="page-link"
                                            th:text="${i}"
-                                           th:href="@{/admin/bookApi(keyword=${keyword}, page=${i}, size=${size})}">1</a>
+                                           th:href="@{/admin/bookApi(keyword=${keyword}, page=${i}, size=${size})}"></a>
                                     </li>
-                                    <!-- Next -->
+                                    
+                                    <!-- 다음 페이지 버튼 -->
                                     <li class="page-item" th:classappend="${page >= lastPage} ? 'disabled'">
                                         <a class="page-link"
                                            th:href="@{/admin/bookApi(keyword=${keyword}, page=${page + 1}, size=${size})}">
                                             다음
                                         </a>
                                     </li>
-
+                                    
+                                    <!-- 다음 페이지 그룹 버튼 (>>) - 10페이지 초과이고 다음 그룹이 있을 때만 표시 -->
+                                    <li class="page-item" 
+                                        th:if="${lastPage > 10 and (page / 10) * 10 + 9 < lastPage}">
+                                        <a class="page-link" 
+                                           th:href="@{/admin/bookApi(keyword=${keyword}, page=${T(java.lang.Math).min((page / 10) * 10 + 10, lastPage)}, size=${size})}">
+                                            <span>&raquo;&raquo;</span>
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
