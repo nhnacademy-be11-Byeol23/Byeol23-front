@@ -45,9 +45,7 @@ public class CouponPolicyController {
 
     @PostMapping
     public String createCouponPolicy(CouponPolicyCreateRequest couponPolicyCreateRequest) {
-        log.info(couponPolicyCreateRequest.toString());
         couponPolicyApiClient.couponPolicyCreate(couponPolicyCreateRequest);
-
         return "redirect:/admin/coupon-policy";
     }
 }
