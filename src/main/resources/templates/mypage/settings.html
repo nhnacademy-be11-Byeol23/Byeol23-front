@@ -87,114 +87,74 @@
             <div class="content-area">
               <div id="settings">
                   <div class="section-header" data-aos="fade-up">
-                    <h2>Account Settings</h2>
+                    <h2>계정 설정</h2>
                   </div>
 
                   <div class="settings-content">
                     <!-- Personal Information -->
                     <div class="settings-section" data-aos="fade-up">
-                      <h3>Personal Information</h3>
-                      <form class="php-email-form settings-form">
+                      <h3>개인 정보</h3>
+                      <div id="personal-information" class="php-email-form settings-form">
                         <div class="row g-3">
                           <div class="col-md-6">
-                            <label for="firstName" class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="firstName" value="Sarah" required="">
+                            <label for="name" class="form-label">이름</label>
+                            <input type="text" class="form-control" id="name" value="Sarah" required="">
                           </div>
                           <div class="col-md-6">
-                            <label for="lastName" class="form-label">Last Name</label>
-                            <input type="text" class="form-control" id="lastName" value="Anderson" required="">
-                          </div>
-                          <div class="col-md-6">
-                            <label for="email" class="form-label">Email</label>
+                            <label for="email" class="form-label">이메일</label>
                             <input type="email" class="form-control" id="email" value="sarah@example.com" required="">
                           </div>
                           <div class="col-md-6">
-                            <label for="phone" class="form-label">Phone</label>
+                            <label for="phone" class="form-label">전화번호</label>
                             <input type="tel" class="form-control" id="phone" value="+1 (555) 123-4567">
                           </div>
                         </div>
 
                         <div class="form-buttons">
-                          <button type="submit" class="btn-save">Save Changes</button>
+                          <button type="button" class="btn-save">저장</button>
                         </div>
 
-                        <div class="loading">Loading</div>
-                        <div class="error-message"></div>
-                        <div class="sent-message">Your changes have been saved successfully!</div>
-                      </form>
-                    </div>
-
-                    <!-- Email Preferences -->
-                    <div class="settings-section" data-aos="fade-up" data-aos-delay="100">
-                      <h3>Email Preferences</h3>
-                      <div class="preferences-list">
-                        <div class="preference-item">
-                          <div class="preference-info">
-                            <h4>Order Updates</h4>
-                            <p>Receive notifications about your order status</p>
-                          </div>
-                          <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="orderUpdates" checked="">
-                          </div>
-                        </div>
-
-                        <div class="preference-item">
-                          <div class="preference-info">
-                            <h4>Promotions</h4>
-                            <p>Receive emails about new promotions and deals</p>
-                          </div>
-                          <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="promotions">
-                          </div>
-                        </div>
-
-                        <div class="preference-item">
-                          <div class="preference-info">
-                            <h4>Newsletter</h4>
-                            <p>Subscribe to our weekly newsletter</p>
-                          </div>
-                          <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="newsletter" checked="">
-                          </div>
-                        </div>
+                        <div class="loading">로딩 중</div>
+                        <div class="error-message">변경에 문제가 발생하였습니다.</div>
+                        <div class="sent-message">성공적으로 변경되었습니다.</div>
                       </div>
                     </div>
 
-                    <!-- Security Settings -->
+
+
+                    <!-- 비밀번호 변경 -->
                     <div class="settings-section" data-aos="fade-up" data-aos-delay="200">
-                      <h3>Security</h3>
-                      <form class="php-email-form settings-form">
+                      <h3>비밀번호 변경</h3>
+                      <div id="password-change" class="php-email-form settings-form">
                         <div class="row g-3">
                           <div class="col-md-12">
-                            <label for="currentPassword" class="form-label">Current Password</label>
+                            <label for="currentPassword" class="form-label">현재 비밀번호</label>
                             <input type="password" class="form-control" id="currentPassword" required="">
                           </div>
                           <div class="col-md-6">
-                            <label for="newPassword" class="form-label">New Password</label>
+                            <label for="newPassword" class="form-label">새 비밀번호</label>
                             <input type="password" class="form-control" id="newPassword" required="">
                           </div>
                           <div class="col-md-6">
-                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <label for="confirmPassword" class="form-label">비밀번호 확인</label>
                             <input type="password" class="form-control" id="confirmPassword" required="">
                           </div>
                         </div>
 
                         <div class="form-buttons">
-                          <button type="submit" class="btn-save">Update Password</button>
+                          <button type="submit" class="btn-save">변경</button>
                         </div>
-
-                        <div class="loading">Loading</div>
-                        <div class="error-message"></div>
-                        <div class="sent-message">Your password has been updated successfully!</div>
-                      </form>
+                      <div class="loading">로딩 중</div>
+                      <div class="error-message">변경에 문제가 발생하였습니다.</div>
+                      <div class="sent-message">성공적으로 변경되었습니다.</div>
                     </div>
 
                     <!-- Delete Account -->
                     <div class="settings-section danger-zone" data-aos="fade-up" data-aos-delay="300">
-                      <h3>Delete Account</h3>
+                      <h3>계정 삭제</h3>
                       <div class="danger-zone-content">
-                        <p>Once you delete your account, there is no going back. Please be certain.</p>
-                        <button type="button" class="btn-danger">Delete Account</button>
+                        <p>계정 삭제 시 복구가 불가능합니다. 신중한 결정 부탁드립니다.</p>
+                        <button type="button" class="btn-danger">계정 삭제</button>
                       </div>
                     </div>
                   </div>
@@ -360,6 +320,10 @@
 
   <!-- Main JS File -->
   <script src="/assets/js/main.js"></script>
+
+    <script>
+
+    </script>
 
   </body>
 
