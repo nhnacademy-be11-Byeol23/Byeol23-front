@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/admin/publishers")
+@RequestMapping("/admin/pub")
 public class PublisherController {
 	private final PublisherApiClient feignClient;
 
