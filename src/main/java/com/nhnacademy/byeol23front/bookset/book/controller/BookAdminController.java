@@ -1,7 +1,6 @@
 package com.nhnacademy.byeol23front.bookset.book.controller;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
-import com.nhnacademy.byeol23front.bookset.book.client.BookDocumentSyncApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.*;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
