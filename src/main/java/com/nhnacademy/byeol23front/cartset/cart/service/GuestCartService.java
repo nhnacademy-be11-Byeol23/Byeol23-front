@@ -122,10 +122,14 @@ public class GuestCartService {
                 -1l, // 비회원
                 book.bookId(),
                 book.bookName(),
-                book.salePrice(),
+                imageUrl,
+                book.isPack(),
                 book.regularPrice(),
+                book.salePrice(),
+                book.publisher(),
                 quantity != null ? quantity : 0,
-                imageUrl
+                book.contributors(),
+                null
             );
             cartBooks.add(cartBook);
         }

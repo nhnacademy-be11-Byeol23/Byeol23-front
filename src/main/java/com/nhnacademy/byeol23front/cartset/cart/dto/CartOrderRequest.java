@@ -6,8 +6,7 @@ import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoRespon
 import java.math.BigDecimal;
 import java.util.List;
 
-public record CartBookResponse(
-        Long cartBookId,
+public record CartOrderRequest(
         Long bookId,
         String bookName,
         String imageUrl,
