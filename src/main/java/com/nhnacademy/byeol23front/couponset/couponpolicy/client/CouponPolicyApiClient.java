@@ -19,4 +19,6 @@ public interface CouponPolicyApiClient {
 
     @GetMapping("/api/coupon-policy")
     ResponseEntity<List<CouponPolicyInfoResponse>> getCouponPolicies();
+
+
 }
