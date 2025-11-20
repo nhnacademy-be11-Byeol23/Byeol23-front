@@ -14,13 +14,14 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.nhnacademy.byeol23front.memberset.addresses.client.AddressApiClient;
+import com.nhnacademy.byeol23front.memberset.addresses.dto.AddressResponse;
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 import com.nhnacademy.byeol23front.memberset.member.dto.MemberMyPageResponse;
 import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
@@ -37,6 +38,7 @@ public class MypageController {
 	private final MemberApiClient memberApiClient;
 	private final OrderApiClient orderApiClient;
 	private final MinioService minioService;
+	private final AddressApiClient addressApiClient;
 
 	@ModelAttribute("activeTab")
 	public String addActiveTabToModel(HttpServletRequest request) {
@@ -128,7 +130,9 @@ public class MypageController {
 
 	@GetMapping("/addresses")
 	public String getAddresses(Model model) {
-		ResponseEntity<MemberMyPageResponse> response = memberApiClient.getMember();
+		List<AddressResponse> addressList = addressApiClient.getAddresses().getBody();
+
+		model.addAttribute("addresses", addressList);
 
 		return "mypage/address";
 	}

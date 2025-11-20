@@ -35,6 +35,7 @@
                 <div class="col-lg-9">
                     <div class="book-management-container">
                         <h2>새 도서 추가</h2>
+                        <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
                         <form id="bookForm" class="book-form" th:action="@{/admin/books/new}" method="post" enctype="multipart/form-data">
                             <div class="mb-3">
                                 <label for="bookName" class="form-label">도서명</label>
@@ -42,11 +43,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="descriptionEditor" class="form-label">설명</label>
-
-                                <!-- Visible editor target -->
                                 <div id="descriptionEditor" class="form-control p-0"></div>
-
-                                <!-- Hidden field submitted with the form -->
                                 <input type="hidden" id="description" name="description">
                             </div>
                             <div class="mb-3">

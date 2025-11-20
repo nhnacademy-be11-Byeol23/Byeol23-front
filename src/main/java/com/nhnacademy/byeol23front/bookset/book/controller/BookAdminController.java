@@ -5,6 +5,7 @@ import com.nhnacademy.byeol23front.bookset.book.client.BookDocumentSyncApiClient
 import com.nhnacademy.byeol23front.bookset.book.dto.*;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,12 +51,17 @@ public class BookAdminController {
 	private static final String ALL_PUBLISHERS = "allPublishers";
 
 	@PostMapping("/new")
-	public String createBook(@ModelAttribute BookCreateTmpRequest tmp) {
+	public String createBook(@ModelAttribute BookCreateTmpRequest tmp, RedirectAttributes redirectAttributes) {
+		List<Long> categoryIds = tmp.categoryIds() != null ? tmp.categoryIds() : List.of();
+		List<Long> tagIds = tmp.tagIds() != null ? tmp.tagIds() : List.of();
+		List<Long> contributorIds = tmp.contributorIds() != null ? tmp.contributorIds() : List.of();
+
+		if (categoryIds.isEmpty()) {
+			redirectAttributes.addFlashAttribute("errorMessage", "카테고리를 최소 한 개 이상 선택해야 합니다.");
+			return "redirect:/admin/books/new";
+		}
+
 		try {
-			List<Long> categoryIds = tmp.categoryIds() != null ? tmp.categoryIds() : List.of();
-			List<Long> tagIds = tmp.tagIds() != null ? tmp.tagIds() : List.of();
-			List<Long> contributorIds = tmp.contributorIds() != null ? tmp.contributorIds() : List.of();
-			
 			BookCreateRequest request = new BookCreateRequest(
 				tmp.bookName(),
 				tmp.toc(),
@@ -64,13 +70,14 @@ public class BookAdminController {
 				tmp.salePrice(),
 				tmp.isbn(),
 				tmp.publishDate(),
-				tmp.isPack(),
+				Boolean.TRUE.equals(tmp.isPack()),
 				tmp.bookStatus(),
 				tmp.stock(),
 				tmp.publisherId(),
 				categoryIds,
 				tagIds,
-				contributorIds
+				contributorIds,
+				null  // imageUrl은 BookAdminController에서는 사용하지 않음 (MultipartFile로 처리)
 			);
 
 			BookResponse createdBook = bookApiClient.createBook(request);
@@ -89,23 +96,33 @@ public class BookAdminController {
 					}
 				}
 			}
-            bookDocumentSyncApiClient.publishBookOutbox(bookId, BookOutboxEventType.ADD);
-            log.info("도서 아웃박스 이벤트 발행: {}", bookId);
+			bookDocumentSyncApiClient.publishBookOutbox(bookId, BookOutboxEventType.ADD);
+			log.info("도서 아웃박스 이벤트 발행: {}", bookId);
 			return "redirect:/admin/books";
-			
+
+		} catch (FeignException.BadRequest e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "카테고리를 최소 한 개 이상 선택해야 합니다.");
+			return "redirect:/admin/books/new";
 		} catch (Exception e) {
 			log.error("도서 생성 실패", e);
+			redirectAttributes.addFlashAttribute("errorMessage", "도서 생성 중 오류가 발생했습니다.");
 			return "redirect:/admin/books/new";
 		}
 	}
 
 	@PostMapping("/{book-id}")
-	public String updateBook(@PathVariable("book-id") Long bookId, @ModelAttribute BookUpdateTmpRequest tmp) {
+	public String updateBook(@PathVariable("book-id") Long bookId, @ModelAttribute BookUpdateTmpRequest tmp,
+		RedirectAttributes redirectAttributes) {
+		List<Long> categoryIds = tmp.categoryIds() != null ? tmp.categoryIds() : List.of();
+		List<Long> tagIds = tmp.tagIds() != null ? tmp.tagIds() : List.of();
+		List<Long> contributorIds = tmp.contributorIds() != null ? tmp.contributorIds() : List.of();
+
+		if (categoryIds.isEmpty()) {
+			redirectAttributes.addFlashAttribute("errorMessage", "카테고리를 최소 한 개 이상 선택해야 합니다.");
+			return "redirect:/admin/books/update/" + bookId;
+		}
+
 		try {
-			List<Long> categoryIds = tmp.categoryIds() != null ? tmp.categoryIds() : List.of();
-			List<Long> tagIds = tmp.tagIds() != null ? tmp.tagIds() : List.of();
-			List<Long> contributorIds = tmp.contributorIds() != null ? tmp.contributorIds() : List.of();
-			
 			if (tmp.images() != null && !tmp.images().isEmpty()) {
 				boolean hasNewImages = tmp.images().stream().anyMatch(img -> !img.isEmpty());
 				if (hasNewImages) {
@@ -152,8 +169,12 @@ public class BookAdminController {
 			bookApiClient.updateBook(bookId, request);
 			return "redirect:/admin/books";
 			
+		} catch (FeignException.BadRequest e) {
+			redirectAttributes.addFlashAttribute("errorMessage", "카테고리를 최소 한 개 이상 선택해야 합니다.");
+			return "redirect:/admin/books/update/" + bookId;
 		} catch (Exception e) {
 			log.error("도서 수정 실패: bookId={}", bookId, e);
+			redirectAttributes.addFlashAttribute("errorMessage", "도서 수정 중 오류가 발생했습니다.");
 			return "redirect:/admin/books/update/" + bookId;
 		}
 	}
@@ -209,8 +230,18 @@ public class BookAdminController {
 
 
 	@GetMapping
-	public String getBooks(Model model){
-		model.addAttribute("books", bookApiClient.getBooks(0,20));
+	public String getBooks(
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "20") int size,
+		Model model
+	){
+		PageResponse<BookResponse> response = bookApiClient.getBooks(page, size).getBody();
+		if (response == null) {
+			response = new PageResponse<>(List.of(), page, size, 0, 0, true, true);
+		}
+		
+		model.addAttribute("books", response.content());
+		model.addAttribute("paging", response);
 		return "admin/book/bookList";
 	}
 

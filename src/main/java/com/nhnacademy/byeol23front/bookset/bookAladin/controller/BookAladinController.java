@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
@@ -22,9 +23,9 @@ import com.nhnacademy.byeol23front.bookset.contributor.dto.ContributorRole;
 import com.nhnacademy.byeol23front.bookset.publisher.client.PublisherApiClient;
 import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
 import com.nhnacademy.byeol23front.bookset.publisher.dto.PublisherCreateRequest;
-import com.nhnacademy.byeol23front.minio.service.MinioService;
-import com.nhnacademy.byeol23front.minio.util.ImageDomain;
+import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,7 +43,7 @@ public class BookAladinController {
 	private final BookApiClient bookApiClient;
 	private final PublisherApiClient publisherApiClient;
 	private final ContributorApiClient contributorApiClient;
-	private final MinioService minioService;
+	private final CategoryApiClient categoryApiClient;
 
 	@GetMapping
 	public String getAllBooks(@RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int size, Model model) throws JsonProcessingException {
@@ -58,14 +59,22 @@ public class BookAladinController {
 	}
 
 	@GetMapping("/new")
-	public String createBook(){
+	public String createBook(Model model){
+		model.addAttribute("categories", categoryApiClient.getRoots());
 		return "admin/bookAladin/bookAladinCreate";
 	}
 
 	@PostMapping("/new")
-	public String createBookFromAladin(@RequestBody BookAladinCreateRequest request) {
+	public String createBookFromAladin(@RequestBody BookAladinCreateRequest request, RedirectAttributes redirectAttributes) {
 		try {
 			log.info("알라딘 도서 생성 요청: {}", request);
+			
+			// 카테고리 검증
+			List<Long> categoryIds = request.categoryIds() != null ? request.categoryIds() : List.of();
+			if (categoryIds.isEmpty()) {
+				redirectAttributes.addFlashAttribute("errorMessage", "카테고리를 최소 한 개 이상 선택해야 합니다.");
+				return "redirect:/admin/bookApi/new";
+			}
 			
 			// 1. 출판사 찾기 또는 생성
 			Long publisherId;
@@ -76,28 +85,38 @@ public class BookAladinController {
 						.getBody();
 					if (publisherResponse == null) {
 						log.error("출판사 응답이 null입니다.");
-						throw new IllegalArgumentException("출판사 조회/생성에 실패했습니다.");
+						redirectAttributes.addFlashAttribute("errorMessage", "출판사 조회/생성에 실패했습니다.");
+						return "redirect:/admin/bookApi/new";
 					}
 					publisherId = publisherResponse.publisherId();
 					log.info("출판사 ID: {}", publisherId);
 				} catch (Exception e) {
 					log.error("출판사 찾기/생성 실패: {}", e.getMessage(), e);
-					throw new IllegalArgumentException("출판사 처리 실패: " + e.getMessage());
+					redirectAttributes.addFlashAttribute("errorMessage", "출판사 처리 실패: " + e.getMessage());
+					return "redirect:/admin/bookApi/new";
 				}
 			} else {
-				throw new IllegalArgumentException("출판사 이름이 필요합니다.");
+				redirectAttributes.addFlashAttribute("errorMessage", "출판사 이름이 필요합니다.");
+				return "redirect:/admin/bookApi/new";
 			}
 
 			// 2. 기여자 파싱 및 찾기 또는 생성
 			List<Long> contributorIds = new ArrayList<>();
 			log.info("저자 정보: {}",request.author());
 			log.info("역자 정보: {}",request.translator());
-			if (!request.author().isBlank()) {
+			if (request.author() != null && !request.author().isBlank()) {
 				try {
 					List<ContributorFindOrCreateRequest> parsedAuthors = parseContributors(request.author(), ContributorRole.AUTHOR);
-					List<ContributorFindOrCreateRequest> parsedTranslators = parseContributors(request.translator(), ContributorRole.TRANSLATOR);
 
 					contributorIds.addAll(findOrCreateContributors(parsedAuthors));
+				} catch (Exception e) {
+					log.error("기여자 파싱 실패: {}", e.getMessage());
+					// 기여자 파싱 실패해도 계속 진행
+				}
+			}
+			if (request.translator() != null && !request.translator().isBlank()){
+				try {
+					List<ContributorFindOrCreateRequest> parsedTranslators = parseContributors(request.translator(), ContributorRole.TRANSLATOR);
 					contributorIds.addAll(findOrCreateContributors(parsedTranslators));
 				} catch (Exception e) {
 					log.error("기여자 파싱 실패: {}", e.getMessage());
@@ -107,16 +126,19 @@ public class BookAladinController {
 
 			// 3. 필수 필드 검증
 			if (request.bookName() == null || request.bookName().isBlank()) {
-				throw new IllegalArgumentException("도서명이 필요합니다.");
+				redirectAttributes.addFlashAttribute("errorMessage", "도서명이 필요합니다.");
+				return "redirect:/admin/bookApi/new";
 			}
 			if (request.isbn() == null || request.isbn().isBlank()) {
-				throw new IllegalArgumentException("ISBN이 필요합니다.");
+				redirectAttributes.addFlashAttribute("errorMessage", "ISBN이 필요합니다.");
+				return "redirect:/admin/bookApi/new";
 			}
 			if (publisherId == null) {
-				throw new IllegalArgumentException("출판사 ID가 필요합니다.");
+				redirectAttributes.addFlashAttribute("errorMessage", "출판사 ID가 필요합니다.");
+				return "redirect:/admin/bookApi/new";
 			}
 
-			// 4. 도서 생성
+			// 4. 도서 생성 (이미지 URL 포함)
 			BookCreateRequest bookRequest = new BookCreateRequest(
 				request.bookName(),
 				request.toc() != null ? request.toc() : "",  // null 체크
@@ -129,9 +151,10 @@ public class BookAladinController {
 				request.bookStatus(),  // 기본값
 				request.stock() != null ? request.stock() : 0,  // 기본값
 				publisherId,
-				request.categoryIds() != null ? request.categoryIds() : List.of(),
+				categoryIds,
 				request.tagIds() != null ? request.tagIds() : List.of(),
-				contributorIds
+				contributorIds,
+				request.imageUrl() != null && !request.imageUrl().isBlank() ? request.imageUrl() : null
 			);
 
 			log.info("도서 생성 요청: {}", bookRequest);
@@ -139,25 +162,20 @@ public class BookAladinController {
 			Long bookId = createdBook.bookId();
 			log.info("도서 생성 완료: bookId={}", bookId);
 
-			// 5. 이미지 URL을 MinIO에 저장
-			if (request.imageUrl() != null && !request.imageUrl().isBlank()) {
-				try {
-					minioService.uploadImageFromUrl(ImageDomain.BOOK, bookId, request.imageUrl());
-					log.info("알라딘 이미지 URL에서 업로드 성공: bookId={}, imageUrl={}", bookId, request.imageUrl());
-				} catch (Exception e) {
-					log.error("알라딘 이미지 URL 업로드 실패: imageUrl={}", request.imageUrl(), e);
-					// 이미지 업로드 실패해도 도서는 생성되었으므로 계속 진행
-				}
-			}
-
 			return "redirect:/admin/books";
 			
+		} catch (FeignException.BadRequest e) {
+			log.error("알라딘 도서 생성 실패 (Bad Request): {}", e.getMessage());
+			redirectAttributes.addFlashAttribute("errorMessage", "카테고리를 최소 한 개 이상 선택해야 합니다.");
+			return "redirect:/admin/bookApi/new";
 		} catch (IllegalArgumentException e) {
 			log.error("알라딘 도서 생성 실패 (잘못된 요청): {}", e.getMessage());
-			return "redirect:/admin/bookApi/new?error=" + e.getMessage();
+			redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+			return "redirect:/admin/bookApi/new";
 		} catch (Exception e) {
 			log.error("알라딘 도서 생성 실패", e);
-			return "redirect:/admin/bookApi/new?error=도서 생성에 실패했습니다.";
+			redirectAttributes.addFlashAttribute("errorMessage", "도서 생성에 실패했습니다.");
+			return "redirect:/admin/bookApi/new";
 		}
 	}
 	List<ContributorFindOrCreateRequest> parseContributors(String str, ContributorRole role) {

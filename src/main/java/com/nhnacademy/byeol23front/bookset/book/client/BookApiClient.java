@@ -5,6 +5,7 @@ import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookStockResponse;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookStockUpdateRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookUpdateRequest;
+import com.nhnacademy.byeol23front.bookset.tag.dto.PageResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,9 +28,9 @@ public interface BookApiClient {
 		@RequestBody BookUpdateRequest request);
 
 	@GetMapping("/api/books")
-	List<BookResponse> getBooks(
-		@RequestParam(defaultValue = "0") int pageNo,
-		@RequestParam(defaultValue = "10") int pageSize
+	ResponseEntity<PageResponse<BookResponse>> getBooks(
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "20") int size
 	);
 
 	@GetMapping("/api/books/{book-id}/stock")
