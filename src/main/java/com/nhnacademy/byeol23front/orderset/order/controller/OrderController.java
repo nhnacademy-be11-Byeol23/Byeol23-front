@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -39,6 +40,9 @@ public class OrderController {
 	private final DeliveryApiClient deliveryApiClient;
 	private final OrderUtil orderUtil;
 
+	@Value("${tossPayment.client-key}")
+	private String tossClientKey;
+
 	@PostMapping("/direct")
 	@ResponseBody
 	public ResponseEntity<Void> handleDirectOrder(@RequestBody BookOrderRequest request,
@@ -71,6 +75,7 @@ public class OrderController {
 		orderUtil.addDeliveryFeeToModel(model, request);
 		orderUtil.addPackagingOption(model);
 
+		model.addAttribute("clientKey", tossClientKey);
 		model.addAttribute("userPoint", 300_000);
 
 		return "order/checkout";
