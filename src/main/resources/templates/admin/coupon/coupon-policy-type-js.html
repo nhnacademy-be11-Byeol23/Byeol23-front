@@ -5,12 +5,13 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
 
+            // ============================================================
+            // 1. 할인 유형 선택 로직 (정률 vs 정액)
+            // ============================================================
             const rateRadio = document.getElementById('rateDiscount');
             const fixedRadio = document.getElementById('fixedDiscount');
-
             const rateOptions = document.getElementById('rateOptions');
             const fixedOptions = document.getElementById('fixedOptions');
-
             const discountRateInput = document.getElementById('discountRate');
             const discountLimitInput = document.getElementById('discountLimit');
             const discountAmountInput = document.getElementById('discountAmount');
@@ -46,44 +47,50 @@
                 }
             }
 
-            if (rateRadio) {
-                rateRadio.addEventListener('change', toggleDiscountOptions);
-            }
-            if (fixedRadio) {
-                fixedRadio.addEventListener('change', toggleDiscountOptions);
-            }
+            if (rateRadio) rateRadio.addEventListener('change', toggleDiscountOptions);
+            if (fixedRadio) fixedRadio.addEventListener('change', toggleDiscountOptions);
+
+            // 초기 실행
             toggleDiscountOptions();
 
 
-            const categoryBtn = document.getElementById('showCategoryTarget');
-            const bookBtn = document.getElementById('showBookTarget');
+            // ============================================================
+            // 2. 적용 대상 선택 로직 (카테고리 vs 도서) - [수정됨]
+            // ============================================================
+            // HTML에서 라디오 버튼의 name을 "targetTypeSelect"로,
+            // ID를 각각 "targetCategory", "targetBook"으로 수정했다고 가정합니다.
+            const targetRadios = document.querySelectorAll('input[name="targetTypeSelect"]');
 
             const categorySection = document.getElementById('categoryListContainer');
             const bookSection = document.getElementById('bookListContainer');
 
-            const scopeInput = document.getElementById('couponScope');
+            const scopeInput = document.getElementById('couponPolicyType');
             const categoryIdsInput = document.getElementById('selectedCategoryIds');
             const bookIdInput = document.getElementById('selectedBookId');
             const policyNameInput = document.getElementById('policyName');
             const originalPolicyNamePlaceholder = policyNameInput ? policyNameInput.placeholder : '';
 
-            if (categoryBtn) {
-                categoryBtn.addEventListener('click', function() {
+            // 대상 변경 처리 함수
+            function handleTargetTypeChange(type) {
+                // scope 값 업데이트
+                if (scopeInput) scopeInput.value = type;
+
+                if (type === 'CATEGORY') {
+                    // 1) UI 표시 전환
                     if (categorySection) categorySection.style.display = 'block';
                     if (bookSection) bookSection.style.display = 'none';
-                    if (scopeInput) scopeInput.value = 'CATEGORY';
+
+                    // 2) 도서 데이터 초기화
                     if (bookIdInput) bookIdInput.value = '';
+                    document.querySelectorAll('.book-radio').forEach(el => el.checked = false);
+
+                    // 3) 플레이스홀더 변경
                     if (policyNameInput) policyNameInput.placeholder = '예: IT/컴퓨터 10% 할인';
 
-                    categoryBtn.classList.remove('btn-outline-info');
-                    categoryBtn.classList.add('btn-info');
-                    bookBtn.classList.remove('btn-dark');
-                    bookBtn.classList.add('btn-outline-dark');
-
+                    // 4) 카테고리 트리 로드 (최초 1회)
                     const rootUl = document.getElementById('category-tree');
                     if (rootUl && categorySection.dataset.allLoaded !== 'true') {
                         console.log('최초 1회, 모든 카테고리 로드를 시작합니다...');
-
                         const topLevelToggles = rootUl.querySelectorAll(':scope > li > div > button.category-toggle');
 
                         topLevelToggles.forEach(toggle => {
@@ -93,34 +100,45 @@
                                 globalThis.loadCategoryChildren(categoryId, childrenUl, true);
                             }
                         });
-
                         categorySection.dataset.allLoaded = 'true';
                     }
 
-                });
-            }
-
-            if (bookBtn) {
-                bookBtn.addEventListener('click', function() {
+                } else if (type === 'BOOK') {
+                    // 1) UI 표시 전환
                     if (categorySection) categorySection.style.display = 'none';
                     if (bookSection) bookSection.style.display = 'block';
-                    if (scopeInput) scopeInput.value = 'BOOK';
-                    if (categoryIdsInput) categoryIdsInput.value = '';
-                    if (globalThis.updateSelectedCategories) {
-                        globalThis.updateSelectedCategories();
-                    }
-                    if (policyNameInput) policyNameInput.placeholder = '예: "이펙티브 자바" 1,000원 할인';
 
-                    categoryBtn.classList.add('btn-outline-info');
-                    categoryBtn.classList.remove('btn-info');
-                    bookBtn.classList.add('btn-dark');
-                    bookBtn.classList.remove('btn-outline-dark');
-                });
+                    // 2) 카테고리 데이터 초기화
+                    if (categoryIdsInput) categoryIdsInput.value = '';
+                    document.querySelectorAll('.category-tree-radio').forEach(el => el.checked = false);
+                    if (globalThis.updateSelectedCategories) {
+                        globalThis.updateSelectedCategories(); // 뱃지 UI 제거
+                    }
+
+                    // 3) 플레이스홀더 변경
+                    if (policyNameInput) policyNameInput.placeholder = '예: "이펙티브 자바" 1,000원 할인';
+                }
             }
 
+            // 이벤트 리스너 등록
+            targetRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    handleTargetTypeChange(this.value);
+                });
+            });
+
+            // 초기 상태 반영 (HTML checked 속성 기준)
+            const initialChecked = document.querySelector('input[name="targetTypeSelect"]:checked');
+            if (initialChecked) {
+                handleTargetTypeChange(initialChecked.value);
+            }
+
+
+            // ============================================================
+            // 3. 폼 제출 및 리셋 핸들러
+            // ============================================================
             const form = document.querySelector('form[action="/admin/coupon-policy"]');
             if (form) {
-
                 form.addEventListener('submit', function (event) {
                     event.preventDefault();
 
@@ -128,13 +146,16 @@
                     let isValid = false;
                     let alertMessage = '';
 
+                    // 할인 값 검증
                     if (discountType === 'RATE') {
                         const discountRate = document.getElementById('discountRate').value;
                         const discountLimit = document.getElementById('discountLimit').value;
-                        if (discountRate && discountRate > 0 && discountLimit && discountLimit >= 0) {
+
+                        if (discountRate && discountRate > 0) {
+                            // discountLimit는 0일 수도 있으므로(제한없음) rate만 필수 체크
                             isValid = true;
                         } else {
-                            alertMessage = '할인률(%)과 최대 할인 금액(원)을 모두 올바르게 입력해주세요.';
+                            alertMessage = '할인률(%)을 올바르게 입력해주세요.';
                             isValid = false;
                         }
                     } else if (discountType === 'FIXED') {
@@ -147,6 +168,7 @@
                         }
                     }
 
+                    // 적용 대상 선택 검증
                     if (isValid) {
                         const scope = scopeInput.value;
                         const categoryIds = categoryIdsInput.value;
@@ -172,43 +194,42 @@
                 });
 
                 form.addEventListener('reset', function() {
+                    // 1) 할인 유형 리셋
                     document.getElementById('rateDiscount').checked = true;
                     document.getElementById('fixedDiscount').checked = false;
-                    if(rateOptions) rateOptions.style.display = 'flex';
-                    if(fixedOptions) fixedOptions.style.display = 'none';
+                    toggleDiscountOptions();
 
-                    if (categorySection) categorySection.style.display = 'none';
-                    if (bookSection) bookSection.style.display = 'none';
-                    if (scopeInput) scopeInput.value = '';
+                    // 2) 적용 대상 리셋 (카테고리로 초기화)
+                    // targetCategory ID를 가진 라디오 버튼이 있다고 가정
+                    const categoryRadio = document.getElementById('targetCategory');
+                    if (categoryRadio) {
+                        categoryRadio.checked = true;
+                        handleTargetTypeChange('CATEGORY');
+                    }
+
+                    // 3) 입력값 및 선택값 초기화
+                    if (scopeInput) scopeInput.value = 'CATEGORY';
                     if (categoryIdsInput) categoryIdsInput.value = '';
                     if (bookIdInput) bookIdInput.value = '';
 
                     const checkedCategoryRadio = document.querySelector('.category-tree-radio:checked');
-                    if (checkedCategoryRadio) {
-                        checkedCategoryRadio.checked = false;
-                    }
+                    if (checkedCategoryRadio) checkedCategoryRadio.checked = false;
 
                     const checkedBookRadio = document.querySelector('.book-radio:checked');
-                    if (checkedBookRadio) {
-                        checkedBookRadio.checked = false;
-                    }
+                    if (checkedBookRadio) checkedBookRadio.checked = false;
 
                     if (globalThis.updateSelectedCategories) {
                         globalThis.updateSelectedCategories();
                     }
                     if (policyNameInput) policyNameInput.placeholder = originalPolicyNamePlaceholder;
-                    if (categoryBtn) {
-                        categoryBtn.classList.add('btn-outline-info');
-                        categoryBtn.classList.remove('btn-info');
-                    }
-                    if (bookBtn) {
-                        bookBtn.classList.add('btn-outline-dark');
-                        bookBtn.classList.remove('btn-dark');
-                    }
                 });
             }
-
         });
+
+
+        // ============================================================
+        // 4. 전역(Global) 함수들 - 카테고리 트리 및 선택 로직
+        // ============================================================
 
         globalThis.toggleCategory = function(element) {
             const categoryId = element.dataset.id;
@@ -349,6 +370,5 @@
         };
     </script>
 </th:block>
-
 </body>
 </html>
