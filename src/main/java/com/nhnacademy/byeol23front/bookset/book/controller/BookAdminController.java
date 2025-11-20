@@ -1,32 +1,28 @@
 package com.nhnacademy.byeol23front.bookset.book.controller;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
-import com.nhnacademy.byeol23front.bookset.book.client.BookDocumentSyncApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.*;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
-
+import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
+import com.nhnacademy.byeol23front.bookset.contributor.client.ContributorApiClient;
+import com.nhnacademy.byeol23front.bookset.contributor.dto.AllContributorResponse;
+import com.nhnacademy.byeol23front.bookset.publisher.client.PublisherApiClient;
+import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
+import com.nhnacademy.byeol23front.bookset.tag.client.TagApiClient;
+import com.nhnacademy.byeol23front.bookset.tag.dto.AllTagsInfoResponse;
+import com.nhnacademy.byeol23front.bookset.tag.dto.PageResponse;
+import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
+import com.nhnacademy.byeol23front.minio.service.MinioService;
+import com.nhnacademy.byeol23front.minio.util.ImageDomain;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
-import com.nhnacademy.byeol23front.bookset.publisher.client.PublisherApiClient;
-import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
-import com.nhnacademy.byeol23front.bookset.tag.client.TagApiClient;
-import com.nhnacademy.byeol23front.bookset.tag.dto.AllTagsInfoResponse;
-import com.nhnacademy.byeol23front.bookset.tag.dto.PageResponse;
-import com.nhnacademy.byeol23front.bookset.contributor.client.ContributorApiClient;
-import com.nhnacademy.byeol23front.bookset.contributor.dto.AllContributorResponse;
-import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
-import com.nhnacademy.byeol23front.minio.service.MinioService;
-import com.nhnacademy.byeol23front.minio.util.ImageDomain;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +39,6 @@ public class BookAdminController {
 	private final ContributorApiClient contributorApiClient;
 	private final PublisherApiClient publisherApiClient;
 	private final MinioService minioService;
-    private final BookDocumentSyncApiClient bookDocumentSyncApiClient;
 
 	private static final String ALL_CONTRIBUTORS = "allContributors";
 	private static final String CATEGORIES = "categories";
@@ -96,8 +91,6 @@ public class BookAdminController {
 					}
 				}
 			}
-			bookDocumentSyncApiClient.publishBookOutbox(bookId, BookOutboxEventType.ADD);
-			log.info("도서 아웃박스 이벤트 발행: {}", bookId);
 			return "redirect:/admin/books";
 
 		} catch (FeignException.BadRequest e) {
@@ -239,7 +232,7 @@ public class BookAdminController {
 		if (response == null) {
 			response = new PageResponse<>(List.of(), page, size, 0, 0, true, true);
 		}
-		
+
 		model.addAttribute("books", response.content());
 		model.addAttribute("paging", response);
 		return "admin/book/bookList";
