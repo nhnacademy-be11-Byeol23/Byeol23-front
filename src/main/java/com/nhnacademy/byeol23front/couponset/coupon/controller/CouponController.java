@@ -3,6 +3,8 @@ package com.nhnacademy.byeol23front.couponset.coupon.controller;
 import com.nhnacademy.byeol23front.couponset.couponpolicy.client.CouponPolicyApiClient;
 import com.nhnacademy.byeol23front.couponset.couponpolicy.dto.CouponPolicyInfoResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,10 +21,10 @@ public class CouponController {
     private final CouponPolicyApiClient couponPolicyApiClient;
 
     @GetMapping()
-    public String couponIssuePage(Model model){
-//        List<CouponPolicyInfoResponse> couponPolicyInfoResponseList
-//                = couponPolicyApiClient.getCouponPolicies().getBody();
-//        model.addAttribute("policies", couponPolicyInfoResponseList);
+    public String couponIssuePage(Model model, Pageable pageable){
+        Page<CouponPolicyInfoResponse> couponPolicyInfoResponseList
+                = couponPolicyApiClient.getCouponPolicies(pageable).getBody();
+        model.addAttribute("policies", couponPolicyInfoResponseList);
 
         return "admin/coupon/coupon_issue";
     }
