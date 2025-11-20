@@ -5,6 +5,7 @@ import com.nhnacademy.byeol23front.couponset.couponpolicy.dto.CouponPolicyInfoRe
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,7 +22,7 @@ public class CouponController {
     private final CouponPolicyApiClient couponPolicyApiClient;
 
     @GetMapping()
-    public String couponIssuePage(Model model, Pageable pageable){
+    public String couponIssuePage(Model model, @PageableDefault Pageable pageable){
         Page<CouponPolicyInfoResponse> couponPolicyInfoResponseList
                 = couponPolicyApiClient.getCouponPolicies(pageable).getBody();
         model.addAttribute("policies", couponPolicyInfoResponseList);
