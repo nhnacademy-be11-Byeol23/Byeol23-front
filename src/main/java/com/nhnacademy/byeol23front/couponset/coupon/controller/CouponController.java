@@ -3,9 +3,13 @@ package com.nhnacademy.byeol23front.couponset.coupon.controller;
 import com.nhnacademy.byeol23front.couponset.couponpolicy.client.CouponPolicyApiClient;
 import com.nhnacademy.byeol23front.couponset.couponpolicy.dto.CouponPolicyInfoResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -16,15 +20,20 @@ import java.util.List;
 public class CouponController {
     private final CouponPolicyApiClient couponPolicyApiClient;
 
-    @GetMapping("/register")
-    public String couponRegister(Model model){
-        List<CouponPolicyInfoResponse> couponPolicyInfoResponseList
-                = couponPolicyApiClient.getCouponPolicies().getBody();
+    @GetMapping()
+    public String couponIssuePage(Model model, Pageable pageable){
+        Page<CouponPolicyInfoResponse> couponPolicyInfoResponseList
+                = couponPolicyApiClient.getCouponPolicies(pageable).getBody();
         model.addAttribute("policies", couponPolicyInfoResponseList);
 
+        return "admin/coupon/coupon_issue";
+    }
+
+    @PostMapping()
+    public ResponseEntity<Void> issueCoupon(){
 
 
 
-        return "admin/coupon/coupon_register";
+        return ResponseEntity.ok().build();
     }
 }

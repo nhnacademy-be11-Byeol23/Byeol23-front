@@ -1,4 +1,16 @@
 (function () {
+    function sanitizeEditorContent(html) {
+        if (!html) {
+            return "";
+        }
+        return html
+            .replace(/<\/p>/gi, '\n')
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<[^>]*>/g, '')
+            .replace(/\n{2,}/g, '\n')
+            .trim();
+    }
+
     function initEditor() {
         // 1) Make sure Toast UI is loaded
         if (!window.toastui || !toastui.Editor) {
@@ -29,30 +41,20 @@
 
         // 4) Initialize the TOC editor
         const tocEditorElement = document.querySelector("#tocEditor");
-        let tocEditor = null;
         if (tocEditorElement) {
-            tocEditor = new toastui.Editor({
+            const tocEditor = new toastui.Editor({
                 el: tocEditorElement,
                 height: "300px",
                 initialEditType: "wysiwyg",
                 placeholder: "도서 목차를 입력하세요…",
+                initialValue: ' ',
                 toolbarItems: [
                     ["heading", "bold", "italic", "strike"],
                     ["hr", "quote"],
                     ["ul", "ol", "task"],
                     ["link"],
                     ["code", "codeblock"]
-                ],
-                // 빈 상태에서 회색 줄 제거를 위한 설정
-                events: {
-                    load: function() {
-                        // 에디터 로드 후 스타일 조정
-                        const editorEl = tocEditorElement.querySelector('.toastui-editor-contents');
-                        if (editorEl) {
-                            editorEl.style.minHeight = '0';
-                        }
-                    }
-                }
+                ]
             });
             window.tocEditor = tocEditor; // 전역 변수로 저장
 
@@ -101,8 +103,8 @@
             if (hidden) hidden.value = value;
             
             // 목차 에디터 내용도 저장
-            if (tocEditor) {
-                const tocValue = tocEditor.getHTML();
+            if (window.tocEditor) {
+                const tocValue = window.tocEditor.getHTML();
                 const tocHidden = document.getElementById("toc");
                 if (tocHidden) tocHidden.value = tocValue;
             }
@@ -115,10 +117,12 @@
             bookForm.addEventListener('submit', function (event) {
                 event.preventDefault();
                 if (editor) {
-                    document.getElementById('description').value = editor.getHTML();
+                    document.getElementById('description').value = sanitizeEditorContent(editor.getHTML());
                 }
-                if (tocEditor) {
-                    document.getElementById('toc').value = tocEditor.getHTML();
+                // TOC는 항상 빈 문자열로 저장
+                const tocInput = document.getElementById('toc');
+                if (tocInput) {
+                    tocInput.value = '';
                 }
 
                 // String 값으로 받아서 처리
@@ -127,22 +131,29 @@
                 const stockStr = document.getElementById("stock").value;
                 const publisherIdStr = document.getElementById("publisherId").value;
 
+                // 카테고리 ID 파싱
+                const categoryIdsInput = document.getElementById("selectedCategoryIds");
+                const categoryIdsStr = categoryIdsInput ? categoryIdsInput.value : "";
+                const categoryIds = categoryIdsStr 
+                    ? categoryIdsStr.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id))
+                    : [];
+
                 const requestBody = {
                     bookName: document.getElementById("bookName").value,
-                    author: document.getElementById("author").value,  // 추가
-                    translator: document.getElementById("translator").value,
-                    publisher: document.getElementById("publisherName").value,  // 추가
+                    author: document.getElementById("author").value,
+                    translator: document.getElementById("translator").value || "",
+                    publisher: document.getElementById("publisherName").value,
                     description: document.getElementById("description").value,
                     regularPrice: regularPriceStr ? parseFloat(regularPriceStr) : null,
                     salePrice: salePriceStr ? parseFloat(salePriceStr) : null,
                     isbn: document.getElementById("isbn").value,
                     publishDate: document.getElementById("publishDate").value,
-                    imageUrl: document.getElementById("imageUrl").value,  // 추가
+                    imageUrl: document.getElementById("imageUrl").value,
                     toc: document.getElementById("toc").value,
                     stock: stockStr ? parseInt(stockStr, 10) : null,
                     isPack: bookForm.querySelector('#isPack').checked,
                     bookStatus: document.getElementById("bookStatus").value,
-                    categoryIds: [],  // 선택된 카테고리 ID들
+                    categoryIds: categoryIds,  // 선택된 카테고리 ID들
                     tagIds: [],       // 선택된 태그 ID들
                     contributorIds: []  // 파싱된 기여자 ID들 (서버에서 처리)
                 };
@@ -159,18 +170,40 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(requestBody),
+                    redirect: 'manual'  // 리다이렉트를 수동으로 처리
                 })
                     .then(response => {
-                        if (response.ok) {
+                        if (response.status === 302 || response.status === 0) {
+                            // 302 리다이렉트 응답 또는 CORS 리다이렉트
+                            const location = response.headers.get('Location');
+                            if (location && location.includes('/admin/books')) {
+                                // 성공 리다이렉트
+                                alert('도서가 성공적으로 생성되었습니다.');
+                                window.location.href = location;
+                            } else if (location && location.includes('/admin/bookApi/new')) {
+                                // 실패 리다이렉트 (에러 메시지가 플래시 속성으로 전달됨)
+                                alert('도서 생성에 실패했습니다. 페이지를 새로고침하여 오류 메시지를 확인하세요.');
+                                window.location.href = location;
+                            } else {
+                                // 알 수 없는 리다이렉트
+                                window.location.href = location || '/admin/books';
+                            }
+                        } else if (response.ok) {
+                            // 성공 응답
                             alert('도서가 성공적으로 생성되었습니다.');
                             window.location.href = '/admin/books';
                         } else {
-                            response.text().then(text => alert('도서 생성에 실패했습니다: ' + text));
+                            // 에러 응답
+                            response.text().then(text => {
+                                console.error('도서 생성 실패:', text);
+                                alert('도서 생성에 실패했습니다. 페이지를 새로고침하여 오류 메시지를 확인하세요.');
+                                window.location.href = '/admin/bookApi/new';
+                            });
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('오류가 발생했습니다.');
+                        alert('오류가 발생했습니다: ' + error.message);
                     });
             });
         }
@@ -291,24 +324,11 @@
 					window.editor.setMarkdown(desc);
 				}
 			}
-			
-			// 출판사 처리 - 이름을 먼저 표시하고, ID를 찾아서 설정
+
 			if (b.publisher) {
-				// 출판사 이름 표시
+				// 출판사 이름만 표시
 				set("publisherName", b.publisher);
-				
-				// 출판사 ID 찾기 또는 생성
-				findOrCreatePublisher(b.publisher).then(publisherId => {
-					if (publisherId) {
-						const publisherIdEl = document.getElementById("publisherId");
-						if (publisherIdEl) {
-							publisherIdEl.value = String(publisherId);
-							console.log("출판사 ID 설정:", publisherId);
-						}
-					}
-				}).catch(err => {
-					console.error("출판사 처리 실패:", err);
-				});
+				// 출판사 ID는 백엔드에서 처리하므로 여기서는 설정하지 않음
 			}
 		} catch (e) {
 			console.error("Failed to parse aladinBookDraft:", e);
@@ -323,29 +343,4 @@
 	}
 })();
 
-// 출판사 찾기 또는 생성 함수
-async function findOrCreatePublisher(publisherName) {
-    try {
-        const response = await fetch('/api/publishers/find-or-create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                publisherName: publisherName
-            })
-        });
-        
-        if (response.ok) {
-            const publisher = await response.json();
-            return publisher.publisherId;
-        } else {
-            console.error('출판사 찾기/생성 실패:', response.status);
-            return null;
-        }
-    } catch (error) {
-        console.error('출판사 처리 중 오류:', error);
-        return null;
-    }
-}
 

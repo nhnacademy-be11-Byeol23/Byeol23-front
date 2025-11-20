@@ -103,16 +103,24 @@
                                     <div class="col-12">
                                         <label class="form-label">적용 대상</label>
                                         <div>
-                                            <button type="button" id="showCategoryTarget" class="btn btn-outline-info me-2">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="targetTypeSelect"
+                                                       id="targetCategory" value="CATEGORY" checked> <label class="form-check-label" for="targetCategory">
                                                 <i class="bi bi-tags"></i> 카테고리
-                                            </button>
-                                            <button type="button" id="showBookTarget" class="btn btn-outline-dark">
-                                                <i class="bi bi-book"></i> 도서
-                                            </button>
+                                            </label>
+                                            </div>
+
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="targetTypeSelect"
+                                                       id="targetBook" value="BOOK">
+                                                <label class="form-check-label" for="targetBook">
+                                                    <i class="bi bi-book"></i> 도서
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <input type="hidden" id="couponScope" name="couponScope" value="">
+                                    <input type="hidden" id="couponPolicyType" name="couponPolicyType" value="">
                                     <input type="hidden" id="selectedCategoryIds" name="categoryIds" value="">
                                     <input type="hidden" id="selectedBookId" name="bookId" value="">
 
@@ -167,10 +175,10 @@
                                         <div class="card card-body shadow-sm pt-3">
                                             <h6 class="fw-semibold mb-3">적용할 도서 선택</h6>
 
-                                            <div class="input-group mb-3">
-                                                <input type="text" class="form-control" placeholder="도서 ID 또는 이름으로 검색...">
-                                                <button class="btn btn-outline-secondary" type="button">검색</button>
-                                            </div>
+<!--                                            <div class="input-group mb-3">-->
+<!--                                                <input type="text" class="form-control" placeholder="도서 ID 또는 이름으로 검색...">-->
+<!--                                                <button class="btn btn-outline-secondary" type="button">검색</button>-->
+<!--                                            </div>-->
 
                                             <div style="max-height: 300px; overflow-y: auto;">
                                                 <table class="table table-hover align-middle">
@@ -208,9 +216,6 @@
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <p class="text-muted small mt-2">
-                                                현재 첫 10개 페이지만 표시됩니다. (추후 검색 및 페이징 기능 추가)
-                                            </p>
                                         </div>
                                     </div>
 
@@ -245,10 +250,10 @@
                                         </tr>
                                         <tr th:each="policy : ${policies}">
                                             <td th:text="${policy.policyName}"></td>
-                                            <td th:text="${#numbers.formatInteger(policy.criterionPrice, 3, 'COMMA') + '원'}"></td>
+                                            <td th:text="${#numbers.formatInteger(policy.criterionPrice, 0, 'COMMA') + '원'}"></td>
                                             <td th:text="${policy.discountRate != null ? policy.discountRate + '%' : '-'}"></td>
-                                            <td th:text="${policy.discountLimit != null ? #numbers.formatInteger(policy.discountLimit, 3, 'COMMA') + '원' : '-'}"></td>
-                                            <td th:text="${policy.discountAmount != null ? #numbers.formatInteger(policy.discountAmount, 3, 'COMMA') + '원' : '-'}"></td>
+                                            <td th:text="${policy.discountLimit != null ? #numbers.formatInteger(policy.discountLimit, 0, 'COMMA') + '원' : '-'}"></td>
+                                            <td th:text="${policy.discountAmount != null ? #numbers.formatInteger(policy.discountAmount, 0, 'COMMA') + '원' : '-'}"></td>
                                         </tr>
                                         </tbody>
                                     </table>

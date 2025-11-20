@@ -1,7 +1,19 @@
 function apiSearch() {
     const input = document.getElementById("keyword").value.trim();
-    const page = document.getElementById("page").value;
     const size = document.getElementById("size").value;
+    
+    // 현재 URL에서 키워드 파라미터 가져오기
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentKeyword = urlParams.get('keyword') || '';
+    
+    // 키워드가 변경되었으면 페이지를 1로 리셋, 같으면 현재 페이지 유지
+    let page = 1; // 기본값은 1
+    if (input === currentKeyword) {
+        // 키워드가 같으면 현재 페이지 유지
+        const currentPage = document.getElementById("page").value;
+        page = currentPage || 1;
+    }
+    
     window.location.href =
         `/admin/bookApi?keyword=${encodeURIComponent(input)}&page=${page}&size=${size}`;
 }
