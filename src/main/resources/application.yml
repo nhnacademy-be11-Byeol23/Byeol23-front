@@ -8,6 +8,8 @@ spring:
     active: dev
 
 
+tossPayment:
+  client-key: test_ck_nRQoOaPz8L4QRwM6lGa58y47BMw6
 
 eureka:
   client:

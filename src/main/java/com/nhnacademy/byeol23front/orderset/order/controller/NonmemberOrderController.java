@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,9 @@ public class NonmemberOrderController {
 	private final BookApiClient bookApiClient;
 	private final OrderUtil orderUtil;
 
+	@Value("${tossPayment.client-key}")
+	private String tossClientKey;
+
 	@GetMapping("/direct")
 	public String getOrderFormDirect(@RequestParam(name = "bookId") Long bookId,
 		@RequestParam(name = "quantity") int quantity,
@@ -35,6 +39,7 @@ public class NonmemberOrderController {
 
 		model.addAttribute("orderItem", bookOrderRequest.bookList());
 		model.addAttribute("quantity", quantity);
+		model.addAttribute("tossClientKey", tossClientKey);
 
 		orderUtil.addTotalQuantity(model, bookOrderRequest.bookList());
 		orderUtil.addDeliveryDatesToModel(model);
