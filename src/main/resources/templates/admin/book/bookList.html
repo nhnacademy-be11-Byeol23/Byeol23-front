@@ -96,6 +96,30 @@
                                 </tr>
                                 </tbody>
                             </table>
+
+                            <nav th:if="${!books.isEmpty()}" class="mt-3">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item" th:classappend="${paging.first()} ? 'disabled'">
+                                        <a class="page-link"
+                                           th:href="@{|?page=${paging.number() - 1}|}">
+                                            <span>이전</span>
+                                        </a>
+                                    </li>
+                                    <li th:each="pageNum: ${#numbers.sequence(0, paging.totalPages() - 1)}"
+                                        th:if="${pageNum >= paging.number() - 5 and pageNum <= paging.number() + 5}"
+                                        th:classappend="${pageNum == paging.number()} ? 'active'"
+                                        class="page-item">
+                                        <a th:text="${pageNum + 1}" 
+                                           class="page-link" 
+                                           th:href="@{|?page=${pageNum}|}"></a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${paging.last()} ? 'disabled'">
+                                        <a class="page-link" th:href="@{|?page=${paging.number() + 1}|}">
+                                            <span>다음</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 </div>
