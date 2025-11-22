@@ -39,27 +39,24 @@ public class CouponPolicyController {
             @Qualifier("policy") Pageable policyPageable,
 
             // 2. 도서 목록 페이징: book_page, book_size 파라미터 사용 (크기 10)
-            @PageableDefault(size = 10, page = 0, sort = "bookId")
-            @Qualifier("book") Pageable bookPageable
-    ) {
-        // 1. 쿠폰 정책 목록 (페이징)
+            @RequestParam(name = "book_page", defaultValue = "0") int bookPage,
+            @RequestParam(name = "book_size", defaultValue = "10") int bookSize) {
+        //쿠폰 정책 목록
         ResponseEntity<Page<CouponPolicyInfoResponse>> policyResponse = couponPolicyApiClient.getCouponPolicies(policyPageable);
         model.addAttribute("pageTitle", "쿠폰 정책 생성");
         model.addAttribute("policies", policyResponse.getBody()); // 💡 .getBody() 호출
 
-        // 2. 최상위 카테고리 정보
+        //최상위 카테고리 정보
         List<CategoryListResponse> roots = categoryApiClient.getRoots();
         model.addAttribute("categories", roots);
 
-        // 3. 도서 리스트 (페이징 적용)
+        //도서 리스트
         ResponseEntity<PageResponse<BookResponse>> bookResponse = bookApiClient.getBooks(
-                bookPageable.getPageNumber(),
-                bookPageable.getPageSize()
+                bookPage,
+                bookSize
         );
-        // 💡 books 대신 booksPage로 PageResponse 객체를 모델에 추가
         model.addAttribute("booksPage", bookResponse.getBody());
 
-        // 💡 HTML에서 기존에 사용하던 "books" 모델을 위해 임시로 content만 추가 (Thymeleaf 수정의 번거로움을 줄이기 위해)
         model.addAttribute("books", bookResponse.getBody().content());
 
         return "admin/coupon/coupon_policy";
