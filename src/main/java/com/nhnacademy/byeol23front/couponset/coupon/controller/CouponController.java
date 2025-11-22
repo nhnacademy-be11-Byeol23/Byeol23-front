@@ -30,6 +30,7 @@ public class CouponController {
         return "admin/coupon/coupon_issue";
     }
 
+    //쿠폰 발급
     @PostMapping()
     public ResponseEntity<Void> issueCoupon(){
 

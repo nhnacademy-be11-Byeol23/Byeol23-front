@@ -41,7 +41,7 @@
                 <div class="col-lg-9">
                     <div class="registration-page">
 
-                        <div class="card shadow-sm">
+                        <div class="card shadow-sm mb-5">
                             <div class="card-body">
                                 <h5 class="fw-semibold mb-3">신규 쿠폰 발급</h5>
                                 <form id="couponRegistrationForm" action="/admin/coupons" method="post" class="row g-3">
@@ -56,8 +56,8 @@
                                         <label for="couponPolicyId" class="form-label">쿠폰 정책 선택</label>
                                         <select class="form-select" id="couponPolicyId" name="couponPolicyId" required>
                                             <option value="" selected disabled>적용할 쿠폰 정책을 선택하세요</option>
-                                            <option th:each="policy : ${policies}"
-
+                                            <option th:each="policy : ${policies.content}"
+                                                    th:value="${policy.couponPolicyId}"
                                                     th:text="${policy.policyName}">
                                                 신규 회원가입 10% 할인
                                             </option>
@@ -69,7 +69,61 @@
                                 </form>
                             </div>
                         </div>
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3">등록된 쿠폰 정책 목록</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped">
+                                        <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>정책명</th>
+                                            <th>기준 금액</th>
+                                            <th>할인율</th>
+                                            <th>최대 할인 금액</th>
+                                            <th>할인 금액</th>
+                                            <th>정책 타입</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="policy : ${policies.content}">
+                                            <td th:text="${policy.couponPolicyId}">1</td>
+                                            <td th:text="${policy.policyName}">신규 회원 10% 할인</td>
+                                            <td th:text="${#numbers.formatInteger(policy.criterionPrice, 0, 'COMMA')}">10,000</td>
+                                            <td th:text="${policy.discountRate} ? ${policy.discountRate} + '%' : '-'">10%</td>
+                                            <td th:text="${policy.discountLimit} ? ${#numbers.formatInteger(policy.discountLimit, 0, 'COMMA')} : '-'">5,000</td>
+                                            <td th:text="${policy.discountAmount} ? ${#numbers.formatInteger(policy.discountAmount, 0, 'COMMA')} : '-'">-</td>
+                                            <td th:text="${policy.couponPolicyType}">RATE</td>
+                                        </tr>
+                                        <tr th:if="${policies.content.isEmpty()}">
+                                            <td colspan="7" class="text-center">등록된 쿠폰 정책이 없습니다.</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
 
+                                <nav th:if="${!policies.content.isEmpty()}" aria-label="Page navigation">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item" th:classappend="${policies.first} ? 'disabled' : ''">
+                                            <a class="page-link" th:href="@{/admin/coupon(page=${policies.number - 1}, size=${policies.size})}" aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+
+                                        <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, policies.totalPages - 1)}"
+                                            th:classappend="${pageNumber == policies.number} ? 'active' : ''">
+                                            <a class="page-link" th:href="@{/admin/coupon(page=${pageNumber}, size=${policies.size})}" th:text="${pageNumber + 1}">1</a>
+                                        </li>
+
+                                        <li class="page-item" th:classappend="${policies.last} ? 'disabled' : ''">
+                                            <a class="page-link" th:href="@{/admin/coupon(page=${policies.number + 1}, size=${policies.size})}" aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
