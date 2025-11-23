@@ -29,6 +29,7 @@ import com.nhnacademy.byeol23front.minio.service.MinioService;
 import com.nhnacademy.byeol23front.minio.util.ImageDomain;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
+import com.nhnacademy.byeol23front.point.client.PointHistoryFeignClient;
 
 @Slf4j
 @Controller
@@ -39,6 +40,7 @@ public class MypageController {
 	private final OrderApiClient orderApiClient;
 	private final MinioService minioService;
 	private final AddressApiClient addressApiClient;
+	private final PointHistoryFeignClient pointHistoryFeignClient;
 
 	@ModelAttribute("activeTab")
 	public String addActiveTabToModel(HttpServletRequest request) {
@@ -126,6 +128,14 @@ public class MypageController {
 	public String getReviews(Model model) {
 
 		return "mypage/reviews";
+	}
+
+	@GetMapping("/points")
+	public String getPoints(Model model) {
+		model.addAttribute("activeTab", "points");
+		model.addAttribute("pointsHistories",
+			pointHistoryFeignClient.getPointHistories());
+		return "mypage/points_history";
 	}
 
 	@GetMapping("/addresses")

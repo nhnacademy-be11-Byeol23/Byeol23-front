@@ -5,9 +5,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
@@ -33,7 +35,18 @@ public class MinioService {
 	public List<GetUrlResponse> getImageUrl(ImageDomain imageDomain, Long domainId) {
 		ResponseEntity<List<GetUrlResponse>> responses = imageFeignClient.getImageUrls(imageDomain, domainId);
 		if (responses.getBody() != null && !responses.getBody().isEmpty()) {
-			return responses.getBody();
+
+			List<GetUrlResponse> proxiedResponses = responses.getBody().stream()
+				.map(response -> {
+					try {
+						String url = response.imageUrl().replace("http://storage.java21.net:8000/", "https://byeol23.shop/img-proxy");
+						return new GetUrlResponse(response.imageId(), url);
+					} catch (Exception e) {
+						return response;
+					}
+				})
+				.collect(Collectors.toList());
+			return proxiedResponses;
 		}
 		throw new RuntimeException("이미지 URL을 가져오는데 실패했습니다.");
 	}
@@ -57,24 +70,24 @@ public class MinioService {
 		return imageUrl;
 	}
 	// upload image : 업로드 후 url을 반환하도록 변경
-	public String uploadImageFromUrl(ImageDomain imageDomain, Long domainId, String url){
-		MultipartFile imageFile = FileUtil.fromUrl(url);
-		String imageUrl = minioUtil.putObject(imageDomain, domainId, imageFile);
-		try{
-			imageFeignClient.uploadImage(
-				new ImageUploadRequest(
-					domainId,
-					imageUrl,
-					imageDomain
-				)
-			);
-		}catch (Exception e){
-			// 이미지 URL 저장에 실패한 경우, Minio에서 업로드한 이미지를 삭제
-			minioUtil.deleteObject(url);
-			throw new RuntimeException("이미지 URL 저장에 실패했습니다.", e);
-		}
-		return url;
-	}
+	// public String uploadImageFromUrl(ImageDomain imageDomain, Long domainId, String url){
+	// 	MultipartFile imageFile = FileUtil.fromUrl(url);
+	// 	String imageUrl = minioUtil.putObject(imageDomain, domainId, imageFile);
+	// 	try{
+	// 		imageFeignClient.uploadImage(
+	// 			new ImageUploadRequest(
+	// 				domainId,
+	// 				imageUrl,
+	// 				imageDomain
+	// 			)
+	// 		);
+	// 	}catch (Exception e){
+	// 		// 이미지 URL 저장에 실패한 경우, Minio에서 업로드한 이미지를 삭제
+	// 		minioUtil.deleteObject(url);
+	// 		throw new RuntimeException("이미지 URL 저장에 실패했습니다.", e);
+	// 	}
+	// 	return url;
+	// }
 
 	public void deleteImage(ImageDomain imageDomain, Long imageId) {
 		ResponseEntity<String> response = imageFeignClient.deleteImage(
