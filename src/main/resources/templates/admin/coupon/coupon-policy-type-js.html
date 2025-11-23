@@ -55,10 +55,8 @@
 
 
             // ============================================================
-            // 2. 적용 대상 선택 로직 (카테고리 vs 도서) - [수정됨]
+            // 2. 적용 대상 선택 로직 (카테고리 vs 도서)
             // ============================================================
-            // HTML에서 라디오 버튼의 name을 "targetTypeSelect"로,
-            // ID를 각각 "targetCategory", "targetBook"으로 수정했다고 가정합니다.
             const targetRadios = document.querySelectorAll('input[name="targetTypeSelect"]');
 
             const categorySection = document.getElementById('categoryListContainer');
@@ -127,15 +125,30 @@
                 });
             });
 
-            // 초기 상태 반영 (HTML checked 속성 기준)
-            const initialChecked = document.querySelector('input[name="targetTypeSelect"]:checked');
-            if (initialChecked) {
-                handleTargetTypeChange(initialChecked.value);
+            // ============================================================
+            // 3. 페이지 로드 시 상태 유지 로직 (URL 파라미터 확인)
+            // ============================================================
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetTypeParam = urlParams.get('targetTypeSelect');
+
+            if (targetTypeParam === 'BOOK') {
+                const targetBookRadio = document.getElementById('targetBook');
+                if (targetBookRadio) {
+                    targetBookRadio.checked = true;
+                    // true를 넘겨 초기 로드임을 알리고 데이터 초기화를 건너뜁니다.
+                    handleTargetTypeChange('BOOK', true);
+                }
+            } else {
+                const targetCategoryRadio = document.getElementById('targetCategory');
+                if (targetCategoryRadio) {
+                    targetCategoryRadio.checked = true;
+                    handleTargetTypeChange('CATEGORY', true);
+                }
             }
 
 
             // ============================================================
-            // 3. 폼 제출 및 리셋 핸들러
+            // 4. 폼 제출 및 리셋 핸들러
             // ============================================================
             const form = document.querySelector('form[action="/admin/coupon-policy"]');
             if (form) {
@@ -228,7 +241,7 @@
 
 
         // ============================================================
-        // 4. 전역(Global) 함수들 - 카테고리 트리 및 선택 로직
+        // 5. 전역(Global) 함수들 - 카테고리 트리 및 선택 로직
         // ============================================================
 
         globalThis.toggleCategory = function(element) {

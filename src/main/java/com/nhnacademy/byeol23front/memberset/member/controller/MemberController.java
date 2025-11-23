@@ -63,7 +63,9 @@ public class MemberController {
 
 
 	@PostMapping("/login")
-	public String login(@ModelAttribute LoginRequest request, HttpServletResponse response) {
+	public String login(@ModelAttribute LoginRequestTmp tmp, HttpServletResponse response) {
+		LoginRequest request = new LoginRequest(tmp.getLoginId(), tmp.getLoginPassword());
+
 		ResponseEntity<LoginResponse> feignResponse = memberApiClient.login(request);
 		List<String> setCookies = feignResponse.getHeaders().get(HttpHeaders.SET_COOKIE);
 
@@ -71,6 +73,12 @@ public class MemberController {
 			setCookies.forEach(c -> response.addHeader(HttpHeaders.SET_COOKIE, c));
 			setCookies.forEach(c -> log.info("Upstream Set-Cookie: {}", c));
 		}
+
+		if (!Objects.isNull(tmp.getBookId()) && !Objects.isNull(tmp.getQuantity())) {
+			return String.format("redirect:/orders/direct?bookId=%d&quantity=%d",
+				tmp.getBookId(), tmp.getQuantity());
+		}
+
 		return "redirect:/";
 	}
 
