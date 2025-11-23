@@ -64,6 +64,9 @@
                     </span>
                   </div>
 
+                  <input type="hidden" th:if="${bookId != null}" name="bookId" th:value="${bookId}" />
+                  <input type="hidden" th:if="${quantity != null}" name="quantity" th:value="${quantity}" />
+
                   <div class="form-options mb-4">
                     <div class="remember-me">
                       <input type="checkbox" id="rememberLogin">

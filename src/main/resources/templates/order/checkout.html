@@ -9,7 +9,7 @@
     <meta name="keywords" content="">
 
     <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
-    <script src="https://js.tosspayments.com/v1/payment-widget"></script>
+    <script src="//js.tosspayments.com/v1"></script>
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 
@@ -440,6 +440,14 @@
         });
     }
 
+    // 결제 금액 가져오기
+    // 금액 파싱 함수 (이 함수 스코프 안에도 정의)
+    const parsePrice = (priceValue) => {
+        if (priceValue == null) return 0;
+        const priceString = String(priceValue);
+        return Number(priceString.replace(/[^\d]/g, '')) || 0;
+    };
+
     function initTossPayments(clientKey) {
         const paymentButton = document.getElementById('payment-button');
         const actualOrderPriceEl = document.getElementById('actual-order-price'); // 요소 미리 찾아두기
@@ -449,14 +457,6 @@
             return;
         }
         var tossPayments = TossPayments(clientKey);
-
-        // 결제 금액 가져오기
-        // 금액 파싱 함수 (이 함수 스코프 안에도 정의)
-        const parsePrice = (priceValue) => {
-            if (priceValue == null) return 0;
-            const priceString = String(priceValue);
-            return Number(priceString.replace(/[^\d]/g, '')) || 0;
-        };
 
         paymentButton.addEventListener('click', async function () {
 
@@ -561,6 +561,9 @@
                     body: JSON.stringify(orderPrepareRequest)
                 });
 
+                console.log("주문 준비 응답: {}", response)
+                console.log("주문 준비 응답 바디: {}", response.body);
+                console.log("주문 준비 응답 코드: {}", response.status);
 
                 if (!response.ok) {
                     const err = await response.json().catch(() => ({message: '주문 준비 API 응답 실패.'}));

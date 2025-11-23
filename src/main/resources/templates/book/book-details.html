@@ -338,65 +338,33 @@
   document.addEventListener('DOMContentLoaded', () => {
     const buyNowButton = document.getElementById('buy-now-btn');
 
-    const bookId = /*[[${book.bookId}]]*/ 1;
-    const bookName = /*[[${book.bookName}]]*/ "책 이름";
-    const regularPrice = /*[[${book.regularPrice}]]*/ null;
-    const salePrice = /*[[${book.salePrice}]]*/ null;
-    const postUrl = /*[[@{/orders/direct}]]*/ '/orders/direct';
-    const successUrl = /*[[@{/orders/direct}]]*/ '/orders/direct';
-    const imageUrl = /*[[${
-            (book.images != null and !#lists.isEmpty(book.images))
-            ? book.images.get(0).imageUrl()
-            : 'https://image.yes24.com/momo/Noimg_L.jpg'
-        }]]*/ null;
     if (buyNowButton) {
       buyNowButton.addEventListener('click', () => {
-        console.log("버튼 클릭");
+        console.log("바로 구매 버튼 클릭");
 
+        const bookId = /*[[${book.bookId}]]*/ 1;
         const quantityInput = document.querySelector('.quantity-input');
         const quantity = quantityInput ? quantityInput.value : 1;
+        const directUrl = '/orders/direct';
 
-        const isPack = /*[[${book.isPack}]]*/ false;
-        const publisher = /*[[${book.publisher}]]*/ null;
-        const contributors = /*[[${book.contributors}]]*/ [];
-
-        const bookInfoRequest = {
-          bookId: bookId,
-          bookName: bookName,
-          imageUrl: imageUrl,
-          isPack: isPack,
-          regularPrice: regularPrice,
-          salePrice: salePrice,
-          publisher: publisher,
-          quantity: quantity,
-          contributors: contributors
-      }
-
-        const bookOrderRequest = {
-          bookList:[bookInfoRequest]
-        }
-
-        fetch(postUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(bookOrderRequest)
+        fetch(directUrl, {
+          method: 'POST'
         })
         .then(response => {
-          if (!response.ok) {
+
             if (response.status === 401) {
               // 1. (POST) 컨트롤러가 401(Unauthorized)을 반환한 경우
               alert("로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.");
               window.location.href = `/members/login?bookId=${bookId}&quantity=${quantity}`;
-            } else {
+            } else if( response.status === 200) {
+              const successRedirectUrl = `${directUrl}?bookId=${bookId}&quantity=${quantity}`;
+              window.location.href = successRedirectUrl;
+            }
+            else {
               // 2. 기타 404, 500 에러
               alert('주문 페이지로 이동하는 데 실패했습니다.');
             }
-            // 'throw'로 .catch()를 실행시키거나, 여기서 중단합니다.
-            throw new Error('Authentication failed or server error');
-          }
-          window.location.href = successUrl;
+
         })
         .catch(error => {
           console.error('Error: ', error);

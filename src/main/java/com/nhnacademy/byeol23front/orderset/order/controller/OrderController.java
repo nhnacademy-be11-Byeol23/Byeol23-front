@@ -1,13 +1,16 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -18,7 +21,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderInfoResponse;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
+import com.nhnacademy.byeol23front.commons.parser.JwtParser;
+import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
+import com.nhnacademy.byeol23front.memberset.member.dto.MemberMyPageResponse;
 import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
 import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
@@ -27,7 +37,6 @@ import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.PointOrderResponse;
 import com.nhnacademy.byeol23front.orderset.order.exception.OrderPrepareFailException;
 
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,38 +48,39 @@ public class OrderController {
 	private final OrderApiClient orderApiClient;
 	private final DeliveryApiClient deliveryApiClient;
 	private final OrderUtil orderUtil;
+	private final BookApiClient bookApiClient;
+	private final MemberApiClient memberApiClient;
 
 	@Value("${tossPayment.client-key}")
 	private String tossClientKey;
 
-	// 여기에 access token 삭제할 필요 있음
 	@PostMapping("/direct")
 	@ResponseBody
-	public ResponseEntity<Void> handleDirectOrder(@RequestBody BookOrderRequest request,
-		@CookieValue(name = "Access-Token", required = false) String accessToken,
-		HttpSession session) {
+	public ResponseEntity<Void> handleDirectOrder(@CookieValue(name = "Access-Token", required = false) String token) {
 
-		if (Objects.isNull(accessToken) || accessToken.isEmpty()) {
+		if (Objects.isNull(token)) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 
-		// 현재 액세스 토큰이 유효한지 검사하는 로직 jwtParser.jwtParserMemberId(accessToken) 이용 필요한지 확인할 필요가 있음
-		session.setAttribute("directOrderRequest", request);
-
-		return ResponseEntity.ok().build();
+		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 
-
-	// 세션 쓰면 안 될 것 같음 -> toss payment 결제 창 띄우면 수정..?
 	@GetMapping("/direct")
-	public String getOrderFormDirect(HttpSession session, Model model) {
-		BookOrderRequest request = (BookOrderRequest)session.getAttribute("directOrderRequest");
+	public String getOrderFormDirect(@RequestParam Long bookId, @RequestParam int quantity, Model model) {
 
-		if (Objects.isNull(request)) {
-			return "redirect:/";
-		}
+		BookResponse book = bookApiClient.getBook(bookId).getBody();
+		MemberMyPageResponse member = memberApiClient.getMember().getBody();
 
-		session.removeAttribute("directOrderRequest");
+		String firstImageUrl = (book.images() != null && !book.images().isEmpty())
+			? book.images().getFirst().imageUrl()
+			: "https://image.yes24.com/momo/Noimg_L.jpg";
+
+		List<BookInfoRequest> bookOrderInfo = List.of(new BookInfoRequest(bookId, book.bookName(),
+			firstImageUrl, book.isPack(), book.regularPrice(), book.salePrice(), book.publisher(), quantity,
+			book.contributors(),
+			null));
+
+		BookOrderRequest request = new BookOrderRequest(bookOrderInfo);
 
 		orderUtil.addTotalQuantity(model, request.bookList());
 		orderUtil.addDeliveryDatesToModel(model);
@@ -78,8 +88,9 @@ public class OrderController {
 		orderUtil.addDeliveryFeeToModel(model, request);
 		orderUtil.addPackagingOption(model);
 
+		model.addAttribute("userPoint", member.currentPoint());
+
 		model.addAttribute("clientKey", tossClientKey);
-		model.addAttribute("userPoint", 300_000);
 
 		return "order/checkout";
 	}
@@ -123,7 +134,8 @@ public class OrderController {
 
 	@PostMapping("/prepare")
 	@ResponseBody
-	public ResponseEntity<OrderPrepareResponse> prepareOrder(@RequestBody OrderPrepareRequest request, @CookieValue(name = "Access-Token", required = false) String accessToken) {
+	public ResponseEntity<OrderPrepareResponse> prepareOrder(@RequestBody OrderPrepareRequest request,
+		@CookieValue(name = "Access-Token", required = false) String accessToken) {
 		ResponseEntity<OrderPrepareResponse> response = orderApiClient.prepareOrder(request, accessToken);
 
 		log.info("주문 준비 응답: {}", response.getBody());
@@ -160,6 +172,5 @@ public class OrderController {
 
 		return "order/success";
 	}
-
 
 }
