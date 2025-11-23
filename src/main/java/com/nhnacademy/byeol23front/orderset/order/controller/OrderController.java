@@ -1,7 +1,6 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,6 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
@@ -23,10 +21,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderInfoResponse;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
-import com.nhnacademy.byeol23front.commons.parser.JwtParser;
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 import com.nhnacademy.byeol23front.memberset.member.dto.MemberMyPageResponse;
 import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
@@ -95,42 +91,6 @@ public class OrderController {
 		return "order/checkout";
 	}
 
-	@GetMapping
-	public String getOrder(Model model) {
-		orderUtil.addDeliveryDatesToModel(model);
-
-		BigDecimal totalBookPrice = new BigDecimal(298000);
-
-		ResponseEntity<DeliveryPolicyInfoResponse> response = deliveryApiClient.getCurrentDeliveryPolicy();
-		DeliveryPolicyInfoResponse deliveryPolicy = response.getBody();
-
-		BigDecimal deliveryFee = BigDecimal.ZERO;
-		BigDecimal actualOrderPrice = totalBookPrice;
-
-		if (deliveryPolicy != null) {
-			BigDecimal policyFee = deliveryPolicy.deliveryFee();
-			BigDecimal freeThreshold = deliveryPolicy.freeDeliveryCondition();
-
-			if (freeThreshold != null && freeThreshold.compareTo(BigDecimal.ZERO) > 0
-				&& totalBookPrice.compareTo(freeThreshold) >= 0) {
-				deliveryFee = BigDecimal.ZERO;
-			} else {
-				deliveryFee = policyFee != null ? policyFee : BigDecimal.ZERO;
-			}
-		} else {
-			log.warn("배송비 정책을 가져올 수 없습니다. 기본 배송비 0원으로 처리합니다.");
-		}
-
-		actualOrderPrice = totalBookPrice.add(deliveryFee);
-
-		model.addAttribute("totalBookPrice", totalBookPrice);
-		model.addAttribute("deliveryFee", deliveryFee);
-		model.addAttribute("actualOrderPrice", actualOrderPrice);
-
-		model.addAttribute("userPoint", 3000000);
-
-		return "order/checkout";
-	}
 
 	@PostMapping("/prepare")
 	@ResponseBody
