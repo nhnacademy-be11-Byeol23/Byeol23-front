@@ -108,7 +108,7 @@ public class MemberController {
 		return memberApiClient.updateMember(req);
 	}
 
-	@PutMapping
+	@PutMapping("/password")
 	@ResponseBody
 	public ResponseEntity<MemberPasswordUpdateResponse> updatePassword(@RequestBody MemberPasswordUpdateRequest req){
 		return memberApiClient.updateMemberPassword(req);

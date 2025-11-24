@@ -139,7 +139,8 @@ public class MypageController {
 
 	@GetMapping("/settings")
 	public String getSettings(Model model) {
-
+		MemberMyPageResponse resp = memberApiClient.getMember().getBody();
+		model.addAttribute("user", resp);
 		return "mypage/settings";
 	}
 
