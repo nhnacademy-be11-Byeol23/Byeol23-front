@@ -4,7 +4,7 @@ document.getElementById("publisherCreateForm").addEventListener("submit", e => {
     e.preventDefault();
     const name = document.getElementById("root").value.trim();
     if (!name) return alert("태그명을 입력하세요.");
-    fetch("/admin/publishers", {
+    fetch("/admin/pub", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
@@ -14,7 +14,7 @@ document.getElementById("publisherCreateForm").addEventListener("submit", e => {
         .then(res => {
             if (!res.ok) throw new Error("등록 실패");
             // 👇 [수정] 새로고침 전 해시(#)를 설정
-            location.hash = '#publishers';
+            location.hash = '#pub';
             location.reload();
         })
         .catch(err => alert(err));
@@ -34,14 +34,14 @@ async function updatePublisher(publisherId){
     const newName = input.value.trim();
     if (newName === "") {alert("수정할 이름을 입력하십시오"); return;}
     console.log(newName);
-    const res = await fetch(`/admin/publishers/`+publisherId , {
-        method: "PUT",
+    const res = await fetch(`/admin/pub/put/`+publisherId , {
+        method: "POST",
         headers: {"Content-Type": "application/json"},
         redirect: 'follow',
         body: JSON.stringify({ publisherName: newName })
     });
     if (!res.ok) throw new Error("수정 실패");
-    window.location.href = '/admin/publishers';
+    window.location.href = '/admin/pub';
 }
 
 
@@ -51,7 +51,7 @@ function deletePublisher(button) {
     const id = button.dataset.id;
     if (!id) return;
 
-    fetch(`/admin/publishers/${id}`, { method: "DELETE"}) // ← use your real API path
+    fetch(`/admin/pub/delete/${id}`, { method: "POST"}) // ← use your real API path
         .then((res) => {
             if (!res.ok) throw new Error("삭제 실패");
             // Remove item without full reload for better UX

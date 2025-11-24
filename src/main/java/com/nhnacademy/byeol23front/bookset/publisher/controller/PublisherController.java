@@ -42,18 +42,18 @@ public class PublisherController {
 	@PostMapping
 	public String createPublisher(@RequestBody PublisherCreateRequest request){
 		feignClient.createPublisher(request);
-		return "redirect:/admin/publishers";
+		return "redirect:/admin/pub";
 	}
 
 	@ResponseBody
-	@DeleteMapping("/{publisher-id}")
+	@PostMapping("/delete/{publisher-id}")
 	public ResponseEntity<Void> deletePublisher(@PathVariable(name = "publisher-id") Long publisherId){
 		feignClient.deletePublisher(publisherId);
 		return ResponseEntity.ok().build();
 	}
 
 	@ResponseBody
-	@PutMapping("/{publisher-id}")
+	@PostMapping("/put/{publisher-id}")
 	public ResponseEntity<Void> updatePublisher(@PathVariable(name = "publisher-id") Long publisherId, @RequestBody PublisherUpdateRequest publisherName){
 		feignClient.updatePublisher(publisherId, publisherName);
 		return ResponseEntity.ok().build();

@@ -34,9 +34,9 @@ public interface PublisherApiClient {
 	@PostMapping(value = "/api/pub/find-or-create")
 	ResponseEntity<AllPublishersInfoResponse> findOrCreatePublisher(@RequestBody PublisherCreateRequest request);
 
-	@DeleteMapping(value = "/api/pub/{publisher-id}")
+	@PostMapping(value = "/api/pub/delete/{publisher-id}")
 	void deletePublisher(@PathVariable(name = "publisher-id") Long publisherId);
 
-	@PutMapping(value = "/api/pub/{publisher-id}")
+	@PostMapping(value = "/api/pub/put/{publisher-id}")
 	PublisherUpdateResponse updatePublisher(@PathVariable(name = "publisher-id") Long publisherId, @RequestBody PublisherUpdateRequest publisherName);
 }
