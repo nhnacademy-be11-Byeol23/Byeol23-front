@@ -4,10 +4,13 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>관리자 - 쿠폰 등록</title>
-    <meta name="description" content="관리자 쿠폰 등록 페이지">
+    <title>관리자 - 쿠폰 발급</title>
+    <meta name="description" content="관리자 쿠폰 발급 페이지">
     <meta name="keywords" content="">
     <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css" integrity="sha512-mSYUmp1HYZDFaVKK//63EcZq4iFWFjxSL+Z3T/aCt4IO9Cejm03q3NKKYN6pFQzY0SBOr8h+eCIAZHPXcpZaNw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
 </head>
 
 <body class="admin-coupon-registration-page">
@@ -17,13 +20,13 @@
 
     <div class="page-title light-background">
         <div class="container d-lg-flex justify-content-between align-items-center">
-            <h1 class="mb-2 mb-lg-0">관리자 - 쿠폰 등록</h1>
+            <h1 class="mb-2 mb-lg-0">관리자 - 쿠폰 발급</h1>
             <nav class="breadcrumbs">
                 <ol>
                     <li><a th:href="@{/}">Home</a></li>
                     <li><a th:href="@{/admin}">관리자 홈</a></li>
                     <li class="current">쿠폰 관리</li>
-                    <li class="current">쿠폰 등록</li>
+                    <li class="current">쿠폰 발급</li>
                 </ol>
             </nav>
         </div>
@@ -41,10 +44,10 @@
                 <div class="col-lg-9">
                     <div class="registration-page">
 
-                        <div class="card shadow-sm">
+                        <div class="card shadow-sm mb-5">
                             <div class="card-body">
                                 <h5 class="fw-semibold mb-3">신규 쿠폰 발급</h5>
-                                <form id="couponRegistrationForm" action="/admin/coupons" method="post" class="row g-3">
+                                <form id="couponRegistrationForm" action="/admin/coupon" method="post" class="row g-3">
 
                                     <div class="col-md-6">
                                         <label for="couponName" class="form-label">쿠폰명</label>
@@ -53,23 +56,89 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label for="couponPolicyId" class="form-label">쿠폰 정책 선택</label>
-                                        <select class="form-select" id="couponPolicyId" name="couponPolicyId" required>
-                                            <option value="" selected disabled>적용할 쿠폰 정책을 선택하세요</option>
-                                            <option th:each="policy : ${policies}"
-
-                                                    th:text="${policy.policyName}">
-                                                신규 회원가입 10% 할인
-                                            </option>
-                                        </select>
+                                        <label for="expiredDate" class="form-label">만료 기한</label>
+                                        <input type="text" class="form-control datepicker" id="expiredDate" name="expiredDate"
+                                               placeholder="만료 기한 선택" required readonly>
                                     </div>
+                                    <div class="col-md-6">
+                                        <label for="selectedPolicyName" class="form-label">선택된 쿠폰 정책</label>
+                                        <div class="form-control bg-light" id="selectedPolicyName" style="height: 38px;">
+                                            적용할 쿠폰 정책을 목록에서 선택하세요.
+                                        </div>
+                                        <input type="hidden" id="couponPolicyId" name="couponPolicyId" required>
+                                    </div>
+
                                     <div class="col-12 text-end">
-                                        <button type="submit" class="btn btn-dark">쿠폰 등록</button>
+                                        <button type="submit" class="btn btn-dark">쿠폰 발급</button>
                                     </div>
                                 </form>
                             </div>
                         </div>
 
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="fw-semibold mb-3">등록된 쿠폰 정책 목록</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped">
+                                        <thead>
+                                        <tr>
+                                            <th>선택</th>
+                                            <th>ID</th>
+                                            <th>정책명</th>
+                                            <th>기준 금액</th>
+                                            <th>할인율</th>
+                                            <th>최대 할인 금액</th>
+                                            <th>할인 금액</th>
+                                            <th>정책 타입</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="policy : ${policies.content}">
+                                            <td>
+                                                <input class="form-check-input policy-select-radio"
+                                                       type="radio"
+                                                       name="policySelection"
+                                                       th:id="'policy_' + ${policy.couponPolicyId}"
+                                                       th:value="${policy.couponPolicyId}"
+                                                       th:data-policy-name="${policy.policyName}">
+                                            </td>
+                                            <td th:text="${policy.couponPolicyId}">1</td>
+                                            <td th:text="${policy.policyName}" th:id="'policyName_' + ${policy.couponPolicyId}">신규 회원 10% 할인</td>
+                                            <td th:text="${#numbers.formatInteger(policy.criterionPrice, 0, 'COMMA')}">10,000</td>
+                                            <td th:text="${policy.discountRate} ? ${policy.discountRate} + '%' : '-'">10%</td>
+                                            <td th:text="${policy.discountLimit} ? ${#numbers.formatInteger(policy.discountLimit, 0, 'COMMA')} : '-'">5,000</td>
+                                            <td th:text="${policy.discountAmount} ? ${#numbers.formatInteger(policy.discountAmount, 0, 'COMMA')} : '-'">-</td>
+                                            <td th:text="${policy.couponPolicyType}">RATE</td>
+                                        </tr>
+                                        <tr th:if="${policies.content.isEmpty()}">
+                                            <td colspan="8" class="text-center">등록된 쿠폰 정책이 없습니다.</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <nav th:if="${!policies.content.isEmpty()}" aria-label="Page navigation">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item" th:classappend="${policies.first} ? 'disabled' : ''">
+                                            <a class="page-link" th:href="@{/admin/coupon(page=${policies.number - 1}, size=${policies.size})}" aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+
+                                        <li class="page-item" th:each="pageNumber : ${#numbers.sequence(0, policies.totalPages - 1)}"
+                                            th:classappend="${pageNumber == policies.number} ? 'active' : ''">
+                                            <a class="page-link" th:href="@{/admin/coupon(page=${pageNumber}, size=${policies.size})}" th:text="${pageNumber + 1}">1</a>
+                                        </li>
+
+                                        <li class="page-item" th:classappend="${policies.last} ? 'disabled' : ''">
+                                            <a class="page-link" th:href="@{/admin/coupon(page=${policies.number + 1}, size=${policies.size})}" aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -92,8 +161,92 @@
 <script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
 <script th:src="@{/assets/js/main.js}"></script>
 
-<script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.ko.min.js" integrity="sha512-L4qpL1ZotXZLLe8Oo0ZyHrj/SweV7CieswUODAAPN/tnqN3PA1P+4qPu5vIryNor6HQ5o22NujIcAZIfyVXwbQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const couponPolicyIdInput = document.getElementById('couponPolicyId');
+        const selectedPolicyNameDiv = document.getElementById('selectedPolicyName');
+        const registrationForm = document.getElementById('couponRegistrationForm');
+
+        // 1. Datepicker 초기화 및 과거 날짜 선택 방지 설정
+        if (typeof $ !== 'undefined' && $.fn.datepicker) {
+            $('#expiredDate').datepicker({
+                format: 'yyyy-mm-dd',   // 날짜 형식 설정
+                autoclose: true,
+                todayHighlight: true,
+                startDate: 'today',     // 과거 날짜 선택 방지
+                language: 'ko'
+            });
+        } else {
+            console.warn("jQuery 또는 Bootstrap Datepicker 라이브러리가 로드되지 않았습니다. 만료 기한 필드가 정상 작동하지 않을 수 있습니다.");
+        }
+        // --------------------------
+
+        // 2. 라디오 버튼 클릭 이벤트 리스너 설정
+        document.querySelectorAll('.policy-select-radio').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.checked) {
+                    couponPolicyIdInput.value = this.value; // 숨겨진 input에 정책 ID 저장
+                    const policyName = this.getAttribute('data-policy-name');
+                    selectedPolicyNameDiv.textContent = policyName; // 선택된 정책명을 화면에 표시
+                    couponPolicyIdInput.setCustomValidity('');
+                }
+            });
+        });
+
+        // 3. 폼 제출 시 비동기 (Fetch API) 요청 처리
+        registrationForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // 기본 폼 제출 동작을 막고, JS가 제어하도록 함
+
+            // [유효성 검사] 정책 선택 여부 확인
+            if (!couponPolicyIdInput.value) {
+                // ... (유효성 검사 실패 시 Alert 및 reportValidity 로직) ...
+                return; // 실패 시 즉시 함수 실행 종료
+            }
+
+            // [데이터 수집] 전송할 JSON Payload 객체 구성
+            const formData = {
+                couponName: document.getElementById('couponName').value,
+                expiredDate: document.getElementById('expiredDate').value,
+                couponPolicyId: couponPolicyIdInput.value
+            };
+
+            // [디버깅] 전송할 데이터 콘솔 출력 (디버깅 용도)
+            console.log("--- 전송 직전 데이터 ---");
+            console.log("JSON Payload:", formData);
+            console.log("CouponPolicyId Value:", formData.couponPolicyId);
+            console.log("-----------------------");
+
+            try {
+                // [Fetch 요청] 서버로 비동기 POST 요청 전송
+                const response = await fetch(registrationForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', // 서버가 JSON을 받도록 명시
+                    },
+                    body: JSON.stringify(formData) // JS 객체를 JSON 문자열로 변환하여 전송
+                });
+
+                // [성공 처리] HTTP 200-299 상태 코드 확인
+                if (response.ok) {
+                    alert('쿠폰 발급 성공'); // 사용자에게 성공 알림
+
+                    window.location.reload(); // 페이지 새로고침
+                } else {
+                    // [실패 처리] 4xx 또는 5xx 상태 코드 처리
+                    const errorText = await response.text();
+                    alert('쿠폰 발급 요청 실패 (서버 오류): ' + errorText);
+                }
+            } catch (error) {
+                // [네트워크 오류 처리] fetch 자체의 실패 (네트워크 끊김 등)
+                console.error('Fetch Error:', error);
+                alert('네트워크 오류가 발생했습니다. 다시 시도해 주세요.');
+            }
+
+        });
+    });
 </script>
 
 </body>
