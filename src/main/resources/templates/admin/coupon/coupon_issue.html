@@ -171,17 +171,15 @@
         const registrationForm = document.getElementById('couponRegistrationForm');
 
         // 1. Datepicker 초기화 및 과거 날짜 선택 방지 설정
-        // CDN을 사용해도 jQuery와 Datepicker 플러그인이 로드되면 이 로직은 정상 작동합니다.
         if (typeof $ !== 'undefined' && $.fn.datepicker) {
             $('#expiredDate').datepicker({
                 format: 'yyyy-mm-dd',   // 날짜 형식 설정
                 autoclose: true,
                 todayHighlight: true,
-                startDate: 'today',     // ⭐ 과거 날짜 선택 방지
+                startDate: 'today',     // 과거 날짜 선택 방지
                 language: 'ko'
             });
         } else {
-            // CDN 사용 시에도 jQuery 로드 순서나 로딩 실패 문제가 있을 수 있으므로 경고는 유지합니다.
             console.warn("jQuery 또는 Bootstrap Datepicker 라이브러리가 로드되지 않았습니다. 만료 기한 필드가 정상 작동하지 않을 수 있습니다.");
         }
         // --------------------------
@@ -190,23 +188,63 @@
         document.querySelectorAll('.policy-select-radio').forEach(radio => {
             radio.addEventListener('change', function() {
                 if (this.checked) {
-                    couponPolicyIdInput.value = this.value;
+                    couponPolicyIdInput.value = this.value; // 숨겨진 input에 정책 ID 저장
                     const policyName = this.getAttribute('data-policy-name');
-                    selectedPolicyNameDiv.textContent = policyName;
+                    selectedPolicyNameDiv.textContent = policyName; // 선택된 정책명을 화면에 표시
                     couponPolicyIdInput.setCustomValidity('');
                 }
             });
         });
 
-        // 3. 폼 제출 시 유효성 검사
-        registrationForm.addEventListener('submit', function(event) {
-            if (!couponPolicyIdInput.value) {
-                event.preventDefault();
-                alert('쿠폰 정책 목록에서 적용할 정책을 선택해주세요.');
+        // 3. 폼 제출 시 비동기 (Fetch API) 요청 처리
+        registrationForm.addEventListener('submit', async function(event) {
+            event.preventDefault(); // 기본 폼 제출 동작을 막고, JS가 제어하도록 함
 
-                couponPolicyIdInput.setCustomValidity('적용할 쿠폰 정책을 선택해야 합니다.');
-                couponPolicyIdInput.reportValidity();
+            // [유효성 검사] 정책 선택 여부 확인
+            if (!couponPolicyIdInput.value) {
+                // ... (유효성 검사 실패 시 Alert 및 reportValidity 로직) ...
+                return; // 실패 시 즉시 함수 실행 종료
             }
+
+            // [데이터 수집] 전송할 JSON Payload 객체 구성
+            const formData = {
+                couponName: document.getElementById('couponName').value,
+                expiredDate: document.getElementById('expiredDate').value,
+                couponPolicyId: couponPolicyIdInput.value
+            };
+
+            // [디버깅] 전송할 데이터 콘솔 출력 (디버깅 용도)
+            console.log("--- 전송 직전 데이터 ---");
+            console.log("JSON Payload:", formData);
+            console.log("CouponPolicyId Value:", formData.couponPolicyId);
+            console.log("-----------------------");
+
+            try {
+                // [Fetch 요청] 서버로 비동기 POST 요청 전송
+                const response = await fetch(registrationForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json', // 서버가 JSON을 받도록 명시
+                    },
+                    body: JSON.stringify(formData) // JS 객체를 JSON 문자열로 변환하여 전송
+                });
+
+                // [성공 처리] HTTP 200-299 상태 코드 확인
+                if (response.ok) {
+                    alert('쿠폰 발급 성공'); // 사용자에게 성공 알림
+
+                    window.location.reload(); // 페이지 새로고침
+                } else {
+                    // [실패 처리] 4xx 또는 5xx 상태 코드 처리
+                    const errorText = await response.text();
+                    alert('쿠폰 발급 요청 실패 (서버 오류): ' + errorText);
+                }
+            } catch (error) {
+                // [네트워크 오류 처리] fetch 자체의 실패 (네트워크 끊김 등)
+                console.error('Fetch Error:', error);
+                alert('네트워크 오류가 발생했습니다. 다시 시도해 주세요.');
+            }
+
         });
     });
 </script>
