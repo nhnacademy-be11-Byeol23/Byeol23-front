@@ -59,10 +59,10 @@ function deleteTag(button) {
 
     fetch(`/admin/tags/${id}`, { method: "DELETE"})
         .then((res) => {
-            if (!res.ok) {
-                return res.json().then(errorBody => { throw new Error(errorBody.message || "삭제 실패"); });
-            }
-            // ✨ 성공: 삭제 후 태그 목록 페이지로 이동합니다.
+            // if (!res.ok) {
+            //     return res.json().then(errorBody => { throw new Error(errorBody.message || "삭제 실패"); });
+            // }
+            // // ✨ 성공: 삭제 후 태그 목록 페이지로 이동합니다.
             window.location.href = '/admin/tags';
         })
         .catch((err) => {

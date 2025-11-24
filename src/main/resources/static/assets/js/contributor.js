@@ -3,7 +3,7 @@ document.getElementById("contributorCreateForm").addEventListener("submit", e =>
     const name = document.getElementById("root").value.trim();
     const role = document.getElementById("contributor-role-input").value;
     if (!name) return alert("기여자명을 입력하세요.");
-    fetch("/admin/contributors", {
+    fetch("/admin/cont", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
@@ -34,8 +34,8 @@ async function updateContributor(contributorId){
     if (newName === "") {alert("수정할 이름을 입력하십시오"); return;}
     console.log(newName);
     console.log(newRole);
-    const res = await fetch(`/admin/contributors/`+contributorId , {
-        method: "PUT",
+    const res = await fetch(`/admin/cont/put/`+contributorId , {
+        method: "POST",
         headers: {"Content-Type": "application/json"},
         redirect: 'follow',
         body: JSON.stringify({
@@ -45,7 +45,7 @@ async function updateContributor(contributorId){
         )
     });
     if (!res.ok) throw new Error("수정 실패");
-    window.location.href = '/admin/contributors';
+    window.location.href = '/admin/cont';
 }
 
 
@@ -55,11 +55,11 @@ function deleteContributor(button) {
     const id = button.dataset.id;
     if (!id) return;
 
-    fetch(`/admin/contributors/${id}`, { method: "DELETE"}) // ← use your real API path
+    fetch(`/admin/cont/delete/${id}`, { method: "POST"}) // ← use your real API path
         .then((res) => {
             if (!res.ok) throw new Error("삭제 실패");
             // Remove item without full reload for better UX
-            window.location.href = '/admin/contributors';
+            window.location.href = '/admin/cont';
         })
         .catch((err) => {
             console.error(err);
