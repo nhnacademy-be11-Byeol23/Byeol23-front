@@ -13,7 +13,9 @@ import com.nhnacademy.byeol23front.minio.util.ImageDomain;
 import com.nhnacademy.byeol23front.reviewset.client.ReviewFeignClient;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class ReviewController {
@@ -25,14 +27,19 @@ public class ReviewController {
 		@RequestParam(value = "image", required = false) MultipartFile image,
 		@RequestParam("reviewContent") String reviewContent,
 		@RequestParam("reviewRate") Byte reviewRate,
-		@RequestParam("orderDetailId") Long orderDetailId
+		@RequestParam("orderNumber") String orderNumber,
+		@RequestParam("bookId") Long bookId
 	) {
+		log.info("reviewContent: {}", reviewContent);
+		log.info("reviewRate: {}", reviewRate);
+		log.info("orderNumber: {}", orderNumber);
+		log.info("bookId: {}", bookId);
 		Long id = reviewFeignClient.registerReview(
 			new com.nhnacademy.byeol23front.reviewset.dto.ReviewRegisterRequest(
 				reviewContent,
 				reviewRate,
-				orderDetailId,
-				null
+				orderNumber,
+				bookId
 			)
 		).getBody();
 
