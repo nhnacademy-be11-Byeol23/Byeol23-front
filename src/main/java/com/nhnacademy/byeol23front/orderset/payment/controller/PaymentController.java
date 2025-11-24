@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.payment.client.PaymentApiClient;
 import com.nhnacademy.byeol23front.orderset.payment.dto.PaymentCancelRequest;

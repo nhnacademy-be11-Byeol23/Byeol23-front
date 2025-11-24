@@ -18,5 +18,5 @@ public interface ReviewFeignClient {
 	ResponseEntity<List<ReviewResponse>> getReviewsByProductId(@PathVariable("book-id") Long bookId);
 
 	@PostMapping
-	ResponseEntity<Void> registerReview(@RequestBody ReviewRegisterRequest request);
+	ResponseEntity<Long> registerReview(@RequestBody ReviewRegisterRequest request);
 }
