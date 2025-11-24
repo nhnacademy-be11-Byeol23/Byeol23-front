@@ -22,7 +22,7 @@ import com.nhnacademy.byeol23front.bookset.contributor.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/admin/contributors")
+@RequestMapping("/admin/cont")
 @RequiredArgsConstructor
 public class ContributorController {
 	private final ContributorApiClient feignClient;

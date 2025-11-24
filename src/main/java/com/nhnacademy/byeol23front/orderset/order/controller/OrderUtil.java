@@ -120,7 +120,4 @@ public class OrderUtil {
 		model.addAttribute("packagingOptions", packagingOptions);
 	}
 
-	public void addUserCurrentPoint(Model model) {
-
-	}
 }

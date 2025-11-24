@@ -1,8 +1,5 @@
 package com.nhnacademy.byeol23front.orderset.order.client;
 
-import java.util.List;
-
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.data.domain.Page;
@@ -14,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderBulkUpdateRequest;

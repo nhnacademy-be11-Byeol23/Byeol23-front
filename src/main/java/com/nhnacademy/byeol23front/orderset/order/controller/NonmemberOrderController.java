@@ -71,8 +71,7 @@ public class NonmemberOrderController {
 			null
 		));
 
-		BookOrderRequest bookOrderRequest = new BookOrderRequest(bookInfoRequest);
-		return bookOrderRequest;
+		return new BookOrderRequest(bookInfoRequest);
 	}
 
 }
