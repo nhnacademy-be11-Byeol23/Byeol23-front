@@ -29,6 +29,7 @@ import com.nhnacademy.byeol23front.minio.service.MinioService;
 import com.nhnacademy.byeol23front.minio.util.ImageDomain;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
+import com.nhnacademy.byeol23front.point.client.PointHistoryFeignClient;
 
 @Slf4j
 @Controller
@@ -39,6 +40,7 @@ public class MypageController {
 	private final OrderApiClient orderApiClient;
 	private final MinioService minioService;
 	private final AddressApiClient addressApiClient;
+	private final PointHistoryFeignClient pointHistoryFeignClient;
 
 	@ModelAttribute("activeTab")
 	public String addActiveTabToModel(HttpServletRequest request) {
@@ -59,11 +61,10 @@ public class MypageController {
 
 	@GetMapping
 	public String getMypage(Model model) {
-		ResponseEntity<MemberMyPageResponse> response = memberApiClient.getMember();
-
-		model.addAttribute("member", response.getBody());
-
-		return "mypage/mypage";
+		MemberMyPageResponse resp = memberApiClient.getMember().getBody();
+		model.addAttribute("activeTab", "settings");
+		model.addAttribute("user", resp);
+		return "mypage/settings";
 	}
 
 	@GetMapping("/orders")
@@ -128,6 +129,14 @@ public class MypageController {
 		return "mypage/reviews";
 	}
 
+	@GetMapping("/points")
+	public String getPoints(Model model) {
+		model.addAttribute("activeTab", "points");
+		model.addAttribute("pointsHistories",
+			pointHistoryFeignClient.getPointHistories());
+		return "mypage/points_history";
+	}
+
 	@GetMapping("/addresses")
 	public String getAddresses(Model model) {
 		List<AddressResponse> addressList = addressApiClient.getAddresses().getBody();
@@ -139,7 +148,8 @@ public class MypageController {
 
 	@GetMapping("/settings")
 	public String getSettings(Model model) {
-
+		MemberMyPageResponse resp = memberApiClient.getMember().getBody();
+		model.addAttribute("user", resp);
 		return "mypage/settings";
 	}
 

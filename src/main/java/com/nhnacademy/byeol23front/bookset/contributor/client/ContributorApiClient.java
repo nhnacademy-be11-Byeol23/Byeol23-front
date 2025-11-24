@@ -21,19 +21,19 @@ import com.nhnacademy.byeol23front.bookset.contributor.dto.ContributorFindOrCrea
 @FeignClient(name = "BYEOL23-GATEWAY", contextId = "contributorApiClient")
 public interface ContributorApiClient {
 
-	@GetMapping(value = "/api/contributors")
+	@GetMapping(value = "/api/cont")
 	ResponseEntity<PageResponse<AllContributorResponse>> getAllContributors(@RequestParam(value = "page") int page, @RequestParam(value = "size") int size);
 
-	@PostMapping(value = "/api/contributors")
+	@PostMapping(value = "/api/cont")
 	ResponseEntity<ContributorCreateResponse> createContributor(@RequestBody ContributorCreateRequest contributorCreateRequest);
 
-	@PostMapping(value = "/api/contributors/find-or-create")
+	@PostMapping(value = "/api/cont/find-or-create")
 	ResponseEntity<AllContributorResponse> findOrCreateContributor(@RequestBody ContributorFindOrCreateRequest request);
 
 
-	@PutMapping(value = "/api/contributors/{contributor-id}")
+	@PutMapping(value = "/api/cont/{contributor-id}")
 	ContributorUpdateResponse updateContributor(@PathVariable(name = "contributor-id") Long contributorId, @RequestBody ContributorUpdateRequest contributorUpdateRequest);
 
-	@DeleteMapping(value = "/api/contributors/{contributor-id}")
+	@DeleteMapping(value = "/api/cont/{contributor-id}")
 	void deleteContributor(@PathVariable(name = "contributor-id") Long contributorId);
 }

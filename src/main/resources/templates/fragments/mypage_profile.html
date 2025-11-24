@@ -4,7 +4,7 @@
         <div class="user-info" data-aos="fade-right">
             <h4 th:text="${member.memberName} + '님'">회원이름</h4>
 
-            <div class="user-status">
+            <div class="user-status" data-bs-toggle="modal" data-bs-target="#gradeModal" style="cursor: pointer;">
                 <i class="bi bi-award"></i>
                 <span th:text="${member.gradeName}">로얄 등급</span>
             </div>
@@ -13,9 +13,15 @@
         <nav class="menu-nav">
             <ul class="nav flex-column" role="tablist">
                 <li class="nav-item">
+                    <a class="nav-link" th:classappend="${activeTab == 'settings' ? 'active' : ''}" th:href="@{/mypage/settings}">
+                        <i class="bi bi-gear"></i>
+                        <span>내 정보 수정</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" th:classappend="${activeTab == 'orders' ? 'active' : ''}" th:href="@{/mypage/orders}">
                         <i class="bi bi-box-seam"></i>
-                        <span>My Orders</span>
+                        <span>주문내역</span>
                         <span class="badge">2</span>
                     </a>
                 </li>
@@ -27,15 +33,9 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:classappend="${activeTab == 'wallet' ? 'active' : ''}" th:href="@{/mypage/wallet}">
-                        <i class="bi bi-wallet2"></i>
-                        <span>Payment Methods</span>
-                    </a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" th:classappend="${activeTab == 'reviews' ? 'active' : ''}" th:href="@{/mypage/reviews}">
                         <i class="bi bi-star"></i>
-                        <span>My Reviews</span>
+                        <span>리뷰</span>
                     </a>
                 </li>
                 <li class="nav-item">
@@ -45,24 +45,41 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:classappend="${activeTab == 'settings' ? 'active' : ''}" th:href="@{/mypage/settings}">
-                        <i class="bi bi-gear"></i>
-                        <span>Account Settings</span>
+                    <a class="nav-link" th:classappend="${activeTab == 'points' ? 'active' : ''}" th:href="@{/mypage/points}">
+                        <i class="bi bi-cash-stack"></i>
+                        <span>포인트 내역</span>
                     </a>
                 </li>
             </ul>
 
             <div class="menu-footer">
-                <a href="#" class="help-link">
-                    <i class="bi bi-question-circle"></i>
-                    <span>Help Center</span>
+                <a href="#" class="withdrawal-link">
+                    <i class="bi bi-person-x"></i>
+                    <span>회원 탈퇴</span>
                 </a>
                 <a href="#" class="logout-link">
                     <i class="bi bi-box-arrow-right"></i>
-                    <span>Log Out</span>
+                    <span>로그아웃</span>
                 </a>
             </div>
         </nav>
     </div>
-</th:block>
 
+    <!-- Grade Modal -->
+    <div class="modal fade" id="gradeModal" tabindex="-1" aria-labelledby="gradeModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gradeModalLabel">등급 정보</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- 내용은 나중에 추가 -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>

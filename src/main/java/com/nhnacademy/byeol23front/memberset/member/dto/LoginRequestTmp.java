@@ -1,13 +1,15 @@
 package com.nhnacademy.byeol23front.memberset.member.dto;
 
 import jakarta.validation.constraints.Null;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter @Getter
-@AllArgsConstructor
-public class LoginRequest {
+@Getter @Setter
+public class LoginRequestTmp {
 	String loginId;
 	String loginPassword;
+	@Null
+	private Long bookId;
+	@Null
+	private Integer quantity;
 }
