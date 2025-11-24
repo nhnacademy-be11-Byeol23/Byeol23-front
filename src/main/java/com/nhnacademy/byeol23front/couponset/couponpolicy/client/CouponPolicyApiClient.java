@@ -11,9 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.List;
-
-//api/coupon-policy/create
 @FeignClient(name = "BYEOL23-GATEWAY", contextId = "couponPolicyApiClient")
 public interface CouponPolicyApiClient {
 

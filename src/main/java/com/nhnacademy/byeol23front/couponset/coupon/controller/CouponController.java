@@ -1,5 +1,7 @@
 package com.nhnacademy.byeol23front.couponset.coupon.controller;
 
+import com.nhnacademy.byeol23front.couponset.coupon.client.CouponApiClient;
+import com.nhnacademy.byeol23front.couponset.coupon.dto.CouponIssueRequestDto;
 import com.nhnacademy.byeol23front.couponset.couponpolicy.client.CouponPolicyApiClient;
 import com.nhnacademy.byeol23front.couponset.couponpolicy.dto.CouponPolicyInfoResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CouponController {
     private final CouponPolicyApiClient couponPolicyApiClient;
+    private final CouponApiClient couponApiClient;
 
     @GetMapping()
     public String couponIssuePage(Model model, @PageableDefault Pageable pageable){
@@ -32,10 +35,9 @@ public class CouponController {
 
     //쿠폰 발급
     @PostMapping()
-    public ResponseEntity<Void> issueCoupon(){
+    public ResponseEntity<String> issueCoupon(CouponIssueRequestDto request){
+        String message = couponApiClient.issueCoupon(request).getBody();
 
-
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(message);
     }
 }
