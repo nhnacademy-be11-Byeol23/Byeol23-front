@@ -57,6 +57,8 @@
                       중복 확인
                     </button>
                   </div>
+                  <div id="idCheckResult" class="mt-1 small"></div>
+
 
                   <div class="row mb-3">
                     <div class="col-md-6">
@@ -74,6 +76,8 @@
                       </div>
                     </div>
                   </div>
+                  <div id="passwordCheckResult" class="mt-1 small"></div>
+
 
                   <div class="form-floating mb-3">
                     <input type="text" class="form-control" id="memberName" name="memberName" placeholder="이름" required="" autocomplete="memberName">
@@ -119,7 +123,7 @@
 -->               <input type="hidden" name="joinedFrom" value="WEB">
                   <input type="hidden" name="memberRole" value="USER">
                   <div class="d-grid mb-4">
-                    <button type="submit" class="btn btn-register">가입하기</button>
+                    <button id="registerBtn" type="submit" class="btn btn-register" disabled>가입하기</button>
                   </div>
                 </form>
                   <div class="login-link text-center">
@@ -181,33 +185,68 @@
 </body>
 
 <script>
-  document.getElementById('checkIdBtn').addEventListener('click', function() {
+  const registerForm = document.querySelector('form[action="/members/register"]');
+  const registerBtn = document.getElementById("registerBtn");
+
+  let idAvailable = false;
+
+  document.getElementById('checkIdBtn').addEventListener('click', function () {
     const loginId = document.getElementById('loginId').value.trim();
+    const resultDiv = document.getElementById('idCheckResult');
+    registerBtn.disabled = true;
+    idAvailable = false;
+
     if (!loginId) {
-      alert('아이디를 입력해주세요.');
+      alert('아이디를 입력해주세요');
       return;
     }
+
     fetch(`/members/check-id?loginId=${encodeURIComponent(loginId)}`)
             .then(res => res.json())
             .then(data => {
-              if (data.available) {
-                alert('사용 가능한 아이디입니다!');
+              if (data.isDuplicated) {
+                resultDiv.textContent = '이미 사용 중인 아이디입니다.';
+                resultDiv.style.color = 'red';
+                idAvailable = false;
               } else {
-                alert('이미 사용 중인 아이디입니다.');
+                resultDiv.textContent = '사용 가능한 아이디입니다.';
+                resultDiv.style.color = 'green';
+                idAvailable = true;
+                registerBtn.disabled = false;
               }
             })
-            .catch(() => alert('아이디 중복 확인 중 오류가 발생했습니다.'));
+            .catch(err => {
+              console.error(err);
+              alert('중복 확인 중 오류가 발생했습니다.');
+            });
   });
 
-  (function() {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    const todayStr = `${yyyy}-${mm}-${dd}`;
-    const el = document.getElementById('birthDate');
-    if (el) el.max = todayStr;
-  })();
+  registerForm.addEventListener('submit', function (e) {
+    const password = document.getElementById('loginPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const pwResultDiv = document.getElementById('passwordCheckResult');
+
+    if (!idAvailable) {
+      e.preventDefault();
+      alert("아이디 중복 확인을 해주세요.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      e.preventDefault();
+      pwResultDiv.textContent = '비밀번호가 일치하지 않습니다.';
+      pwResultDiv.style.color = 'red';
+      return;
+    }
+
+  });
+
+  document.getElementById('loginId').addEventListener('input', () => {
+    idAvailable = false;
+    registerBtn.disabled = true;
+    document.getElementById('idCheckResult').textContent = '';
+  });
+
 </script>
 
 </html>

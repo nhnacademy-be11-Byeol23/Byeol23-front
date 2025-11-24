@@ -1,6 +1,7 @@
 package com.nhnacademy.byeol23front.memberset.member.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.nhnacademy.byeol23front.memberset.member.dto.*;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 
@@ -85,6 +87,13 @@ public class MemberController {
 		response.addHeader("Set-Cookie", deleteCookie("Refresh-Token", "/members"));
 
 		return "redirect:/";
+	}
+
+	@GetMapping("/check-id")
+	@ResponseBody
+	public CheckIdResponse checkId(@RequestParam String loginId) {
+		CheckIdResponse response = memberApiClient.checkId(loginId);
+		return response;
 	}
 
 	private String deleteCookie(String name, String path) {

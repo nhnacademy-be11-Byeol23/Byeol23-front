@@ -8,10 +8,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.nhnacademy.byeol23front.auth.MemberPrincipal;
 import com.nhnacademy.byeol23front.commons.parser.JwtParser;
 
 import io.jsonwebtoken.Claims;
@@ -33,18 +32,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	public Authentication createAuthentication(Claims claims) {
 		String role = claims.get("role", String.class);
 		Long memberId = claims.get("memberId", Long.class);
+		String nickname = claims.get("nickname", String.class);
 		List<GrantedAuthority> authorities =
 			List.of(new SimpleGrantedAuthority(role));
 
-		UserDetails principal = User.withUsername(memberId.toString())
-			.password("")
-			.authorities(authorities)
-			.build();
+		MemberPrincipal principal = new MemberPrincipal(memberId, nickname, role, authorities);
 
 		return new UsernamePasswordAuthenticationToken(
 			principal,
 			null,
-			authorities
+			principal.getAuthorities()
 		);
 	}
 
