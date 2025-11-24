@@ -61,11 +61,10 @@ public class MypageController {
 
 	@GetMapping
 	public String getMypage(Model model) {
-		ResponseEntity<MemberMyPageResponse> response = memberApiClient.getMember();
-
-		model.addAttribute("member", response.getBody());
-
-		return "mypage/mypage";
+		MemberMyPageResponse resp = memberApiClient.getMember().getBody();
+		model.addAttribute("activeTab", "settings");
+		model.addAttribute("user", resp);
+		return "mypage/settings";
 	}
 
 	@GetMapping("/orders")
