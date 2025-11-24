@@ -71,8 +71,7 @@ public class BookAdminController {
 				tmp.publisherId(),
 				categoryIds,
 				tagIds,
-				contributorIds,
-				null  // imageUrl은 BookAdminController에서는 사용하지 않음 (MultipartFile로 처리)
+				contributorIds
 			);
 
 			BookResponse createdBook = bookApiClient.createBook(request);

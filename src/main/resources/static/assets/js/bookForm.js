@@ -279,8 +279,7 @@
 })();
 
 // 도서 삭제 함수
-globalThis.softDeleteBook = function(bookId) {
-    if (confirm('정말로 이 도서의 삭제 상태를 변경하시겠습니까?')) {
+window.softDeleteBook = function(bookId) {    if (confirm('정말로 이 도서의 삭제 상태를 변경하시겠습니까?')) {
         fetch(`/admin/books/${bookId}`, {
             method: 'DELETE'
         })

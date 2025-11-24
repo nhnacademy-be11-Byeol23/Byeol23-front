@@ -69,11 +69,10 @@ public class MinioService {
 				)
 			);
 		}catch (Exception e){
-			// 이미지 URL 저장에 실패한 경우, Minio에서 업로드한 이미지를 삭제
-			minioUtil.deleteObject(url);
+			minioUtil.deleteObject(imageUrl);
 			throw new RuntimeException("이미지 URL 저장에 실패했습니다.", e);
 		}
-		return url;
+		return imageUrl;
 	}
 
 	public void deleteImage(ImageDomain imageDomain, Long imageId) {
