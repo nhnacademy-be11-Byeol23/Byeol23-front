@@ -13,6 +13,18 @@
         <nav class="menu-nav">
             <ul class="nav flex-column" role="tablist">
                 <li class="nav-item">
+                    <a class="nav-link" th:classappend="${activeTab == 'info' ? 'active' : ''}" th:href="@{/mypage/info}">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>내 정보 조회</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${activeTab == 'settings' ? 'active' : ''}" th:href="@{/mypage/settings}">
+                        <i class="bi bi-gear"></i>
+                        <span>내 정보 수정</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" th:classappend="${activeTab == 'orders' ? 'active' : ''}" th:href="@{/mypage/orders}">
                         <i class="bi bi-box-seam"></i>
                         <span>주문내역</span>
