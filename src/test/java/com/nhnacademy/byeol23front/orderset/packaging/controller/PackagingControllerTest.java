@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +34,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.nhnacademy.byeol23front.auth.AuthHelper;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
 import com.nhnacademy.byeol23front.minio.service.MinioService;
@@ -45,6 +47,7 @@ import com.nhnacademy.byeol23front.orderset.packaging.dto.PackagingUpdateRequest
 
 // PackagingController를 단위 테스트하기 위해 @WebMvcTest 사용
 @WebMvcTest(PackagingController.class)
+@Import(AuthHelper.class)
 class PackagingControllerTest {
 
 	@Autowired
@@ -56,6 +59,9 @@ class PackagingControllerTest {
 
 	@MockitoBean
 	private CategoryApiClient categoryApiClient;
+
+	@MockBean
+	private AuthHelper authHelper;
 
 	@MockBean
 	private MinioService minioService;

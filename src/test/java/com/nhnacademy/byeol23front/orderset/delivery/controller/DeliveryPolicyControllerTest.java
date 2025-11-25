@@ -1,6 +1,7 @@
 package com.nhnacademy.byeol23front.orderset.delivery.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper; // [추가] ObjectMapper 임포트
+import com.nhnacademy.byeol23front.auth.AuthHelper;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
 import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyCreateRequest;
@@ -15,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -39,6 +42,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(DeliveryPolicyController.class)
+@Import(AuthHelper.class)
 class DeliveryPolicyControllerTest { // 클래스 이름 수정 (Test 접미어)
 
 	@Autowired
@@ -50,7 +54,8 @@ class DeliveryPolicyControllerTest { // 클래스 이름 수정 (Test 접미어)
 	@MockBean
 	private CategoryApiClient categoryApiClient;
 
-	// [제거] JwtParser, MemberRepository @MockBean 제거
+	@MockBean
+	private AuthHelper authHelper;
 
 	private Pageable defaultPageable;
 	private DeliveryPolicyInfoResponse infoResponse;
@@ -61,7 +66,6 @@ class DeliveryPolicyControllerTest { // 클래스 이름 수정 (Test 접미어)
 
 	@BeforeEach
 	void setUp() {
-		// [제거] 필터/인터셉터 Mocking 설정 (JwtParser, MemberRepository) 관련 코드 모두 제거
 
 		// 테스트용 DTO 및 Pageable 초기화
 		defaultPageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "changedAt"));
@@ -160,7 +164,7 @@ class DeliveryPolicyControllerTest { // 클래스 이름 수정 (Test 접미어)
 
 		// when & then
 		mockMvc.perform(post("/admin/policies/deliveries")
-				.with(csrf()) // <-- [수정] CSRF 토큰 추가
+				.with(csrf())
 				.with(user("admin").roles("ADMIN"))
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.param("deliveryFee", "2500")
