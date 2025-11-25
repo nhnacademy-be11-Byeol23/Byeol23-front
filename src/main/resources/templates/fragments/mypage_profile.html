@@ -50,13 +50,15 @@
                         <span>포인트 내역</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${activeTab == 'coupons' ? 'active' : ''}" th:href="@{/mypage/coupons}">
+                        <i class="bi bi-ticket-perforated"></i>
+                        <span>쿠폰함</span>
+                    </a>
+                </li>
             </ul>
 
             <div class="menu-footer">
-                <a href="#" class="withdrawal-link">
-                    <i class="bi bi-person-x"></i>
-                    <span>회원 탈퇴</span>
-                </a>
                 <a href="#" class="logout-link">
                     <i class="bi bi-box-arrow-right"></i>
                     <span>로그아웃</span>

@@ -153,6 +153,17 @@ public class MypageController {
 		return "mypage/settings";
 	}
 
+	@GetMapping("/coupons")
+	public String getCoupons(Model model) {
+		model.addAttribute("activeTab", "coupons");
+		
+		// 발급 내역(사용 전)
+		model.addAttribute("issuedCoupons", new ArrayList<>());
+		// 사용 내역
+		model.addAttribute("usedCoupons", new ArrayList<>());
+		return "mypage/coupon_box";
+	}
+
 	public record OrderViewModel(OrderDetailResponse order, String firstImageUrl) { }
 
 }
