@@ -279,17 +279,17 @@
 })();
 
 // 도서 삭제 함수
-globalThis.softDeleteBook = function(bookId) {
+window.softDeleteBook = function(bookId) {
     if (confirm('정말로 이 도서의 삭제 상태를 변경하시겠습니까?')) {
-        fetch(`/admin/books/${bookId}`, {
-            method: 'DELETE'
+        fetch(`/admin/books/${bookId}/delete`, {
+            method: 'POST'
         })
             .then(response => {
                 if (response.ok) {
                     alert('도서의 삭제 상태가 변경되었습니다.');
                     location.reload();
                 } else {
-                    response.text().then(text => {
+                    return response.text().then(text => {
                         console.error('삭제 실패:', text);
                         alert('상태 변경에 실패했습니다: ' + text);
                     });

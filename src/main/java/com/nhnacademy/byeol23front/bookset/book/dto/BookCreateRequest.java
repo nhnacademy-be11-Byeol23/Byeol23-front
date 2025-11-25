@@ -18,7 +18,6 @@ public record BookCreateRequest(
 	Long publisherId,
 	List<Long> categoryIds,
 	List<Long> tagIds,
-	List<Long> contributorIds,
-	String imageUrl
+	List<Long> contributorIds
 ) {
 }
