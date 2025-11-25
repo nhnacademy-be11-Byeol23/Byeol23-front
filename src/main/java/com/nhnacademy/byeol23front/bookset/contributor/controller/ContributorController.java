@@ -42,7 +42,7 @@ public class ContributorController {
 	@PostMapping
 	public String createContributor(@RequestBody ContributorCreateRequest request, Model model){
 		feignClient.createContributor(request);
-		return "redirect: /admin/cont";
+		return "redirect:/admin/cont";
 	}
 
 	@PostMapping("/put/{contributorId}")
