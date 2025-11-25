@@ -9,6 +9,6 @@ public record CouponPolicyInfoResponse(
         Integer discountRate,
         BigDecimal discountLimit,
         BigDecimal discountAmount,
-        String CouponPolicyType
+        String couponPolicyType
 ) {
 }

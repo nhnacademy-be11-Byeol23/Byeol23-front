@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>계정 설정 - 별이삼shop</title>
+  <title>내 정보 수정 - 별이삼shop</title>
   <meta name="description" content="">
   <meta name="keywords" content="">
 
@@ -52,12 +52,12 @@
     <!-- Page Title -->
     <div class="page-title light-background">
       <div class="container d-lg-flex justify-content-between align-items-center">
-        <h1 class="mb-2 mb-lg-0">계정 설정</h1>
+        <h1 class="mb-2 mb-lg-0">내 정보 수정</h1>
         <nav class="breadcrumbs">
           <ol>
             <li><a th:href="@{/}">홈</a></li>
             <li><a th:href="@{/mypage}">마이페이지</a></li>
-            <li class="current">계정 설정</li>
+            <li class="current">내 정보 수정</li>
           </ol>
         </nav>
       </div>
@@ -87,7 +87,7 @@
             <div class="content-area">
               <div id="settings">
                   <div class="section-header" data-aos="fade-up">
-                    <h2>계정 설정</h2>
+                    <h2>내 정보 수정</h2>
                   </div>
 
                   <div class="settings-content">
@@ -98,24 +98,24 @@
                         <div class="row g-3">
                           <div class="col-md-6">
                             <label for="name" class="form-label">이름</label>
-                            <input type="text" class="form-control" id="name" value="Sarah" required="">
+                            <input type="text" class="form-control" id="name" required="" th:value="${user.memberName()}">
                           </div>
                             <div class="col-md-6">
                                 <label for="nickname" class="form-label">별명</label>
-                                <input class="form-control" id="nickname">
+                                <input class="form-control" id="nickname" th:value="${user.nickname()}">
                             </div>
                             <div class="col-md-6">
                                 <label for="phone" class="form-label">전화번호</label>
-                                <input type="tel" class="form-control" id="phone" value="+1 (555) 123-4567">
+                                <input type="tel" class="form-control" id="phone" th:value="${user.phoneNumber()}">
                             </div>
                           <div class="col-md-6">
                             <label for="email" class="form-label">이메일</label>
-                            <input type="email" class="form-control" id="email" value="sarah@example.com" required="">
+                            <input type="email" class="form-control" id="email" value="sarah@example.com" required="" th:value="${user.email()}">
                           </div>
 
                             <div class="col-md-6">
                                 <label for="birthDate" class="form-label">생일</label>
-                                <input type="date" class="form-control" id="birthDate">
+                                <input type="date" class="form-control" id="birthDate" th:value="${user.birthDate()}">
                             </div>
                         </div>
 
@@ -123,9 +123,6 @@
                           <button id="info-button" onclick="updateInfo()" type="button" class="btn-save">저장</button>
                         </div>
 
-                        <div class="loading">로딩 중</div>
-                        <div class="error-message">변경에 문제가 발생하였습니다.</div>
-                        <div class="sent-message">성공적으로 변경되었습니다.</div>
                       </div>
                     </div>
 
@@ -154,9 +151,6 @@
                           <button id="password-button" onclick="updatePassword()" type="submit" class="btn-save">변경</button>
                         </div>
                       </div>
-                      <div class="loading">로딩 중</div>
-                      <div class="error-message">변경에 문제가 발생하였습니다.</div>
-                      <div class="sent-message">성공적으로 변경되었습니다.</div>
                     </div>
 
                     <!-- Delete Account -->
