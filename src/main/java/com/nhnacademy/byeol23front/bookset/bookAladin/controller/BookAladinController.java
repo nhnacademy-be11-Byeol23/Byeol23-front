@@ -24,6 +24,11 @@ import com.nhnacademy.byeol23front.bookset.publisher.client.PublisherApiClient;
 import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
 import com.nhnacademy.byeol23front.bookset.publisher.dto.PublisherCreateRequest;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
+import com.nhnacademy.byeol23front.minio.service.MinioService;
+import com.nhnacademy.byeol23front.minio.util.ImageDomain;
+import com.nhnacademy.byeol23front.bookset.tag.client.TagApiClient;
+import com.nhnacademy.byeol23front.bookset.tag.dto.AllTagsInfoResponse;
+import com.nhnacademy.byeol23front.bookset.tag.dto.PageResponse;
 
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
@@ -38,12 +43,13 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/admin/bookApi")
 public class BookAladinController {
-
+	private final MinioService minioService;
 	private final BookAladinService bookAladinService;
 	private final BookApiClient bookApiClient;
 	private final PublisherApiClient publisherApiClient;
 	private final ContributorApiClient contributorApiClient;
 	private final CategoryApiClient categoryApiClient;
+	private final TagApiClient tagApiClient;
 
 	@GetMapping
 	public String getAllBooks(@RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int size, Model model) throws JsonProcessingException {
@@ -61,6 +67,10 @@ public class BookAladinController {
 	@GetMapping("/new")
 	public String createBook(Model model){
 		model.addAttribute("categories", categoryApiClient.getRoots());
+		PageResponse<AllTagsInfoResponse> tagsResponse = tagApiClient.getAllTags(0, 100).getBody();
+		List<AllTagsInfoResponse> allTags = tagsResponse != null ? tagsResponse.content() : new ArrayList<>();
+		model.addAttribute("allTags", allTags);
+
 		return "admin/bookAladin/bookAladinCreate";
 	}
 
@@ -68,15 +78,15 @@ public class BookAladinController {
 	public String createBookFromAladin(@RequestBody BookAladinCreateRequest request, RedirectAttributes redirectAttributes) {
 		try {
 			log.info("알라딘 도서 생성 요청: {}", request);
-			
+
 			// 카테고리 검증
 			List<Long> categoryIds = request.categoryIds() != null ? request.categoryIds() : List.of();
 			if (categoryIds.isEmpty()) {
 				redirectAttributes.addFlashAttribute("errorMessage", "카테고리를 최소 한 개 이상 선택해야 합니다.");
 				return "redirect:/admin/bookApi/new";
 			}
-			
-			// 1. 출판사 찾기 또는 생성
+
+			// 출판사 찾기 또는 생성
 			Long publisherId;
 			if (request.publisher() != null && !request.publisher().isBlank()) {
 				try {
@@ -100,7 +110,7 @@ public class BookAladinController {
 				return "redirect:/admin/bookApi/new";
 			}
 
-			// 2. 기여자 파싱 및 찾기 또는 생성
+			// 기여자 파싱 및 찾기 또는 생성
 			List<Long> contributorIds = new ArrayList<>();
 			log.info("저자 정보: {}",request.author());
 			log.info("역자 정보: {}",request.translator());
@@ -124,7 +134,7 @@ public class BookAladinController {
 				}
 			}
 
-			// 3. 필수 필드 검증
+			// 필수 필드 검증
 			if (request.bookName() == null || request.bookName().isBlank()) {
 				redirectAttributes.addFlashAttribute("errorMessage", "도서명이 필요합니다.");
 				return "redirect:/admin/bookApi/new";
@@ -138,23 +148,22 @@ public class BookAladinController {
 				return "redirect:/admin/bookApi/new";
 			}
 
-			// 4. 도서 생성 (이미지 URL 포함)
+			// 도서 생성
 			BookCreateRequest bookRequest = new BookCreateRequest(
 				request.bookName(),
-				request.toc() != null ? request.toc() : "",  // null 체크
-				request.description() != null ? request.description() : "",  // null 체크
+				request.toc() != null ? request.toc() : "",
+				request.description() != null ? request.description() : "",
 				request.regularPrice(),
 				request.salePrice(),
 				request.isbn(),
 				request.publishDate(),
 				request.isPack(),
-				request.bookStatus(),  // 기본값
-				request.stock() != null ? request.stock() : 0,  // 기본값
+				request.bookStatus(),
+				request.stock() != null ? request.stock() : 0,
 				publisherId,
 				categoryIds,
 				request.tagIds() != null ? request.tagIds() : List.of(),
-				contributorIds,
-				request.imageUrl() != null && !request.imageUrl().isBlank() ? request.imageUrl() : null
+				contributorIds
 			);
 
 			log.info("도서 생성 요청: {}", bookRequest);
@@ -162,8 +171,22 @@ public class BookAladinController {
 			Long bookId = createdBook.bookId();
 			log.info("도서 생성 완료: bookId={}", bookId);
 
+			// 알라딘 이미지 URL을 미니오에 업로드
+			if (request.imageUrl() != null && !request.imageUrl().isBlank()) {
+				log.info("이미지 업로드 시작: bookId={}, imageUrl={}", bookId, request.imageUrl());
+				try {
+					String uploadedUrl = minioService.uploadImageFromUrl(ImageDomain.BOOK, bookId, request.imageUrl());
+					log.info("이미지 업로드 성공: bookId={}, uploadedUrl={}", bookId, uploadedUrl);
+				} catch (Exception e) {
+					log.error("이미지 업로드 실패: bookId={}, imageUrl={}, error={}", bookId, request.imageUrl(), e.getMessage(), e);
+					// 이미지 업로드 실패해도 도서는 생성되었으므로 계속 진행
+				}
+			} else {
+				log.warn("이미지 URL이 없어서 이미지 업로드를 건너뜁니다. bookId={}", bookId);
+			}
+
 			return "redirect:/admin/books";
-			
+
 		} catch (FeignException.BadRequest e) {
 			log.error("알라딘 도서 생성 실패 (Bad Request): {}", e.getMessage());
 			redirectAttributes.addFlashAttribute("errorMessage", "카테고리를 최소 한 개 이상 선택해야 합니다.");

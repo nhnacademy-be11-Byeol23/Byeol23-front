@@ -71,8 +71,7 @@ public class BookAdminController {
 				tmp.publisherId(),
 				categoryIds,
 				tagIds,
-				contributorIds,
-				null  // imageUrl은 BookAdminController에서는 사용하지 않음 (MultipartFile로 처리)
+				contributorIds
 			);
 
 			BookResponse createdBook = bookApiClient.createBook(request);
@@ -264,13 +263,16 @@ public class BookAdminController {
 		return "admin/book/bookForm";
 	}
 
-	@DeleteMapping("/{book-id}")
+	@PostMapping("/{book-id}/delete")
 	@ResponseBody
 	public ResponseEntity<Void> deleteBook(@PathVariable("book-id") Long id) {
+		log.info("[BookAdminController] DELETE 요청 수신: bookId={}", id);
 		try {
 			bookApiClient.deleteBook(id);
+			log.info("[BookAdminController] 도서 삭제 성공: bookId={}", id);
 			return ResponseEntity.ok().build();
 		} catch (Exception e) {
+			log.error("[BookAdminController] 도서 삭제 실패: bookId={}, error={}", id, e.getMessage(), e);
 			return ResponseEntity.internalServerError().build();
 		}
 	}
