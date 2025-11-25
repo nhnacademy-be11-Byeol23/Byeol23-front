@@ -3,12 +3,15 @@ package com.nhnacademy.byeol23front.orderset.order.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderInfoResponse;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
+import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderBulkUpdateRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderCancelRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderInfoResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderSearchCondition;
+import com.nhnacademy.byeol23front.orderset.packaging.dto.PackagingInfoResponse;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -61,19 +64,32 @@ class OrderAdminControllerTest {
 	private String testOrderNumber;
 	private OrderDetailResponse testOrderDetailResponse;
 	private OrderInfoResponse testOrderInfoResponse;
+	private BigDecimal testDeliveryFee;
+	private BigDecimal testPointAmount;
 	private Pageable defaultPageable;
 
 	@BeforeEach
 	void setUp() {
 		testOrderNumber = "20251115-TEST123";
+		testDeliveryFee = new BigDecimal("3000"); // ✨ 배달비 값 정의 (3,000원)
+		testPointAmount = new BigDecimal("1000");
+
+		DeliveryPolicyInfoResponse testDeliveryPolicyResponse = new DeliveryPolicyInfoResponse(
+			new BigDecimal("50000"), // freeDeliveryCondition (예: 5만원 이상 무료)
+			testDeliveryFee,         // deliveryFee (Raw Fee: 3000원)
+			LocalDateTime.now()
+		);
+
+		PackagingInfoResponse testPackaging = new PackagingInfoResponse(1L, "테스트 포장지", new BigDecimal("2000"),
+			"https://testImage.jpg");
 
 		// GET /{order-number} 응답 DTO
 		testOrderDetailResponse = new OrderDetailResponse(
 			testOrderNumber, LocalDateTime.now(), "ORDERED", new BigDecimal("15000"),
 			"홍길동", "01012345678", "주소", "상세주소", "12345",
-			List.of(new BookOrderInfoResponse(1L, "테스트 책", 1, new BigDecimal("15000")))
+			List.of(new BookOrderInfoResponse(1L, "테스트 책", 1, new BigDecimal("15000"), testPackaging)),
+			testDeliveryPolicyResponse, testPointAmount
 		);
-
 		// GET / 응답 DTO
 		testOrderInfoResponse = new OrderInfoResponse(
 			testOrderNumber, LocalDateTime.now(), "홍길동", new BigDecimal("15000"), "ORDERED"

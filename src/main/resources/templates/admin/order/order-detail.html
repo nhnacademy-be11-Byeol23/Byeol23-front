@@ -34,23 +34,80 @@
 
   <div>
     <h6>주문 상품</h6>
-    <ul class="list-group list-group-flush">
-      <th:block th:if="${orderDetail.items != null and not #lists.isEmpty(orderDetail.items)}">
-        <li class="list-group-item d-flex justify-content-between align-items-center"
-            th:each="item : ${orderDetail.items}">
-          <div>
-            <span th:text="${item.bookTitle ?: '상품명 없음'}"></span>
-            <small class="text-muted" th:text="'(' + ${item.quantity ?: 0} + '개)'"></small>
-          </div>
-          <span class="fw-semibold" th:text="${item.price != null and item.quantity != null ? #numbers.formatInteger(item.price * item.quantity, 0, 'COMMA') + '원' : '가격 정보 없음'}"></span>
-        </li>
-      </th:block>
-      <li class="list-group-item text-muted" th:if="${orderDetail.items == null or #lists.isEmpty(orderDetail.items)}">
-        주문 상품 정보가 없습니다.
-      </li>
-    </ul>
-  </div>
+    <div class="order-items-list">
+      <div th:if="${orderDetail.items != null and not #lists.isEmpty(orderDetail.items)}">
 
+        <div class="item-row"
+             th:each="item : ${orderDetail.items()}">
+
+          <div class="item-image me-3">
+            <img src="/assets/img/book_placeholder.png" alt="Book" style="width: 60px; height: 80px; object-fit: cover;">
+          </div>
+
+          <div class="item-info-group">
+
+            <h5 class="mb-1" th:text="${item.bookTitle()}">도서 제목</h5>
+
+            <div class="item-metadata d-flex small mb-0 align-items-center">
+              <span class="text-muted me-3">수량: <span th-text="${item.quantity()}">1</span>권</span>
+
+              <th:block th-if="${item.packaging() != null}">
+                <span class="text-muted mx-1">|</span>
+                <i class="bi bi-gift-fill me-1 text-success"></i>
+                <span th-text="${item.packaging().packagingName()}" class="fw-semibold">프리미엄 포장</span>
+              </th:block>
+            </div>
+          </div>
+
+          <div class="item-price ms-auto fw-bold">
+            <span th:text="${#numbers.formatCurrency(item.price() * item.quantity())}">₩15,000</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div th:if="${orderDetail.items == null or #lists.isEmpty(orderDetail.items)}"
+           class="list-group-item text-muted text-center py-3">
+        주문 상품 정보가 없습니다.
+      </div>
+
+    </div>
+  </div>
+  <div class="detail-section">
+    <h4>결제 상세 내역</h4>
+    <div class="summary-grid">
+
+      <div class="info-row d-flex justify-content-between mb-1">
+        <span class="label">상품 합계:</span>
+        <span class="value text-end" th:text="${#numbers.formatCurrency(subTotal)}">₩30,000</span>
+      </div>
+
+      <div class="info-row d-flex justify-content-between mb-1" th:if="${packagingTotal != null and packagingTotal > 0}">
+        <span class="label">포장비:</span>
+        <span class="value text-end" th:text="${#numbers.formatCurrency(packagingTotal)}">₩0</span>
+      </div>
+
+      <div class="info-row d-flex justify-content-between mb-1">
+        <span class="label">배송비:</span>
+        <span class="value text-end" th:text="${#numbers.formatCurrency(appliedFee)}">₩0</span>
+      </div>
+
+      <th:block th:if="${pointDiscount > 0}">
+        <div class="info-row d-flex justify-content-between mb-1">
+          <span class="label text-danger">포인트 할인:</span>
+          <span class="value text-end text-danger" th:text="'-' + ${#numbers.formatCurrency(pointDiscount)}">₩0</span>
+        </div>
+      </th:block>
+
+      <hr class="my-2">
+
+      <div class="info-row d-flex justify-content-between">
+        <span class="label fw-bold">총 결제 금액:</span>
+        <span class="value text-end fw-bold text-primary" th:text="${#numbers.formatCurrency(orderDetail.actualOrderPrice())}">₩30,000</span>
+      </div>
+    </div>
+
+  </div>
 </th:block>
 
 <div th:if="${orderDetail == null}">

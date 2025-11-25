@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.nhnacademy.byeol23front.memberset.member.dto.NonmemberOrderRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderBulkUpdateRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderCancelRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderCancelResponse;
@@ -50,5 +51,8 @@ public interface OrderApiClient {
 
 	@GetMapping("/api/orders/members")
 	ResponseEntity<Page<OrderDetailResponse>> getOrders(Pageable pageable);
+
+	@PostMapping("/api/orders/nonmembers/lookup")
+	OrderDetailResponse getNonmemberOrder(@RequestBody NonmemberOrderRequest request);
 
 }

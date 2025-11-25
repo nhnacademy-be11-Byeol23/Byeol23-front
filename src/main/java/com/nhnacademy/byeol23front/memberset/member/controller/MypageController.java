@@ -28,6 +28,7 @@ import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
 import com.nhnacademy.byeol23front.minio.service.MinioService;
 import com.nhnacademy.byeol23front.minio.util.ImageDomain;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
+import com.nhnacademy.byeol23front.orderset.order.controller.OrderUtil;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
 import com.nhnacademy.byeol23front.point.client.PointHistoryFeignClient;
 
@@ -41,6 +42,7 @@ public class MypageController {
 	private final MinioService minioService;
 	private final AddressApiClient addressApiClient;
 	private final PointHistoryFeignClient pointHistoryFeignClient;
+	private final OrderUtil orderUtil;
 
 	@ModelAttribute("activeTab")
 	public String addActiveTabToModel(HttpServletRequest request) {
@@ -103,11 +105,13 @@ public class MypageController {
 	}
 
 	@GetMapping("/orders/{order-number}")
-	@ResponseBody
-	public OrderDetailResponse getOrderDetails(@PathVariable(name = "order-number")String orderNumber) {
+	public String getOrderDetails(Model model, @PathVariable(name = "order-number") String orderNumber) {
 		ResponseEntity<OrderDetailResponse> response = orderApiClient.getOrderByOrderNumber(orderNumber);
 
-		return response.getBody();
+		model.addAttribute("orderDetail", response.getBody());
+		orderUtil.addFinalPaymentAmountToModel(model, response.getBody());
+
+		return "mypage/order-detail";
 	}
 
 	@GetMapping("/wishlist")
@@ -156,7 +160,7 @@ public class MypageController {
 	@GetMapping("/coupons")
 	public String getCoupons(Model model) {
 		model.addAttribute("activeTab", "coupons");
-		
+
 		// 발급 내역(사용 전)
 		model.addAttribute("issuedCoupons", new ArrayList<>());
 		// 사용 내역

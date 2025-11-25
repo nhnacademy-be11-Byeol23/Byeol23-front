@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class OrderAdminController {
 	private final OrderApiClient orderApiClient;
+	private final OrderUtil orderUtil;
 
 	@PostMapping("/{orderNumber}/cancel")
 	public String cancelOrder(@PathVariable String orderNumber,
@@ -43,6 +44,7 @@ public class OrderAdminController {
 		ResponseEntity<OrderDetailResponse> response = orderApiClient.getOrderByOrderNumber(orderNumber);
 		log.info("order: {}", response.getBody());
 		model.addAttribute("orderDetail", response.getBody());
+		orderUtil.addFinalPaymentAmountToModel(model, response.getBody());
 
 		return "admin/order/order-detail";
 	}
