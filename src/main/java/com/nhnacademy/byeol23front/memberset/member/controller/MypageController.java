@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.nhnacademy.byeol23front.couponset.coupon.client.CouponApiClient;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,7 @@ public class MypageController {
 	private final MinioService minioService;
 	private final AddressApiClient addressApiClient;
 	private final PointHistoryFeignClient pointHistoryFeignClient;
+	private final CouponApiClient couponApiClient;
 
 	@ModelAttribute("activeTab")
 	public String addActiveTabToModel(HttpServletRequest request) {
@@ -156,8 +158,9 @@ public class MypageController {
 	@GetMapping("/coupons")
 	public String getCoupons(Model model) {
 		model.addAttribute("activeTab", "coupons");
-		
+		couponApiClient.getCoupons();
 		// 발급 내역(사용 전)
+
 		model.addAttribute("issuedCoupons", new ArrayList<>());
 		// 사용 내역
 		model.addAttribute("usedCoupons", new ArrayList<>());
