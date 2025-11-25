@@ -33,8 +33,8 @@ async function updateTag(tagId){
     if (newName === "") {alert("수정할 이름을 입력하십시오"); return;}
     console.log(newName);
     try {
-        const res = await fetch(`/admin/tags/` + tagId, {
-            method: "PUT",
+        const res = await fetch(`/admin/tags/put/` + tagId, {
+            method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({ tagName: newName })
         });
@@ -57,12 +57,12 @@ function deleteTag(button) {
     const id = button.dataset.id;
     if (!id) return;
 
-    fetch(`/admin/tags/${id}`, { method: "DELETE"})
+    fetch(`/admin/tags/delete/${id}`, { method: "POST"})
         .then((res) => {
-            if (!res.ok) {
-                return res.json().then(errorBody => { throw new Error(errorBody.message || "삭제 실패"); });
-            }
-            // ✨ 성공: 삭제 후 태그 목록 페이지로 이동합니다.
+            // if (!res.ok) {
+            //     return res.json().then(errorBody => { throw new Error(errorBody.message || "삭제 실패"); });
+            // }
+            // // ✨ 성공: 삭제 후 태그 목록 페이지로 이동합니다.
             window.location.href = '/admin/tags';
         })
         .catch((err) => {
