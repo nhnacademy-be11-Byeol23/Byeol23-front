@@ -1,6 +1,7 @@
 package com.nhnacademy.byeol23front.memberset.member.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.nhnacademy.byeol23front.memberset.member.dto.*;
@@ -89,6 +90,13 @@ public class MemberController {
 		response.addHeader("Set-Cookie", deleteCookie("Refresh-Token", "/members"));
 
 		return "redirect:/";
+	}
+
+	@GetMapping("/check-id")
+	@ResponseBody
+	public CheckIdResponse checkId(@RequestParam String loginId) {
+		CheckIdResponse response = memberApiClient.checkId(loginId);
+		return response;
 	}
 
 	private String deleteCookie(String name, String path) {
