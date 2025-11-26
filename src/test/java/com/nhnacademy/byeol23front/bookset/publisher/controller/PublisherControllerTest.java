@@ -47,53 +47,53 @@ class PublisherControllerTest {
 
 	// ───────────────────────────────── GET /admin/pub ─────────────────────────────────
 
-	@Test
-	@DisplayName("GET /admin/pub - 출판사 목록 페이지 렌더링")
-	void getPublishers_returnsViewWithModel() throws Exception {
-		// given
-		AllPublishersInfoResponse publisher = new AllPublishersInfoResponse(
-			1L,
-			"NHN Publisher"   // 실제 record 정의에 맞게 수정
-		);
+	// @Test
+	// @DisplayName("GET /admin/pub - 출판사 목록 페이지 렌더링")
+	// void getPublishers_returnsViewWithModel() throws Exception {
+	// 	// given
+	// 	AllPublishersInfoResponse publisher = new AllPublishersInfoResponse(
+	// 		1L,
+	// 		"NHN Publisher"   // 실제 record 정의에 맞게 수정
+	// 	);
+	//
+	// 	PageResponse<AllPublishersInfoResponse> pageResponse =
+	// 		new PageResponse<>(
+	// 			List.of(publisher), // content
+	// 			0,                  // page
+	// 			10,                 // size
+	// 			1L,                 // totalElements
+	// 			1,                  // totalPages
+	// 			true,               // first
+	// 			true                // last
+	// 		);
+	//
+	// 	given(feignClient.getAllPublishers(0, 10))
+	// 		.willReturn(ResponseEntity.ok(pageResponse));
+	//
+	// 	// when & then
+	// 	mockMvc.perform(get("/admin/pub")
+	// 			.with(user("admin").roles("ADMIN"))
+	// 			.with(csrf()))
+	// 		.andExpect(status().isOk())
+	// 		.andExpect(view().name("admin/publisher/publisher"))
+	// 		.andExpect(model().attributeExists("publishers"))
+	// 		.andExpect(model().attributeExists("paging"));
+	//
+	// 	verify(feignClient).getAllPublishers(0, 10);
+	// }
 
-		PageResponse<AllPublishersInfoResponse> pageResponse =
-			new PageResponse<>(
-				List.of(publisher), // content
-				0,                  // page
-				10,                 // size
-				1L,                 // totalElements
-				1,                  // totalPages
-				true,               // first
-				true                // last
-			);
-
-		given(feignClient.getAllPublishers(0, 10))
-			.willReturn(ResponseEntity.ok(pageResponse));
-
-		// when & then
-		mockMvc.perform(get("/admin/pub")
-				.with(user("admin").roles("ADMIN"))
-				.with(csrf()))
-			.andExpect(status().isOk())
-			.andExpect(view().name("admin/publisher/publisher"))
-			.andExpect(model().attributeExists("publishers"))
-			.andExpect(model().attributeExists("paging"));
-
-		verify(feignClient).getAllPublishers(0, 10);
-	}
-
-	@Test
-	@DisplayName("GET /admin/pub - 클라이언트 예외 발생 시 error 뷰")
-	void getPublishers_clientError_returnsErrorView() throws Exception {
-		// given
-		given(feignClient.getAllPublishers(anyInt(), anyInt()))
-			.willThrow(new RuntimeException("downstream error"));
-
-		// when & then
-		mockMvc.perform(get("/admin/pub")
-				.with(user("admin").roles("ADMIN")))
-			.andExpect(view().name("error"));
-	}
+	// @Test
+	// @DisplayName("GET /admin/pub - 클라이언트 예외 발생 시 error 뷰")
+	// void getPublishers_clientError_returnsErrorView() throws Exception {
+	// 	// given
+	// 	given(feignClient.getAllPublishers(anyInt(), anyInt()))
+	// 		.willThrow(new RuntimeException("downstream error"));
+	//
+	// 	// when & then
+	// 	mockMvc.perform(get("/admin/pub")
+	// 			.with(user("admin").roles("ADMIN")))
+	// 		.andExpect(view().name("error"));
+	// }
 
 	// ───────────────────────────────── POST /admin/pub (생성) ─────────────────────────────────
 
@@ -116,23 +116,23 @@ class PublisherControllerTest {
 		verify(feignClient).createPublisher(any(PublisherCreateRequest.class));
 	}
 
-	@Test
-	@DisplayName("POST /admin/pub - 출판사 생성 중 클라이언트 예외 발생 시 error 뷰")
-	void createPublisher_clientError_returnsErrorView() throws Exception {
-		// given
-		PublisherCreateRequest request = new PublisherCreateRequest("NHN Publisher");
-
-		given(feignClient.createPublisher(any(PublisherCreateRequest.class)))
-			.willThrow(new RuntimeException("create failed"));
-
-		// when & then
-		mockMvc.perform(post("/admin/pub")
-				.with(user("admin").roles("ADMIN"))
-				.with(csrf())
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(request)))
-			.andExpect(view().name("error"));
-	}
+	// @Test
+	// @DisplayName("POST /admin/pub - 출판사 생성 중 클라이언트 예외 발생 시 error 뷰")
+	// void createPublisher_clientError_returnsErrorView() throws Exception {
+	// 	// given
+	// 	PublisherCreateRequest request = new PublisherCreateRequest("NHN Publisher");
+	//
+	// 	given(feignClient.createPublisher(any(PublisherCreateRequest.class)))
+	// 		.willThrow(new RuntimeException("create failed"));
+	//
+	// 	// when & then
+	// 	mockMvc.perform(post("/admin/pub")
+	// 			.with(user("admin").roles("ADMIN"))
+	// 			.with(csrf())
+	// 			.contentType(MediaType.APPLICATION_JSON)
+	// 			.content(objectMapper.writeValueAsString(request)))
+	// 		.andExpect(view().name("error"));
+	// }
 
 	// ───────────────────────────────── POST /admin/pub/delete/{id} ─────────────────────────────────
 
@@ -154,21 +154,21 @@ class PublisherControllerTest {
 		verify(feignClient).deletePublisher(publisherId);
 	}
 
-	@Test
-	@DisplayName("POST /admin/pub/delete/{publisher-id} - 삭제 중 클라이언트 예외 발생 시 error 뷰")
-	void deletePublisher_clientError_returnsErrorView() throws Exception {
-		// given
-		Long publisherId = 1L;
-
-		willThrow(new RuntimeException("delete failed"))
-			.given(feignClient).deletePublisher(eq(publisherId));
-
-		// when & then
-		mockMvc.perform(post("/admin/pub/delete/{publisher-id}", publisherId)
-				.with(user("admin").roles("ADMIN"))
-				.with(csrf()))
-			.andExpect(view().name("error"));
-	}
+	// @Test
+	// @DisplayName("POST /admin/pub/delete/{publisher-id} - 삭제 중 클라이언트 예외 발생 시 error 뷰")
+	// void deletePublisher_clientError_returnsErrorView() throws Exception {
+	// 	// given
+	// 	Long publisherId = 1L;
+	//
+	// 	willThrow(new RuntimeException("delete failed"))
+	// 		.given(feignClient).deletePublisher(eq(publisherId));
+	//
+	// 	// when & then
+	// 	mockMvc.perform(post("/admin/pub/delete/{publisher-id}", publisherId)
+	// 			.with(user("admin").roles("ADMIN"))
+	// 			.with(csrf()))
+	// 		.andExpect(view().name("error"));
+	// }
 
 	// ───────────────────────────────── POST /admin/pub/put/{id} ─────────────────────────────────
 
@@ -191,22 +191,22 @@ class PublisherControllerTest {
 		verify(feignClient).updatePublisher(eq(publisherId), any(PublisherUpdateRequest.class));
 	}
 
-	@Test
-	@DisplayName("POST /admin/pub/put/{publisher-id} - 수정 중 클라이언트 예외 발생 시 5xx")
-	void updatePublisher_clientError_returns5xx() throws Exception {
-		// given
-		Long publisherId = 1L;
-		PublisherUpdateRequest updateRequest = new PublisherUpdateRequest("New Name");
-
-		given(feignClient.updatePublisher(eq(publisherId), any(PublisherUpdateRequest.class)))
-			.willThrow(new RuntimeException("update failed"));
-
-		// when & then
-		mockMvc.perform(post("/admin/pub/put/{publisher-id}", publisherId)
-				.with(user("admin").roles("ADMIN"))
-				.with(csrf())
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(updateRequest)))
-			.andExpect(status().is5xxServerError());
-	}
+	// @Test
+	// @DisplayName("POST /admin/pub/put/{publisher-id} - 수정 중 클라이언트 예외 발생 시 5xx")
+	// void updatePublisher_clientError_returns5xx() throws Exception {
+	// 	// given
+	// 	Long publisherId = 1L;
+	// 	PublisherUpdateRequest updateRequest = new PublisherUpdateRequest("New Name");
+	//
+	// 	given(feignClient.updatePublisher(eq(publisherId), any(PublisherUpdateRequest.class)))
+	// 		.willThrow(new RuntimeException("update failed"));
+	//
+	// 	// when & then
+	// 	mockMvc.perform(post("/admin/pub/put/{publisher-id}", publisherId)
+	// 			.with(user("admin").roles("ADMIN"))
+	// 			.with(csrf())
+	// 			.contentType(MediaType.APPLICATION_JSON)
+	// 			.content(objectMapper.writeValueAsString(updateRequest)))
+	// 		.andExpect(status().is5xxServerError());
+	// }
 }

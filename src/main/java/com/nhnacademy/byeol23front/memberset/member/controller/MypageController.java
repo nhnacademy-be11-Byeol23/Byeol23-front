@@ -46,6 +46,7 @@ public class MypageController {
 	private final AddressApiClient addressApiClient;
 	private final PointHistoryFeignClient pointHistoryFeignClient;
 	private final CouponApiClient couponApiClient;
+	private final OrderUtil orderUtil;
 
 	@ModelAttribute("activeTab")
 	public String addActiveTabToModel(HttpServletRequest request) {
