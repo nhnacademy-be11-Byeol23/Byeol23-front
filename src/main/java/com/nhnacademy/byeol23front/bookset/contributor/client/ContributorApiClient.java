@@ -34,6 +34,6 @@ public interface ContributorApiClient {
 	@PostMapping(value = "/api/cont/put/{contributor-id}")
 	ContributorUpdateResponse updateContributor(@PathVariable(name = "contributor-id") Long contributorId, @RequestBody ContributorUpdateRequest contributorUpdateRequest);
 
-	@DeleteMapping(value = "/api/cont/delete/{contributor-id}")
+	@PostMapping(value = "/api/cont/delete/{contributor-id}")
 	void deleteContributor(@PathVariable(name = "contributor-id") Long contributorId);
 }

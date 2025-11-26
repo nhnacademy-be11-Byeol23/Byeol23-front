@@ -9055,7 +9055,6 @@ section,
 
 .register .social-login .social-buttons {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
 }
 
