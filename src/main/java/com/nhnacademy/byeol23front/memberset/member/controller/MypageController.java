@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.nhnacademy.byeol23front.couponset.coupon.client.CouponApiClient;
+import com.nhnacademy.byeol23front.couponset.coupon.dto.IssuedCouponInfoResponseDto;
+import com.nhnacademy.byeol23front.couponset.coupon.dto.UsedCouponInfoResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +45,7 @@ public class MypageController {
 	private final MinioService minioService;
 	private final AddressApiClient addressApiClient;
 	private final PointHistoryFeignClient pointHistoryFeignClient;
-	private final OrderUtil orderUtil;
+	private final CouponApiClient couponApiClient;
 
 	@ModelAttribute("activeTab")
 	public String addActiveTabToModel(HttpServletRequest request) {
@@ -162,9 +165,12 @@ public class MypageController {
 		model.addAttribute("activeTab", "coupons");
 
 		// 발급 내역(사용 전)
-		model.addAttribute("issuedCoupons", new ArrayList<>());
+		List<IssuedCouponInfoResponseDto> issuedCoupons = couponApiClient.getIssuedCoupons().getBody();
+		model.addAttribute("issuedCoupons", issuedCoupons);
+
 		// 사용 내역
-		model.addAttribute("usedCoupons", new ArrayList<>());
+		List<UsedCouponInfoResponseDto> usedCoupons = couponApiClient.getUsedCoupons().getBody();
+		model.addAttribute("usedCoupons", usedCoupons);
 		return "mypage/coupon_box";
 	}
 
