@@ -98,24 +98,24 @@
                         <div class="row g-3">
                           <div class="col-md-6">
                             <label for="name" class="form-label">이름</label>
-                            <input type="text" class="form-control" id="name" required="" th:value="${user.memberName()}">
+                            <input type="text" class="form-control" id="name" required="" th:value="${member.memberName()}">
                           </div>
                             <div class="col-md-6">
                                 <label for="nickname" class="form-label">별명</label>
-                                <input class="form-control" id="nickname" th:value="${user.nickname()}">
+                                <input class="form-control" id="nickname" th:value="${member.nickname()}">
                             </div>
                             <div class="col-md-6">
                                 <label for="phone" class="form-label">전화번호</label>
-                                <input type="tel" class="form-control" id="phone" th:value="${user.phoneNumber()}">
+                                <input type="tel" class="form-control" id="phone" th:value="${member.phoneNumber()}">
                             </div>
                           <div class="col-md-6">
                             <label for="email" class="form-label">이메일</label>
-                            <input type="email" class="form-control" id="email" value="sarah@example.com" required="" th:value="${user.email()}">
+                            <input type="email" class="form-control" id="email" value="sarah@example.com" required="" th:value="${member.email()}">
                           </div>
 
                             <div class="col-md-6">
                                 <label for="birthDate" class="form-label">생일</label>
-                                <input type="date" class="form-control" id="birthDate" th:value="${user.birthDate()}">
+                                <input type="date" class="form-control" id="birthDate" th:value="${member.birthDate()}">
                             </div>
                         </div>
 

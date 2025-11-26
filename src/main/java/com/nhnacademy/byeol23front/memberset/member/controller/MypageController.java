@@ -46,6 +46,7 @@ public class MypageController {
 	private final AddressApiClient addressApiClient;
 	private final PointHistoryFeignClient pointHistoryFeignClient;
 	private final CouponApiClient couponApiClient;
+	private final OrderUtil orderUtil;
 
 	@ModelAttribute("activeTab")
 	public String addActiveTabToModel(HttpServletRequest request) {
@@ -68,7 +69,7 @@ public class MypageController {
 	public String getMypage(Model model) {
 		MemberMyPageResponse resp = memberApiClient.getMember().getBody();
 		model.addAttribute("activeTab", "settings");
-		model.addAttribute("user", resp);
+		model.addAttribute("member", resp);
 		return "mypage/settings";
 	}
 
@@ -156,7 +157,7 @@ public class MypageController {
 	@GetMapping("/settings")
 	public String getSettings(Model model) {
 		MemberMyPageResponse resp = memberApiClient.getMember().getBody();
-		model.addAttribute("user", resp);
+		model.addAttribute("member", resp);
 		return "mypage/settings";
 	}
 
