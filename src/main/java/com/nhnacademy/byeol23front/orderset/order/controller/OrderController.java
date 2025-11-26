@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +27,9 @@ import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 import com.nhnacademy.byeol23front.memberset.member.dto.MemberMyPageResponse;
 import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
-import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
+import com.nhnacademy.byeol23front.orderset.order.dto.OrderCancelRequest;
+import com.nhnacademy.byeol23front.orderset.order.dto.OrderCancelResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.PointOrderResponse;
@@ -131,6 +133,16 @@ public class OrderController {
 		model.addAttribute("paymentInfo", paymentInfo);
 
 		return "order/success";
+	}
+
+	@PostMapping("/{order-number}/cancel")
+	@ResponseBody
+	public ResponseEntity<OrderCancelResponse> cancelOrder(@PathVariable(name = "order-number") String orderNumber,
+		@RequestBody OrderCancelRequest request) {
+
+		OrderCancelResponse response = orderApiClient.cancelOrder(orderNumber, request).getBody();
+
+		return ResponseEntity.ok(response);
 	}
 
 }

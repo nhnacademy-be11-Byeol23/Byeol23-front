@@ -277,7 +277,8 @@
                                                 <div class="item-meta">
                                                     <span th:text="'수량: ' + ${firstItem.quantity}">수량: 1</span>
                                                     <span class="separator">|</span>
-                                                    <span class="price" th:text="${#numbers.formatCurrency(firstItem.price)}">₩15,000</span>
+                                                    <span class="price"
+                                                          th:text="${#numbers.formatCurrency(firstItem.price)}">₩15,000</span>
                                                 </div>
                                                 <div class="more-items" th:if="${totalItems > 1}">
                                                     <span th:text="'외 ' + (${totalItems} - 1) + '건'">외 2건</span>
@@ -287,13 +288,15 @@
                                             <div class="order-info">
                                                 <div class="info-row">
                                                     <span class="label">상태 / 개수:</span>
-                                                    <span class="value" th:text="${viewModel.order.orderStatus} + ' (' + ${totalItems} + ' items)'">대기 (3 items)</span>
+                                                    <span class="value"
+                                                          th:text="${viewModel.order.orderStatus} + ' (' + ${totalItems} + ' items)'">대기 (3 items)</span>
                                                 </div>
                                                 <hr class="my-2">
 
                                                 <div class="info-row total">
                                                     <span class="label">총 결제 금액</span>
-                                                    <span class="value price" th:text="${#numbers.formatCurrency(viewModel.order.actualOrderPrice)}">₩30,000</span>
+                                                    <span class="value price"
+                                                          th:text="${#numbers.formatCurrency(viewModel.order.actualOrderPrice)}">₩30,000</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -317,7 +320,8 @@
                                     </div>
 
                                     <!-- 숨겨진 select: 이 주문에 포함된 도서들을 서버사이드에서 렌더링 -->
-                                    <select class="order-book-select" style="display:none;" th:if="${!#lists.isEmpty(viewModel.order.items)}">
+                                    <select class="order-book-select" style="display:none;"
+                                            th:if="${!#lists.isEmpty(viewModel.order.items)}">
                                         <option value="" disabled selected>선택</option>
                                         <option th:each="item : ${viewModel.order.items}"
                                                 th:value="${item.bookId}"
@@ -438,7 +442,8 @@
 
                     <div class="mb-3">
                         <label for="reviewContent" class="form-label">리뷰 내용</label>
-                        <textarea class="form-control" id="reviewContent" name="reviewContent" rows="4" required></textarea>
+                        <textarea class="form-control" id="reviewContent" name="reviewContent" rows="4"
+                                  required></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">평점</label>
@@ -497,7 +502,9 @@
             const modalOrderNum = document.getElementById('modal-order-number');
 
             // 1. 모달 내용을 로딩 스피너로 초기화
-            while (modalBody.firstChild) { modalBody.removeChild(modalBody.firstChild); }
+            while (modalBody.firstChild) {
+                modalBody.removeChild(modalBody.firstChild);
+            }
             modalBody.appendChild(createLoadingSpinner());
             modalOrderNum.textContent = '...';
 
@@ -515,7 +522,9 @@
                 const renderedHtml = await response.text();
 
                 // 4. 성공: 로딩 스피너 제거 후, HTML Fragment를 innerHTML로 주입
-                while (modalBody.firstChild) { modalBody.removeChild(modalBody.firstChild); }
+                while (modalBody.firstChild) {
+                    modalBody.removeChild(modalBody.firstChild);
+                }
                 modalBody.innerHTML = renderedHtml;
 
                 // 5. 모달 제목 업데이트 (주문 번호 재사용)
@@ -523,7 +532,9 @@
 
             } catch (error) {
                 // --- 에러 처리 (DOM API 사용) ---
-                while (modalBody.firstChild) { modalBody.removeChild(modalBody.firstChild); }
+                while (modalBody.firstChild) {
+                    modalBody.removeChild(modalBody.firstChild);
+                }
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'alert alert-danger';
                 errorDiv.textContent = error.message || '조회 중 오류가 발생했습니다.';
@@ -531,6 +542,263 @@
             }
         });
     });
+
+    window.refundModalInstance = null;
+    window.currentRefundOrderNumber = null;
+    window.currentAppliedFee = 0;
+    window.currentDeliveryStartDate = null;
+
+    function displayAlert(message) {
+        console.warn('Alert: ' + message);
+        alert(message);
+    }
+
+    function getDateDifferenceInDays(date1, date2) {
+        const diffTime = Math.abs(date2 - date1);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    }
+
+    function handleToggleRefundSection(buttonElement) {
+        const refundSection = document.getElementById('refundSection');
+        const refundReasonSelect = document.getElementById('refundReason');
+        const isVisible = refundSection.style.display !== 'none';
+
+        if (isVisible) {
+            // 섹션 숨기기
+            refundSection.style.display = 'none';
+            return;
+        }
+
+        // 섹션 보이기
+        refundSection.style.display = 'block';
+
+        // 데이터 초기화 (모달이 열릴 때 하던 작업)
+        const dataset = buttonElement.dataset;
+        window.currentRefundOrderNumber = dataset.orderNumber;
+        window.currentAppliedFee = parseFloat(dataset.appliedFee);
+        window.currentDeliveryStartDate = new Date(dataset.orderDate);
+
+        if (refundReasonSelect) {
+            refundReasonSelect.value = "";
+
+            const changeHandler = function(event) {
+                handleUpdateRefundPolicy(event.target.value);
+            };
+
+            refundReasonSelect.removeEventListener('change', window.refundReasonChangeHandler);
+            refundReasonSelect.addEventListener('change', changeHandler);
+            window.refundReasonChangeHandler = changeHandler; // 제거를 위해 전역 변수에 저장
+
+            handleUpdateRefundPolicy(""); // 정책 초기화
+        }
+    }
+
+    window.processRefund = function () {
+        // 로그가 안 찍히는 문제 해결을 위해 이 함수를 handleProcessRefund의 별칭으로 사용합니다.
+        handleProcessRefund();
+    }
+
+    function handleUpdateRefundPolicy(reason) {
+        const refundPolicyText = document.getElementById('refundPolicyText');
+        const refundDeliveryFeeDisplay = document.getElementById('refundDeliveryFee');
+        const processRefundBtn = document.getElementById('processRefundBtn');
+
+        const currentDeliveryStartDate = window.currentDeliveryStartDate;
+        const currentAppliedFee = window.currentAppliedFee;
+
+        // --- 유효성 검사 및 정책 로직 (이전 로직 유지) ---
+        if (!refundPolicyText || !currentDeliveryStartDate || !processRefundBtn || isNaN(currentAppliedFee)) {
+            refundPolicyText.innerHTML = '<p class="text-danger">오류: 주문 정보가 올바르지 않습니다.</p>';
+            if (processRefundBtn) processRefundBtn.disabled = true;
+            return;
+        }
+
+        const today = new Date();
+        const daysPassed = getDateDifferenceInDays(currentDeliveryStartDate, today);
+        let policyHtml = '';
+        let deliveryFeeText = '';
+        let isValid = true;
+        const fee = currentAppliedFee;
+
+        if (reason === 'simple_change') {
+            if (daysPassed <= 10) {
+                policyHtml = `<p class="text-success fw-bold">정책 적용 가능: 단순 변심 (10일 이내)</p><p>반품/환불 금액은 **반품 택배비 ${fee.toLocaleString()}원**을 제외하고 **전액 포인트**로 환불됩니다.</p>`;
+                deliveryFeeText = `(차감) ${fee.toLocaleString()}원`;
+            } else {
+                policyHtml = `<p class="text-danger fw-bold">정책 적용 불가</p><p>단순 변심 반품/환불은 배송 시작일(${currentDeliveryStartDate.toLocaleDateString()})로부터 10일 이내에만 가능합니다. (경과일: ${daysPassed}일)</p>`;
+                deliveryFeeText = '-';
+                isValid = false;
+            }
+        } else if (reason === 'damage') {
+            if (daysPassed <= 30) {
+                policyHtml = `<p class="text-success fw-bold">정책 적용 가능: 파손/파본 (30일 이내)</p><p>상품 문제로 인한 반품/환불은 **배송비 포함 전액 포인트**로 환불됩니다.</p>`;
+                deliveryFeeText = `0원 (배송비 면제)`;
+            } else {
+                policyHtml = `<p class="text-danger fw-bold">정책 적용 불가</p><p>파손/파본 반품/환불은 배송 시작일(${currentDeliveryStartDate.toLocaleDateString()})로부터 30일 이내에만 가능합니다. (경과일: ${daysPassed}일)</p>`;
+                deliveryFeeText = '-';
+                isValid = false;
+            }
+        } else {
+            policyHtml = '<p class="text-secondary">환불 사유를 선택해주세요.</p>';
+            deliveryFeeText = '-';
+            isValid = false;
+        }
+
+        refundPolicyText.innerHTML = policyHtml;
+        if (refundDeliveryFeeDisplay) refundDeliveryFeeDisplay.textContent = deliveryFeeText;
+        if (processRefundBtn) processRefundBtn.disabled = !isValid;
+
+    }
+
+    function handleCancelOrderByUser(orderNumber) {
+        console.log("취소 버튼 눌림 - Delegate 패턴 최종 확인. 주문 번호: " + orderNumber);
+        if (!confirm(`주문 번호 [${orderNumber}]의 결제를 취소하시겠습니까?`)) {
+            return;
+        }
+        const url = `/orders/${orderNumber}/cancel`;
+        const orderCancelRequest = {cancelReason: "고객 요청에 의한 취소"};
+
+        fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(orderCancelRequest)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || "결제 취소 처리 중 오류가 발생했습니다.")
+                    });
+                }
+                return response.text();
+            })
+            .then(() => {
+                displayAlert(`주문 [${orderNumber}]이(가) 성공적으로 취소되었습니다. 페이지를 새로고침합니다.`);
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error("Order cancellation failed:", error);
+                displayAlert(`결제 취소에 실패했습니다: ${error.message}`);
+            });
+    }
+
+    function handleOpenRefundModal(buttonElement) {
+        const dataset = buttonElement.dataset;
+        window.currentRefundOrderNumber = dataset.orderNumber;
+        window.currentAppliedFee = parseFloat(dataset.appliedFee);
+        window.currentDeliveryStartDate = new Date(dataset.orderDate);
+
+        if (!window.refundModalInstance) {
+            const refundModalElement = document.getElementById('refundModal');
+
+            // 요소는 찾았지만, Bootstrap이 로드되었는지도 확인합니다.
+            if (refundModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                window.refundModalInstance = new bootstrap.Modal(refundModalElement);
+            } else {
+                // 이 경고가 뜬다면: 1. Fragment가 제대로 로드되지 않음. 2. Bootstrap JS 로드 문제.
+                displayAlert("환불 모달을 찾거나 초기화할 수 없습니다. 모달 HTML이 DOM에 있는지 확인해 주세요.");
+                return;
+            }
+        }
+
+        const refundReasonSelect = document.getElementById('refundReason');
+        if (refundReasonSelect) refundReasonSelect.value = "";
+        handleUpdateRefundPolicy("");
+
+        window.refundModalInstance.show();
+    }
+
+    function handleProcessRefund() { // HTML의 onclick에 연결\
+        console.log("환불/반품 버튼 클릭");
+
+        const refundReasonSelect = document.getElementById('refundReason');
+        const processRefundBtn = document.getElementById('processRefundBtn');
+        const reason = refundReasonSelect ? refundReasonSelect.value : "";
+
+        if (reason === "" || (processRefundBtn && processRefundBtn.disabled)) {
+            displayAlert("환불/반품 사유를 선택하거나, 정책 적용 가능 상태인지 확인해 주세요.");
+            return;
+        }
+        if (!confirm(`선택 사유 (${reason})로 환불을 요청하시겠습니까? 모든 금액은 포인트로 환불됩니다.`)) {
+            return;
+        }
+
+        let refundOptionKey = '';
+
+        if (reason === 'simple_change') {
+            refundOptionKey = 'MIND_CHANGED'; // Enum: MIND_CHANGED("단순 변심")
+        } else if (reason === 'damage') {
+            refundOptionKey = 'BREAK';      // Enum: BREAK("파손, 파본")
+        } else {
+            displayAlert("유효하지 않은 환불 사유입니다.");
+            return;
+        }
+
+        const url = `/refunds`;
+        const refundRequest = {
+            orderNumber: window.currentRefundOrderNumber,
+            refundReason: reason,
+            refundOption: refundOptionKey,
+            appliedFee: window.currentAppliedFee
+        };
+
+        fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(refundRequest)})
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || "환불 처리 중 오류가 발생했습니다.")
+                    });
+                }
+                return response.text();
+            })
+            .then(() => {
+                displayAlert(`주문 [${window.currentRefundOrderNumber}]에 대한 환불 요청이 성공적으로 처리되었습니다. 페이지를 새로고침합니다.`);
+                if (window.refundModalInstance) window.refundModalInstance.hide();
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error("Refund failed:", error);
+                if (window.refundModalInstance) window.refundModalInstance.hide();
+                displayAlert(`환불 요청에 실패했습니다: ${error.message}`);
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // Modal 인스턴스 생성 (부모 페이지에서 한 번만)
+        document.body.addEventListener('change', function (event) {
+            const target = event.target;
+
+            // 1. 환불 사유 선택 박스(id='refundReason')의 변경 감지
+            if (target.id === 'refundReason') {
+                const selectedReason = target.value;
+                handleUpdateRefundPolicy(selectedReason);
+            }
+        });
+
+        document.body.addEventListener('click', function (event) {
+            const target = event.target;
+
+            // 1. 주문 취소 버튼(.js-cancel-order-btn) 확인
+            if (target.classList.contains('js-cancel-order-btn')) {
+                event.preventDefault();
+                const orderNumber = target.dataset.orderNumber;
+                handleCancelOrderByUser(orderNumber);
+            }
+
+            // 2. 환불/반품 토글 버튼(.js-toggle-refund-section) 확인
+            if (target.classList.contains('js-toggle-refund-section')) {
+                event.preventDefault();
+                handleToggleRefundSection(target);
+            }
+
+            if (target.id === 'processRefundBtn' || target.classList.contains('js-process-refund-btn')) {
+                event.preventDefault();
+                handleProcessRefund(); // 새로운 핸들러 호출
+            }
+        });
+    });
+
 </script>
 
 </body>

@@ -130,6 +130,15 @@
                     </div>
                 </div>
             </div>
+            <div class="text-end pt-4 mt-3 border-top">
+                <button th:if="${order.orderStatus() == '결제 완료' or order.orderStatus() == '배송중'}"
+                        type="button"
+                        class="btn btn-danger"
+                        th:data-order-number="${order.orderNumber()}"
+                        th:onclick="|cancelNonMemberOrder(this)|">
+                    결제 취소
+                </button>
+            </div>
         </div>
 
     </div>
@@ -139,6 +148,50 @@
 
 <script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/assets/js/main.js}"></script>
+
+<script>
+    /**
+     * 비회원 주문 취소 요청을 처리합니다.
+     * @param {HTMLElement} buttonElement - 클릭된 '결제 취소' 버튼 요소
+     */
+    function cancelNonMemberOrder(buttonElement) {
+        const orderNumber = buttonElement.dataset.orderNumber;
+
+        if (!confirm(`주문 번호 [${orderNumber}]의 결제를 취소하시겠습니까? 취소 후에는 다시 복구할 수 없습니다.`)) {
+            return;
+        }
+
+        const url = `/orders/${orderNumber}/cancel`;
+
+        const cancelRequest = {
+            // 비회원 취소이므로 사유는 고정
+            cancelReason: "고객 요청에 의한 취소"
+        };
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(cancelRequest)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message || "주문 취소 처리 중 오류가 발생했습니다.") });
+                }
+                return response.text();
+            })
+            .then(() => {
+                alert(`주문 [${orderNumber}]이(가) 성공적으로 취소되었습니다.`);
+                // 취소 후 페이지 새로고침하여 상태 업데이트
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error("Order cancellation failed:", error);
+                alert(`결제 취소에 실패했습니다: ${error.message}`);
+            });
+    }
+</script>
 
 </body>
 

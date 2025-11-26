@@ -1,11 +1,23 @@
 <div th:fragment="orderDetailModalBody">
 
+    <div id="modalOrderData"
+         th:data-order-number="${orderDetail.orderNumber}"
+         th:data-order-date="${orderDetail.orderDate != null ? #temporals.format(orderDetail.orderDate, 'yyyy-MM-dd HH:mm:ss') : ''}"
+         th:data-order-status="${orderDetail.orderStatus}"
+         th:data-applied-fee="${appliedFee}">
+    </div>
+
     <div class="mb-3">
         <h6>기본 정보</h6>
         <p class="mb-1"><strong>주문 번호:</strong> <span th:text="${orderDetail.orderNumber ?: 'N/A'}"></span></p>
-        <p class="mb-1"><strong>주문 일시:</strong> <span th:text="${orderDetail.orderDate != null ? #temporals.format(orderDetail.orderDate, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}"></span></p>
+        <p class="mb-1"><strong>주문 일시:</strong> <span
+                th:text="${orderDetail.orderDate != null ? #temporals.format(orderDetail.orderDate, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}"></span>
+        </p>
         <p class="mb-1"><strong>주문 상태:</strong>
-            <span class="badge" th:text="${orderDetail.orderStatus ?: 'N/A'}"></span>
+            <span class="badge"
+                  th:classappend="${orderDetail.orderStatus == '결제 완료' or orderDetail.orderStatus == '배송중' ? 'bg-info' :
+                                  (orderDetail.orderStatus == '배송완료' ? 'bg-success' : 'bg-secondary')}"
+                  th:text="${orderDetail.orderStatus ?: 'N/A'}"></span>
         </p>
     </div>
 
@@ -13,25 +25,22 @@
 
     <div class="detail-section">
         <h4>주문 상품 (<span th:text="${#lists.size(orderDetail.items())}">3</span>개)</h4>
-
         <div class="order-items-list">
             <div class="item-row" th:each="item, iterStat : ${orderDetail.items()}">
-
                 <div class="item-image me-3">
-                    <img src="/assets/img/book_placeholder.png" alt="Book" style="width: 60px; height: 80px; object-fit: cover;">
+                    <img src="/assets/img/book_placeholder.png" alt="Book"
+                         style="width: 60px; height: 80px; object-fit: cover;">
                 </div>
-
                 <div class="item-info-group">
                     <h5 class="mb-1" th:text="${item.bookTitle()}">도서 제목</h5>
-                    <p class="text-muted small mb-0">수량: <span th-text="${item.quantity()}">1</span>권</p>
-
+                    <p class="text-muted small mb-0">수량: <span th:text="${item.quantity()}">1</span>권</p>
                     <div th:if="${item.packaging() != null}" class="small mt-1 text-success">
                         <i class="bi bi-gift-fill me-1"></i>
                         <span th:text="${item.packaging().packagingName()}">프리미엄 포장</span>
-                        <span class="fw-bold ms-1" th:text="'(' + ${#numbers.formatCurrency(item.packaging().packagingPrice() ?: 0)} + ')'"></span>
+                        <span class="fw-bold ms-1"
+                              th:text="'(' + ${#numbers.formatCurrency(item.packaging().packagingPrice() ?: 0)} + ')'"></span>
                     </div>
                 </div>
-
                 <div class="item-price ms-auto fw-bold">
                     <span th:text="${#numbers.formatCurrency(item.price() * item.quantity())}">₩15,000</span>
                 </div>
@@ -44,25 +53,21 @@
     <div class="detail-section">
         <h4>결제 상세 내역</h4>
         <div class="summary-grid">
-
             <span class="label">상품 합계:</span>
             <span class="value text-end" th:text="${#numbers.formatCurrency(subTotal)}">₩30,000</span>
-
             <th:block th:if="${packagingTotal != null and packagingTotal > 0}">
                 <span class="label">포장비:</span>
                 <span class="value text-end" th:text="${#numbers.formatCurrency(packagingTotal)}">₩5,000</span>
             </th:block>
-
             <span class="label">배송비:</span>
             <span class="value text-end" th:text="${#numbers.formatCurrency(appliedFee)}">₩0</span>
-
             <th:block th:if="${usedPoint != null and usedPoint > 0}">
                 <span class="label text-danger">포인트 할인:</span>
                 <span class="value text-end text-danger" th:text="'-' + ${#numbers.formatCurrency(usedPoint)}">₩0</span>
             </th:block>
-
             <span class="label fw-bold">총 결제 금액:</span>
-            <span class="value text-end fw-bold text-primary" th:text="${#numbers.formatCurrency(orderDetail.actualOrderPrice)}">₩30,000</span>
+            <span class="value text-end fw-bold text-primary"
+                  th:text="${#numbers.formatCurrency(orderDetail.actualOrderPrice)}">₩30,000</span>
         </div>
     </div>
 
@@ -78,5 +83,62 @@
             (<span th:text="${orderDetail.postCode ?: 'N/A'}"></span>)
         </p>
     </div>
+
+    <div class="text-end pt-3">
+        <button th:if="${orderDetail.orderStatus == '결제 완료' or orderDetail.orderStatus == '배송중'}"
+                type="button"
+                class="btn btn-danger js-cancel-order-btn"
+                th:data-order-number="${orderDetail.orderNumber}">
+            결제 취소
+        </button>
+
+        <button th:if="${orderDetail.orderStatus == '배송완료'}"
+                type="button"
+                class="btn btn-warning text-dark js-toggle-refund-section"
+                th:data-order-number="${orderDetail.orderNumber}"
+                th:data-order-date="${orderDetail.orderDate != null ? #temporals.format(orderDetail.orderDate, 'yyyy-MM-dd HH:mm:ss') : ''}"
+                th:data-applied-fee="${appliedFee}">
+            환불/반품 요청
+        </button>
+    </div>
+
+    <hr class="mt-4">
+
+    <div id="refundSection" class="detail-section mt-4" style="display: none;">
+        <h4 class="mb-3">환불/반품 요청 및 정책 확인</h4>
+
+        <form id="refundForm">
+            <div class="mb-3">
+                <label for="refundReason" class="form-label">환불/반품 사유</label>
+                <select id="refundReason" class="form-select">
+                    <option value="" selected>사유를 선택해주세요</option>
+                    <option value="simple_change">단순 변심 / 사이즈, 색상 변경</option>
+                    <option value="damage">상품 파손 / 파본 / 오배송</option>
+                </select>
+            </div>
+
+            <div class="p-3 bg-light rounded">
+                <h6 class="fw-bold">환불 정책 안내</h6>
+                <div id="refundPolicyText">
+                    <p class="text-secondary">환불 사유를 선택하시면 정책이 표시됩니다.</p>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between small">
+                    <span>배송비 차감 여부:</span>
+                    <span id="refundDeliveryFee" class="fw-bold">0원</span>
+                </div>
+                <div class="mt-2 small text-danger">
+                    모든 환불 금액은 **포인트**로 지급됩니다.
+                </div>
+            </div>
+        </form>
+
+        <div class="text-end pt-3">
+            <button type="button" class="btn btn-secondary js-cancel-refund-btn">취소</button>
+            <button type="button" class="btn btn-primary" id="processRefundBtn" disabled>환불 요청</button>
+        </div>
+    </div>
+</div>
+
 
 </div>
