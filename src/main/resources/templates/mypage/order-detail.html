@@ -1,0 +1,82 @@
+<div th:fragment="orderDetailModalBody">
+
+    <div class="mb-3">
+        <h6>기본 정보</h6>
+        <p class="mb-1"><strong>주문 번호:</strong> <span th:text="${orderDetail.orderNumber ?: 'N/A'}"></span></p>
+        <p class="mb-1"><strong>주문 일시:</strong> <span th:text="${orderDetail.orderDate != null ? #temporals.format(orderDetail.orderDate, 'yyyy-MM-dd HH:mm:ss') : 'N/A'}"></span></p>
+        <p class="mb-1"><strong>주문 상태:</strong>
+            <span class="badge" th:text="${orderDetail.orderStatus ?: 'N/A'}"></span>
+        </p>
+    </div>
+
+    <hr>
+
+    <div class="detail-section">
+        <h4>주문 상품 (<span th:text="${#lists.size(orderDetail.items())}">3</span>개)</h4>
+
+        <div class="order-items-list">
+            <div class="item-row" th:each="item, iterStat : ${orderDetail.items()}">
+
+                <div class="item-image me-3">
+                    <img src="/assets/img/book_placeholder.png" alt="Book" style="width: 60px; height: 80px; object-fit: cover;">
+                </div>
+
+                <div class="item-info-group">
+                    <h5 class="mb-1" th:text="${item.bookTitle()}">도서 제목</h5>
+                    <p class="text-muted small mb-0">수량: <span th-text="${item.quantity()}">1</span>권</p>
+
+                    <div th:if="${item.packaging() != null}" class="small mt-1 text-success">
+                        <i class="bi bi-gift-fill me-1"></i>
+                        <span th:text="${item.packaging().packagingName()}">프리미엄 포장</span>
+                        <span class="fw-bold ms-1" th:text="'(' + ${#numbers.formatCurrency(item.packaging().packagingPrice() ?: 0)} + ')'"></span>
+                    </div>
+                </div>
+
+                <div class="item-price ms-auto fw-bold">
+                    <span th:text="${#numbers.formatCurrency(item.price() * item.quantity())}">₩15,000</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="detail-section">
+        <h4>결제 상세 내역</h4>
+        <div class="summary-grid">
+
+            <span class="label">상품 합계:</span>
+            <span class="value text-end" th:text="${#numbers.formatCurrency(subTotal)}">₩30,000</span>
+
+            <th:block th:if="${packagingTotal != null and packagingTotal > 0}">
+                <span class="label">포장비:</span>
+                <span class="value text-end" th:text="${#numbers.formatCurrency(packagingTotal)}">₩5,000</span>
+            </th:block>
+
+            <span class="label">배송비:</span>
+            <span class="value text-end" th:text="${#numbers.formatCurrency(appliedFee)}">₩0</span>
+
+            <th:block th:if="${usedPoint != null and usedPoint > 0}">
+                <span class="label text-danger">포인트 할인:</span>
+                <span class="value text-end text-danger" th:text="'-' + ${#numbers.formatCurrency(usedPoint)}">₩0</span>
+            </th:block>
+
+            <span class="label fw-bold">총 결제 금액:</span>
+            <span class="value text-end fw-bold text-primary" th:text="${#numbers.formatCurrency(orderDetail.actualOrderPrice)}">₩30,000</span>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="mb-3">
+        <h6>수신자 정보</h6>
+        <p class="mb-1"><strong>이름:</strong> <span th:text="${orderDetail.receiver ?: 'N/A'}"></span></p>
+        <p class="mb-1"><strong>연락처:</strong> <span th:text="${orderDetail.receiverPhone ?: 'N/A'}"></span></p>
+        <p class="mb-0"><strong>주소:</strong>
+            <span th:text="${orderDetail.receiverAddress ?: ''}"></span>
+            <span th:text="' ' + ${orderDetail.receiverAddressDetail ?: ''}"></span>
+            (<span th:text="${orderDetail.postCode ?: 'N/A'}"></span>)
+        </p>
+    </div>
+
+</div>

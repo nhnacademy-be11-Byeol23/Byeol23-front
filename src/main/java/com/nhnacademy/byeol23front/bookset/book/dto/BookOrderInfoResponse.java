@@ -2,8 +2,11 @@ package com.nhnacademy.byeol23front.bookset.book.dto;
 
 import java.math.BigDecimal;
 
+import com.nhnacademy.byeol23front.orderset.packaging.dto.PackagingInfoResponse;
+
 public record BookOrderInfoResponse(Long bookId,
 									String bookTitle,
 									int quantity,
-									BigDecimal price) {
+									BigDecimal price,
+									PackagingInfoResponse packaging) {
 }

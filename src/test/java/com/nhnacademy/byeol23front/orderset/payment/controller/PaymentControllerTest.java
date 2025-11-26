@@ -1,6 +1,7 @@
 package com.nhnacademy.byeol23front.orderset.payment.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhnacademy.byeol23front.auth.AuthHelper;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.payment.client.PaymentApiClient;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -27,6 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(PaymentController.class)
+@Import(AuthHelper.class)
 class PaymentControllerTest {
 
 	@Autowired
@@ -36,6 +39,8 @@ class PaymentControllerTest {
 	private PaymentApiClient paymentApiClient;
 	@MockBean
 	private OrderApiClient orderApiClient;
+	@MockBean
+	private AuthHelper authHelper;
 
 	// (Context Load를 위한 @ControllerAdvice 의존성 Mocking)
 	@MockBean
