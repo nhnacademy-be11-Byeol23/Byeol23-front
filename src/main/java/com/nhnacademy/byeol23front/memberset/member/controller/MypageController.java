@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.nhnacademy.byeol23front.couponset.coupon.client.CouponApiClient;
+import com.nhnacademy.byeol23front.couponset.coupon.dto.IssuedCouponInfoResponseDto;
+import com.nhnacademy.byeol23front.couponset.coupon.dto.UsedCouponInfoResponseDto;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +31,7 @@ import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
 import com.nhnacademy.byeol23front.minio.service.MinioService;
 import com.nhnacademy.byeol23front.minio.util.ImageDomain;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
+import com.nhnacademy.byeol23front.orderset.order.controller.OrderUtil;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
 import com.nhnacademy.byeol23front.point.client.PointHistoryFeignClient;
 
@@ -41,6 +45,7 @@ public class MypageController {
 	private final MinioService minioService;
 	private final AddressApiClient addressApiClient;
 	private final PointHistoryFeignClient pointHistoryFeignClient;
+	private final CouponApiClient couponApiClient;
 
 	@ModelAttribute("activeTab")
 	public String addActiveTabToModel(HttpServletRequest request) {
@@ -103,11 +108,13 @@ public class MypageController {
 	}
 
 	@GetMapping("/orders/{order-number}")
-	@ResponseBody
-	public OrderDetailResponse getOrderDetails(@PathVariable(name = "order-number")String orderNumber) {
+	public String getOrderDetails(Model model, @PathVariable(name = "order-number") String orderNumber) {
 		ResponseEntity<OrderDetailResponse> response = orderApiClient.getOrderByOrderNumber(orderNumber);
 
-		return response.getBody();
+		model.addAttribute("orderDetail", response.getBody());
+		orderUtil.addFinalPaymentAmountToModel(model, response.getBody());
+
+		return "mypage/order-detail";
 	}
 
 	@GetMapping("/wishlist")
@@ -151,6 +158,20 @@ public class MypageController {
 		MemberMyPageResponse resp = memberApiClient.getMember().getBody();
 		model.addAttribute("user", resp);
 		return "mypage/settings";
+	}
+
+	@GetMapping("/coupons")
+	public String getCoupons(Model model) {
+		model.addAttribute("activeTab", "coupons");
+
+		// 발급 내역(사용 전)
+		List<IssuedCouponInfoResponseDto> issuedCoupons = couponApiClient.getIssuedCoupons().getBody();
+		model.addAttribute("issuedCoupons", issuedCoupons);
+
+		// 사용 내역
+		List<UsedCouponInfoResponseDto> usedCoupons = couponApiClient.getUsedCoupons().getBody();
+		model.addAttribute("usedCoupons", usedCoupons);
+		return "mypage/coupon_box";
 	}
 
 	public record OrderViewModel(OrderDetailResponse order, String firstImageUrl) { }

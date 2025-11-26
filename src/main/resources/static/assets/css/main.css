@@ -9055,7 +9055,6 @@ section,
 
 .register .social-login .social-buttons {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
 }
 
@@ -12970,4 +12969,130 @@ section,
   .wishlist-content .price {
     justify-content: center !important;
   }
+}
+
+/* Coupon Box Styles */
+.coupon-tabs {
+  border-bottom: 2px solid #eee;
+  margin-bottom: 24px;
+}
+
+.coupon-tabs .nav-link {
+  color: #6c757d;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 12px 24px;
+  font-weight: 500;
+  background: none;
+}
+
+.coupon-tabs .nav-link:hover {
+  color: #252223;
+  border-bottom-color: #ddd;
+}
+
+.coupon-tabs .nav-link.active {
+  color: #252223;
+  border-bottom-color: #252223;
+  background: none;
+}
+
+.coupon-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.coupon-table thead {
+  background-color: #f8f9fa;
+}
+
+.coupon-table th {
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  color: #252223;
+  border-bottom: 2px solid #eee;
+  font-size: 0.95rem;
+}
+
+.coupon-table td {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.coupon-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.coupon-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.coupon-name {
+  font-weight: 600;
+  color: #252223;
+  margin-bottom: 4px;
+}
+
+.coupon-discount {
+  color: #dc3545;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.coupon-discount-info {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.coupon-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.status-available {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-used {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-expired {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+}
+
+.empty-state i {
+  font-size: 4rem;
+  color: #dee2e6;
+  margin-bottom: 16px;
+}
+
+.empty-state h4 {
+  color: #495057;
+  margin-bottom: 8px;
+}
+
+.date-info {
+  color: #6c757d;
+  font-size: 0.9rem;
 }

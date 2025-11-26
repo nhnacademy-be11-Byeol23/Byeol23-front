@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.nhnacademy.byeol23front.auth.AuthHelper;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +22,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.ui.Model;
@@ -36,6 +38,7 @@ import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.packaging.client.PackagingApiClient;
 
 @WebMvcTest(NonmemberOrderController.class)
+@Import(AuthHelper.class)
 class NonmemberOrderControllerTest {
 
 	@Autowired
@@ -50,6 +53,9 @@ class NonmemberOrderControllerTest {
 	private PackagingApiClient packagingApiClient;
 	@MockBean
 	private OrderUtil orderUtil;
+
+	@MockBean
+	private AuthHelper authHelper;
 
 	@MockBean
 	private CategoryApiClient categoryApiClient;

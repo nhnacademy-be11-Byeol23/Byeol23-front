@@ -30,16 +30,11 @@ public class SecurityConfig {
 			.httpBasic(AbstractHttpConfigurer::disable)   // 기본 인증
 			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-				//인증이 필요없는 URI 저장
 				.requestMatchers(
-					"/",
-					"/error",
-					"/members/login",
-					"/members/register"
-				).permitAll()
-					.anyRequest().permitAll() //임시
-				//인증이 필요한 나머지 URI에 대해서
-				//.anyRequest().authenticated()
+					"/mypage",
+					"/admin"
+				).authenticated()
+				.anyRequest().permitAll()
 			)
 			.addFilterBefore(
 				new JwtAuthenticationFilter(jwtParser),
@@ -48,5 +43,5 @@ public class SecurityConfig {
 
 		return http.build();
 	}
-
 }
+

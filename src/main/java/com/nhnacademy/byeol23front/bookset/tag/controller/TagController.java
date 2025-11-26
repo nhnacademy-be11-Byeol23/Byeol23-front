@@ -49,14 +49,14 @@ public class TagController {
 	}
 
 	@ResponseBody
-	@DeleteMapping("/{tag-id}")
+	@PostMapping("/delete/{tag-id}")
 	public ResponseEntity<Void> deleteTag(@PathVariable(name = "tag-id") Long tagId){
 		feignClient.deleteTag(tagId);
 		return ResponseEntity.ok().build();
 	}
 
 	@ResponseBody
-	@PutMapping("/{tag-id}")
+	@PostMapping("/put/{tag-id}")
 	public ResponseEntity<Void> updateTag(@PathVariable(name = "tag-id") Long tagId, @RequestBody TagUpdateRequest tagName){
 		feignClient.updateTag(tagId, tagName);
 		return ResponseEntity.ok().build();
