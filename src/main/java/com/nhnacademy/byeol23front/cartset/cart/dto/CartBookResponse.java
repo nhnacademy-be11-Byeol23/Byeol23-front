@@ -1,13 +1,4 @@
 package com.nhnacademy.byeol23front.cartset.cart.dto;
 
-import java.math.BigDecimal;
-
-public record CartBookResponse(
-        Long cartBookId,
-        Long bookId,
-        String bookName,
-        BigDecimal salePrice,
-        BigDecimal regularPrice,
-        int quantity,
-        String imageUrl
-) {}
+public record CartBookResponse(Long bookId, String imageUrl, String bookName, int quantity, int regularPrice, int salePrice) {
+}

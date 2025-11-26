@@ -1,53 +1,37 @@
 package com.nhnacademy.byeol23front.cartset.cart.controller;
 
 import com.nhnacademy.byeol23front.cartset.cart.client.CartApiClient;
+import com.nhnacademy.byeol23front.cartset.cart.dto.CartBookAddRequest;
+import com.nhnacademy.byeol23front.cartset.cart.dto.CartBookResponse;
 import com.nhnacademy.byeol23front.cartset.cart.dto.CartBookUpdateRequest;
-import com.nhnacademy.byeol23front.cartset.cart.dto.CartResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
+import java.util.List;
+
 @Controller
-@RequestMapping("/carts")
 @RequiredArgsConstructor
 public class CartController {
     private final CartApiClient cartApiClient;
 
-    // 장바구니 페이지 조회
-    @GetMapping("/{member-id}")
-    public String getCart(@PathVariable("member-id") Long memberId, Model model) {
-        CartResponse cart = cartApiClient.getCartByMember(memberId);
-
-        long totalPrice = 0L;
-        if (cart.cartBooks() != null) {
-            totalPrice = cart.cartBooks().stream()
-                    .mapToLong(cb -> cb.salePrice().longValue() * cb.quantity())
-                    .sum();
-        }
-        
-        model.addAttribute("totalPrice", totalPrice);
-        model.addAttribute("cart", cart);
-        return "cart";
+    @GetMapping("/carts/books")
+    public String cartPage(Model model) {
+        List<CartBookResponse> cartBooks = cartApiClient.getCartBooks();
+        model.addAttribute("cartBooks", cartBooks);
+        return "cart/carts";
     }
 
-    // 장바구니 도서 수량 수정 (AJAX 요청용)
-    @PutMapping("/cart-books")
+    @PostMapping("/carts/books")
     @ResponseBody
-    public ResponseEntity<Void> updateCartBook(@RequestBody CartBookUpdateRequest request) {
-        cartApiClient.updateCartBook(request);
-        return ResponseEntity.ok().build();
+    public void addCartBook(@RequestBody CartBookAddRequest request) {
+        cartApiClient.addCartBook(request);
     }
 
-    // 장바구니 도서 삭제 (AJAX 요청용)
-    @DeleteMapping("/cart-books/{cart-book-id}")
+    @PostMapping("/carts/books/{book-id}/update")
     @ResponseBody
-    public ResponseEntity<Void> deleteCartBook(@PathVariable("cart-book-id") Long cartBookId) {
-        cartApiClient.deleteCartBook(cartBookId);
-        return ResponseEntity.ok().build();
+    public void updateCartBook(@PathVariable("book-id") Long bookId, @RequestBody CartBookUpdateRequest request) {
+        cartApiClient.updateCartBook(bookId, request);
     }
-
 }

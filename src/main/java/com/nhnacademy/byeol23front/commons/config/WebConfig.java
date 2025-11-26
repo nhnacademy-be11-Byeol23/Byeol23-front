@@ -31,6 +31,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/best")
                 .addPathPatterns("/new")
                 .addPathPatterns("/error/**")
+                .addPathPatterns("/carts/books/**")
                 .order(1);
     }
 
