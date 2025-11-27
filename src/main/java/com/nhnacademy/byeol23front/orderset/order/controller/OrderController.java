@@ -86,6 +86,8 @@ public class OrderController {
 		orderUtil.addDeliveryFeeToModel(model, request);
 		orderUtil.addPackagingOption(model);
 
+		model.addAttribute("defaultAddress", member.address());
+
 		model.addAttribute("userPoint", member.currentPoint());
 
 		model.addAttribute("clientKey", tossClientKey);

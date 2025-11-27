@@ -37,6 +37,8 @@
         <div class="container" data-aos="fade-up" data-aos-delay="100">
 
             <form id="checkout-form">
+
+
                 <div class="row">
                     <div class="col-lg-7">
                         <div class="checkout-container" data-aos="fade-up">
@@ -152,9 +154,16 @@
                                         <label for="zip">우편번호</label>
                                         <div class="input-group">
                                             <input type="text" name="zip" class="form-control" id="zip"
-                                                   placeholder="우편번호" required="" readonly>
-                                            <button class="btn btn-outline-secondary" type="button" id="find-zip-btn">
-                                                우편번호 찾기
+                                                   placeholder="우편번호" required="" readonly
+                                                   th:value="${defaultAddress?.postCode}">  <button class="btn btn-outline-secondary" type="button" id="find-zip-btn">
+                                            우편번호 찾기
+                                        </button>
+
+                                            <button class="btn btn-outline-primary" type="button"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#addressSelectModal"
+                                                    id="load-addresses-btn">
+                                                기존 배송지 불러오기
                                             </button>
                                         </div>
                                     </div>
@@ -162,45 +171,23 @@
                                     <div class="form-group">
                                         <label for="address">주소</label>
                                         <input type="text" class="form-control" name="address" id="address"
-                                               placeholder="기본 주소" readonly>
-                                    </div>
+                                               placeholder="기본 주소" readonly
+                                               th:value="${defaultAddress?.addressInfo}"> </div>
 
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="address-detail">상세주소</label>
                                                 <input type="text" class="form-control" name="address-detail"
-                                                       id="address-detail" placeholder="상세주소 (아파트 동, 호수 등)">
-                                            </div>
+                                                       id="address-detail" placeholder="상세주소 (아파트 동, 호수 등)"
+                                                       th:value="${defaultAddress?.addressDetail}"> </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="address-extra">참고 항목</label>
                                                 <input type="text" class="form-control" name="address-extra"
-                                                       id="address-extra" placeholder="참고항목" readonly>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="section-content">
-                                        <div class="form-group mt-3">
-                                            <label class="form-label">배송일 선택 <small class="text-muted">(도착 예상일)</small></label>
-                                            <div class="delivery-date-buttons d-flex flex-wrap gap-2">
-                                                <th:block th:each="dateInfo, iterStat : ${deliveryDates}">
-                                                    <input type="radio" class="btn-check" name="deliveryDate"
-                                                           th:id="'date-' + ${dateInfo.valueDate}"
-                                                           th:value="${dateInfo.valueDate}"
-                                                           th:checked="${iterStat.first}"
-                                                           autocomplete="off">
-                                                    <label class="btn btn-outline-secondary"
-                                                           th:for="'date-' + ${dateInfo.valueDate}"
-                                                           th:text="${dateInfo.dayName} + ' (' + ${dateInfo.displayDate} + ')'">
-                                                        날짜 버튼
-                                                    </label>
-                                                </th:block>
-                                            </div>
-                                            <small class="text-muted d-block mt-1">주말 및 공휴일 제외, 5 영업일 이내 선택
-                                                가능합니다.</small>
+                                                       id="address-extra" placeholder="참고항목" readonly
+                                                       th:value="${defaultAddress?.addressExtra}"> </div>
                                         </div>
                                     </div>
                                 </div>
@@ -410,7 +397,9 @@
         initPointInputListener();
         initApplyAllPointsButton();
         initPackagingModal();
-
+        initAddressSelectModal();
+        const defaultAddress = /*[[${defaultAddress}]]*/ null;
+        initDefaultAddress(defaultAddress);
         const findZipBtn = document.getElementById('find-zip-btn');
         if (findZipBtn) {
             findZipBtn.addEventListener('click', sample6_execDaumPostcode);
@@ -871,6 +860,102 @@
         });
     }
 
+    /**
+     * 주소 선택 모달 초기화 및 로드 로직
+     */
+    function initAddressSelectModal() {
+        const addressSelectModal = document.getElementById('addressSelectModal');
+        if (addressSelectModal) {
+            addressSelectModal.addEventListener('show.bs.modal', async (event) => {
+                const modalBody = document.getElementById('address-list-body');
+
+                // 1. 모달 내용을 로딩 스피너로 초기화 (임시 스피너)
+                modalBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-dark" role="status"></div></div>`;
+
+                try {
+                    // 2. ✨ API 호출: 현재 로그인한 회원의 주소 목록을 요청
+                    const response = await fetch('/members/me/addresses');
+
+                    if (!response.ok) {
+                        throw new Error('주소 목록을 불러오는 데 실패했습니다.');
+                    }
+
+                    // 3. 주소 목록 데이터 (JSON 배열) 획득
+                    const addresses = await response.json();
+
+                    // 4. 주소 목록 HTML 렌더링
+                    modalBody.innerHTML = renderAddressList(addresses);
+
+                } catch (error) {
+                    modalBody.innerHTML = `<div class="alert alert-danger">주소 로딩 실패: ${error.message || '오류 발생'}</div>`;
+                }
+            });
+
+            // 5. 주소 목록에서 항목 선택 시 폼에 데이터 주입
+            addressSelectModal.addEventListener('click', function (event) {
+                const target = event.target.closest('.address-select-item');
+                if (target) {
+                    const dataset = target.dataset;
+
+                    // 폼 요소에 데이터 주입
+                    document.getElementById('zip').value = dataset.postCode;         // DTO: postCode -> dataset.postCode
+                    document.getElementById('address').value = dataset.addressInfo;    // DTO: addressInfo -> dataset.addressInfo
+                    document.getElementById('address-detail').value = dataset.addressDetail || ''; // DTO: addressDetail -> dataset.addressDetail
+                    document.getElementById('address-extra').value = dataset.addressExtra || '';   // DTO: addressExtra -> dataset.addressExtra
+                    // 모달 닫기
+                    const modalInstance = bootstrap.Modal.getInstance(addressSelectModal);
+                    modalInstance.hide();
+
+                    document.getElementById('address-detail').focus();
+                }
+            });
+        }
+    }
+
+
+    /**
+     * 주소 목록 데이터를 받아 HTML로 렌더링하는 헬퍼 함수
+     */
+    function renderAddressList(addresses) {
+        if (addresses.length === 0) {
+            return '<div class="alert alert-info">등록된 배송지가 없습니다. 새로운 주소를 입력해주세요.</div>';
+        }
+
+        let html = '';
+
+        addresses.forEach((addr, index) => {
+
+            // ⭐ DTO: isDefault (Boolean) 필드를 사용하여 '기본' 여부를 판단합니다.
+            const isDefault = addr.isDefault ? ' (기본)' : '';
+            const defaultClass = addr.isDefault ? ' border-primary border-2' : '';
+
+            html += `
+        <div class="list-group-item list-group-item-action d-flex flex-column address-select-item ${defaultClass}"
+             role="button"
+
+             data-post-code="${addr.postCode || ''}"
+             data-address-info="${addr.addressInfo || ''}"
+             data-address-detail="${addr.addressDetail || ''}"
+             data-address-extra="${addr.addressExtra || ''}"
+
+        >
+            <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1 fw-bold">
+                    [${addr.addressAlias || '주소'}] ${isDefault}
+                </h6>
+                <small class="text-muted">${addr.postCode || 'N/A'}</small>
+            </div>
+
+            <p class="mb-1">${addr.addressInfo || ''} ${addr.addressDetail || ''}</p>
+
+        </div>
+        `;
+        });
+
+        return `<div class="list-group">${html}</div>`;
+    }
+
+
 </script>
 <div class="modal fade" id="packagingSelectModal" tabindex="-1" aria-labelledby="packagingModalLabel"
      aria-hidden="true">
@@ -927,6 +1012,27 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                 <button type="button" class="btn btn-primary" id="savePackagingButton">적용</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addressSelectModal" tabindex="-1" aria-labelledby="addressSelectModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addressSelectModalLabel">내 주소 목록</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="address-list-body">
+                <div class="text-center p-5">
+                    <div class="spinner-border text-dark" role="status">
+                        <span class="visually-hidden">주소 로딩 중...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
             </div>
         </div>
     </div>
