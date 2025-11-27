@@ -35,7 +35,7 @@ public class OrderAdminController {
 	private final OrderUtil orderUtil;
 
 	@PostMapping("/{orderNumber}/cancel")
-	public String cancelOrder(@PathVariable String orderNumber,
+	public String cancelOrderByAdmin(@PathVariable String orderNumber,
 		@RequestBody OrderCancelRequest request) {
 		orderApiClient.cancelOrder(orderNumber, request);
 

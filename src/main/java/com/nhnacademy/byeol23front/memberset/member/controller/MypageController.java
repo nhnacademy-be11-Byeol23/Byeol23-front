@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.nhnacademy.byeol23front.memberset.addresses.client.AddressApiClient;
 import com.nhnacademy.byeol23front.memberset.addresses.dto.AddressResponse;
@@ -84,10 +83,8 @@ public class MypageController {
 		if (!Objects.isNull(orders)) {
 			for (OrderDetailResponse order : orders) {
 				String imageUrl = defaultImageUrl;
-
 				if (order.items() != null && !order.items().isEmpty()) {
 					Long firstBookId = order.items().get(0).bookId();
-
 					try {
 						List<GetUrlResponse> images = minioService.getImageUrl(ImageDomain.BOOK, firstBookId);
 
@@ -175,6 +172,7 @@ public class MypageController {
 		return "mypage/coupon_box";
 	}
 
-	public record OrderViewModel(OrderDetailResponse order, String firstImageUrl) { }
+	public record OrderViewModel(OrderDetailResponse order, String firstImageUrl) {
+	}
 
 }
