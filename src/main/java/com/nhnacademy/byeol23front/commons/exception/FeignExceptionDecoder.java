@@ -44,6 +44,11 @@ public class FeignExceptionDecoder implements ErrorDecoder {
 		}
 
 
+		if (status == HttpStatus.SC_UNAUTHORIZED) {
+			//TODO: 인증과정에서 거부되었을 때의 반응 채울 것
+		}
+
+
 
 		if (status == HttpStatus.SC_CONFLICT && errorResponse.path().equals("/api/tags")){
 			return new TagAlreadyExistsException(message, errorResponse.timestamp());
