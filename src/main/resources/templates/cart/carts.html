@@ -111,7 +111,7 @@
 
                 <div th:each="item : ${cartBooks}"
                      class="cart-item cart-grid py-3 border-bottom"
-                     th:attr="data-book-id=${item.bookId}">
+                     th:attr="data-book-id=${item.bookId}, data-sale-price=${item.salePrice}">
 
                     <div class="cart-info-box">
                         <img th:src="${item.imageUrl != null ? item.imageUrl : 'https://image.yes24.com/momo/Noimg_L.jpg'}" alt="상품 이미지" class="cart-img">
@@ -139,9 +139,9 @@
                     </div>
 
                     <div class="cart-col-total fw-bold">
-            <span class="item-total"
-                  th:text="${#numbers.formatInteger(item.salePrice * item.quantity,3,'COMMA')} + '원'">
-            </span>
+                        <span class="item-total"
+                            th:text="${#numbers.formatInteger(item.salePrice * item.quantity,3,'COMMA')} + '원'">
+                        </span>
                     </div>
 
                     <div class="cart-col-remove">
@@ -166,6 +166,13 @@
 <div th:replace="~{fragments/common_footer :: commonFooter}"></div>
 
 <script>
+    function updateRowTotal(row, qty) {
+        const price = Number(row.dataset.salePrice);  // data-sale-price 가져오기
+        const total = price * qty;
+        row.querySelector(".item-total").textContent =
+            total.toLocaleString() + "원";
+    }
+
     const debounceTimers = {};
 
     function updateQuantity(bookId, quantity) {
@@ -181,10 +188,9 @@
                     });
                 }
             })
-            .catch(err => {
-                alert(err.message);
-            });
+            .catch(err => alert(err.message));
     }
+
     document.querySelectorAll(".increase").forEach(btn => {
         btn.addEventListener("click", function () {
             const row = this.closest(".cart-item");
@@ -192,12 +198,16 @@
             const bookId = row.dataset.bookId;
 
             let qty = Number(input.value);
-            if (qty < 999) input.value = ++qty;
+            if (qty < 999) qty++;
+
+            input.value = qty;
+
+            updateRowTotal(row, qty);
 
             if (debounceTimers[bookId]) clearTimeout(debounceTimers[bookId]);
-            debounceTimers[bookId] = setTimeout(
-                () => updateQuantity(bookId, qty), 300
-            );
+            debounceTimers[bookId] = setTimeout(() => {
+                updateQuantity(bookId, qty);
+            }, 300);
         });
     });
 
@@ -208,12 +218,16 @@
             const bookId = row.dataset.bookId;
 
             let qty = Number(input.value);
-            if (qty > 1) input.value = --qty;
+            if (qty > 1) qty--;
+
+            input.value = qty;
+
+            updateRowTotal(row, qty);
 
             if (debounceTimers[bookId]) clearTimeout(debounceTimers[bookId]);
-            debounceTimers[bookId] = setTimeout(
-                () => updateQuantity(bookId, qty), 300
-            );
+            debounceTimers[bookId] = setTimeout(() => {
+                updateQuantity(bookId, qty);
+            }, 300);
         });
     });
     function deleteCartItem(bookId, row) {
@@ -231,10 +245,21 @@
                 row.remove();
 
                 if (document.querySelectorAll(".cart-item").length === 0) {
-                    window.location.reload();
+                    showEmptyCartView();
                 }
             })
             .catch(err => alert(err.message));
+    }
+
+    function showEmptyCartView() {
+        const container = document.querySelector(".cart .container");
+        container.innerHTML = `
+        <div class="text-center py-5">
+            <i class="bi bi-cart-x" style="font-size: 80px; color: #ddd;"></i>
+            <h3 class="mt-3">장바구니에 담긴 상품이 없습니다.</h3>
+            <a href="/" class="btn btn-accent">홈으로 돌아가기</a>
+        </div>
+    `;
     }
 
     document.querySelectorAll(".remove-btn").forEach(btn => {
@@ -248,6 +273,5 @@
         });
     });
 </script>
-
 </body>
 </html>
