@@ -56,7 +56,6 @@
             gap: 1.25rem; /* 20px 간격 */
             padding: 1.25rem 0;
             border-bottom: 1px solid #f0f0f0;
-            border-top: 1px solid #f0f0f0;
             margin-top: 1.25rem;
             margin-bottom: 1.25rem;
         }
@@ -141,11 +140,7 @@
             min-width: 60px; /* 값의 최소 너비를 주어 정렬을 맞춤 */
         }
 
-        .order-info .info-row.total {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #f0f0f0;
-        }
+
 
         .order-info .info-row.total .label {
             font-weight: 600;
@@ -179,13 +174,6 @@
             font-weight: 500;
         }
 
-        /* 6. Total 행만 강조 */
-        .product-details-container .order-info .info-row.total {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #f0f0f0;
-        }
-
         .product-details-container .order-info .info-row.total .label {
             font-weight: 600;
             color: #000;
@@ -195,6 +183,18 @@
             font-weight: 700;
             font-size: 1.1rem;
             color: #000;
+        }
+
+        /* Modal spacing */
+        .order-detail-modal .modal-header{
+            padding: 20px 30px 20px 30px;
+        }
+        .order-detail-modal .modal-footer {
+            padding: 20px 30px 20px 30px;
+        }
+        .order-detail-modal .modal-body
+       {
+            padding: 30px;
         }
     </style>
 
@@ -277,8 +277,7 @@
                                                 <div class="item-meta">
                                                     <span th:text="'수량: ' + ${firstItem.quantity}">수량: 1</span>
                                                     <span class="separator">|</span>
-                                                    <span class="price"
-                                                          th:text="${#numbers.formatCurrency(firstItem.price)}">₩15,000</span>
+                                                    <span class="price" th:text="${#numbers.formatInteger(firstItem.price, 0, 'COMMA') + '원'}">15,000원</span>
                                                 </div>
                                                 <div class="more-items" th:if="${totalItems > 1}">
                                                     <span th:text="'외 ' + (${totalItems} - 1) + '건'">외 2건</span>
@@ -288,36 +287,30 @@
                                             <div class="order-info">
                                                 <div class="info-row">
                                                     <span class="label">상태 / 개수:</span>
-                                                    <span class="value"
-                                                          th:text="${viewModel.order.orderStatus} + ' (' + ${totalItems} + ' items)'">대기 (3 items)</span>
+                                                    <span class="value" th:text="${viewModel.order.orderStatus} + ' (' + ${totalItems} + ' items)'">대기 (3 items)</span>
                                                 </div>
-                                                <hr class="my-2">
-
                                                 <div class="info-row total">
                                                     <span class="label">총 결제 금액</span>
-                                                    <span class="value price"
-                                                          th:text="${#numbers.formatCurrency(viewModel.order.actualOrderPrice)}">₩30,000</span>
+                                                    <span class="value price"  th:text="${#numbers.formatInteger(viewModel.order.actualOrderPrice, 0, 'COMMA') + '원'}">30,000원</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="order-footer">
-                                        <button type="button" class="btn btn-light w-100"
+                                        <button type="button" class="btn btn-light w-50"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#orderDetailsModal"
                                                 th:data-order-id="${viewModel.order.orderNumber}">
-                                            View Details
+                                            주문 상세
                                         </button>
-                                    </div>
-                                    <div class="order-footer">
-                                        <!-- 리뷰 작성 버튼: orderNumber를 데이터로 전달 -->
-                                        <button type="button" class="btn btn-light w-100 review-open-btn"
+                                        <button type="button" class="btn btn-light w-50 review-open-btn"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#reviewModal"
                                                 th:attr="data-order-number=${viewModel.order.orderNumber}">
                                             리뷰 작성
                                         </button>
                                     </div>
+
 
                                     <!-- 숨겨진 select: 이 주문에 포함된 도서들을 서버사이드에서 렌더링 -->
                                     <select class="order-book-select" style="display:none;"
@@ -396,7 +389,7 @@
 <!-- Main JS File -->
 <script src="/assets/js/main.js"></script>
 
-<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
+<div class="modal fade order-detail-modal" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -442,8 +435,7 @@
 
                     <div class="mb-3">
                         <label for="reviewContent" class="form-label">리뷰 내용</label>
-                        <textarea class="form-control" id="reviewContent" name="reviewContent" rows="4"
-                                  required></textarea>
+                        <textarea class="form-control" id="reviewContent" name="reviewContent" rows="4" required></textarea>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">평점</label>
