@@ -21,5 +21,8 @@ public interface CartApiClient {
 
     @PostMapping("/api/carts/books/{book-id}/update")
     void updateCartBook(@PathVariable("book-id") Long bookId, @RequestBody CartBookUpdateRequest request);
+
+    @PostMapping("/api/carts/books/{book-id}/delete")
+    void deleteCartBook(@PathVariable("book-id") Long bookId);
 }
 

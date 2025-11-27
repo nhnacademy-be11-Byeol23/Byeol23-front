@@ -185,7 +185,6 @@
                 alert(err.message);
             });
     }
-
     document.querySelectorAll(".increase").forEach(btn => {
         btn.addEventListener("click", function () {
             const row = this.closest(".cart-item");
@@ -215,6 +214,37 @@
             debounceTimers[bookId] = setTimeout(
                 () => updateQuantity(bookId, qty), 300
             );
+        });
+    });
+    function deleteCartItem(bookId, row) {
+        fetch(`/carts/books/${bookId}/delete`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        })
+            .then(res => {
+                if (!res.ok) {
+                    return res.json().then(body => {
+                        throw new Error(body.message || "삭제 실패");
+                    });
+                }
+
+                row.remove();
+
+                if (document.querySelectorAll(".cart-item").length === 0) {
+                    window.location.reload();
+                }
+            })
+            .catch(err => alert(err.message));
+    }
+
+    document.querySelectorAll(".remove-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const bookId = this.dataset.bookId;
+            const row = this.closest(".cart-item");
+
+            if (confirm("해당 상품을 장바구니에서 삭제하시겠습니까?")) {
+                deleteCartItem(bookId, row);
+            }
         });
     });
 </script>

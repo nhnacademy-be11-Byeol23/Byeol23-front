@@ -34,4 +34,10 @@ public class CartController {
     public void updateCartBook(@PathVariable("book-id") Long bookId, @RequestBody CartBookUpdateRequest request) {
         cartApiClient.updateCartBook(bookId, request);
     }
+
+    @PostMapping("/carts/books/{book-id}/delete")
+    @ResponseBody
+    public void deleteCartBook(@PathVariable("book-id") Long bookId) {
+        cartApiClient.deleteCartBook(bookId);
+    }
 }
