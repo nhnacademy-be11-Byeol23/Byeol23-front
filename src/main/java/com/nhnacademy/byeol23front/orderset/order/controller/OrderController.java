@@ -24,6 +24,7 @@ import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
+import com.nhnacademy.byeol23front.cartset.cart.dto.CartOrderRequest;
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 import com.nhnacademy.byeol23front.memberset.member.dto.MemberMyPageResponse;
 import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
@@ -44,7 +45,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class OrderController {
 	private final OrderApiClient orderApiClient;
-	private final DeliveryApiClient deliveryApiClient;
 	private final OrderUtil orderUtil;
 	private final BookApiClient bookApiClient;
 	private final MemberApiClient memberApiClient;
@@ -82,8 +82,33 @@ public class OrderController {
 
 		orderUtil.addTotalQuantity(model, request.bookList());
 		orderUtil.addDeliveryDatesToModel(model);
-		orderUtil.addOrderSummary(model, request.bookList());
+		orderUtil.addOrderSummary(model, request);
 		orderUtil.addDeliveryFeeToModel(model, request);
+		orderUtil.addPackagingOption(model);
+
+		model.addAttribute("defaultAddress", member.address());
+
+		model.addAttribute("userPoint", member.currentPoint());
+
+		model.addAttribute("clientKey", tossClientKey);
+
+		return "order/checkout";
+	}
+
+	@GetMapping("/carts")
+	public String getOrderFormCart(@CookieValue(name = "Access-Token", required = false) String token,
+		@RequestBody CartOrderRequest cartOrderRequest,
+		Model model) {
+
+		//비회원 주문 리다이렉트 시킬 방법 생각해볼 것
+
+		MemberMyPageResponse member = memberApiClient.getMember().getBody();
+		BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(cartOrderRequest).getBody();
+
+		orderUtil.addDeliveryDatesToModel(model);
+		orderUtil.addDeliveryFeeToModel(model, bookOrderRequest);
+		orderUtil.addOrderSummary(model, bookOrderRequest);
+		orderUtil.addTotalQuantity(model, bookOrderRequest.bookList());
 		orderUtil.addPackagingOption(model);
 
 		model.addAttribute("defaultAddress", member.address());
