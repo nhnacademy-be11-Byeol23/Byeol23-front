@@ -51,7 +51,7 @@
                                     <div class="order-items-container">
 
                                         <div class="order-item"
-                                             th:each="item : ${orderItem}"
+                                             th:each="item : ${bookOrderRequest.bookList()}"
                                              th:data-book-id="${item.bookId}"
                                              th:data-quantity="${item.quantity}"
                                              th:data-sale-price="${item.salePrice}"

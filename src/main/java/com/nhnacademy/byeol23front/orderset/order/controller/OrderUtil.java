@@ -105,8 +105,8 @@ public class OrderUtil {
 		model.addAttribute("actualOrderPrice", actualOrderPrice);
 	}
 
-	public void addOrderSummary(Model model, List<BookInfoRequest> requestList) {
-		model.addAttribute("orderItem", requestList);
+	public void addOrderSummary(Model model, BookOrderRequest bookOrderRequest) {
+		model.addAttribute("bookOrderRequest", bookOrderRequest);
 	}
 
 	public void addTotalQuantity(Model model, List<BookInfoRequest> requestList) {

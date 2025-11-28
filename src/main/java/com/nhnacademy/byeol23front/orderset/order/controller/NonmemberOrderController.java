@@ -16,14 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderInfoResponse;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.memberset.member.dto.NonmemberOrderRequest;
-import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
-import com.nhnacademy.byeol23front.orderset.packaging.dto.PackagingInfoResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -53,7 +50,7 @@ public class NonmemberOrderController {
 
 		orderUtil.addTotalQuantity(model, bookOrderRequest.bookList());
 		orderUtil.addDeliveryDatesToModel(model);
-		orderUtil.addOrderSummary(model, bookOrderRequest.bookList());
+		orderUtil.addOrderSummary(model, bookOrderRequest);
 		orderUtil.addDeliveryFeeToModel(model, bookOrderRequest);
 		orderUtil.addPackagingOption(model);
 		
@@ -74,7 +71,6 @@ public class NonmemberOrderController {
 
 		return "order/nonmemberOrderDetail";
 	}
-
 
 
 	@NotNull
