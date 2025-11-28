@@ -12,6 +12,9 @@ document.getElementById("contributorCreateForm").addEventListener("submit", e =>
         })
     })
         .then(res => {
+            if (!res.ok) {
+                return res.json().then(errorBody => { throw new Error(errorBody.message || "추가 실패"); });
+            }
             location.hash = '#contributors';
             location.reload();
         })
@@ -44,7 +47,9 @@ async function updateContributor(contributorId){
         }
         )
     });
-    if (!res.ok) throw new Error("수정 실패");
+    if (!res.ok) {
+        return res.json().then(errorBody => { throw new Error(errorBody.message || "수정 실패"); });
+    }
     window.location.href = '/admin/cont';
 }
 
@@ -57,8 +62,9 @@ function deleteContributor(button) {
 
     fetch(`/admin/cont/delete/${id}`, { method: "POST"}) // ← use your real API path
         .then((res) => {
-            if (!res.ok) throw new Error("삭제 실패");
-            // Remove item without full reload for better UX
+            if (!res.ok) {
+                return res.json().then(errorBody => { throw new Error(errorBody.message || "삭제 실패"); });
+            }
             window.location.href = '/admin/cont';
         })
         .catch((err) => {
