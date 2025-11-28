@@ -21,6 +21,7 @@ import com.nhnacademy.byeol23front.bookset.tag.dto.PageResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.TagCreateRequest;
 import com.nhnacademy.byeol23front.bookset.tag.dto.TagCreateResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.TagUpdateRequest;
+import com.nhnacademy.byeol23front.bookset.tag.exception.TagNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -45,7 +46,9 @@ public class TagController {
 	@PostMapping
 	@ResponseBody
 	public TagCreateResponse createTag(@RequestBody TagCreateRequest request){
+
 		ResponseEntity<TagCreateResponse> response = feignClient.createTag(request);
+
 		return response.getBody();
 	}
 

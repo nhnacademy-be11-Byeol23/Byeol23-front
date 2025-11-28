@@ -17,8 +17,9 @@ import com.nhnacademy.byeol23front.bookset.contributor.dto.ContributorUpdateRequ
 import com.nhnacademy.byeol23front.bookset.contributor.dto.ContributorUpdateResponse;
 import com.nhnacademy.byeol23front.bookset.contributor.dto.PageResponse;
 import com.nhnacademy.byeol23front.bookset.contributor.dto.ContributorFindOrCreateRequest;
+import com.nhnacademy.byeol23front.commons.config.CommonFeignConfig;
 
-@FeignClient(name = "BYEOL23-GATEWAY", contextId = "contributorApiClient")
+@FeignClient(name = "BYEOL23-GATEWAY", contextId = "contributorApiClient", configuration = CommonFeignConfig.class)
 public interface ContributorApiClient {
 
 	@GetMapping(value = "/api/cont")
