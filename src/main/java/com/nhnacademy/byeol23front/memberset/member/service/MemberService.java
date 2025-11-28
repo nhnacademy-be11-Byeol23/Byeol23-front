@@ -1,7 +1,9 @@
 package com.nhnacademy.byeol23front.memberset.member.service;
 
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
+import com.nhnacademy.byeol23front.memberset.domain.Token;
 import com.nhnacademy.byeol23front.memberset.member.dto.FindLoginIdResponse;
 import com.nhnacademy.byeol23front.memberset.member.dto.LoginRequest;
 import com.nhnacademy.byeol23front.memberset.member.dto.LoginResponse;
@@ -18,4 +20,5 @@ public interface MemberService {
 	void logout();
 	FindLoginIdResponse findLoginId(String loginId);
 	ValueDuplicationCheckResponse checkDuplication(ValueDuplicationCheckRequest request);
+	ResponseCookie createCookie(Token token);
 }

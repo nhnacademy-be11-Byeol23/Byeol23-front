@@ -3,6 +3,7 @@ package com.nhnacademy.byeol23front.memberset.member.service.Impl;
 import java.lang.reflect.Member;
 import java.time.Duration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +34,14 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
+
+	private final String accessCookieHeader = "access-token";
+	private final String refreshCookieHeader = "refresh-token";
+
+	private Long accessTokenExp;
+
+	@Value("${jwt}")
+	private Long refreshTokenExp;
 
 	private final MemberApiClient memberApiClient;
 
@@ -66,12 +75,14 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public ResponseCookie createCookie(Token token, Long time) {
+	public ResponseCookie createCookie(Token token) {
 		String path;
 		String tokenType;
+		Long expiration;
 		String sameSite = "Lax";			//중요: https요청에는 none으로 설정해도 됨, http요청은 secure가 false상태이므로 브라우저에서 none에 대한 쿠키는 거부하여 lax로 설정
 		if(token instanceof RefreshToken) {
 			tokenType = "Refresh-Token";
+			expiration =
 			path = "/refresh";
 		} else if (token instanceof AccessToken) {
 			tokenType = "Access-Token";

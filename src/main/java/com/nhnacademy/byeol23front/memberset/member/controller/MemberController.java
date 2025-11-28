@@ -34,8 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberController {
 	private final MemberService memberService;
 
-	private final String accessCookieHeader = "access-token";
-	private final String refreshCookieHeader = "refresh-token";
+
 
 	@GetMapping("/register")
 	public String showRegisterForm() {
@@ -72,8 +71,7 @@ public class MemberController {
 		LoginRequest request = new LoginRequest(tmp.getLoginId(), tmp.getLoginPassword());
 		LoginResponse loginResponse = memberService.login(request);
 
-
-
+		ResponseCookie cookie = memberService.createCookiel;
 
 		if (setCookies != null) {
 			setCookies.forEach(c -> response.addHeader(HttpHeaders.SET_COOKIE, c));
