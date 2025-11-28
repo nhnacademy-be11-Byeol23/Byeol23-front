@@ -25,7 +25,6 @@ public class GuestIdCookieInterceptor implements HandlerInterceptor {
                     .orElse(null);
 
             if(StringUtils.isNotBlank(accessToken)) {
-                log.info("액세스 토큰: {}", accessToken);
                 return true;
             }
         }
