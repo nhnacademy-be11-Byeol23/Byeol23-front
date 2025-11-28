@@ -37,3 +37,7 @@ minio:
 aladin:
   base-url: https://www.aladin.co.kr/ttb/api/ItemSearch.aspx
   ttb-key: ${ALADIN_TTB_KEY:ttbrhw25741714001}
+
+payco:
+  client-id: 3RDqzUwAf9DoEwippcFB96j
+  client-secret: VhS7D7ntRVD14NSGcOjnPndf

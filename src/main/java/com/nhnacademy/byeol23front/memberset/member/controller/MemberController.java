@@ -1,7 +1,6 @@
 package com.nhnacademy.byeol23front.memberset.member.controller;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import com.nhnacademy.byeol23front.memberset.member.dto.*;
@@ -21,8 +20,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
+import com.nhnacademy.byeol23front.memberset.member.service.MemberService;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/members")
 @RequiredArgsConstructor
 public class MemberController {
-	private final MemberApiClient memberApiClient;
+	private final MemberService memberService;
+
+	private final String accessCookieHeader = "access-token";
+	private final String refreshCookieHeader = "refresh-token";
 
 	@GetMapping("/register")
 	public String showRegisterForm() {
@@ -41,10 +44,11 @@ public class MemberController {
 
 	@PostMapping("/register")
 	public String register(@ModelAttribute MemberRegisterRequest request, BindingResult br) {
+		log.info("request:{}", request);
 		if (br.hasErrors()) {
 			return "member/register";
 		}
-		memberApiClient.registerRequest(request);
+		memberService.register(request);
 		return "member/login";
 	}
 
@@ -64,10 +68,12 @@ public class MemberController {
 
 	@PostMapping("/login")
 	public String login(@ModelAttribute LoginRequestTmp tmp, HttpServletResponse response) {
-		LoginRequest request = new LoginRequest(tmp.getLoginId(), tmp.getLoginPassword());
 
-		ResponseEntity<LoginResponse> feignResponse = memberApiClient.login(request);
-		List<String> setCookies = feignResponse.getHeaders().get(HttpHeaders.SET_COOKIE);
+		LoginRequest request = new LoginRequest(tmp.getLoginId(), tmp.getLoginPassword());
+		LoginResponse loginResponse = memberService.login(request);
+
+
+
 
 		if (setCookies != null) {
 			setCookies.forEach(c -> response.addHeader(HttpHeaders.SET_COOKIE, c));
@@ -84,7 +90,7 @@ public class MemberController {
 
 	@PostMapping("/logout")
 	public String logout(@ModelAttribute LogoutRequest request, HttpServletResponse response) {
-		ResponseEntity<LogoutResponse> feignResponse = memberApiClient.logout();
+		memberService.logout();
 
 		response.addHeader("Set-Cookie", deleteCookie("Access-Token", "/"));
 		response.addHeader("Set-Cookie", deleteCookie("Refresh-Token", "/members"));
@@ -94,8 +100,16 @@ public class MemberController {
 
 	@GetMapping("/check-id")
 	@ResponseBody
-	public CheckIdResponse checkId(@RequestParam String loginId) {
-		CheckIdResponse response = memberApiClient.checkId(loginId);
+	public FindLoginIdResponse findLoginId(@RequestParam String loginId) {
+		FindLoginIdResponse response = memberService.checkId();
+		return response;
+	}
+
+	@PostMapping("/check-duplication")
+	@ResponseBody
+	public ValueDuplicationCheckResponse checkDuplication(
+		@RequestBody ValueDuplicationCheckRequest request) {
+		ValueDuplicationCheckResponse response = memberApiClient.checkDuplication(request);
 		return response;
 	}
 
@@ -126,4 +140,6 @@ public class MemberController {
 	public ResponseEntity<Void> deleteMember(){
 		return memberApiClient.deleteMember();
 	}
+
+
 }

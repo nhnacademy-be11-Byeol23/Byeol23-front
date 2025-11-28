@@ -2,10 +2,8 @@ package com.nhnacademy.byeol23front.memberset.member.client;
 
 import com.nhnacademy.byeol23front.memberset.member.dto.*;
 
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,14 +16,16 @@ public interface MemberApiClient {
 	/**
 	 * 회원 가입
 	 */
-	@PostMapping("/api/members/register")
-	ResponseEntity<MemberRegisterResponse> registerRequest(@RequestBody MemberRegisterRequest request);
-
+	@PostMapping("/api/members")
+	ResponseEntity<Void> registerRequest(@RequestBody MemberRegisterRequest request);
 	/**
 	 * 로그인
 	 */
 	@PostMapping("/auth/login")
 	ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request);
+
+	@GetMapping("/auth/payco/login")
+	ResponseEntity<Void> loginWithPayco();
 
 	@PostMapping("/auth/logout")
 	ResponseEntity<LogoutResponse> logout();
@@ -46,6 +46,11 @@ public interface MemberApiClient {
 	ResponseEntity<Void> deleteMember();
 
 	@GetMapping("/api/members/check-id")
-	CheckIdResponse checkId(@RequestParam("loginId") String loginId);
+	FindLoginIdResponse findLoginId(@RequestParam("loginId") String loginId);
 
+	@GetMapping("/api/members/check-duplication")
+	ValueDuplicationCheckResponse checkDuplication(@RequestBody ValueDuplicationCheckRequest request);
+
+	@PostMapping("/auth/social-login")
+	Void socialLogin(SocialLoginRequest request);
 }
