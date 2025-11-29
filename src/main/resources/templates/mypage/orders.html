@@ -416,49 +416,51 @@
 <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <form id="reviewForm" enctype="multipart/form-data">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="reviewModalLabel">리뷰 작성</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- 주문번호를 서버로 전송하는 숨김 필드 -->
-                    <input type="hidden" name="orderNumber" id="reviewOrderNumber" value=""/>
+            <form id="reviewForm" th:action="@{/reviews}" method="post" enctype="multipart/form-data">
+                    <!-- CSRF 토큰 (필요 시 fetch 요청에 헤더로 포함) -->
+                    <input type="hidden" id="csrfToken" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                     <div class="modal-header">
+                         <h5 class="modal-title" id="reviewModalLabel">리뷰 작성</h5>
+                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                     </div>
+                     <div class="modal-body">
+                         <!-- 주문번호를 서버로 전송하는 숨김 필드 -->
+                         <input type="hidden" name="orderNumber" id="reviewOrderNumber" value=""/>
 
-                    <div class="mb-3">
-                        <label class="form-label">리뷰 대상 도서</label>
-                        <select class="form-select" id="reviewBookId" name="bookId" required>
-                            <option value="">선택</option>
-                            <!-- 옵션은 모달 오픈 시 JS로 복사됩니다 -->
-                        </select>
-                    </div>
+                         <div class="mb-3">
+                             <label class="form-label">리뷰 대상 도서</label>
+                             <select class="form-select" id="reviewBookId" name="bookId" required>
+                                 <option value="">선택</option>
+                                 <!-- 옵션은 모달 오픈 시 JS로 복사됩니다 -->
+                             </select>
+                         </div>
 
-                    <div class="mb-3">
-                        <label for="reviewContent" class="form-label">리뷰 내용</label>
-                        <textarea class="form-control" id="reviewContent" name="reviewContent" rows="4" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">평점</label>
-                        <select class="form-select" name="reviewRate" id="reviewRate" required>
-                            <option value="">선택</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="reviewImage" class="form-label">이미지 (선택)</label>
-                        <input class="form-control" type="file" id="reviewImage" name="image" accept="image/*">
-                    </div>
-                    <div id="reviewAlert" style="display:none;" class="alert" role="alert"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
-                    <button type="submit" class="btn btn-primary">등록하기</button>
-                </div>
-            </form>
+                         <div class="mb-3">
+                             <label for="reviewContent" class="form-label">리뷰 내용</label>
+                             <textarea class="form-control" id="reviewContent" name="reviewContent" rows="4" required></textarea>
+                         </div>
+                         <div class="mb-3">
+                             <label class="form-label">평점</label>
+                             <select class="form-select" name="reviewRate" id="reviewRate" required>
+                                 <option value="">선택</option>
+                                 <option value="1">1</option>
+                                 <option value="2">2</option>
+                                 <option value="3">3</option>
+                                 <option value="4">4</option>
+                                 <option value="5">5</option>
+                             </select>
+                         </div>
+                         <div class="mb-3">
+                             <label for="reviewImage" class="form-label">이미지 (선택)</label>
+                             <input class="form-control" type="file" id="reviewImage" name="image" accept="image/*">
+                         </div>
+                         <div id="reviewAlert" style="display:none;" class="alert" role="alert"></div>
+                     </div>
+                     <div class="modal-footer">
+                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                         <button type="submit" class="btn btn-primary">등록하기</button>
+                     </div>
+                 </form>
         </div>
     </div>
 </div>
@@ -789,6 +791,105 @@
                 handleProcessRefund(); // 새로운 핸들러 호출
             }
         });
+    });
+
+    // 추가: 리뷰 모달이 열릴 때 해당 주문 카드의 숨겨진 select 옵션을 복사하여 모달에 채웁니다.
+    (function () {
+        const reviewModalEl = document.getElementById('reviewModal');
+        if (!reviewModalEl) return;
+
+        reviewModalEl.addEventListener('show.bs.modal', function (event) {
+            const triggerBtn = event.relatedTarget;
+            if (!triggerBtn) return;
+
+            // 주문번호 설정
+            const orderNumber = triggerBtn.getAttribute('data-order-number') || '';
+            const orderInput = document.getElementById('reviewOrderNumber');
+            if (orderInput) orderInput.value = orderNumber;
+
+            // 모달의 select 요소
+            const modalSelect = document.getElementById('reviewBookId');
+            if (!modalSelect) return;
+            // 기본 옵션 초기화
+            modalSelect.innerHTML = '<option value="">선택</option>';
+
+            // 클릭한 버튼과 같은 .order-card 내의 숨겨진 select(.order-book-select) 찾기
+            const orderCard = triggerBtn.closest('.order-card');
+            const hiddenSelect = orderCard ? orderCard.querySelector('.order-book-select') : null;
+
+            if (hiddenSelect) {
+                // hiddenSelect의 option들을 복사
+                Array.from(hiddenSelect.options).forEach(opt => {
+                    // 첫 기본 옵션("")는 건너뜀
+                    if (!opt.value) return;
+                    const newOpt = document.createElement('option');
+                    newOpt.value = opt.value;
+                    newOpt.text = opt.text; // OrderDetailResponse.items[index].bookTitle 로 렌더된 텍스트
+                    modalSelect.appendChild(newOpt);
+                });
+            }
+        });
+
+        // 모달이 닫힐 때 선택 초기화(선택 해제)
+        reviewModalEl.addEventListener('hidden.bs.modal', function () {
+            const modalSelect = document.getElementById('reviewBookId');
+            if (modalSelect) modalSelect.selectedIndex = 0;
+            const orderInput = document.getElementById('reviewOrderNumber');
+            if (orderInput) orderInput.value = '';
+            const alertEl = document.getElementById('reviewAlert');
+            if (alertEl) { alertEl.style.display = 'none'; alertEl.className = 'alert'; alertEl.textContent = ''; }
+            const fileInput = document.getElementById('reviewImage');
+            if (fileInput) fileInput.value = '';
+            const content = document.getElementById('reviewContent');
+            if (content) content.value = '';
+            const rate = document.getElementById('reviewRate');
+            if (rate) rate.selectedIndex = 0;
+        });
+    })();
+
+    // 리뷰 폼을 fetch로 전송하고 결과만 alert로 보여줌 (페이지 이동 없음)
+    document.addEventListener('DOMContentLoaded', function () {
+        const reviewForm = document.getElementById('reviewForm');
+        if (!reviewForm) return;
+
+        reviewForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            try {
+                const formData = new FormData(reviewForm);
+                const action = reviewForm.getAttribute('action') || '/reviews';
+                const method = (reviewForm.getAttribute('method') || 'post').toUpperCase();
+
+                const headers = {};
+                const csrfInput = document.getElementById('csrfToken');
+                if (csrfInput && csrfInput.value) {
+                    headers['X-CSRF-TOKEN'] = csrfInput.value;
+                }
+
+                const resp = await fetch(action, {
+                    method: method,
+                    body: formData,
+                    headers: headers,
+                    credentials: 'same-origin'
+                });
+
+                if (resp.ok) {
+                    alert('리뷰 등록이 완료되었습니다.');
+                    // 페이지 이동 없음, 모달 자동 닫기도 하지 않음(사용자가 직접 닫음)
+                } else {
+                    let message = '리뷰 등록에 실패했습니다.';
+                    try {
+                        const json = await resp.json();
+                        if (json && json.message) message += '\n' + json.message;
+                    } catch (_) {
+                        const text = await resp.text();
+                        if (text) message += '\n' + text;
+                    }
+                    alert(message);
+                }
+            } catch (err) {
+                alert('등록 중 오류가 발생했습니다: ' + (err.message || err));
+            }
+        }, false);
     });
 
 </script>
