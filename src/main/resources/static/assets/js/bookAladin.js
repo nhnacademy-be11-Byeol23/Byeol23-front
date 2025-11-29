@@ -33,7 +33,7 @@ function addApiBook(btn) {
         priceStandard: d.priceStandard ? String(d.priceStandard) : "",
         isbn13: d.isbn13 || "",
         pubDate: toYmdFromJavaDate(d.pubDate) || "",
-        imageUrl: d.cover || btn.getAttribute("data-cover") || ""
+        imageUrl: (d.cover || btn.getAttribute("data-cover") || "").replace("coversum", "cover500")
     };
 
     sessionStorage.setItem("aladinBookDraft", JSON.stringify(payload));
