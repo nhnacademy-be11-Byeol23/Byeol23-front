@@ -69,24 +69,12 @@
                         <div class="card shadow-sm">
                             <div class="card-body">
                                 <h5 class="fw-semibold mb-3">포인트 정책 목록</h5>
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle" id="pointPolicyTable">
-                                        <thead class="table-light">
-                                        <tr>
-                                            <th scope="col">정책명</th>
-                                            <th scope="col">적립 금액</th>
-                                            <th scope="col">활성 여부</th>
-                                            <th scope="col">생성일</th>
-                                            <th scope="col">관리</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="policyTbody">
-                                        <tr id="noDataRow">
-                                            <td colspan="5" class="text-center py-4">등록된 포인트 정책이 없습니다.</td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
+
+                                <!-- ReservedPolicy 기준 그룹 렌더링 영역 -->
+                                <div id="policyGroupContainer">
+                                    <p class="text-center text-muted" id="noDataText">등록된 포인트 정책이 없습니다.</p>
                                 </div>
+
                                 <div class="d-flex gap-2 mt-2">
                                     <button class="btn btn-outline-secondary btn-sm" id="reloadBtn">새로고침</button>
                                 </div>
@@ -104,7 +92,13 @@
                                                     aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <input type="hidden" id="editOriginalName">
+                                            <!-- 식별을 위해 ID 보관(읽기 전용) -->
+                                            <input type="hidden" id="editPointPolicyId">
+                                            <!-- 타입도 수정 불가, 필요 시 표시만 -->
+                                            <div class="mb-3">
+                                                <label class="form-label">정책 타입</label>
+                                                <input type="text" class="form-control" id="editType" disabled>
+                                            </div>
                                             <div class="mb-3">
                                                 <label for="editPointPolicyName" class="form-label">정책명</label>
                                                 <input type="text" class="form-control" id="editPointPolicyName" required>
@@ -113,9 +107,10 @@
                                                 <label for="editSaveAmount" class="form-label">적립 금액</label>
                                                 <input type="number" class="form-control" id="editSaveAmount" min="0" step="0.01" required>
                                             </div>
-                                            <div class="mb-3 form-check">
-                                                <input class="form-check-input" type="checkbox" id="editIsActive">
-                                                <label class="form-check-label" for="editIsActive">활성화</label>
+                                            <!-- isActive, createdAt 등은 읽기 전용 -->
+                                            <div class="mb-3">
+                                                <label class="form-label">활성 여부</label>
+                                                <input type="text" class="form-control" id="editIsActiveView" disabled>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">생성일</label>
@@ -160,8 +155,8 @@
             e.preventDefault();
             const dto = {
                 pointPolicyName: document.getElementById('pointPolicyName').value.trim(),
-                saveAmount: document.getElementById('saveAmount').value.trim(), // BigDecimal 호환을 위해 문자열 전송
-                isActive: document.getElementById('isActive').checked
+                saveAmount: document.getElementById('saveAmount').value.trim(), // BigDecimal 호환 위해 문자열
+                // 기본 정책 타입은 서버에서 결정하거나, 필요 시 추가 필드로 선택하도록 확장 가능
             };
             if (!dto.pointPolicyName || dto.saveAmount === '' || Number(dto.saveAmount) < 0) {
                 alert('필수 값을 확인하세요.');
@@ -179,7 +174,6 @@
                 .then(() => {
                     alert('생성 완료');
                     e.target.reset();
-                    document.getElementById('isActive').checked = true;
                     loadPolicies();
                 })
                 .catch(err => alert(err.message));
@@ -187,18 +181,19 @@
 
         document.getElementById('reloadBtn').addEventListener('click', loadPolicies);
 
+        // 수정: saveAmount, pointPolicyName 만 보냄
         document.getElementById('editPolicyForm').addEventListener('submit', (e) => {
             e.preventDefault();
+            const id = document.getElementById('editPointPolicyId').value;
             const dto = {
                 pointPolicyName: document.getElementById('editPointPolicyName').value.trim(),
-                saveAmount: document.getElementById('editSaveAmount').value.trim(),
-                isActive: document.getElementById('editIsActive').checked
+                saveAmount: document.getElementById('editSaveAmount').value.trim()
             };
             if (!dto.pointPolicyName || dto.saveAmount === '' || Number(dto.saveAmount) < 0) {
                 alert('필수 값을 확인하세요.');
                 return;
             }
-            fetch(API_BASE + '/update', {
+            fetch(API_BASE + '/update/' + encodeURIComponent(id), {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(dto)
@@ -224,46 +219,87 @@
                 if (!r.ok) throw new Error('목록 조회 실패');
                 return r.json();
             })
-            .then(list => renderPolicyTable(list))
+            .then(map => renderPolicyGroups(map))
             .catch(err => alert(err.message));
     }
 
-    function renderPolicyTable(list) {
-        const tbody = document.getElementById('policyTbody');
-        tbody.innerHTML = '';
-        if (!list || list.length === 0) {
-            const noRow = document.getElementById('noDataRow');
-            noRow.style.display = '';
-            tbody.appendChild(noRow);
+    // ReservedPolicy 기준으로 ul/ol 로 구분해서 렌더링
+    function renderPolicyGroups(map) {
+        const container = document.getElementById('policyGroupContainer');
+        const noDataText = document.getElementById('noDataText');
+        container.innerHTML = '';
+
+        if (!map || Object.keys(map).length === 0) {
+            noDataText.style.display = '';
+            container.appendChild(noDataText);
             return;
         }
-        list.forEach(p => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${escapeHtml(p.pointPolicyName)}</td>
-                <td>${p.saveAmount ?? '-'}</td>
-                <td>${p.isActive ? '활성' : '비활성'}</td>
-                <td>${formatDateTime(p.createdAt)}</td>
-                <td class="text-nowrap">
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="openEdit('${encodeURIComponent(p.pointPolicyName)}')">수정</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deletePolicy('${encodeURIComponent(p.pointPolicyName)}')">삭제</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
+        noDataText.style.display = 'none';
+
+        Object.keys(map).forEach(key => {
+            const policies = map[key] || [];
+            if (policies.length === 0) return;
+
+            // 그룹 카드
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'mb-4';
+
+            // 제목: ReservedPolicy key 와 description 둘 다 나오도록
+            const title = document.createElement('h6');
+            title.className = 'fw-semibold';
+            title.textContent = key; // 필요 시 서버에서 description 포함 형태로 내려도 됨
+            groupDiv.appendChild(title);
+
+            // 목록 (ol 사용, ul 로 바꿔도 무방)
+            const listEl = document.createElement('ol');
+            listEl.className = 'list-group list-group-numbered';
+
+            policies.forEach(p => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+                const left = document.createElement('div');
+                left.innerHTML = `
+                    <div><strong>${escapeHtml(p.pointPolicyName)}</strong></div>
+                    <div class="small text-muted">
+                        적립 금액: ${p.saveAmount ?? '-'} /
+                        활성 여부: ${p.isActive ? '활성' : '비활성'} /
+                        생성일: ${formatDateTime(p.createdAt)}
+                    </div>
+                `;
+
+                const right = document.createElement('div');
+                right.className = 'text-nowrap';
+                right.innerHTML = `
+                    <button class="btn btn-sm btn-outline-primary me-1"
+                        onclick="openEdit(${encodeURIComponent(p.pointPolicyId)})">수정</button>
+                    <button class="btn btn-sm btn-outline-danger"
+                        onclick="deletePolicy(${encodeURIComponent(p.pointPolicyId)})">삭제</button>
+                `;
+
+                li.appendChild(left);
+                li.appendChild(right);
+                listEl.appendChild(li);
+            });
+
+            groupDiv.appendChild(listEl);
+            container.appendChild(groupDiv);
         });
     }
 
-    function openEdit(encodedName) {
-        fetch(API_BASE + '/' + encodedName)
+    // id 기반 단건 조회 후 모달 열기
+    function openEdit(id) {
+        fetch(API_BASE + '/' + encodeURIComponent(id))
             .then(r => {
                 if (!r.ok) throw new Error('정책 조회 실패');
                 return r.json();
             })
             .then(p => {
-                document.getElementById('editOriginalName').value = p.pointPolicyName;
-                document.getElementById('editPointPolicyName').value = p.pointPolicyName;
+                document.getElementById('editPointPolicyId').value = p.pointPolicyId;
+                document.getElementById('editType').value = p.type ?? '';
+                document.getElementById('editPointPolicyName').value = p.pointPolicyName ?? '';
                 document.getElementById('editSaveAmount').value = p.saveAmount ?? 0;
-                document.getElementById('editIsActive').checked = !!p.isActive;
+                document.getElementById('editIsActiveView').value = p.isActive ? '활성' : '비활성';
                 document.getElementById('editCreatedAt').value = formatDateTime(p.createdAt);
                 const modal = new bootstrap.Modal(document.getElementById('editModal'));
                 modal.show();
@@ -271,9 +307,9 @@
             .catch(err => alert(err.message));
     }
 
-    function deletePolicy(encodedName) {
+    function deletePolicy(id) {
         if (!confirm('삭제하시겠습니까?')) return;
-        fetch(API_BASE + '/' + encodedName, { method: 'DELETE' })
+        fetch(API_BASE + '/' + encodeURIComponent(id), { method: 'DELETE' })
             .then(r => {
                 if (!r.ok) throw new Error('삭제 실패');
                 return r;
@@ -287,7 +323,6 @@
 
     function formatDateTime(s) {
         if (!s) return '-';
-        // ISO-8601 문자열을 간단 표시로
         return String(s).replace('T', ' ').substring(0, 19);
     }
 

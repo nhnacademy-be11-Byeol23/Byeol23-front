@@ -7,26 +7,34 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.nhnacademy.byeol23front.point.dto.PointPolicyDTO;
+import com.nhnacademy.byeol23front.point.dto.ReservedPolicy;
 
-@FeignClient(name = "BYEOL23-BACKEND", contextId = "pointFeignClient")
+import java.util.Map;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+@FeignClient(name = "BYEOL23-BACKEND", contextId = "pointFeignClient", path = "/api/point-policies")
 public interface PointPolicyFeignClinet {
 
-	@GetMapping("/api/point-policies")
-	ResponseEntity<List<PointPolicyDTO>> getAllPointPolicies(
-		@RequestParam(value = "page", required = false) Integer page,
-		@RequestParam(value = "size", required = false) Integer size,
-		@RequestParam(value = "sort", required = false) List<String> sort
-	);
+	@GetMapping
+	Map<ReservedPolicy, List<PointPolicyDTO>> getAllPointPolicies();
 
-	@GetMapping("/api/point-policies/{name}")
-	ResponseEntity<PointPolicyDTO> getPointPolicy(@PathVariable("name") String name);
+	@PostMapping
+	void createPointPolicy(@RequestBody PointPolicyDTO pointPolicyDTO);
 
-	@PostMapping("/api/point-policies/create")
-	ResponseEntity<Void> createPointPolicy(@RequestBody PointPolicyDTO pointPolicyDTO);
+	@PostMapping("update/{id}")
+	void updatePointPolicy(@PathVariable("id") Long id, @RequestBody PointPolicyDTO pointPolicyDTO);
 
-	@PutMapping("/api/point-policies/update")
-	ResponseEntity<Void> updatePointPolicy(@RequestBody PointPolicyDTO pointPolicyDTO);
+	@PostMapping("delete/{id}")
+	void deletePointPolicy(@PathVariable("id") Long id);
 
-	@DeleteMapping("/api/point-policies/{name}")
-	ResponseEntity<Void> deletePointPolicy(@PathVariable("name") String name);
+	@PostMapping("activate/{id}")
+	void activatePointPolicy(@PathVariable("id") Long id);
+
+	@GetMapping("/{id}")
+	PointPolicyDTO getPointPolicyById(@PathVariable("id") Long id);
 }
