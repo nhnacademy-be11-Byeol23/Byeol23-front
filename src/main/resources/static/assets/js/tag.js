@@ -12,7 +12,10 @@ document.getElementById("tagCreateForm").addEventListener("submit", e => {
         })
     })
         .then(res => {
-            if (!res.ok) throw new Error("등록 실패");
+
+            if (!res.ok){
+                return res.json().then(errorBody => { throw new Error(errorBody.message || "추가 실패"); });
+            }
             window.location.reload();
         })
         .catch(err => alert(err));
@@ -40,8 +43,7 @@ async function updateTag(tagId){
         });
 
         if (!res.ok) {
-            const error = await res.json().catch(() => ({message: '수정 중 서버 오류'}));
-            throw new Error(error.message || "수정 실패");
+            return res.json().then(errorBody => { throw new Error(errorBody.message || "수정 실패"); });
         }
 
         window.location.href = '/admin/tags';
@@ -59,10 +61,10 @@ function deleteTag(button) {
 
     fetch(`/admin/tags/delete/${id}`, { method: "POST"})
         .then((res) => {
-            // if (!res.ok) {
-            //     return res.json().then(errorBody => { throw new Error(errorBody.message || "삭제 실패"); });
-            // }
-            // // ✨ 성공: 삭제 후 태그 목록 페이지로 이동합니다.
+            if (!res.ok) {
+                return res.json().then(errorBody => { throw new Error(errorBody.message || "삭제 실패"); });
+            }
+            // ✨ 성공: 삭제 후 태그 목록 페이지로 이동합니다.
             window.location.href = '/admin/tags';
         })
         .catch((err) => {

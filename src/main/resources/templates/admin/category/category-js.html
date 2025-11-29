@@ -11,6 +11,7 @@
                 body: JSON.stringify({ name })
             })
                 .then(res => {
+                    if (res.status === 409) throw new Error("Success")
                     if (!res.ok) throw new Error("등록 실패");
                     // 👇 [수정] 새로고침 전 해시(#)를 설정
                     location.hash = '#categories';

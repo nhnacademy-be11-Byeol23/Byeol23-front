@@ -1,33 +1,11 @@
 package com.nhnacademy.byeol23front.memberset.member.service.Impl;
 
-import java.lang.reflect.Member;
-import java.time.Duration;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.nhnacademy.byeol23front.memberset.member.dto.*;
 import org.springframework.stereotype.Service;
-
-import com.nhnacademy.byeol23front.commons.exception.DecodingFailureException;
-import com.nhnacademy.byeol23front.memberset.domain.AccessToken;
-import com.nhnacademy.byeol23front.memberset.domain.RefreshToken;
-import com.nhnacademy.byeol23front.memberset.domain.Token;
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
-import com.nhnacademy.byeol23front.memberset.member.dto.FindLoginIdResponse;
-import com.nhnacademy.byeol23front.memberset.member.dto.LoginRequest;
-import com.nhnacademy.byeol23front.memberset.member.dto.LoginResponse;
-import com.nhnacademy.byeol23front.memberset.member.dto.LogoutRequest;
-import com.nhnacademy.byeol23front.memberset.member.dto.MemberRegisterRequest;
-import com.nhnacademy.byeol23front.memberset.member.dto.MemberRegisterResponse;
-import com.nhnacademy.byeol23front.memberset.member.dto.ValueDuplicationCheckRequest;
-import com.nhnacademy.byeol23front.memberset.member.dto.ValueDuplicationCheckResponse;
 import com.nhnacademy.byeol23front.memberset.member.service.MemberService;
 
-import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -35,13 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
 
-	private final String accessCookieHeader = "access-token";
-	private final String refreshCookieHeader = "refresh-token";
 
-	private Long accessTokenExp;
-
-	@Value("${jwt}")
-	private Long refreshTokenExp;
 
 	private final MemberApiClient memberApiClient;
 
@@ -52,11 +24,7 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public LoginResponse login(LoginRequest request) {
-		ResponseEntity<LoginResponse> feignResponse = memberApiClient.login(request);
-		String accessToken = String.valueOf(feignResponse.getHeaders().get(HttpHeaders.AUTHORIZATION));
-		Cookie refreshToken = (Cookie)feignResponse.getHeaders().get(HttpHeaders.SET_COOKIE);
-
-		return new LoginResponse(accessToken, refreshToken);
+		return memberApiClient.login(request).getBody();
 	}
 
 	@Override
@@ -75,28 +43,18 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public ResponseCookie createCookie(Token token) {
-		String path;
-		String tokenType;
-		Long expiration;
-		String sameSite = "Lax";			//중요: https요청에는 none으로 설정해도 됨, http요청은 secure가 false상태이므로 브라우저에서 none에 대한 쿠키는 거부하여 lax로 설정
-		if(token instanceof RefreshToken) {
-			tokenType = "Refresh-Token";
-			expiration =
-			path = "/refresh";
-		} else if (token instanceof AccessToken) {
-			tokenType = "Access-Token";
-			path = "/";
-		} else {
-			throw new DecodingFailureException("토큰 에러");
-		}
-		return ResponseCookie.from(tokenType, token.getValue())
-			.httpOnly(true)					//XSS
-			.secure(false)					//중요: 실제 배포 환경에선 https요청으로 변경 / secure -> true
-			.sameSite(sameSite)				//CSRF
-			.path(path)
-			.maxAge(Duration.ofMinutes(time))
-			.build();
+	public MemberUpdateResponse updateMember(MemberUpdateRequest request) {
+		return null;
+	}
+
+	@Override
+	public MemberPasswordUpdateResponse updateMemberPassword(MemberPasswordUpdateRequest request) {
+		return null;
+	}
+
+	@Override
+	public void deleteMember() {
+
 	}
 
 }

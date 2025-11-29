@@ -1,6 +1,7 @@
 package com.nhnacademy.byeol23front.commons.config;
 
 import com.nhnacademy.byeol23front.commons.interceptor.CategoryHeaderInterceptor;
+import com.nhnacademy.byeol23front.commons.interceptor.GuestIdCookieInterceptor;
 import com.nhnacademy.byeol23front.resolver.PageableResolver;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -13,6 +14,10 @@ import java.util.List;
 public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new GuestIdCookieInterceptor())
+                .addPathPatterns("/**")
+                .order(0);
+
         registry.addInterceptor(new CategoryHeaderInterceptor())
                 .addPathPatterns("/")
                 .addPathPatterns("/admin/**")
@@ -26,7 +31,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/best")
                 .addPathPatterns("/new")
                 .addPathPatterns("/error/**")
-        ;
+                .addPathPatterns("/carts/books/**")
+                .order(1);
     }
 
     @Override

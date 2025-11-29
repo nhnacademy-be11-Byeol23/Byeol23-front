@@ -1,5 +1,6 @@
 package com.nhnacademy.byeol23front.bookset.tag.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +21,7 @@ import com.nhnacademy.byeol23front.bookset.tag.dto.PageResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.TagCreateRequest;
 import com.nhnacademy.byeol23front.bookset.tag.dto.TagCreateResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.TagUpdateRequest;
+import com.nhnacademy.byeol23front.bookset.tag.exception.TagNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -44,7 +46,9 @@ public class TagController {
 	@PostMapping
 	@ResponseBody
 	public TagCreateResponse createTag(@RequestBody TagCreateRequest request){
+
 		ResponseEntity<TagCreateResponse> response = feignClient.createTag(request);
+
 		return response.getBody();
 	}
 
@@ -58,6 +62,11 @@ public class TagController {
 	@ResponseBody
 	@PostMapping("/put/{tag-id}")
 	public ResponseEntity<Void> updateTag(@PathVariable(name = "tag-id") Long tagId, @RequestBody TagUpdateRequest tagName){
+		// try {
+		// 	feignClient.updateTag(tagId, tagName);
+		// } catch(RuntimeException e){
+		// 	return ResponseEntity.status(HttpStatus.CONFLICT).build();
+		// }
 		feignClient.updateTag(tagId, tagName);
 		return ResponseEntity.ok().build();
 	}

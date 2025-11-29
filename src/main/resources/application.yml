@@ -41,3 +41,11 @@ aladin:
 payco:
   client-id: 3RDqzUwAf9DoEwippcFB96j
   client-secret: VhS7D7ntRVD14NSGcOjnPndf
+
+jwt:
+  access-token:
+    prefix: "accessToken=Bearer "
+    expiration: "300000"
+  refresh-token:
+    prefix: "refreshToken="
+    expiration: "3000000"

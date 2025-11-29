@@ -37,6 +37,7 @@
             border-color: #252223 !important;
             box-shadow: 0 0 0 0.25rem rgba(37, 34, 35, 0.25) !important;
         }
+
         .order-card {
             background: #fff;
             border: 1px solid #eee;
@@ -55,7 +56,6 @@
             gap: 1.25rem; /* 20px 간격 */
             padding: 1.25rem 0;
             border-bottom: 1px solid #f0f0f0;
-            border-top: 1px solid #f0f0f0;
             margin-top: 1.25rem;
             margin-bottom: 1.25rem;
         }
@@ -102,8 +102,13 @@
             margin-bottom: 5px;
         }
 
-        .product-details-container .item-meta .separator { margin: 0 5px; }
-        .product-details-container .item-meta .price { font-weight: 500; }
+        .product-details-container .item-meta .separator {
+            margin: 0 5px;
+        }
+
+        .product-details-container .item-meta .price {
+            font-weight: 500;
+        }
 
         .product-details-container .more-items {
             font-size: 0.9rem;
@@ -119,7 +124,7 @@
         .order-info .info-row {
             display: flex;
             justify-content: flex-end !important; /* ✨ 오른쪽 끝 정렬 */
-            gap: 10px;                   /* ✨ 라벨과 값 사이의 간격 */
+            gap: 10px; /* ✨ 라벨과 값 사이의 간격 */
             font-size: 0.9rem;
             margin-bottom: 8px;
         }
@@ -135,32 +140,24 @@
             min-width: 60px; /* 값의 최소 너비를 주어 정렬을 맞춤 */
         }
 
-        .order-info .info-row.total {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #f0f0f0;
-        }
+
+
         .order-info .info-row.total .label {
             font-weight: 600;
             color: #000;
         }
+
         .order-info .info-row.total .value {
             font-weight: 700;
             font-size: 1.1rem;
             color: #000;
         }
 
-        /* 3. 주문 요약 정보 (오른쪽 정렬) */
-        .product-details-container .order-info {
-            margin-top: 0 !important;
-            flex-shrink: 0;
-        }
-
         /* ✨ .product-details-container를 앞에 붙여 CSS 우선순위 확보 */
         .product-details-container .order-info .info-row {
             display: flex;
             justify-content: flex-end !important; /* 👈 오른쪽 끝 정렬 (space-between -> flex-end) */
-            gap: 10px;                   /* ✨ 라벨과 값 사이의 간격을 10px로 고정 */
+            gap: 10px; /* ✨ 라벨과 값 사이의 간격을 10px로 고정 */
             font-size: 0.9rem;
             margin-bottom: 8px;
         }
@@ -177,20 +174,27 @@
             font-weight: 500;
         }
 
-        /* 6. Total 행만 강조 */
-        .product-details-container .order-info .info-row.total {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #f0f0f0;
-        }
         .product-details-container .order-info .info-row.total .label {
             font-weight: 600;
             color: #000;
         }
+
         .product-details-container .order-info .info-row.total .value {
             font-weight: 700;
             font-size: 1.1rem;
             color: #000;
+        }
+
+        /* Modal spacing */
+        .order-detail-modal .modal-header{
+            padding: 20px 30px 20px 30px;
+        }
+        .order-detail-modal .modal-footer {
+            padding: 20px 30px 20px 30px;
+        }
+        .order-detail-modal .modal-body
+       {
+            padding: 30px;
         }
     </style>
 
@@ -219,9 +223,8 @@
     <!-- Account Section -->
     <section id="account" class="account section">
 
-        <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="container" data-aos-delay="100">
 
-            <!-- Mobile Menu Toggle -->
             <div class="mobile-menu d-lg-none mb-4">
                 <button class="mobile-menu-toggle" type="button" data-bs-toggle="collapse"
                         data-bs-target="#profileMenu">
@@ -231,12 +234,10 @@
             </div>
 
             <div class="row g-4">
-                <!-- Profile Menu -->
                 <div class="col-lg-3">
                     <div th:replace="~{fragments/mypage_profile :: mypage_profile}"></div>
                 </div>
 
-                <!-- Content Area -->
                 <div class="col-lg-9">
                     <div class="content-area">
                         <div id="orders">
@@ -245,8 +246,10 @@
                             </div>
 
                             <div class="orders-grid" th:if="${orders != null and !orders.isEmpty()}">
+
                                 <div class="order-card" data-aos="fade-up" data-aos-delay="100"
-                                     th:each="viewModel : ${viewModels}">
+                                     th:each="viewModel : ${viewModels}"
+                                     th:with="firstItem = ${viewModel.order.items[0]}, totalItems = ${#lists.size(viewModel.order.items)}">
 
                                     <div class="order-header">
                                         <div class="order-id">
@@ -259,22 +262,22 @@
                                     </div>
 
                                     <div class="order-content">
+
                                         <div class="product-grid">
                                             <img th:src="${viewModel.firstImageUrl}"
-                                                 th:alt="${viewModel.order.items[0].bookTitle}"
+                                                 th:alt="${firstItem.bookTitle}"
                                                  alt="Product Image" loading="lazy">
                                         </div>
+
                                         <div class="product-details-container"
-                                             th:if="${!#lists.isEmpty(viewModel.order.items)}"
-                                             th:with="firstItem = ${viewModel.order.items[0]},
-                                                    totalItems = ${#lists.size(viewModel.order.items)}">
+                                             th:if="${!#lists.isEmpty(viewModel.order.items)}">
 
                                             <div class="product-info-group">
                                                 <h6 class="book-title" th:text="${firstItem.bookTitle}">Book Title</h6>
                                                 <div class="item-meta">
                                                     <span th:text="'수량: ' + ${firstItem.quantity}">수량: 1</span>
                                                     <span class="separator">|</span>
-                                                    <span class="price" th:text="${#numbers.formatCurrency(firstItem.price)}">₩15,000</span>
+                                                    <span class="price" th:text="${#numbers.formatInteger(firstItem.price, 0, 'COMMA') + '원'}">15,000원</span>
                                                 </div>
                                                 <div class="more-items" th:if="${totalItems > 1}">
                                                     <span th:text="'외 ' + (${totalItems} - 1) + '건'">외 2건</span>
@@ -283,31 +286,24 @@
 
                                             <div class="order-info">
                                                 <div class="info-row">
-                                                    <span class="value" th:text="${viewModel.order.orderStatus}">...</span>
-                                                </div>
-                                                <div class="info-row">
-                                                    <span class="value" th:text="${#lists.size(viewModel.order.items)} + ' items'">...</span>
+                                                    <span class="label">상태 / 개수:</span>
+                                                    <span class="value" th:text="${viewModel.order.orderStatus} + ' (' + ${totalItems} + ' items)'">대기 (3 items)</span>
                                                 </div>
                                                 <div class="info-row total">
-                                                    <span class="label">전체 주문 금액</span>
-                                                    <span class="value price"
-                                                          th:text="${#numbers.formatCurrency(viewModel.order.actualOrderPrice)}">...</span>
+                                                    <span class="label">총 결제 금액</span>
+                                                    <span class="value price"  th:text="${#numbers.formatInteger(viewModel.order.actualOrderPrice, 0, 'COMMA') + '원'}">30,000원</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="order-footer">
-                                        <button type="button" class="btn btn-light w-100"
+                                        <button type="button" class="btn btn-light w-50"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#orderDetailsModal"
                                                 th:data-order-id="${viewModel.order.orderNumber}">
-                                            View Details
+                                            주문 상세
                                         </button>
-                                    </div>
-                                    <div class="order-footer">
-                                        <!-- 리뷰 작성 버튼: orderNumber를 데이터로 전달 -->
-                                        <button type="button" class="btn btn-light w-100 review-open-btn"
+                                        <button type="button" class="btn btn-light w-50 review-open-btn"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#reviewModal"
                                                 th:attr="data-order-number=${viewModel.order.orderNumber}">
@@ -315,8 +311,10 @@
                                         </button>
                                     </div>
 
+
                                     <!-- 숨겨진 select: 이 주문에 포함된 도서들을 서버사이드에서 렌더링 -->
-                                    <select class="order-book-select" style="display:none;" th:if="${!#lists.isEmpty(viewModel.order.items)}">
+                                    <select class="order-book-select" style="display:none;"
+                                            th:if="${!#lists.isEmpty(viewModel.order.items)}">
                                         <option value="" disabled selected>선택</option>
                                         <option th:each="item : ${viewModel.order.items}"
                                                 th:value="${item.bookId}"
@@ -331,11 +329,8 @@
 
                                 </div>
                             </div>
-
-                            <div class="alert alert-info" th:if="${orders == null or orders.isEmpty()}">
-                                주문 내역이 없습니다.
-                            </div>
-                            <div class="pagination-wrapper" data-aos="fade-up" th:if="${orders.totalPages > 1}">
+                            <div class="pagination-wrapper" data-aos="fade-up"
+                                 th:if="${orders != null and orders.totalPages > 1}">
 
                                 <a th:if="${orders.hasPrevious()}"
                                    th:href="@{/mypage/orders(page=${orders.number - 1})}"
@@ -365,15 +360,12 @@
                                     <i class="bi bi-chevron-right"></i>
                                 </button>
                             </div>
-                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
-    </section><!-- /Account Section -->
-
+    </section>
 </main>
 
 <div th:replace="~{fragments/common_footer :: commonFooter}"></div>
@@ -397,7 +389,7 @@
 <!-- Main JS File -->
 <script src="/assets/js/main.js"></script>
 
-<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
+<div class="modal fade order-detail-modal" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -486,17 +478,8 @@
     function createLoadingSpinner() {
         const wrapper = document.createElement('div');
         wrapper.className = 'text-center p-5';
-
-        const spinner = document.createElement('div');
-        spinner.className = 'spinner-border text-dark';
-        spinner.setAttribute('role', 'status');
-
-        const visuallyHidden = document.createElement('span');
-        visuallyHidden.className = 'visually-hidden';
-        visuallyHidden.textContent = 'Loading...';
-
-        spinner.appendChild(visuallyHidden);
-        wrapper.appendChild(spinner);
+        // Note: innerHTML 사용을 피해야 하지만, 로딩 스피너의 static HTML 삽입은 허용합니다.
+        wrapper.innerHTML = `<div class="spinner-border text-dark" role="status"><span class="visually-hidden">Loading...</span></div>`;
         return wrapper;
     }
 
@@ -510,7 +493,7 @@
             const modalBody = document.getElementById('modal-order-body');
             const modalOrderNum = document.getElementById('modal-order-number');
 
-            // 1. 모달 내용을 로딩 스피너로 초기화 (DOM API 사용)
+            // 1. 모달 내용을 로딩 스피너로 초기화
             while (modalBody.firstChild) {
                 modalBody.removeChild(modalBody.firstChild);
             }
@@ -518,86 +501,26 @@
             modalOrderNum.textContent = '...';
 
             try {
-                // 2. 서버에 주문 상세 정보 요청
-                const response = await fetch(`/mypage/orders/${orderNumber}`);
-                if (!response.ok) throw new Error('주문 정보를 불러오는 데 실패했습니다.');
+                // 2. ✨ 서버에 렌더링된 HTML Fragment를 요청합니다.
+                // (가정: Controller는 /api/orders/modal-content/{orderNumber}에 매핑되어 있음)
+                const url = `/mypage/orders/${orderNumber}`;
+                const response = await fetch(url);
 
-                const orderData = await response.json();
+                if (!response.ok) {
+                    throw new Error('주문 상세 정보를 불러오는 데 실패했습니다.');
+                }
 
-                // 3. 모달 내용 HTML 생성 (DOM API 사용)
-                modalOrderNum.textContent = orderData.orderNumber;
+                // 3. 렌더링된 HTML 문자열을 획득
+                const renderedHtml = await response.text();
 
-                // 로딩 스피너 제거
+                // 4. 성공: 로딩 스피너 제거 후, HTML Fragment를 innerHTML로 주입
                 while (modalBody.firstChild) {
                     modalBody.removeChild(modalBody.firstChild);
                 }
+                modalBody.innerHTML = renderedHtml;
 
-                const items = orderData.items || [];
-
-                // --- "주문 상품" 섹션 ---
-                const h5Items = document.createElement('h5');
-                h5Items.textContent = `주문 상품 (${items.length}개)`;
-                modalBody.appendChild(h5Items);
-
-                const orderItemsDiv = document.createElement('div');
-                orderItemsDiv.className = 'order-items';
-
-                items.forEach(item => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'item';
-
-                    const itemInfoDiv = document.createElement('div');
-                    itemInfoDiv.className = 'item-info';
-                    itemInfoDiv.style.width = '70%';
-
-                    const h6Title = document.createElement('h6');
-                    h6Title.textContent = item.bookTitle; // .textContent로 XSS 방지
-                    itemInfoDiv.appendChild(h6Title);
-
-                    const itemMetaDiv = document.createElement('div');
-                    itemMetaDiv.className = 'item-meta';
-
-                    const spanQty = document.createElement('span');
-                    spanQty.textContent = `수량 : ${item.quantity}`; // .textContent로 XSS 방지
-                    itemMetaDiv.appendChild(spanQty);
-                    itemInfoDiv.appendChild(itemMetaDiv);
-
-                    const itemPriceDiv = document.createElement('div');
-                    itemPriceDiv.className = 'item-price';
-                    itemPriceDiv.textContent = formatCurrency(item.price); // 헬퍼 함수 사용
-
-                    itemDiv.appendChild(itemInfoDiv);
-                    itemDiv.appendChild(itemPriceDiv);
-                    orderItemsDiv.appendChild(itemDiv);
-                });
-                modalBody.appendChild(orderItemsDiv);
-
-                modalBody.appendChild(document.createElement('hr'));
-
-                // --- "배송지 정보" 섹션 ---
-                const h5Shipping = document.createElement('h5');
-                h5Shipping.textContent = '배송지 정보';
-                modalBody.appendChild(h5Shipping);
-
-                const addressInfoDiv = document.createElement('div');
-                addressInfoDiv.className = 'address-info';
-
-                const pAddress = document.createElement('p');
-
-                const strongReceiver = document.createElement('strong');
-                strongReceiver.textContent = orderData.receiver; // .textContent
-                pAddress.appendChild(strongReceiver);
-                pAddress.appendChild(document.createElement('br'));
-
-                // .createTextNode를 사용해 순수 텍스트로 삽입 (XSS 방지)
-                pAddress.appendChild(document.createTextNode(`${orderData.receiverAddress} ${orderData.receiverAddressDetail}`));
-                pAddress.appendChild(document.createElement('br'));
-                pAddress.appendChild(document.createTextNode(`(${orderData.postCode})`));
-                pAddress.appendChild(document.createElement('br'));
-                pAddress.appendChild(document.createTextNode(orderData.receiverPhone));
-
-                addressInfoDiv.appendChild(pAddress);
-                modalBody.appendChild(addressInfoDiv);
+                // 5. 모달 제목 업데이트 (주문 번호 재사용)
+                modalOrderNum.textContent = orderNumber;
 
             } catch (error) {
                 // --- 에러 처리 (DOM API 사용) ---
@@ -606,90 +529,270 @@
                 }
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'alert alert-danger';
-                errorDiv.textContent = error.message; // .textContent
+                errorDiv.textContent = error.message || '조회 중 오류가 발생했습니다.';
                 modalBody.appendChild(errorDiv);
             }
         });
     });
-    document.addEventListener('DOMContentLoaded', () => {
-        const reviewModal = document.getElementById('reviewModal');
-        const reviewOrderNumber = document.getElementById('reviewOrderNumber');
-        const reviewForm = document.getElementById('reviewForm');
-        const reviewAlert = document.getElementById('reviewAlert');
-        const reviewBookSelect = document.getElementById('reviewBookId');
 
-        // 모달 열릴 때 버튼의 data- 속성에서 값 채우기 및 해당 주문의 숨겨진 select에서 옵션 복사
-        reviewModal.addEventListener('show.bs.modal', (event) => {
-            const button = event.relatedTarget;
-            const orderNumber = button ? (button.getAttribute('data-order-number') || button.getAttribute('data-order-id')) : '';
+    window.refundModalInstance = null;
+    window.currentRefundOrderNumber = null;
+    window.currentAppliedFee = 0;
+    window.currentDeliveryStartDate = null;
 
-            // 이 버튼이 속한 주문 카드에서 숨겨진 select를 찾아 옵션을 복사
-            let orderCard = button ? button.closest('.order-card') : null;
-            let hiddenSelect = orderCard ? orderCard.querySelector('.order-book-select') : null;
+    function displayAlert(message) {
+        console.warn('Alert: ' + message);
+        alert(message);
+    }
 
-            // modal 안의 select 초기화
-            reviewBookSelect.innerHTML = '';
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = '선택';
-            reviewBookSelect.appendChild(defaultOption);
+    function getDateDifferenceInDays(date1, date2) {
+        const diffTime = Math.abs(date2 - date1);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    }
 
-            if (hiddenSelect) {
-                hiddenSelect.querySelectorAll('option').forEach(opt => {
-                    // skip placeholder options from hidden select
-                    if (!opt.value) return;
-                    reviewBookSelect.appendChild(opt.cloneNode(true));
-                });
+    function handleToggleRefundSection(buttonElement) {
+        const refundSection = document.getElementById('refundSection');
+        const refundReasonSelect = document.getElementById('refundReason');
+        const isVisible = refundSection.style.display !== 'none';
+
+        if (isVisible) {
+            // 섹션 숨기기
+            refundSection.style.display = 'none';
+            return;
+        }
+
+        // 섹션 보이기
+        refundSection.style.display = 'block';
+
+        // 데이터 초기화 (모달이 열릴 때 하던 작업)
+        const dataset = buttonElement.dataset;
+        window.currentRefundOrderNumber = dataset.orderNumber;
+        window.currentAppliedFee = parseFloat(dataset.appliedFee);
+        window.currentDeliveryStartDate = new Date(dataset.orderDate);
+
+        if (refundReasonSelect) {
+            refundReasonSelect.value = "";
+
+            const changeHandler = function(event) {
+                handleUpdateRefundPolicy(event.target.value);
+            };
+
+            refundReasonSelect.removeEventListener('change', window.refundReasonChangeHandler);
+            refundReasonSelect.addEventListener('change', changeHandler);
+            window.refundReasonChangeHandler = changeHandler; // 제거를 위해 전역 변수에 저장
+
+            handleUpdateRefundPolicy(""); // 정책 초기화
+        }
+    }
+
+    window.processRefund = function () {
+        // 로그가 안 찍히는 문제 해결을 위해 이 함수를 handleProcessRefund의 별칭으로 사용합니다.
+        handleProcessRefund();
+    }
+
+    function handleUpdateRefundPolicy(reason) {
+        const refundPolicyText = document.getElementById('refundPolicyText');
+        const refundDeliveryFeeDisplay = document.getElementById('refundDeliveryFee');
+        const processRefundBtn = document.getElementById('processRefundBtn');
+
+        const currentDeliveryStartDate = window.currentDeliveryStartDate;
+        const currentAppliedFee = window.currentAppliedFee;
+
+        // --- 유효성 검사 및 정책 로직 (이전 로직 유지) ---
+        if (!refundPolicyText || !currentDeliveryStartDate || !processRefundBtn || isNaN(currentAppliedFee)) {
+            refundPolicyText.innerHTML = '<p class="text-danger">오류: 주문 정보가 올바르지 않습니다.</p>';
+            if (processRefundBtn) processRefundBtn.disabled = true;
+            return;
+        }
+
+        const today = new Date();
+        const daysPassed = getDateDifferenceInDays(currentDeliveryStartDate, today);
+        let policyHtml = '';
+        let deliveryFeeText = '';
+        let isValid = true;
+        const fee = currentAppliedFee;
+
+        if (reason === 'simple_change') {
+            if (daysPassed <= 10) {
+                policyHtml = `<p class="text-success fw-bold">정책 적용 가능: 단순 변심 (10일 이내)</p><p>반품/환불 금액은 **반품 택배비 ${fee.toLocaleString()}원**을 제외하고 **전액 포인트**로 환불됩니다.</p>`;
+                deliveryFeeText = `(차감) ${fee.toLocaleString()}원`;
+            } else {
+                policyHtml = `<p class="text-danger fw-bold">정책 적용 불가</p><p>단순 변심 반품/환불은 배송 시작일(${currentDeliveryStartDate.toLocaleDateString()})로부터 10일 이내에만 가능합니다. (경과일: ${daysPassed}일)</p>`;
+                deliveryFeeText = '-';
+                isValid = false;
             }
+        } else if (reason === 'damage') {
+            if (daysPassed <= 30) {
+                policyHtml = `<p class="text-success fw-bold">정책 적용 가능: 파손/파본 (30일 이내)</p><p>상품 문제로 인한 반품/환불은 **배송비 포함 전액 포인트**로 환불됩니다.</p>`;
+                deliveryFeeText = `0원 (배송비 면제)`;
+            } else {
+                policyHtml = `<p class="text-danger fw-bold">정책 적용 불가</p><p>파손/파본 반품/환불은 배송 시작일(${currentDeliveryStartDate.toLocaleDateString()})로부터 30일 이내에만 가능합니다. (경과일: ${daysPassed}일)</p>`;
+                deliveryFeeText = '-';
+                isValid = false;
+            }
+        } else {
+            policyHtml = '<p class="text-secondary">환불 사유를 선택해주세요.</p>';
+            deliveryFeeText = '-';
+            isValid = false;
+        }
 
-            reviewOrderNumber.value = orderNumber || '';
-            reviewAlert.style.display = 'none';
+        refundPolicyText.innerHTML = policyHtml;
+        if (refundDeliveryFeeDisplay) refundDeliveryFeeDisplay.textContent = deliveryFeeText;
+        if (processRefundBtn) processRefundBtn.disabled = !isValid;
+
+    }
+
+    function handleCancelOrderByUser(orderNumber) {
+        console.log("취소 버튼 눌림 - Delegate 패턴 최종 확인. 주문 번호: " + orderNumber);
+        if (!confirm(`주문 번호 [${orderNumber}]의 결제를 취소하시겠습니까?`)) {
+            return;
+        }
+        const url = `/orders/${orderNumber}/cancel`;
+        const orderCancelRequest = {cancelReason: "고객 요청에 의한 취소"};
+
+        fetch(url, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(orderCancelRequest)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || "결제 취소 처리 중 오류가 발생했습니다.")
+                    });
+                }
+                return response.text();
+            })
+            .then(() => {
+                displayAlert(`주문 [${orderNumber}]이(가) 성공적으로 취소되었습니다. 페이지를 새로고침합니다.`);
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error("Order cancellation failed:", error);
+                displayAlert(`결제 취소에 실패했습니다: ${error.message}`);
+            });
+    }
+
+    function handleOpenRefundModal(buttonElement) {
+        const dataset = buttonElement.dataset;
+        window.currentRefundOrderNumber = dataset.orderNumber;
+        window.currentAppliedFee = parseFloat(dataset.appliedFee);
+        window.currentDeliveryStartDate = new Date(dataset.orderDate);
+
+        if (!window.refundModalInstance) {
+            const refundModalElement = document.getElementById('refundModal');
+
+            // 요소는 찾았지만, Bootstrap이 로드되었는지도 확인합니다.
+            if (refundModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                window.refundModalInstance = new bootstrap.Modal(refundModalElement);
+            } else {
+                // 이 경고가 뜬다면: 1. Fragment가 제대로 로드되지 않음. 2. Bootstrap JS 로드 문제.
+                displayAlert("환불 모달을 찾거나 초기화할 수 없습니다. 모달 HTML이 DOM에 있는지 확인해 주세요.");
+                return;
+            }
+        }
+
+        const refundReasonSelect = document.getElementById('refundReason');
+        if (refundReasonSelect) refundReasonSelect.value = "";
+        handleUpdateRefundPolicy("");
+
+        window.refundModalInstance.show();
+    }
+
+    function handleProcessRefund() { // HTML의 onclick에 연결\
+        console.log("환불/반품 버튼 클릭");
+
+        const refundReasonSelect = document.getElementById('refundReason');
+        const processRefundBtn = document.getElementById('processRefundBtn');
+        const reason = refundReasonSelect ? refundReasonSelect.value : "";
+
+        if (reason === "" || (processRefundBtn && processRefundBtn.disabled)) {
+            displayAlert("환불/반품 사유를 선택하거나, 정책 적용 가능 상태인지 확인해 주세요.");
+            return;
+        }
+        if (!confirm(`선택 사유 (${reason})로 환불을 요청하시겠습니까? 모든 금액은 포인트로 환불됩니다.`)) {
+            return;
+        }
+
+        let refundOptionKey = '';
+
+        if (reason === 'simple_change') {
+            refundOptionKey = 'MIND_CHANGED'; // Enum: MIND_CHANGED("단순 변심")
+        } else if (reason === 'damage') {
+            refundOptionKey = 'BREAK';      // Enum: BREAK("파손, 파본")
+        } else {
+            displayAlert("유효하지 않은 환불 사유입니다.");
+            return;
+        }
+
+        const url = `/refunds`;
+        const refundRequest = {
+            orderNumber: window.currentRefundOrderNumber,
+            refundReason: reason,
+            refundOption: refundOptionKey,
+            appliedFee: window.currentAppliedFee
+        };
+
+        fetch(url, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(refundRequest)})
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || "환불 처리 중 오류가 발생했습니다.")
+                    });
+                }
+                return response.text();
+            })
+            .then(() => {
+                displayAlert(`주문 [${window.currentRefundOrderNumber}]에 대한 환불 요청이 성공적으로 처리되었습니다. 페이지를 새로고침합니다.`);
+                if (window.refundModalInstance) window.refundModalInstance.hide();
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error("Refund failed:", error);
+                if (window.refundModalInstance) window.refundModalInstance.hide();
+                displayAlert(`환불 요청에 실패했습니다: ${error.message}`);
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // Modal 인스턴스 생성 (부모 페이지에서 한 번만)
+        document.body.addEventListener('change', function (event) {
+            const target = event.target;
+
+            // 1. 환불 사유 선택 박스(id='refundReason')의 변경 감지
+            if (target.id === 'refundReason') {
+                const selectedReason = target.value;
+                handleUpdateRefundPolicy(selectedReason);
+            }
         });
 
-        // 폼 제출: FormData로 multipart 전송
-        reviewForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        document.body.addEventListener('click', function (event) {
+            const target = event.target;
 
-            const formData = new FormData(reviewForm);
+            // 1. 주문 취소 버튼(.js-cancel-order-btn) 확인
+            if (target.classList.contains('js-cancel-order-btn')) {
+                event.preventDefault();
+                const orderNumber = target.dataset.orderNumber;
+                handleCancelOrderByUser(orderNumber);
+            }
 
-            try {
-                const submitBtn = reviewForm.querySelector('button[type="submit"]');
-                submitBtn.disabled = true;
-                submitBtn.textContent = '등록중...';
+            // 2. 환불/반품 토글 버튼(.js-toggle-refund-section) 확인
+            if (target.classList.contains('js-toggle-refund-section')) {
+                event.preventDefault();
+                handleToggleRefundSection(target);
+            }
 
-                const response = await fetch('/reviews', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    const text = await response.text();
-                    throw new Error(text || '리뷰 등록에 실패했습니다.');
-                }
-
-                // 성공
-                reviewAlert.className = 'alert alert-success';
-                reviewAlert.textContent = '리뷰가 등록되었습니다.';
-                reviewAlert.style.display = 'block';
-
-                setTimeout(() => {
-                    const modal = bootstrap.Modal.getInstance(reviewModal);
-                    modal.hide();
-                    // 선택적: 페이지 새로고침 또는 UI 업데이트
-                    location.reload();
-                }, 800);
-            } catch (err) {
-                reviewAlert.className = 'alert alert-danger';
-                reviewAlert.textContent = err.message || '오류가 발생했습니다.';
-                reviewAlert.style.display = 'block';
-            } finally {
-                const submitBtn = reviewForm.querySelector('button[type="submit"]');
-                submitBtn.disabled = false;
-                submitBtn.textContent = '등록하기';
+            if (target.id === 'processRefundBtn' || target.classList.contains('js-process-refund-btn')) {
+                event.preventDefault();
+                handleProcessRefund(); // 새로운 핸들러 호출
             }
         });
     });
+
 </script>
+
 </body>
 
 </html>

@@ -2,14 +2,23 @@ package com.nhnacademy.byeol23front.commons.exception;
 
 import java.io.IOException;
 import java.io.InputStream;
+<<<<<<< HEAD
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 
 import org.apache.http.HttpStatus;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+=======
+import java.time.LocalDateTime;
+
+import org.apache.http.HttpStatus;
+>>>>>>> b25e82c06cf6d95b5d5eac9d3bead5c680db6298
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nhnacademy.byeol23front.bookset.contributor.exception.ContributorAlreadyExistsException;
+import com.nhnacademy.byeol23front.bookset.tag.exception.TagAlreadyExistsException;
+import com.nhnacademy.byeol23front.bookset.tag.exception.TagNotFoundException;
 
 import feign.Response;
 import feign.codec.ErrorDecoder;
@@ -18,10 +27,10 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component
 public class FeignExceptionDecoder implements ErrorDecoder {
 
 	private final ObjectMapper objectMapper;
+
 	@Override
 	public Exception decode(String methodKey, Response response) {
 		log.info("response:{}", response);
@@ -44,7 +53,11 @@ public class FeignExceptionDecoder implements ErrorDecoder {
 
 
 		if (status == HttpStatus.SC_UNAUTHORIZED) {
+<<<<<<< HEAD
 			return new AccessDeniedException("ACCESS-TOKEN-EXPIRED");
+=======
+			//TODO: 인증과정에서 거부되었을 때의 반응 채울 것
+>>>>>>> b25e82c06cf6d95b5d5eac9d3bead5c680db6298
 		}
 
 
