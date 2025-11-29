@@ -13,9 +13,11 @@ import com.nhnacademy.byeol23front.point.dto.PointPolicyDTO;
 import com.nhnacademy.byeol23front.point.dto.ReservedPolicy;
 
 import io.swagger.v3.oas.annotations.Operation;
+import lombok.extern.slf4j.Slf4j;
 
 @Authorized(role = Role.ADMIN)
 @RestController
+@Slf4j
 @RequestMapping("/api/front/point-policies")
 public class PointPolicyProxyController {
 
@@ -30,6 +32,11 @@ public class PointPolicyProxyController {
 	public ResponseEntity<Map<ReservedPolicy, List<PointPolicyDTO>>> getAllPointPolicies(){
 
 		Map<ReservedPolicy, List<PointPolicyDTO>> body = pointPolicyFeignClinet.getAllPointPolicies();
+		for(List<PointPolicyDTO> list : body.values()){
+			for(PointPolicyDTO policy : list){
+				log.info("Policy Retrieved: {}", policy.pointPolicyName());
+			}
+		}
 		return ResponseEntity.ok(body);
 	}
 

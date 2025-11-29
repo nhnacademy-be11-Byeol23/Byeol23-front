@@ -236,14 +236,25 @@
     // ReservedPolicy 기준으로 ul/ol 로 구분해서 렌더링
     function renderPolicyGroups(map) {
         const container = document.getElementById('policyGroupContainer');
-        const noDataText = document.getElementById('noDataText');
+
+        // noDataText 요소를 먼저 찾되, 없으면 새로 생성하여 안전하게 처리
+        let noDataText = document.getElementById('noDataText');
+        if (!noDataText) {
+            noDataText = document.createElement('p');
+            noDataText.id = 'noDataText';
+            noDataText.className = 'text-center text-muted';
+            noDataText.textContent = '등록된 포인트 정책이 없습니다.';
+        }
+
+        // 초기화
         container.innerHTML = '';
 
         if (!map || Object.keys(map).length === 0) {
-            noDataText.style.display = '';
+            noDataText.style.display = ''; // 보이게
             container.appendChild(noDataText);
             return;
         }
+        // 데이터가 있을 때는 noDataText 숨김 (DOM에 없을 수도 있으므로 append 하지 않음)
         noDataText.style.display = 'none';
 
         Object.keys(map).forEach(key => {
@@ -307,7 +318,7 @@
             .then(p => {
                 document.getElementById('editPointPolicyId').value = p.pointPolicyId;
                 document.getElementById('editType').value = p.type ?? '';
-                document.getElementById('editPointPolicyName').value = p.pointPolicyName ?? '';
+                document.getElementById('editPointPolicyName').value = p.pointPolicyName ?? '이름 로드 안됨';
                 document.getElementById('editSaveAmount').value = p.saveAmount ?? 0;
                 document.getElementById('editIsActiveView').value = p.isActive ? '활성' : '비활성';
                 document.getElementById('editCreatedAt').value = formatDateTime(p.createdAt);
