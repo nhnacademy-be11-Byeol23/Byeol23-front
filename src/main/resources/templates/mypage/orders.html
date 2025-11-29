@@ -543,8 +543,8 @@
     window.currentDeliveryStartDate = null;
 
     function displayAlert(message) {
-        console.warn('Alert: ' + message);
         alert(message);
+        console.error(message);
     }
 
     function getDateDifferenceInDays(date1, date2) {

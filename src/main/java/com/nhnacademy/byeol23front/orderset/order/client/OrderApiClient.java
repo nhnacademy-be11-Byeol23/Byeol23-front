@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.nhnacademy.byeol23front.cartset.cart.dto.CartOrderRequest;
 import com.nhnacademy.byeol23front.memberset.member.dto.NonmemberOrderRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderBulkUpdateRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderCancelRequest;
@@ -54,5 +55,8 @@ public interface OrderApiClient {
 
 	@PostMapping("/api/orders/nonmembers/lookup")
 	OrderDetailResponse getNonmemberOrder(@RequestBody NonmemberOrderRequest request);
+
+	@PostMapping("/api/orders/nonmembers")
+	ResponseEntity<Void> saveGuestOrder(@RequestParam("guestId") String guestId, @RequestBody CartOrderRequest orderRequest);
 
 }

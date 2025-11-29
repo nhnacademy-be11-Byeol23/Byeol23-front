@@ -1,6 +1,5 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -18,6 +17,7 @@ import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
+import com.nhnacademy.byeol23front.cartset.cart.dto.CartOrderRequest;
 import com.nhnacademy.byeol23front.memberset.member.dto.NonmemberOrderRequest;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
@@ -56,6 +56,26 @@ public class NonmemberOrderController {
 		
 		return "order/nonmemberCheckout";
 	}
+
+	@GetMapping
+	public String getNonmemberOrderForm(@RequestParam List<Long> bookIds,
+		@RequestParam List<Integer> quantities,
+		Model model) {
+
+		CartOrderRequest cartOrderRequest = orderUtil.createOrderRequest(bookIds, quantities);
+		BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(cartOrderRequest).getBody();
+
+		orderUtil.addDeliveryDatesToModel(model);
+		orderUtil.addDeliveryFeeToModel(model, bookOrderRequest);
+		orderUtil.addOrderSummary(model, bookOrderRequest);
+		orderUtil.addTotalQuantity(model, bookOrderRequest.bookList());
+		orderUtil.addPackagingOption(model);
+
+		model.addAttribute("clientKey", tossClientKey);
+
+		return "order/nonmemberCheckout";
+	}
+
 
 	@GetMapping("/lookup")
 	public String lookUpPage() {

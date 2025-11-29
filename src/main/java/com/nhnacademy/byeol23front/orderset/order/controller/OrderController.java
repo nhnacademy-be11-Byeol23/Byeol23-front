@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -95,14 +96,30 @@ public class OrderController {
 		return "order/checkout";
 	}
 
-	@GetMapping("/carts")
-	public String getOrderFormCart(@CookieValue(name = "Access-Token", required = false) String token,
-		@RequestBody CartOrderRequest cartOrderRequest,
+	@PostMapping
+	@ResponseBody
+	public ResponseEntity<Map<String, String>> handleOrderRequest(@CookieValue(name = "Access-Token", required = false) String token,
+		@CookieValue(name= "guestId", required = false) String guestId,
+		@RequestBody CartOrderRequest orderRequest) {
+
+		if (Objects.isNull(token) || token.isEmpty()) {
+			orderApiClient.saveGuestOrder(guestId, orderRequest);
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
+
+		Map<String, String> responseBody = new HashMap<>();
+		responseBody.put("redirectUrl", "/orders");
+		return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+	}
+
+	@GetMapping
+	public String getOrderForm(@RequestParam List<Long> bookIds,
+		@RequestParam List<Integer> quantities,
 		Model model) {
 
-		//비회원 주문 리다이렉트 시킬 방법 생각해볼 것
-
 		MemberMyPageResponse member = memberApiClient.getMember().getBody();
+
+		CartOrderRequest cartOrderRequest = orderUtil.createOrderRequest(bookIds, quantities);
 		BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(cartOrderRequest).getBody();
 
 		orderUtil.addDeliveryDatesToModel(model);
@@ -119,7 +136,6 @@ public class OrderController {
 
 		return "order/checkout";
 	}
-
 
 	@PostMapping("/prepare")
 	@ResponseBody
@@ -171,5 +187,7 @@ public class OrderController {
 
 		return ResponseEntity.ok(response);
 	}
+
+
 
 }
