@@ -40,10 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 public class MemberController {
 	private final MemberService memberService;
 
-	@Value("${jwt.access-token.prefix}")
-	private String accessCookiePrefix;
-	@Value("${jwt.refresh-token.prefix}")
-	private String refreshCookiePrefix;
 	@Value("${jwt.access-token.expiration}")
 	private Long accessTokenExp;
 	@Value("${jwt.refresh-token.expiration}")
@@ -163,18 +159,16 @@ public class MemberController {
 		String sameSite = "Lax";			//중요: https요청에는 none으로 설정해도 됨, http요청은 secure가 false상태이므로 브라우저에서 none에 대한 쿠키는 거부하여 lax로 설정
 		if(token instanceof RefreshToken) {
 			tokenType = "Refresh-Token";
-			prefix = refreshCookiePrefix;
 			expiration = refreshTokenExp;
-			path = "/refresh";
+			path = "/";
 		} else if (token instanceof AccessToken) {
 			tokenType = "Access-Token";
-			prefix = accessCookiePrefix;
 			expiration = accessTokenExp;
 			path = "/";
 		} else {
 			throw new DecodingFailureException("토큰 에러");
 		}
-		return ResponseCookie.from(tokenType, prefix+token.getValue())
+		return ResponseCookie.from(tokenType, token.getValue())
 				.httpOnly(true)					//XSS
 				.secure(false)					//중요: 실제 배포 환경에선 https요청으로 변경 / secure -> true
 				.sameSite(sameSite)				//CSRF

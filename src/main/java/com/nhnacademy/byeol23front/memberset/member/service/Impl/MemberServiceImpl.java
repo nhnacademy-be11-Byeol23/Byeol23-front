@@ -7,6 +7,7 @@ import com.nhnacademy.byeol23front.memberset.member.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.CookieValue;
 
 @Slf4j
 @Service
@@ -24,7 +25,7 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public LoginResponse login(LoginRequest request) {
-		return memberApiClient.login(request).getBody();
+		return memberApiClient.login(request);
 	}
 
 	@Override
@@ -44,17 +45,22 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public MemberUpdateResponse updateMember(MemberUpdateRequest request) {
-		return null;
+		return memberApiClient.updateMember(request);
 	}
 
 	@Override
 	public MemberPasswordUpdateResponse updateMemberPassword(MemberPasswordUpdateRequest request) {
-		return null;
+		return memberApiClient.updateMemberPassword(request);
 	}
 
 	@Override
 	public void deleteMember() {
+		memberApiClient.deleteMember();
+	}
 
+	@Override
+	public ReAuthenticateResponse reissueAccessToken(String refreshToken) {
+		return memberApiClient.reissueAccessToken(refreshToken);
 	}
 
 }

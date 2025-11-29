@@ -3,6 +3,7 @@ package com.nhnacademy.byeol23front.memberset.member.controller;
 import java.time.Duration;
 import java.util.UUID;
 
+import com.nhnacademy.byeol23front.memberset.member.service.MemberService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -33,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class OAuthController {
 	private final PaycoOAuthService paycoOAuthService;
 	private final MemberApiClient memberApiClient;
+	private final MemberService memberService;
 
 	@GetMapping("/login")
 	public ResponseEntity<Void> redirectToPayco(HttpServletResponse servletResponse) {
@@ -73,7 +75,7 @@ public class OAuthController {
 		// 3. 사용자 정보 조회
 		PaycoUserInfo userInfo = paycoOAuthService.getUserInfo(paycoAccessToken);
 
-		if(memberApiClient.checkId(userInfo.paycoId()).isDuplicated()) {
+		if(memberService.findLoginId(userInfo.paycoId()).isDuplicated()) {
 			SocialLoginRequest request = new SocialLoginRequest(userInfo.paycoId());
 			memberApiClient.socialLogin(request);
 

@@ -1,5 +1,6 @@
 package com.nhnacademy.byeol23front.commons.interceptor;
 
+import org.apache.http.HttpHeaders;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -34,7 +35,7 @@ public class FeignInterceptor {
 					}
 					if ("Access-Token".equals(cookie.getName())) {
 						String tokenValue = cookie.getValue();
-						template.header("Cookie", "Access-Token=" + tokenValue);
+						template.header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenValue);
 					}
                     if ("guestId".equals(cookie.getName())) {
                         String guestId = cookie.getValue();
