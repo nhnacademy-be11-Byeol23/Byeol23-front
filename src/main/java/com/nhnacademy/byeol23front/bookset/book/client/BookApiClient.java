@@ -48,7 +48,7 @@ public interface BookApiClient {
 	@GetMapping("/api/books/list")
 	List<BookResponse> getBooksByIds(@RequestParam("ids") List<Long> bookIds);
 
-	@GetMapping("/api/books/orders")
+	@PostMapping("/api/books/orders")
 	ResponseEntity<BookOrderRequest> getBookOrder(@RequestBody CartOrderRequest cartOrderRequest);
 
 }

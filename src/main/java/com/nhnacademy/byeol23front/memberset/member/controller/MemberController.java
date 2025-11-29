@@ -53,14 +53,19 @@ public class MemberController {
 	}
 
 	@GetMapping("/login")
-	public String showLoginForm(@RequestParam(name = "bookId", required = false) Long bookId,
-		@RequestParam(name = "quantity", required = false) Integer quantity,
+	public String showLoginForm(@RequestParam(required = false) String nonMemberRedirect,
+		@RequestParam(required = false) String memberRedirect,
+		@RequestParam(required = false) List<Long> bookIds,
+		@RequestParam(required = false) List<Integer> quantities,
 		Model model) {
 
-		if (!Objects.isNull(bookId) && !Objects.isNull(quantity)) {
-			model.addAttribute("bookId", bookId);
-			model.addAttribute("quantity", quantity);
+		if (bookIds != null && !bookIds.isEmpty()) {
+			model.addAttribute("bookIds", bookIds);
+			model.addAttribute("quantities", quantities);
 		}
+
+		model.addAttribute("nonMemberRedirect", nonMemberRedirect);
+		model.addAttribute("memberRedirect", memberRedirect);
 
 		return "member/login";
 	}
@@ -78,9 +83,18 @@ public class MemberController {
 			setCookies.forEach(c -> log.info("Upstream Set-Cookie: {}", c));
 		}
 
-		if (!Objects.isNull(tmp.getBookId()) && !Objects.isNull(tmp.getQuantity())) {
-			return String.format("redirect:/orders/direct?bookId=%d&quantity=%d",
-				tmp.getBookId(), tmp.getQuantity());
+		if (tmp.getBookIds() != null && !tmp.getBookIds().isEmpty()) {
+			String baseUrl = tmp.getRedirectUrl() != null ? tmp.getRedirectUrl() : "/orders";
+
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < tmp.getBookIds().size(); i++) {
+				sb.append("&bookIds=").append(tmp.getBookIds().get(i));
+				sb.append("&quantities=").append(tmp.getQuantities().get(i));
+			}
+			String finalRedirectUrl = baseUrl + "?" + sb.substring(1);
+			log.info(finalRedirectUrl);
+
+			return "redirect:" + finalRedirectUrl;
 		}
 
 		return "redirect:/";

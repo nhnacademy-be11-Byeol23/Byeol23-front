@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.springframework.ui.Model;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderInfoResponse;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
+import com.nhnacademy.byeol23front.cartset.cart.dto.CartOrderRequest;
 import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
 import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
@@ -151,5 +153,26 @@ public class OrderUtil {
 		model.addAttribute("packagingTotal", packagingFee);
 		model.addAttribute("appliedFee", appliedFee);
 		model.addAttribute("usedPoint", usedPoints);
+	}
+
+	public CartOrderRequest createOrderRequest(List<Long> bookIds, List<Integer> quantities) {
+		if (bookIds == null || quantities == null || bookIds.size() != quantities.size()) {
+			throw new IllegalArgumentException("도서 ID와 수량 목록의 크기가 일치해야 합니다.");
+		}
+
+		Map<Long, Integer> cartOrderList = new HashMap<>();
+
+		for (int i = 0; i < bookIds.size(); i++) {
+			Long bookId = bookIds.get(i);
+			Integer quantity = quantities.get(i);
+
+			cartOrderList.put(bookId, quantity);
+		}
+
+		return new CartOrderRequest(cartOrderList);
+	}
+
+	public void saveGuestOrder(String guestId, CartOrderRequest orderRequest) {
+
 	}
 }

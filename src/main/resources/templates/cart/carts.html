@@ -14,12 +14,20 @@
             align-items: center;
             gap: 10px;
         }
+
         .cart-info-box {
             display: flex;
             align-items: flex-start;
         }
-        .cart-item { gap: 10px; }
-        .cart-col-info { min-width: 360px; }
+
+        .cart-item {
+            gap: 10px;
+        }
+
+        .cart-col-info {
+            min-width: 360px;
+        }
+
         .cart-img {
             width: 90px;
             height: 120px;
@@ -28,29 +36,50 @@
             flex-shrink: 0;
             margin-right: 15px;
         }
+
         .cart-price-info {
             margin-bottom: 2px;
         }
+
         .price-sale {
             color: #d32f2f;
             font-weight: bold;
             font-size: 15px;
         }
+
         .price-regular {
             text-decoration: line-through;
             color: #777;
             font-size: 14px;
         }
-        .cart-col-qty { width: 150px; justify-content: center; }
-        .cart-col-total { width: 130px; text-align: center; }
-        .cart-col-remove { width: 80px; text-align: center; }
-        .cart-col-order { width: 100px; text-align: center; }
+
+        .cart-col-qty {
+            width: 150px;
+            justify-content: center;
+        }
+
+        .cart-col-total {
+            width: 130px;
+            text-align: center;
+        }
+
+        .cart-col-remove {
+            width: 80px;
+            text-align: center;
+        }
+
+        .cart-col-order {
+            width: 100px;
+            text-align: center;
+        }
+
         .cart-col-qty, .cart-col-total,
         .cart-col-remove, .cart-col-order {
             display: flex;
             justify-content: center;
             align-items: center;
         }
+
         .summary-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -58,6 +87,7 @@
             align-items: center;
             width: 100%;
         }
+
         .qty-btn {
             width: 32px;
             height: 32px;
@@ -65,15 +95,18 @@
             justify-content: center;
             align-items: center;
         }
+
         .qty-input {
             width: 55px;
             text-align: center;
         }
+
         .qty-input::-webkit-inner-spin-button,
         .qty-input::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
+
         .qty-input {
             -moz-appearance: textfield;
         }
@@ -126,7 +159,8 @@
                     </div>
 
                     <div class="cart-info-box">
-                        <img th:src="${item.imageUrl != null ? item.imageUrl : 'https://image.yes24.com/momo/Noimg_L.jpg'}" alt="상품 이미지" class="cart-img">
+                        <img th:src="${item.imageUrl != null ? item.imageUrl : 'https://image.yes24.com/momo/Noimg_L.jpg'}"
+                             alt="상품 이미지" class="cart-img">
 
                         <div class="cart-text ms-3">
                             <div class="cart-title fw-bold mb-1"
@@ -152,7 +186,7 @@
 
                     <div class="cart-col-total fw-bold">
                         <span class="item-total"
-                            th:text="${#numbers.formatInteger(item.salePrice * item.quantity,3,'COMMA')} + '원'">
+                              th:text="${#numbers.formatInteger(item.salePrice * item.quantity,3,'COMMA')} + '원'">
                         </span>
                     </div>
 
@@ -172,7 +206,7 @@
                 </div>
             </div>
             <input type="hidden" id="shipping-threshold" th:value="${shippingCondition.threshold}">
-            <input type="hidden" id="shipping-fee"       th:value="${shippingCondition.shippingFee}">
+            <input type="hidden" id="shipping-fee" th:value="${shippingCondition.shippingFee}">
             <div th:if="${cartBooks != null && !cartBooks.isEmpty()}"
                  class="cart-summary mt-4 p-4 border rounded" id="summary-box">
 
@@ -199,21 +233,26 @@
     </section>
 </main>
 
+<form id="order-form-submit" method="POST" th:action="@{/orders/carts}" style="display:none;">
+    <input type="hidden" name="cartOrderJson" id="cart-order-json-input">
+</form>
+
 <div th:replace="~{fragments/common_footer :: commonFooter}"></div>
 <script>
+
+    const debounceTimers = {};
+
     function updateRowTotal(row, qty) {
         const price = Number(row.dataset.salePrice);
         const total = price * qty;
         row.querySelector(".item-total").textContent = total.toLocaleString() + "원";
     }
 
-    const debounceTimers = {};
-
     function updateQuantity(bookId, quantity) {
         fetch(`/carts/books/${bookId}/update`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ quantity })
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({quantity})
         })
             .then(res => {
                 if (!res.ok) {
@@ -228,7 +267,7 @@
     function deleteCartItem(bookId, row) {
         fetch(`/carts/books/${bookId}/delete`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" }
+            headers: {"Content-Type": "application/json"}
         })
             .then(res => {
                 if (!res.ok) {
@@ -309,68 +348,188 @@
             finalAmount.toLocaleString() + "원";
     }
 
-    document.querySelectorAll(".increase").forEach(btn => {
-        btn.addEventListener("click", function () {
-            const row = this.closest(".cart-item");
-            const input = row.querySelector(".qty-input");
-            const bookId = row.dataset.bookId;
+    document.addEventListener("DOMContentLoaded", () => {
+        // 4-1 수량 증가/감소 및 입력 이벤트
+        document.querySelectorAll(".increase").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const row = this.closest(".cart-item");
+                const input = row.querySelector(".qty-input");
+                const bookId = row.dataset.bookId;
 
-            let qty = Number(input.value);
-            if (qty < 999) qty++;
+                let qty = Number(input.value);
+                if (qty < 999) qty++;
 
-            input.value = qty;
-            updateRowTotal(row, qty);
+                input.value = qty;
+                updateRowTotal(row, qty);
 
-            if (debounceTimers[bookId]) clearTimeout(debounceTimers[bookId]);
-            debounceTimers[bookId] = setTimeout(() => {
-                updateQuantity(bookId, qty);
-            }, 300);
+                if (debounceTimers[bookId]) clearTimeout(debounceTimers[bookId]);
+                debounceTimers[bookId] = setTimeout(() => {
+                    updateQuantity(bookId, qty);
+                }, 300);
 
+                updateSummaryBox();
+            });
+        });
+
+        document.querySelectorAll(".decrease").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const row = this.closest(".cart-item");
+                const input = row.querySelector(".qty-input");
+                const bookId = row.dataset.bookId;
+
+                let qty = Number(input.value);
+                if (qty > 1) qty--;
+
+                input.value = qty;
+                updateRowTotal(row, qty);
+
+                if (debounceTimers[bookId]) clearTimeout(debounceTimers[bookId]);
+                debounceTimers[bookId] = setTimeout(() => {
+                    updateQuantity(bookId, qty);
+                }, 300);
+
+                updateSummaryBox();
+            });
+        });
+
+        // 4.2 삭제 버튼 연결
+        document.querySelectorAll(".remove-btn").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const bookId = this.dataset.bookId;
+                const row = this.closest(".cart-item");
+
+                if (confirm("해당 상품을 장바구니에서 삭제하시겠습니까?")) {
+                    deleteCartItem(bookId, row);
+                }
+            });
+        });
+
+        //4.3 체크 박스 연결
+        document.querySelectorAll(".select-item").forEach(cb => {
+            cb.addEventListener("change", () => {
+                updateSummaryBox();
+            });
+        });
+
+        //4.4 전체 선택 체크 박스 로직 추가
+        document.getElementById("selectAll")?.addEventListener("change", function () {
+            const isChecked = this.checked;
+            document.querySelectorAll(".select-item").forEach(cb => {
+                cb.checked = isChecked;
+            });
             updateSummaryBox();
         });
-    });
+        // 4.5 선택 상품 추가
+        const orderBtn = document.getElementById("order-selected-btn");
+        if (orderBtn) {
+            orderBtn.addEventListener("click", function (e) {
+                e.preventDefault(); // 기본 <a> 태그 동작 방지
+                collectAndOrderSelectedItems();
+            });
+        }
+        updateSummaryBox();
+    })
 
-    document.querySelectorAll(".decrease").forEach(btn => {
-        btn.addEventListener("click", function () {
-            const row = this.closest(".cart-item");
-            const input = row.querySelector(".qty-input");
-            const bookId = row.dataset.bookId;
+    function displayAlert(message) {
+        alert(message);
+        console.error(message);
+    }
+    /**
+     * 선택된 상품 ID와 수량을 수집하여 주문 요청을 보냅니다.
+     */
+    function collectAndOrderSelectedItems() {
+        const cartOrderList = {};
+        const selectedItems = document.querySelectorAll(".cart-item");
 
-            let qty = Number(input.value);
-            if (qty > 1) qty--;
+        let hasSelectedItem = false;
 
-            input.value = qty;
-            updateRowTotal(row, qty);
+        selectedItems.forEach(row => {
+            const checkbox = row.querySelector(".select-item");
+            const qtyInput = row.querySelector(".qty-input");
 
-            if (debounceTimers[bookId]) clearTimeout(debounceTimers[bookId]);
-            debounceTimers[bookId] = setTimeout(() => {
-                updateQuantity(bookId, qty);
-            }, 300);
+            if (checkbox && qtyInput && checkbox.checked) {
+                const bookId = Number(row.dataset.bookId);
+                const quantity = Number(qtyInput.value);
 
-            updateSummaryBox();
-        });
-    });
-
-    document.querySelectorAll(".remove-btn").forEach(btn => {
-        btn.addEventListener("click", function () {
-            const bookId = this.dataset.bookId;
-            const row = this.closest(".cart-item");
-
-            if (confirm("해당 상품을 장바구니에서 삭제하시겠습니까?")) {
-                deleteCartItem(bookId, row);
+                cartOrderList[bookId] = quantity;
+                hasSelectedItem = true;
             }
         });
-    });
 
-    document.querySelectorAll(".select-item").forEach(cb => {
-        cb.addEventListener("change", () => {
-            updateSummaryBox();
-        });
-    });
+        if (!hasSelectedItem) {
+            displayAlert("주문할 상품을 하나 이상 선택해주세요.");
+            return;
+        }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        updateSummaryBox();
-    });
+        // DTO 구조에 맞춰 CartOrderRequest 객체 생성
+        const requestBody = {
+            cartOrderList: cartOrderList
+        };
+
+        fetch("/orders", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(requestBody)
+        })
+            .then(async (res) => {
+                if (res.ok) { // 200 OK: 인증 성공 (회원)
+                    const data = await res.json();
+                    const bookIds = [];
+                    const quantities = [];
+
+                    // cartOrderList 객체에서 bookId와 quantity를 배열로 추출
+                    for (const [bookId, quantity] of Object.entries(cartOrderList)) {
+                        bookIds.push(bookId);
+                        quantities.push(quantity);
+                    }
+
+                    // --- 2. 쿼리 파라미터 생성 ---
+                    const params = new URLSearchParams();
+                    bookIds.forEach(id => params.append('bookIds', id));
+                    quantities.forEach(qty => params.append('quantities', qty));
+
+                    const baseUrl = data.redirectUrl || "/orders";
+
+                    const getUrl = `${baseUrl}?${params.toString()}`;
+
+                    console.log("최종 Checkout URL:", getUrl);
+                    window.location.href = getUrl; // GET 요청 실행
+
+                } else if (res.status === 401) { // 401 UNAUTHORIZED: 인증 실패 (비회원)
+                    displayAlert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
+
+                    const bookIds = [];
+                    const quantities = [];
+
+                    for (const [bookId, quantity] of Object.entries(cartOrderList)) {
+                        bookIds.push(bookId);
+                        quantities.push(quantity);
+                    }
+
+                    const params = new URLSearchParams();
+                    bookIds.forEach(id => params.append('bookIds', id));
+                    quantities.forEach(qty => params.append('quantities', qty));
+                    const itemParams = params.toString(); // "bookIds=1&bookIds=2&quantities=5&quantities=1"
+
+                    const nonMemberOrderBaseUrl = "/orders/nonmember";
+
+                    const redirectUrl = encodeURIComponent(nonMemberOrderBaseUrl);
+                    const memberOrderUrl = encodeURIComponent("/orders");
+
+                    window.location.href = `/members/login?nonMemberRedirect=${redirectUrl}&memberRedirect=${memberOrderUrl}&${itemParams}`;
+                } else {
+                    // 기타 서버 오류 (400, 500 등)
+                    // JSON 응답을 시도하고 실패하면 일반 메시지를 표시합니다.
+                    return res.json()
+                        .then(err => {
+                            throw new Error(err.message || "주문 검증 중 서버 오류가 발생했습니다.");
+                        })
+                        .catch(() => {
+                            throw new Error("알 수 없는 서버 오류가 발생했습니다.");
+                        });
+                }
+            });
+    }
 </script>
 </body>
 </html>
