@@ -417,8 +417,8 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <form id="reviewForm" th:action="@{/reviews}" method="post" enctype="multipart/form-data">
-                    <!-- CSRF 토큰 (필요 시 fetch 요청에 헤더로 포함) -->
-                    <input type="hidden" id="csrfToken" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+<!--                    &lt;!&ndash; CSRF 토큰 (필요 시 fetch 요청에 헤더로 포함) &ndash;&gt;-->
+<!--                    <input type="hidden" id="csrfToken" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />-->
                      <div class="modal-header">
                          <h5 class="modal-title" id="reviewModalLabel">리뷰 작성</h5>
                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
