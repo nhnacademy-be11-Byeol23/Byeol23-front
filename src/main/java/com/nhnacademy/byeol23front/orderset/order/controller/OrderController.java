@@ -13,7 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,13 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.cartset.cart.dto.CartOrderRequest;
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 import com.nhnacademy.byeol23front.memberset.member.dto.MemberMyPageResponse;
-import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderCancelRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderCancelResponse;
@@ -52,49 +48,6 @@ public class OrderController {
 
 	@Value("${tossPayment.client-key}")
 	private String tossClientKey;
-
-	@PostMapping("/direct")
-	@ResponseBody
-	public ResponseEntity<Void> handleDirectOrder(@CookieValue(name = "Access-Token", required = false) String token) {
-
-		if (Objects.isNull(token)) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-		}
-
-		return ResponseEntity.status(HttpStatus.OK).build();
-	}
-
-	@GetMapping("/direct")
-	public String getOrderFormDirect(@RequestParam Long bookId, @RequestParam int quantity, Model model) {
-
-		BookResponse book = bookApiClient.getBook(bookId).getBody();
-		MemberMyPageResponse member = memberApiClient.getMember().getBody();
-
-		String firstImageUrl = (book.images() != null && !book.images().isEmpty())
-			? book.images().getFirst().imageUrl()
-			: "https://image.yes24.com/momo/Noimg_L.jpg";
-
-		List<BookInfoRequest> bookOrderInfo = List.of(new BookInfoRequest(bookId, book.bookName(),
-			firstImageUrl, book.isPack(), book.regularPrice(), book.salePrice(), book.publisher(), quantity,
-			book.contributors(),
-			null));
-
-		BookOrderRequest request = new BookOrderRequest(bookOrderInfo);
-
-		orderUtil.addTotalQuantity(model, request.bookList());
-		orderUtil.addDeliveryDatesToModel(model);
-		orderUtil.addOrderSummary(model, request);
-		orderUtil.addDeliveryFeeToModel(model, request);
-		orderUtil.addPackagingOption(model);
-
-		model.addAttribute("defaultAddress", member.address());
-
-		model.addAttribute("userPoint", member.currentPoint());
-
-		model.addAttribute("clientKey", tossClientKey);
-
-		return "order/checkout";
-	}
 
 	@PostMapping
 	@ResponseBody
