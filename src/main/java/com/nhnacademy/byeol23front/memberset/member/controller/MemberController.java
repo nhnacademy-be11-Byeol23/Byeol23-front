@@ -53,7 +53,8 @@ public class MemberController {
 	}
 
 	@GetMapping("/login")
-	public String showLoginForm(@RequestParam(required = false) String nonMemberRedirect,
+	public String showLoginForm(
+		@RequestParam(required = false) String nonMemberRedirect,
 		@RequestParam(required = false) String memberRedirect,
 		@RequestParam(required = false) List<Long> bookIds,
 		@RequestParam(required = false) List<Integer> quantities,

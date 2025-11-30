@@ -337,161 +337,186 @@
 <script th:src="@{/assets/js/main.js}"></script>
 
 <script th:inline="javascript">
+  function displayAlert(message) {
+    alert(message);
+    console.error(message);
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
+
+    // --- 핵심 요소 정의 ---
+    const purchaseSection = document.querySelector(".purchase-section");
+    if (!purchaseSection) return; // 필수 요소가 없으면 실행 중단
+
+    // Thymeleaf 변수를 JavaScript로 가져오기 (bookId는 필수)
+    const bookId = /*[[${book.bookId}]]*/ null;
+    if (!bookId) {
+      console.error("Book ID is null. Cannot proceed with purchase logic.");
+      return;
+    }
+
+    const qtyInput = purchaseSection.querySelector(".quantity-input");
+    const maxStock = Number(qtyInput?.max) || 999;
+    const minQuantity = Number(qtyInput?.min) || 1;
+
+
+    // =========================================================
+    // A. 수량 조절 및 입력 검사
+    // =========================================================
+
+    // 수량 증가/감소 핸들러
+    const updateQuantityHandler = (type) => {
+      if (!qtyInput) return;
+      let value = parseInt(qtyInput.value, 10);
+
+      if (type === 'increase' && value < maxStock) {
+        value++;
+      } else if (type === 'decrease' && value > minQuantity) {
+        value--;
+      }
+      qtyInput.value = value;
+    };
+
+    // 수량 입력 필드 유효성 검사 (keydown, input, blur 로직)
+    // ... (이전에 제공된 유효성 검사 로직을 여기에 통합) ...
+    qtyInput.addEventListener("keydown", event => {
+      if (["e", "E", "-", "+"].includes(event.key)) event.preventDefault();
+    });
+    qtyInput.addEventListener("input", event => {
+      let value = qtyInput.value.replace(/[^0-9]/g, "");
+      let num = Number(value);
+      if (num < minQuantity) num = minQuantity;
+      if (num > maxStock) num = maxStock;
+      qtyInput.value = num;
+    });
+    qtyInput.addEventListener("blur", () => {
+      if (!qtyInput.value || isNaN(qtyInput.value)) qtyInput.value = minQuantity;
+    });
+
+
+    // =========================================================
+    // B. 바로 구매 (Buy Now) 로직 (인증 체크 후 리다이렉트)
+    // =========================================================
+
     const buyNowButton = document.getElementById('buy-now-btn');
 
     if (buyNowButton) {
       buyNowButton.addEventListener('click', () => {
-        console.log("바로 구매 버튼 클릭");
+        const quantity = parseInt(qtyInput.value, 10);
+        if (quantity < minQuantity || quantity > maxStock) {
+          alert(`수량은 ${minQuantity}권 이상, ${maxStock}권 이하로 설정해주세요.`);
+          return;
+        }
 
-        const bookId = /*[[${book.bookId}]]*/ 1;
-        const quantityInput = document.querySelector('.quantity-input');
-        const quantity = quantityInput ? quantityInput.value : 1;
-        const directUrl = '/orders/direct';
+        const cartOrderList = { [bookId]: quantity };
+        const requestBody = { cartOrderList: cartOrderList };
 
-        fetch(directUrl, {
-          method: 'POST'
+        // 1. POST 요청 (인증 검증)
+        fetch("/orders", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(requestBody)
         })
-        .then(response => {
+                .then(async (res) => {
+                  // 2. 서버 응답 확인
+                  if (res.ok) { // 200 OK: 인증 성공 (회원)
+                    const data = await res.json();
+                    const bookIds = [];
+                    const quantities = [];
 
-            if (response.status === 401) {
-              // 1. (POST) 컨트롤러가 401(Unauthorized)을 반환한 경우
-              alert("로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.");
-              window.location.href = `/members/login?bookId=${bookId}&quantity=${quantity}`;
-            } else if( response.status === 200) {
-              const successRedirectUrl = `${directUrl}?bookId=${bookId}&quantity=${quantity}`;
-              window.location.href = successRedirectUrl;
-            }
-            else {
-              // 2. 기타 404, 500 에러
-              alert('주문 페이지로 이동하는 데 실패했습니다.');
-            }
+                    for (const [bookId, quantity] of Object.entries(cartOrderList)) {
+                      bookIds.push(bookId);
+                      quantities.push(quantity);
+                    }
 
-        })
-        .catch(error => {
-          console.error('Error: ', error);
+                    // 3. GET URL 구성 및 이동
+                    const params = new URLSearchParams();
+                    bookIds.forEach(id => params.append('bookIds', id));
+                    quantities.forEach(qty => params.append('quantities', qty));
+
+                    const baseUrl = data.redirectUrl || "/orders";
+
+                    const getUrl = `${baseUrl}?${params.toString()}`;
+
+                    console.log("최종 Checkout URL:", getUrl);
+                    window.location.href = getUrl; // GET 요청 실행
+
+                  } else if (res.status === 401) { // 401 UNAUTHORIZED: 인증 실패 (비회원)
+                    alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
+
+                    const bookIds = [];
+                    const quantities = [];
+
+                    for (const [bookId, quantity] of Object.entries(cartOrderList)) {
+                      bookIds.push(bookId);
+                      quantities.push(quantity);
+                    }
+
+                    const params = new URLSearchParams();
+                    bookIds.forEach(id => params.append('bookIds', id));
+                    quantities.forEach(qty => params.append('quantities', qty));
+                    const itemParams = params.toString();
+
+                    const nonMemberOrderBaseUrl = "/orders/nonmember";
+
+                    const redirectUrl = encodeURIComponent(nonMemberOrderBaseUrl);
+                    const memberOrderUrl = encodeURIComponent("/orders");
+
+                    window.location.href = `/members/login?nonMemberRedirect=${redirectUrl}&memberRedirect=${memberOrderUrl}&${itemParams}`;
+                  } else {
+
+                    // 기타 서버 오류 (400, 500 등)
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.message || "주문 검증 중 서버 오류가 발생했습니다.");
+                  }
+                })
+                .catch(error => {
+                  console.error('Error: ', error);
+                  alert('요청 처리 중 오류가 발생했습니다.');
+                });
+      });
+    }
+
+    const mainImage = document.getElementById('main-product-image');
+    const thumbnails = document.querySelectorAll('.thumbnail-item');
+    if (mainImage && thumbnails.length > 0) {
+      thumbnails.forEach(thumb => {
+        thumb.addEventListener('click', function() {
+          mainImage.src = this.dataset.fullSrc;
+          thumbnails.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
         });
       });
     }
-  });
 
-  // 1. DOMContentLoaded 이벤트 리스너
-  document.addEventListener('DOMContentLoaded', () => {
+    const addToCartBtn = document.querySelector(".add-to-cart-btn");
+    if (addToCartBtn) {
+      addToCartBtn.addEventListener("click", async () => {
+        const quantity = Number(qtyInput.value);
+        const payload = { bookId: Number(bookId), quantity: quantity };
 
-    // 2. 핵심 요소 찾기
-    const mainImage = document.getElementById('main-product-image');
-    const thumbnails = document.querySelectorAll('.thumbnail-item');
+        try {
+          const res = await fetch("/carts/books", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
 
-    // 3. 예외 처리 (가드 클로즈)
-    if (!mainImage || thumbnails.length === 0) {
-      return;
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            alert(body.message || "장바구니 담기 실패");
+            return;
+          }
+
+          alert("상품이 장바구니에 담겼습니다.");
+
+        } catch (err) {
+          console.error(err);
+          alert("장바구니 처리 중 오류 발생");
+        }
+      });
     }
 
-    // 4. 썸네일에 클릭 이벤트 '등록' (forEach 루프)
-    thumbnails.forEach(thumb => {
-
-      // 5. 클릭 이벤트 '발생' 시 실행될 함수
-      thumb.addEventListener('click', function() { // 'this'를 사용하기 위해 화살표 함수( => ) 대신 function() 사용
-
-        // 6. 클릭된 썸네일에서 큰 이미지 URL 가져오기
-        const newSrc = this.dataset.fullSrc;
-
-        // 7. 메인 이미지 변경
-        mainImage.src = newSrc;
-
-        // 8. (선택) 'active' 클래스 관리 (시각적 피드백)
-        thumbnails.forEach(t => t.classList.remove('active'));
-        this.classList.add('active');
-      });
-    });
-  });
-
-  document.addEventListener("DOMContentLoaded", () => {
-
-      const qtyInput = document.querySelector(".quantity-input");
-      if (!qtyInput) return;
-
-      const min = Number(qtyInput.min) || 1;
-      const max = Number(qtyInput.max) || 999;
-
-      qtyInput.addEventListener("keydown", event => {
-          if (["e", "E", "-", "+"].includes(event.key)) {
-              event.preventDefault();
-          }
-      });
-
-      qtyInput.addEventListener("input", event => {
-          let value = qtyInput.value;
-
-          if (value === "") return;
-
-          value = value.replace(/[^0-9]/g, "");
-          let num = Number(value);
-
-          if (num < min) num = min;
-          if (num > max) num = max;
-
-          qtyInput.value = num;
-      });
-
-      qtyInput.addEventListener("blur", () => {
-          if (!qtyInput.value || isNaN(qtyInput.value)) {
-              qtyInput.value = min;
-          }
-      });
-
-      document.querySelector(".quantity-btn.increase")?.addEventListener("click", () => {
-          let value = Number(qtyInput.value);
-          if (value < max) value++;
-          qtyInput.value = value;
-      });
-
-      document.querySelector(".quantity-btn.decrease")?.addEventListener("click", () => {
-          let value = Number(qtyInput.value);
-          if (value > min) value--;
-          qtyInput.value = value;
-      });
-
-  });
-
-  document.addEventListener("DOMContentLoaded", () => {
-
-      const addToCartBtn = document.querySelector(".add-to-cart-btn");
-      const purchaseSection = document.querySelector(".purchase-section");
-
-      if (!addToCartBtn || !purchaseSection) return;
-
-      const bookId = purchaseSection.dataset.bookId;
-      const qtyInput = purchaseSection.querySelector(".quantity-input");
-
-      addToCartBtn.addEventListener("click", async () => {
-          const quantity = Number(qtyInput.value);
-
-          const payload = {
-              bookId: Number(bookId),
-              quantity: quantity
-          };
-
-          try {
-              const res = await fetch("/carts/books", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(payload)
-              });
-
-              if (!res.ok) {
-                  const body = await res.json().catch(() => ({}));
-                  alert(body.message || "장바구니 담기 실패");
-                  return;
-              }
-
-              alert("상품이 장바구니에 담겼습니다.");
-
-          } catch (err) {
-              console.error(err);
-              alert("장바구니 처리 중 오류 발생");
-          }
-      });
   });
 
   // 위시리스트 버튼 클릭 이벤트
