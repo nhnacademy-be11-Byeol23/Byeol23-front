@@ -6,5 +6,6 @@ public record ReviewRegisterRequest(
 	String reviewContent,
 	Byte reviewRate,
 	String orderNumber,
-	Long bookId
+	Long bookId,
+	Boolean withImage
 ) {}
