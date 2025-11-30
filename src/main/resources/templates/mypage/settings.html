@@ -334,8 +334,8 @@
             const birthDate = document.getElementById("birthDate").value;
 
 
-            fetch("/members", {
-                method: "PUT",
+            fetch("/members/put", {
+                method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
                     memberName: name,
@@ -361,8 +361,8 @@
                 return;
             }
 
-            fetch("/members/password", {
-                method: "PUT",
+            fetch("/members/password/put", {
+                method: "POST",
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
                     currentPassword: currentPassword,
@@ -383,8 +383,8 @@
         }
 
         function deleteAccount(){
-            fetch("/members", {
-                method: "DELETE"
+            fetch("/members/delete", {
+                method: "POST"
             })
                 .then(res => {
                     if (res.status === 204){

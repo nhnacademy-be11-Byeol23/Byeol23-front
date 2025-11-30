@@ -109,19 +109,19 @@ public class MemberController {
 				.build().toString();
 	}
 
-	@PutMapping
+	@PostMapping("/put")
 	@ResponseBody
 	public ResponseEntity<MemberUpdateResponse> updateMember(@RequestBody MemberUpdateRequest req){
 		return memberApiClient.updateMember(req);
 	}
 
-	@PutMapping("/password")
+	@PostMapping("/put/password")
 	@ResponseBody
 	public ResponseEntity<MemberPasswordUpdateResponse> updatePassword(@RequestBody MemberPasswordUpdateRequest req){
 		return memberApiClient.updateMemberPassword(req);
 	}
 
-	@DeleteMapping
+	@PostMapping("/delete")
 	@ResponseBody
 	public ResponseEntity<Void> deleteMember(){
 		return memberApiClient.deleteMember();

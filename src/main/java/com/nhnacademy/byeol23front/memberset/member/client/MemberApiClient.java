@@ -33,16 +33,16 @@ public interface MemberApiClient {
 	@GetMapping("/api/members")
 	ResponseEntity<MemberMyPageResponse> getMember();
 
-	@PutMapping("/api/members")
+	@PostMapping("/api/members/put")
 	ResponseEntity<MemberUpdateResponse> updateMember(@RequestBody MemberUpdateRequest request);
 
-	@PutMapping("/api/members/password")
+	@PostMapping("/api/members/put/password")
 	ResponseEntity<MemberPasswordUpdateResponse> updateMemberPassword(@RequestBody MemberPasswordUpdateRequest request);
 
 	@PutMapping("api/members/reactivate")
 	ResponseEntity<Void> reactivateMember(@RequestBody MemberPasswordUpdateRequest request);
 
-	@DeleteMapping("/api/members")
+	@PostMapping("/api/members/delete")
 	ResponseEntity<Void> deleteMember();
 
 	@GetMapping("/api/members/check-id")
