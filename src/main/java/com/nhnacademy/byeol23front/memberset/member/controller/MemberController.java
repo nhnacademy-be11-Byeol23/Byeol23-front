@@ -4,8 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.nhnacademy.byeol23front.memberset.addresses.client.AddressApiClient;
+import com.nhnacademy.byeol23front.memberset.addresses.dto.AddressResponse;
 import com.nhnacademy.byeol23front.memberset.member.dto.*;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -33,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MemberController {
 	private final MemberApiClient memberApiClient;
+	private final AddressApiClient addressApiClient;
 
 	@GetMapping("/register")
 	public String showRegisterForm() {
@@ -126,4 +130,12 @@ public class MemberController {
 	public ResponseEntity<Void> deleteMember(){
 		return memberApiClient.deleteMember();
 	}
+
+	@GetMapping("/me/addresses")
+	@ResponseBody
+	public ResponseEntity<List<AddressResponse>> getMemberAddresses() {
+		ResponseEntity<List<AddressResponse>> responses = addressApiClient.getAddresses();
+		return ResponseEntity.status(responses.getStatusCode()).body(responses.getBody());
+	}
+
 }
