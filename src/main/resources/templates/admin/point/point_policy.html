@@ -59,7 +59,7 @@
                                             <!-- thymeleaf로 ReservedPolicy 목록 제공 -->
                                             <option th:each="t : ${reservedPolicies}"
                                                     th:value="${t}"
-                                                    th:text="${t}"></option>
+                                                    th:text="${t.description}"></option>
                                         </select>
                                     </div>
 
@@ -154,7 +154,20 @@
 <script>
     const API_BASE = '/api/front/point-policies';
 
+    // ReservedPolicy 이름 -> description 매핑을 동적으로 생성
+    const RESERVED_POLICY_DESCRIPTIONS = {};
+
     document.addEventListener('DOMContentLoaded', () => {
+        // #typeSelect의 option들을 읽어 매핑 생성 (서버에서 제공한 reservedPolicies의 description 사용)
+        const typeSelect = document.getElementById('typeSelect');
+        if (typeSelect) {
+            Array.from(typeSelect.options).forEach(opt => {
+                if (opt.value) {
+                    RESERVED_POLICY_DESCRIPTIONS[opt.value] = opt.textContent;
+                }
+            });
+        }
+
         loadPolicies();
 
         document.getElementById('createPolicyForm').addEventListener('submit', (e) => {
@@ -265,10 +278,11 @@
             const groupDiv = document.createElement('div');
             groupDiv.className = 'mb-4';
 
-            // 제목: ReservedPolicy key 와 description 둘 다 나오도록
+            // 제목: ReservedPolicy description 으로 표시(없으면 key 그대로)
             const title = document.createElement('h6');
             title.className = 'fw-semibold';
-            title.textContent = key;
+            const desc = RESERVED_POLICY_DESCRIPTIONS[key] || key;
+            title.textContent = desc;
             groupDiv.appendChild(title);
 
             // 목록 (ol 사용)
