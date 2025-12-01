@@ -86,7 +86,7 @@ public class FeignExceptionDecoder implements ErrorDecoder {
 			return new ContributorAlreadyExistsException(message, errorResponse.timestamp());
 		}
 
-		return defaultDecoder.decode(methodKey, response);
+		return new DefaultException("Default exception");
 	}
 
 //	private LoginResponse refreshAccessToken() {

@@ -40,14 +40,29 @@
 
       <div class="hero-visuals">
         <div class="book-cards-stack" data-aos="fade-left" data-aos-delay="200">
-          <div class="book-card card-1" data-aos="zoom-in" data-aos-delay="300">
-            <img src="https://image.yes24.com/goods/136734901/XL" alt="돈의 심리학">
+          <div class="book-card card-1" data-aos="zoom-in" data-aos-delay="300"
+               th:if="${top3Books != null && !top3Books.isEmpty()}">
+            <a th:href="|/books/${top3Books[0].id()}|">
+              <img th:src="${(!#strings.isEmpty(top3Books[0].imageUrl())) ? top3Books[0].imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}" 
+                   th:alt="${top3Books[0].title()}"
+                   onerror="this.src='https://image.yes24.com/momo/Noimg_L.jpg'; this.onerror=null;">
+            </a>
           </div>
-          <div class="book-card card-2" data-aos="zoom-in" data-aos-delay="400">
-            <img src="https://image.yes24.com/goods/153497469/XL" alt="절창">
+          <div class="book-card card-2" data-aos="zoom-in" data-aos-delay="400"
+               th:if="${top3Books != null && top3Books.size() > 1}">
+            <a th:href="|/books/${top3Books[1].id()}|">
+              <img th:src="${(!#strings.isEmpty(top3Books[1].imageUrl())) ? top3Books[1].imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}" 
+                   th:alt="${top3Books[1].title()}"
+                   onerror="this.src='https://image.yes24.com/momo/Noimg_L.jpg'; this.onerror=null;">
+            </a>
           </div>
-          <div class="book-card card-3" data-aos="zoom-in" data-aos-delay="500">
-            <img src="https://image.yes24.com/goods/160408776/XL" alt="대형주 추세추종 투자법칙">
+          <div class="book-card card-3" data-aos="zoom-in" data-aos-delay="500"
+               th:if="${top3Books != null && top3Books.size() > 2}">
+            <a th:href="|/books/${top3Books[2].id()}|">
+              <img th:src="${(!#strings.isEmpty(top3Books[2].imageUrl())) ? top3Books[2].imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}" 
+                   th:alt="${top3Books[2].title()}"
+                   onerror="this.src='https://image.yes24.com/momo/Noimg_L.jpg'; this.onerror=null;">
+            </a>
           </div>
         </div>
       </div>
@@ -69,7 +84,7 @@
               <span class="category-tag">지금 인기</span>
               <h2>이달의 베스트셀러</h2>
               <p>가장 많은 독자들이 선택한 베스트셀러를 만나보세요. 소설부터 자기계발서까지 다양한 장르의 추천 도서를 한눈에 확인하세요.</p>
-              <a href="#" class="btn-shop">베스트셀러 보기 <i class="bi bi-arrow-right"></i></a>
+              <a href="/best" class="btn-shop">베스트셀러 보기 <i class="bi bi-arrow-right"></i></a>
             </div>
           </div>
         </div>
@@ -151,12 +166,17 @@
 
       <div class="row g-5">
 
-        <!-- Product 1 -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-          <div class="product-item" data-book-id="1">
+        <!-- 베스트 도서 목록 -->
+        <div th:each="book : ${bestBooks}" class="col-lg-2 col-md-4 col-sm-6"
+             th:with="bookId=${book.id()}">
+          <div class="product-item" th:attr="data-book-id=${book.id()}">
             <div class="product-image">
-              <a href="/books/1">
-                <img src="https://image.yes24.com/goods/160408776/XL" alt="Product Image" class="img-fluid" loading="lazy">
+              <a th:href="|/books/${bookId}|">
+                <img th:src="${(!#strings.isEmpty(book.imageUrl())) ? book.imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}" 
+                     alt="Product Image" 
+                     class="img-fluid" 
+                     loading="lazy"
+                     onerror="this.src='https://image.yes24.com/momo/Noimg_L.jpg'; this.onerror=null;">
               </a>
               <div class="product-actions">
                 <button class="action-btn wishlist-btn">
@@ -165,289 +185,21 @@
               </div>
             </div>
             <div class="product-info">
-              <div class="product-category">이종호 저 | 사피엔테스</div>
-              <h4 class="product-name"><a href="/books/1">대형주 추세추종 투자법칙</a></h4>
+              <div class="product-category" th:text="${#strings.arrayJoin(book.author(), ', ')} + ' | ' + ${book.publisher()}"></div>
+              <h4 class="product-name">
+                <a th:href="|/books/${bookId}|" th:text="${book.title()}"></a>
+              </h4>
               <div class="product-price">
-                <span class="old-price">32,000원</span>
-                <span class="current-price">28,000원</span>
+                <span th:if="${book.regularPrice() != book.salePrice()}" 
+                      class="old-price" 
+                      th:text="${#numbers.formatInteger(book.regularPrice(), 3, 'COMMA')} + '원'"></span>
+                <span class="current-price" 
+                      th:text="${#numbers.formatInteger(book.salePrice(), 3, 'COMMA')} + '원'"></span>
               </div>
             </div>
           </div>
         </div>
-        <!-- End Product 1 -->
-
-        <!-- Product 2 -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-          <div class="product-item" data-book-id="2">
-            <div class="product-image">
-              <a href="/books/2">
-                <img src="https://image.yes24.com/goods/160614569/XL" alt="Product Image" class="img-fluid" loading="lazy">
-              </a>
-              <div class="product-actions">
-                <button class="action-btn wishlist-btn">
-                  <i class="bi bi-heart"></i>
-                </button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-category">플스포 저 | 알에이치코리아</div>
-              <h4 class="product-name"><a href="/books/2">플스포의 메타인지 투자법</a></h4>
-              <div class="product-price">
-                <span class="old-price">25,000원</span>
-                <span class="current-price">22,500원</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End Product 2 -->
-
-        <!-- Product 3 -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-          <div class="product-item" data-book-id="3">
-            <div class="product-image">
-              <a href="/books/3">
-                <img src="https://image.yes24.com/goods/142972546/XL" alt="Product Image" class="img-fluid" loading="lazy">
-              </a>
-              <div class="product-actions">
-                <button class="action-btn wishlist-btn">
-                  <i class="bi bi-heart"></i>
-                </button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-category">프리드리히 니체 | 떠오름</div>
-              <h4 class="product-name"><a href="/books/3">위버멘쉬</a></h4>
-              <div class="product-price">
-                <span class="old-price">16,020원</span>
-                <span class="current-price">14,520원</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End Product 3 -->
-
-        <!-- Product 4 -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-          <div class="product-item" data-book-id="4">
-            <div class="product-image">
-              <a href="/books/4">
-                <img src="https://image.yes24.com/goods/153908443/XL" alt="Product Image" class="img-fluid" loading="lazy">
-              </a>
-              <div class="product-actions">
-                <button class="action-btn wishlist-btn">
-                  <i class="bi bi-heart"></i>
-                </button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-category">채은미 저 | 북플레저</div>
-              <h4 class="product-name"><a href="/books/4">처음 만나는 양자의 세계</a></h4>
-              <div class="product-price">
-                <span class="old-price">17,100원</span>
-                <span class="current-price">15,600원</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End Product 4 -->
-
-        <!-- Product 5 -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-          <div class="product-item" data-book-id="5">
-            <div class="product-image">
-              <a href="/books/5">
-                <img src="https://image.yes24.com/goods/161535941/XL" alt="Product Image" class="img-fluid" loading="lazy">
-              </a>
-              <div class="product-actions">
-                <button class="action-btn wishlist-btn">
-                  <i class="bi bi-heart"></i>
-                </button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-category">박두환 저 | 애덤스미스</div>
-              <h4 class="product-name"><a href="/books/5">주식 투자의 뿌리</a></h4>
-              <div class="product-price">
-                <span class="old-price">22,000원</span>
-                <span class="current-price">19,800원</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End Product 5 -->
-
-        <!-- Product 6 -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-          <div class="product-item" data-book-id="6">
-            <div class="product-image">
-              <a href="/books/6">
-                <img src="https://image.yes24.com/goods/153497469/XL" alt="Product Image" class="img-fluid" loading="lazy">
-              </a>
-              <div class="product-actions">
-                <button class="action-btn wishlist-btn">
-                  <i class="bi bi-heart"></i>
-                </button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-category">구병모 저 | 문학동네</div>
-              <h4 class="product-name"><a href="/books/6">절창 切創</a></h4>
-              <div class="product-price">
-                <span class="old-price">18,000원</span>
-                <span class="current-price">16,200원</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End Product 6 -->
-
-        <!-- Product 7 -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-          <div class="product-item" data-book-id="7">
-            <div class="product-image">
-              <a href="/books/7">
-                <img src="https://image.yes24.com/goods/159574278/XL" alt="Product Image" class="img-fluid" loading="lazy">
-              </a>
-              <div class="product-actions">
-                <button class="action-btn wishlist-btn">
-                  <i class="bi bi-heart"></i>
-                </button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-category">시나공 저 | 길벗</div>
-              <h4 class="product-name"><a href="/books/7">정보처리기사 필기 기본서</a></h4>
-              <div class="product-price">
-                <span class="old-price">35,000원</span>
-                <span class="current-price">31,500원</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End Product 7 -->
-
-        <!-- Product 8 -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-          <div class="product-item" data-book-id="8">
-            <div class="product-image">
-              <a href="/books/8">
-                <img src="https://image.yes24.com/goods/118397512/XL" alt="Product Image" class="img-fluid" loading="lazy">
-              </a>
-              <div class="product-actions">
-                <button class="action-btn wishlist-btn">
-                  <i class="bi bi-heart"></i>
-                </button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-category">김홍석 저 | 문학동네</div>
-              <h4 class="product-name"><a href="/books/8">누군가 나에게 푹</a></h4>
-              <div class="product-price">
-                <span class="current-price">15,300원</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End Product 8 -->
-
-        <!-- Product 9 -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-          <div class="product-item" data-book-id="9">
-            <div class="product-image">
-              <a href="/books/9">
-                <img src="https://image.yes24.com/goods/147178677/XL" alt="Product Image" class="img-fluid" loading="lazy">
-              </a>
-              <div class="product-actions">
-                <button class="action-btn wishlist-btn">
-                  <i class="bi bi-heart"></i>
-                </button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-category">나민애 저 | 포레스트북스</div>
-              <h4 class="product-name"><a href="/books/9">단 한 줄만 내 마음에 새긴다고 해도</a></h4>
-              <div class="product-price">
-                <span class="old-price">9,000원</span>
-                <span class="current-price">8,100원</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End Product 9 -->
-
-        <!-- Product 10 -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-          <div class="product-item" data-book-id="10">
-            <div class="product-image">
-              <a href="/books/10">
-                <img src="https://image.yes24.com/goods/136734901/XL" alt="Product Image" class="img-fluid" loading="lazy">
-              </a>
-              <div class="product-actions">
-                <button class="action-btn wishlist-btn">
-                  <i class="bi bi-heart"></i>
-                </button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-category">모건 하우절 저 | 인플루엔셜</div>
-              <h4 class="product-name"><a href="/books/10">돈의 심리학</a></h4>
-              <div class="product-price">
-                <span class="old-price">20,000원</span>
-                <span class="current-price">18,000원</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End Product 10 -->
-
-        <!-- Product 11 -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-          <div class="product-item" data-book-id="11">
-            <div class="product-image">
-              <a href="/books/11">
-                <img src="https://image.yes24.com/goods/96547408/XL" alt="Product Image" class="img-fluid" loading="lazy">
-              </a>
-              <div class="product-actions">
-                <button class="action-btn wishlist-btn">
-                  <i class="bi bi-heart"></i>
-                </button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-category">히가시노 게이고 저 | 재인</div>
-              <h4 class="product-name"><a href="/books/11">용의자 X의 헌신</a></h4>
-              <div class="product-price">
-                <span class="current-price">14,400원</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End Product 11 -->
-
-        <!-- Product 12 -->
-        <div class="col-lg-2 col-md-4 col-sm-6">
-          <div class="product-item" data-book-id="12">
-            <div class="product-image">
-              <a href="/books/12">
-                <img src="https://image.yes24.com/goods/128766364/XL" alt="Product Image" class="img-fluid" loading="lazy">
-              </a>
-              <div class="product-actions">
-                <button class="action-btn wishlist-btn">
-                  <i class="bi bi-heart"></i>
-                </button>
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-category">해커스 공무원학습연구소 | 해커스공무원</div>
-              <h4 class="product-name"><a href="/books/12">해커스 공무원 한국사</a></h4>
-              <div class="product-price">
-                <span class="old-price">39,000원</span>
-                <span class="current-price">35,100원</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- End Product 12 -->
+        <!-- End 베스트 도서 목록 -->
 
       </div>
 

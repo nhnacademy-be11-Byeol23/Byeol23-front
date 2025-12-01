@@ -129,21 +129,21 @@ public class MemberController {
 				.build().toString();
 	}
 
-	@PutMapping
+	@PostMapping("/put")
 	@ResponseBody
 	public ResponseEntity<MemberUpdateResponse> updateMember(@RequestBody MemberUpdateRequest request){
 		MemberUpdateResponse response = memberService.updateMember(request);
 		return ResponseEntity.ok().body(response);
 	}
 
-	@PutMapping("/password")
+	@PostMapping("/put/password")
 	@ResponseBody
 	public ResponseEntity<MemberPasswordUpdateResponse> updatePassword(@RequestBody MemberPasswordUpdateRequest request){
 		MemberPasswordUpdateResponse response = memberService.updateMemberPassword(request);
 		return ResponseEntity.ok().body(response);
 	}
 
-	@DeleteMapping
+	@PostMapping("/delete")
 	@ResponseBody
 	public ResponseEntity<Void> deleteMember() {
 		memberService.deleteMember();

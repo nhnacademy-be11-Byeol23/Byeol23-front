@@ -15,4 +15,5 @@ public record BookSearchResultResponse(
         int reviewCount,
         float ratingAverage,
         boolean isSoldOut
-) {}
+) {
+}

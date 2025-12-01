@@ -28,16 +28,16 @@ public interface MemberApiClient {
 	@GetMapping("/api/members")
 	MemberMyPageResponse getMember();
 
-	@PutMapping("/api/members")
+	@PostMapping("/api/members/put")
 	MemberUpdateResponse updateMember(@RequestBody MemberUpdateRequest request);
 
-	@PutMapping("/api/members/password")
+	@PostMapping("/api/members/put/password")
 	MemberPasswordUpdateResponse updateMemberPassword(@RequestBody MemberPasswordUpdateRequest request);
 
 	@PutMapping("api/members/reactivate")
 	void reactivateMember(@RequestBody MemberPasswordUpdateRequest request);
 
-	@DeleteMapping("/api/members")
+	@PostMapping("/api/members/delete")
 	void deleteMember();
 
 	@GetMapping("/api/members/check-id")
