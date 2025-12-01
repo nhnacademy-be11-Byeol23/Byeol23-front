@@ -26,6 +26,8 @@ public class HomeController {
 
 		var bestBooksResult = searchApiClient.searchBestBooks(0, 12);
 		var bestBooks = BookSearchResultLongIdResponse.fromList(bestBooksResult.content());
+
+		// var categoryBooks = searchApiClient.searchBooksByCategory().content();
 		
 		log.info("=== 메인 페이지 베스트 도서 조회 ===");
 		log.info("Hero Section 도서 수: {}", top3Books.size());
@@ -33,6 +35,8 @@ public class HomeController {
 		
 		model.addAttribute("top3Books", top3Books);
 		model.addAttribute("bestBooks", bestBooks);
+
+		// model.addAttribute("categoryBooks", categoryBooks);
 		return "index";
 	}
 
