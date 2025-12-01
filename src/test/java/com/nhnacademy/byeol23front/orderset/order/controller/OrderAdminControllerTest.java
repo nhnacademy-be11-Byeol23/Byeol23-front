@@ -91,7 +91,7 @@ class OrderAdminControllerTest {
 
 		// BookOrderInfoResponse가 실제 DTO이므로 이를 사용합니다.
 		BookOrderInfoResponse bookOrderInfo = new BookOrderInfoResponse(
-			100L, "테스트 도서 A", 2, new BigDecimal("4500.00"), packagingInfo
+			100L, "https://image.yes24.com/momo/Noimg_L.jpg", "테스트 도서 A", 2, new BigDecimal("4500.00"), packagingInfo
 		);
 
 		// DeliveryPolicyInfoResponse가 실제 DTO이므로 이를 사용합니다.
