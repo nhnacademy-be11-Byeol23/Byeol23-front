@@ -15,9 +15,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
 import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderInfoResponse;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
 import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
 import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
+import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
 import com.nhnacademy.byeol23front.orderset.packaging.client.PackagingApiClient;
 import com.nhnacademy.byeol23front.orderset.packaging.dto.PackagingInfoResponse;
 
@@ -120,7 +122,34 @@ public class OrderUtil {
 		model.addAttribute("packagingOptions", packagingOptions);
 	}
 
-	public void addUserCurrentPoint(Model model) {
+	public void addFinalPaymentAmountToModel(Model model, OrderDetailResponse orderDetail) {
+		BigDecimal subTotal = BigDecimal.ZERO;
+		BigDecimal packagingFee = BigDecimal.ZERO;
 
+		for (BookOrderInfoResponse bookOrder : orderDetail.items()) {
+			PackagingInfoResponse packaging = bookOrder.packaging() != null ? bookOrder.packaging() : null;
+			BigDecimal itemTotal = bookOrder.price().multiply(BigDecimal.valueOf(bookOrder.quantity()));
+			subTotal = subTotal.add(itemTotal);
+			packagingFee = packagingFee.add(packaging != null ? packaging.packagingPrice().multiply(BigDecimal.valueOf(bookOrder.quantity())) : BigDecimal.ZERO);
+		}
+
+		DeliveryPolicyInfoResponse delivery = orderDetail.delivery();
+		BigDecimal rawFee = delivery.deliveryFee();
+		BigDecimal appliedFee = BigDecimal.ZERO;
+
+		if (delivery != null) {
+			BigDecimal freeCondition = delivery.freeDeliveryCondition();
+
+			if (subTotal.compareTo(freeCondition) < 0) {
+				appliedFee = rawFee;
+			}
+		}
+
+		BigDecimal usedPoints = orderDetail.usedPoints() != null ? orderDetail.usedPoints() : BigDecimal.ZERO;
+
+		model.addAttribute("subTotal", subTotal);
+		model.addAttribute("packagingTotal", packagingFee);
+		model.addAttribute("appliedFee", appliedFee);
+		model.addAttribute("usedPoint", usedPoints);
 	}
 }

@@ -19,24 +19,24 @@ import com.nhnacademy.byeol23front.bookset.publisher.dto.PublisherUpdateResponse
 
 @FeignClient(name = "BYEOL23-GATEWAY", contextId = "publisherApiClient")
 public interface PublisherApiClient {
-	@PostMapping(value = "/api/publishers")
+	@PostMapping(value = "/api/pub")
 	ResponseEntity<PublisherCreateResponse> createPublisher(@RequestBody PublisherCreateRequest request);
 
-	@GetMapping(value = "/api/publishers")
+	@GetMapping(value = "/api/pub")
 	ResponseEntity<PageResponse<AllPublishersInfoResponse>> getAllPublishers(
 		@RequestParam(value = "page", defaultValue = "0") int page,
 		@RequestParam(value = "size", defaultValue = "10") int size
 	);
 
-	@GetMapping(value = "/api/publishers/search")
+	@GetMapping(value = "/api/pub/search")
 	ResponseEntity<AllPublishersInfoResponse> findPublisherByName(@RequestParam String publisherName);
 
-	@PostMapping(value = "/api/publishers/find-or-create")
+	@PostMapping(value = "/api/pub/find-or-create")
 	ResponseEntity<AllPublishersInfoResponse> findOrCreatePublisher(@RequestBody PublisherCreateRequest request);
 
-	@DeleteMapping(value = "/api/publishers/{publisher-id}")
+	@PostMapping(value = "/api/pub/delete/{publisher-id}")
 	void deletePublisher(@PathVariable(name = "publisher-id") Long publisherId);
 
-	@PutMapping(value = "/api/publishers/{publisher-id}")
+	@PostMapping(value = "/api/pub/put/{publisher-id}")
 	PublisherUpdateResponse updatePublisher(@PathVariable(name = "publisher-id") Long publisherId, @RequestBody PublisherUpdateRequest publisherName);
 }

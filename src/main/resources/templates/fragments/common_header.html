@@ -35,9 +35,16 @@
                             <i class="bi bi-person"></i>
                         </button>
                         <div class="dropdown-menu">
-                            <div class="dropdown-header">
+                            <div class="dropdown-header" th:if="${@authHelper.isLoggedIn()}">
+                                <h6>
+                                    안녕하세요! <span sec:authentication="principal.nickname"></span> 님
+                                </h6>
+                                <p class="mb-0">내 정보 &amp; 주문 내역</p>
+                            </div>
+
+                            <div class="dropdown-header" th:if="${!@authHelper.isLoggedIn()}">
                                 <h6>별이삼shop</h6>
-                                <p class="mb-0"  sec:authorize="isAuthenticated()">내 정보 &amp; 주문 내역</p>
+                                <p class="mb-0">로그인 해주세요</p>
                             </div>
 
                                 <div class="dropdown-body" sec:authorize="isAuthenticated()">
@@ -51,7 +58,7 @@
                                         <span>주문내역</span>
                                     </a>
 
-                                    <a class="dropdown-item d-flex align-items-center" href="/wishlist">
+                                    <a class="dropdown-item d-flex align-items-center" href="/mypage/wishlist">
                                         <i class="bi bi-heart me-2"></i>
                                         <span>위시리스트</span>
                                     </a>
@@ -76,9 +83,8 @@
                     </div>
 
                     <!-- Cart -->
-                    <a href="/carts" class="header-action-btn">
+                    <a href="/carts/books" class="header-action-btn">
                         <i class="bi bi-cart3"></i>
-                        <span class="badge">3</span>
                     </a>
 
                     <!-- Mobile Navigation Toggle -->

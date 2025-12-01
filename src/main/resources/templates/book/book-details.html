@@ -136,7 +136,7 @@
             </div>
           </div>
 
-          <div class="purchase-section">
+          <div class="purchase-section" th:attr="data-book-id=${book.bookId}">
             <div class="quantity-control">
               <label class="control-label">수량:</label>
               <div class="quantity-input-group">
@@ -144,7 +144,7 @@
                   <button class="quantity-btn decrease" type="button">
                     <i class="bi bi-dash"></i>
                   </button>
-                  <input type="number" class="quantity-input" value="1" min="1" th:max="${book.stock}">
+                    <input type="number" class="quantity-input" value="1" min="1" th:max="${book.stock}">
                   <button class="quantity-btn increase" type="button">
                     <i class="bi bi-plus"></i>
                   </button>
@@ -153,7 +153,7 @@
             </div>
 
             <div class="action-buttons">
-              <button class="btn primary-action">
+              <button class="btn primary-action add-to-cart-btn">
                 <i class="bi bi-bag-plus"></i>
                 장바구니 담기
               </button>
@@ -161,8 +161,10 @@
                 <i class="bi bi-lightning"></i>
                 바로 구매
               </button>
-              <button class="btn icon-action" title="Add to Wishlist">
-                <i class="bi bi-heart"></i>
+              <button class="btn icon-action wishlist-btn" 
+                      id="wishlist-btn" 
+                      th:attr="data-book-id=${book.bookId}">
+                <i class="bi bi-heart" id="wishlist-icon"></i>
               </button>
             </div>
           </div>
@@ -338,65 +340,33 @@
   document.addEventListener('DOMContentLoaded', () => {
     const buyNowButton = document.getElementById('buy-now-btn');
 
-    const bookId = /*[[${book.bookId}]]*/ 1;
-    const bookName = /*[[${book.bookName}]]*/ "책 이름";
-    const regularPrice = /*[[${book.regularPrice}]]*/ null;
-    const salePrice = /*[[${book.salePrice}]]*/ null;
-    const postUrl = /*[[@{/orders/direct}]]*/ '/orders/direct';
-    const successUrl = /*[[@{/orders/direct}]]*/ '/orders/direct';
-    const imageUrl = /*[[${
-            (book.images != null and !#lists.isEmpty(book.images))
-            ? book.images.get(0).imageUrl()
-            : 'https://image.yes24.com/momo/Noimg_L.jpg'
-        }]]*/ null;
     if (buyNowButton) {
       buyNowButton.addEventListener('click', () => {
-        console.log("버튼 클릭");
+        console.log("바로 구매 버튼 클릭");
 
+        const bookId = /*[[${book.bookId}]]*/ 1;
         const quantityInput = document.querySelector('.quantity-input');
         const quantity = quantityInput ? quantityInput.value : 1;
+        const directUrl = '/orders/direct';
 
-        const isPack = /*[[${book.isPack}]]*/ false;
-        const publisher = /*[[${book.publisher}]]*/ null;
-        const contributors = /*[[${book.contributors}]]*/ [];
-
-        const bookInfoRequest = {
-          bookId: bookId,
-          bookName: bookName,
-          imageUrl: imageUrl,
-          isPack: isPack,
-          regularPrice: regularPrice,
-          salePrice: salePrice,
-          publisher: publisher,
-          quantity: quantity,
-          contributors: contributors
-      }
-
-        const bookOrderRequest = {
-          bookList:[bookInfoRequest]
-        }
-
-        fetch(postUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(bookOrderRequest)
+        fetch(directUrl, {
+          method: 'POST'
         })
         .then(response => {
-          if (!response.ok) {
+
             if (response.status === 401) {
               // 1. (POST) 컨트롤러가 401(Unauthorized)을 반환한 경우
               alert("로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.");
               window.location.href = `/members/login?bookId=${bookId}&quantity=${quantity}`;
-            } else {
+            } else if( response.status === 200) {
+              const successRedirectUrl = `${directUrl}?bookId=${bookId}&quantity=${quantity}`;
+              window.location.href = successRedirectUrl;
+            }
+            else {
               // 2. 기타 404, 500 에러
               alert('주문 페이지로 이동하는 데 실패했습니다.');
             }
-            // 'throw'로 .catch()를 실행시키거나, 여기서 중단합니다.
-            throw new Error('Authentication failed or server error');
-          }
-          window.location.href = successUrl;
+
         })
         .catch(error => {
           console.error('Error: ', error);
@@ -436,9 +406,144 @@
     });
   });
 
+  document.addEventListener("DOMContentLoaded", () => {
 
+      const qtyInput = document.querySelector(".quantity-input");
+      if (!qtyInput) return;
+
+      const min = Number(qtyInput.min) || 1;
+      const max = Number(qtyInput.max) || 999;
+
+      qtyInput.addEventListener("keydown", event => {
+          if (["e", "E", "-", "+"].includes(event.key)) {
+              event.preventDefault();
+          }
+      });
+
+      qtyInput.addEventListener("input", event => {
+          let value = qtyInput.value;
+
+          if (value === "") return;
+
+          value = value.replace(/[^0-9]/g, "");
+          let num = Number(value);
+
+          if (num < min) num = min;
+          if (num > max) num = max;
+
+          qtyInput.value = num;
+      });
+
+      qtyInput.addEventListener("blur", () => {
+          if (!qtyInput.value || isNaN(qtyInput.value)) {
+              qtyInput.value = min;
+          }
+      });
+
+      document.querySelector(".quantity-btn.increase")?.addEventListener("click", () => {
+          let value = Number(qtyInput.value);
+          if (value < max) value++;
+          qtyInput.value = value;
+      });
+
+      document.querySelector(".quantity-btn.decrease")?.addEventListener("click", () => {
+          let value = Number(qtyInput.value);
+          if (value > min) value--;
+          qtyInput.value = value;
+      });
+
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+
+      const addToCartBtn = document.querySelector(".add-to-cart-btn");
+      const purchaseSection = document.querySelector(".purchase-section");
+
+      if (!addToCartBtn || !purchaseSection) return;
+
+      const bookId = purchaseSection.dataset.bookId;
+      const qtyInput = purchaseSection.querySelector(".quantity-input");
+
+      addToCartBtn.addEventListener("click", async () => {
+          const quantity = Number(qtyInput.value);
+
+          const payload = {
+              bookId: Number(bookId),
+              quantity: quantity
+          };
+
+          try {
+              const res = await fetch("/carts/books", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload)
+              });
+
+              if (!res.ok) {
+                  const body = await res.json().catch(() => ({}));
+                  alert(body.message || "장바구니 담기 실패");
+                  return;
+              }
+
+              alert("상품이 장바구니에 담겼습니다.");
+
+          } catch (err) {
+              console.error(err);
+              alert("장바구니 처리 중 오류 발생");
+          }
+      });
+  });
+
+  // 위시리스트 버튼 클릭 이벤트
+  document.addEventListener("DOMContentLoaded", () => {
+    const wishlistBtn = document.getElementById("wishlist-btn");
+    const wishlistIcon = document.getElementById("wishlist-icon");
+    
+    if (!wishlistBtn || !wishlistIcon) return;
+    
+    const bookId = wishlistBtn.dataset.bookId;
+    let isLiked = false; // 초기 상태 (나중에 서버에서 확인 가능)
+    
+    wishlistBtn.addEventListener("click", async () => {
+      try {
+        const res = await fetch(`/likes/${bookId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        });
+        
+        if (!res.ok) {
+          if (res.status === 401) {
+            alert("로그인이 필요한 서비스입니다.");
+            window.location.href = `/members/login`;
+            return;
+          }
+          const body = await res.json().catch(() => ({}));
+          alert(body.message || "위시리스트 처리 중 오류가 발생했습니다.");
+          return;
+        }
+        
+        // 토글 상태 변경
+        isLiked = !isLiked;
+        
+        // 아이콘 변경
+        if (isLiked) {
+          wishlistIcon.classList.remove("bi-heart");
+          wishlistIcon.classList.add("bi-heart-fill");
+          wishlistBtn.style.color = "#e74c3c"; // 빨간색
+          alert("위시리스트에 추가되었습니다.");
+        } else {
+          wishlistIcon.classList.remove("bi-heart-fill");
+          wishlistIcon.classList.add("bi-heart");
+          wishlistBtn.style.color = ""; // 기본 색상
+          alert("위시리스트에서 제거되었습니다.");
+        }
+        
+      } catch (err) {
+        console.error(err);
+        alert("위시리스트 처리 중 오류가 발생했습니다.");
+      }
+    });
+  });
 </script>
-
 </body>
-
 </html>

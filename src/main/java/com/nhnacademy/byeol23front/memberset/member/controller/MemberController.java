@@ -1,6 +1,7 @@
 package com.nhnacademy.byeol23front.memberset.member.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.nhnacademy.byeol23front.memberset.member.dto.*;
@@ -10,11 +11,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 
@@ -58,7 +63,9 @@ public class MemberController {
 
 
 	@PostMapping("/login")
-	public String login(@ModelAttribute LoginRequest request, HttpServletResponse response) {
+	public String login(@ModelAttribute LoginRequestTmp tmp, HttpServletResponse response) {
+		LoginRequest request = new LoginRequest(tmp.getLoginId(), tmp.getLoginPassword());
+
 		ResponseEntity<LoginResponse> feignResponse = memberApiClient.login(request);
 		List<String> setCookies = feignResponse.getHeaders().get(HttpHeaders.SET_COOKIE);
 
@@ -66,6 +73,12 @@ public class MemberController {
 			setCookies.forEach(c -> response.addHeader(HttpHeaders.SET_COOKIE, c));
 			setCookies.forEach(c -> log.info("Upstream Set-Cookie: {}", c));
 		}
+
+		if (!Objects.isNull(tmp.getBookId()) && !Objects.isNull(tmp.getQuantity())) {
+			return String.format("redirect:/orders/direct?bookId=%d&quantity=%d",
+				tmp.getBookId(), tmp.getQuantity());
+		}
+
 		return "redirect:/";
 	}
 
@@ -79,6 +92,13 @@ public class MemberController {
 		return "redirect:/";
 	}
 
+	@GetMapping("/check-id")
+	@ResponseBody
+	public CheckIdResponse checkId(@RequestParam String loginId) {
+		CheckIdResponse response = memberApiClient.checkId(loginId);
+		return response;
+	}
+
 	private String deleteCookie(String name, String path) {
 		return ResponseCookie.from(name, "")
 				.path(path)
@@ -89,4 +109,21 @@ public class MemberController {
 				.build().toString();
 	}
 
+	@PutMapping
+	@ResponseBody
+	public ResponseEntity<MemberUpdateResponse> updateMember(@RequestBody MemberUpdateRequest req){
+		return memberApiClient.updateMember(req);
+	}
+
+	@PutMapping("/password")
+	@ResponseBody
+	public ResponseEntity<MemberPasswordUpdateResponse> updatePassword(@RequestBody MemberPasswordUpdateRequest req){
+		return memberApiClient.updateMemberPassword(req);
+	}
+
+	@DeleteMapping
+	@ResponseBody
+	public ResponseEntity<Void> deleteMember(){
+		return memberApiClient.deleteMember();
+	}
 }

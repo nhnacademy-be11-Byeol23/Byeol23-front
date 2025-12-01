@@ -5,6 +5,7 @@ import java.util.List;
 public record ReviewRegisterRequest(
 	String reviewContent,
 	Byte reviewRate,
-	Long orderDetailId,
-	List<String> imageUrls
+	String orderNumber,
+	Long bookId,
+	Boolean withImage
 ) {}

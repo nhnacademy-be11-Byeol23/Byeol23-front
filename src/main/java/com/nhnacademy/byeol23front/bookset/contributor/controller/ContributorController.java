@@ -22,7 +22,7 @@ import com.nhnacademy.byeol23front.bookset.contributor.dto.PageResponse;
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/admin/contributors")
+@RequestMapping("/admin/cont")
 @RequiredArgsConstructor
 public class ContributorController {
 	private final ContributorApiClient feignClient;
@@ -42,17 +42,17 @@ public class ContributorController {
 	@PostMapping
 	public String createContributor(@RequestBody ContributorCreateRequest request, Model model){
 		feignClient.createContributor(request);
-		return "redirect: /admin/contributors";
+		return "redirect:/admin/cont";
 	}
 
-	@PutMapping("/{contributorId}")
+	@PostMapping("/put/{contributorId}")
 	@ResponseBody
 	public ResponseEntity<Void> updateContributor(@PathVariable Long contributorId, @RequestBody ContributorUpdateRequest request){
 		feignClient.updateContributor(contributorId, request);
 		return ResponseEntity.ok().build();
 	}
 
-	@DeleteMapping("/{contributorId}")
+	@PostMapping("/delete/{contributorId}")
 	public ResponseEntity<Void> deleteContributor(@PathVariable Long contributorId){
 		feignClient.deleteContributor(contributorId);
 		return ResponseEntity.noContent().build();

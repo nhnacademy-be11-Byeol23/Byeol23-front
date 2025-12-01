@@ -10,24 +10,20 @@
         .search-page {
             padding: 40px 0;
         }
-
         .search-layout {
             display: grid;
             grid-template-columns: 250px 1fr;
             gap: 24px;
         }
-
         .category-sidebar {
             background: #fff;
             padding: 16px;
             border-radius: 8px;
             border: 1px solid #eee;
         }
-
         .category-sidebar ul { list-style: none; margin: 0; padding-left: 0; }
         .category-sidebar li { margin-bottom: 8px; }
         .category-sidebar a { color: #333; font-weight: 500; }
-
         .book-card {
             display: grid;
             grid-template-columns: 120px 1fr auto;
@@ -39,13 +35,10 @@
             margin-bottom: 16px;
             transition: box-shadow 0.2s;
             align-items: center;
-            cursor: pointer;
         }
-
         .book-card:hover {
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
-
         .book-thumb {
             width: 120px;
             height: 170px;
@@ -58,26 +51,34 @@
             border-radius: 6px;
             overflow: hidden;
         }
-
-        .book-info h4 {
+        .book-thumb:hover,
+        .book-info:hover {
+            cursor: pointer;
+        }
+        .book-title {
             font-size: 18px;
             font-weight: 600;
             margin: 0 0 6px;
         }
-
         .book-meta {
             color: #555;
             font-size: 14px;
             margin-bottom: 8px;
         }
-
         .price-box {
             margin-top: 6px;
         }
-
         .price-sale { color: #d32f2f; font-weight: bold; font-size: 17px; }
         .price-regular { text-decoration: line-through; margin-left: 8px; color: #777; }
 
+        .qty-input::-webkit-inner-spin-button,
+        .qty-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .qty-input {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 
@@ -114,7 +115,7 @@
                              id="main-product-image">
                     </div>
                     <div class="book-info">
-                        <h4 th:text="${book.title}"></h4>
+                        <p class="book-title" th:text="${book.title}"></p>
 
                         <div class="book-meta">
                             <span th:text="${#strings.arrayJoin(book.author, ', ')}"></span> |
@@ -133,8 +134,16 @@
                     </div>
 
                     <div class="button-column mt-3 d-flex flex-column gap-2 align-items-end">
-                        <button type="button" class="btn btn-outline-secondary btn-sm" style="width: 120px">장바구니</button>
-                        <button type="button" class="btn btn-outline-primary btn-sm" style="width: 120px">바로구매</button>
+                        <div class="quantity-box d-flex align-items-center gap-2">
+                            <button class="qty-btn btn btn-outline-secondary btn-sm" data-action="minus">-</button>
+                            <input type="number" class="qty-input form-control form-control-sm"
+                                   value="1" min="1" max="999"
+                                   style="width: 50px; text-align:center;">
+                            <button class="qty-btn btn btn-outline-secondary btn-sm" data-action="plus">+</button>
+                        </div>
+
+                        <button type="button" class="btn btn-outline-secondary btn-sm add-to-cart-btn" style="width: 120px;">장바구니</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" style="width: 120px;">바로구매</button>
                     </div>
                 </div>
             </section>
@@ -145,13 +154,116 @@
 
 <div th:replace="~{fragments/common_footer :: commonFooter}"></div>
 
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<div id="preloader"></div>
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+
+<script th:src="@{/assets/js/main.js}"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".book-card").forEach(card => {
-            card.addEventListener("click", function () {
-                const bookId = this.dataset.bookId;
+        document.querySelectorAll(".book-thumb").forEach(thumb => {
+            thumb.addEventListener("click", function (event) {
+                event.stopPropagation();
+                const bookId = this.closest(".book-card").dataset.bookId;
                 window.location.href = "/books/" + bookId;
             });
+        });
+        document.querySelectorAll(".book-info").forEach(title => {
+            title.addEventListener("click", function (event) {
+                event.stopPropagation();
+                const bookId = this.closest(".book-card").dataset.bookId;
+                window.location.href = "/books/" + bookId;
+            });
+        });
+    });
+
+    document.querySelectorAll(".qty-btn").forEach(btn => {
+        btn.addEventListener("click", function (event) {
+            event.stopPropagation();
+
+            const input = this.parentElement.querySelector(".qty-input");
+            const min = Number(input.min);
+            const max = Number(input.max);
+            let value = input.valueAsNumber;
+
+            if (this.dataset.action === "plus") {
+                if (value < max) value++;
+            } else {
+                if (value > min) value--;
+            }
+
+            input.value = value;
+        });
+    });
+
+    document.querySelectorAll(".qty-input").forEach(input => {
+        input.addEventListener("keydown", event => {
+            if (["e", "E", "-", "+"].includes(event.key)) {
+                event.preventDefault();
+            }
+        });
+        input.addEventListener("input", event => {
+            event.stopPropagation();
+            let value = input.value;
+
+            if (value === "") return;
+
+            value = value.replace(/[^0-9]/g, "");
+
+            let num = Number(value);
+
+            if (num < 1) num = 1;
+            if (num > 999) num = 999;
+
+            input.value = num;
+        });
+
+        input.addEventListener("blur", () => {
+            if (input.value === "" || isNaN(input.value)) {
+                input.value = 1;
+            }
+        });
+    });
+
+    document.querySelectorAll(".add-to-cart-btn").forEach(btn => {
+        btn.addEventListener("click", async function (event) {
+            event.stopPropagation();
+
+            const card = this.closest(".book-card");
+            const bookId = card.dataset.bookId;
+            const quantity = card.querySelector(".qty-input").valueAsNumber;
+
+            const payload = {
+                bookId: Number(bookId),
+                quantity: quantity
+            };
+
+            try {
+                const res = await fetch("/carts/books", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    alert("장바구니 담기 실패");
+                    return;
+                }
+
+                alert("상품이 장바구니에 담겼습니다.");
+
+            } catch (err) {
+                console.error(err);
+                alert("장바구니 처리 중 오류 발생");
+            }
         });
     });
 </script>

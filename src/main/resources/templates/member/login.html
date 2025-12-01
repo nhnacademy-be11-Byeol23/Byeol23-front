@@ -9,6 +9,7 @@
   <meta name="keywords" content="">
 
   <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 </head>
 
 <body class="login-page">
@@ -42,8 +43,8 @@
               <!-- Login Form -->
               <div class="auth-form login-form active">
                 <div class="form-header">
-                  <h3>Welcome Back</h3>
-                  <p>Sign in to your account</p>
+                  <h3>로그인</h3>
+                  <p>별이삼샵에 오신 것을 환영합니다.</p>
                 </div>
 
                 <form action="/members/login" method="POST" class="auth-form-content">
@@ -51,26 +52,27 @@
                     <span class="input-icon">
                       <i class="bi bi-envelope"></i>
                     </span>
-                    <input type="text" name="loginId" class="form-control" placeholder="아이디" required="" autocomplete="memberId">
+                    <input type="text"
+                           id="loginId"
+                           name="loginId"
+                           class="form-control"
+                           placeholder="아이디"
+                           required
+                           autocomplete="memberId">
                   </div>
 
                   <div class="input-group mb-3">
                     <span class="input-icon">
                       <i class="bi bi-lock"></i>
                     </span>
-                    <input type="password" name="loginPassword" class="form-control" placeholder="비밀번호" required="" autocomplete="current-password">
-                    <span class="password-toggle">
+                    <input type="password" name="loginPassword" id="loginPassword" class="form-control" placeholder="비밀번호" required="" autocomplete="current-password">
+                    <span class="password-toggle" id="passwordToggle" style="cursor: pointer;">
                       <i class="bi bi-eye"></i>
                     </span>
                   </div>
 
-                  <div class="form-options mb-4">
-                    <div class="remember-me">
-                      <input type="checkbox" id="rememberLogin">
-                      <label for="rememberLogin">Remember me</label>
-                    </div>
-                    <a href="#" class="forgot-password">비밀번호를 잊어버리셨나요?</a>
-                  </div>
+                  <input type="hidden" th:if="${bookId != null}" name="bookId" th:value="${bookId}" />
+                  <input type="hidden" th:if="${quantity != null}" name="quantity" th:value="${quantity}" />
 
                   <button type="submit" class="auth-btn primary-btn mb-3">
                     로그인
@@ -125,6 +127,26 @@
 <script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
 <script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
 <script th:src="@{/assets/js/main.js}"></script>
+
+<script>
+  $(document).ready(() => {
+    const $passwordInput = $('#loginPassword');
+    const $passwordToggle = $('#passwordToggle');
+    const $passwordIcon = $passwordToggle.find('i');
+    
+    if ($passwordToggle.length && $passwordInput.length) {
+      $passwordToggle.on('click', () => {
+        if ($passwordInput.attr('type') === 'password') {
+          $passwordInput.attr('type', 'text');
+          $passwordIcon.removeClass('bi-eye').addClass('bi-eye-slash');
+        } else {
+          $passwordInput.attr('type', 'password');
+          $passwordIcon.removeClass('bi-eye-slash').addClass('bi-eye');
+        }
+      });
+    }
+  });
+</script>
 
 </body>
 

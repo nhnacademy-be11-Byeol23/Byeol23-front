@@ -1,53 +1,75 @@
 package com.nhnacademy.byeol23front.cartset.cart.controller;
 
 import com.nhnacademy.byeol23front.cartset.cart.client.CartApiClient;
+import com.nhnacademy.byeol23front.cartset.cart.dto.CartBookAddRequest;
+import com.nhnacademy.byeol23front.cartset.cart.dto.CartBookResponse;
 import com.nhnacademy.byeol23front.cartset.cart.dto.CartBookUpdateRequest;
-import com.nhnacademy.byeol23front.cartset.cart.dto.CartResponse;
+import com.nhnacademy.byeol23front.cartset.cart.dto.FreeShippingCondition;
+import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
+import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.StructuredTaskScope;
 
 @Slf4j
 @Controller
-@RequestMapping("/carts")
 @RequiredArgsConstructor
 public class CartController {
     private final CartApiClient cartApiClient;
+    private final DeliveryApiClient deliveryApiClient;
 
-    // 장바구니 페이지 조회
-    @GetMapping("/{member-id}")
-    public String getCart(@PathVariable("member-id") Long memberId, Model model) {
-        CartResponse cart = cartApiClient.getCartByMember(memberId);
+    @GetMapping("/carts/books")
+    public String cartPage(Model model) throws InterruptedException, ExecutionException {
+        try(var taskScope = new StructuredTaskScope.ShutdownOnFailure()) {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            var cartTask = taskScope.fork(() -> {
+                RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(attributes.getRequest()));
+                return cartApiClient.getCartBooks();
+            });
+            var deliveryTask = taskScope.fork(() -> {
+                RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(attributes.getRequest()));
+                return deliveryApiClient.getCurrentDeliveryPolicy();
+            });
 
-        long totalPrice = 0L;
-        if (cart.cartBooks() != null) {
-            totalPrice = cart.cartBooks().stream()
-                    .mapToLong(cb -> cb.salePrice().longValue() * cb.quantity())
-                    .sum();
+            taskScope.join();
+            taskScope.throwIfFailed();
+
+            List<CartBookResponse> cartBooks = cartTask.get();
+            ResponseEntity<DeliveryPolicyInfoResponse> currentDeliveryPolicy = deliveryTask.get();
+            DeliveryPolicyInfoResponse deliveryPolicy = currentDeliveryPolicy.getBody();
+            FreeShippingCondition freeShippingCondition = new FreeShippingCondition(deliveryPolicy.freeDeliveryCondition().intValue(), deliveryPolicy.deliveryFee().intValue());
+
+            model.addAttribute("cartBooks", cartBooks);
+            model.addAttribute("shippingCondition", freeShippingCondition);
+            return "cart/carts";
         }
-        
-        model.addAttribute("totalPrice", totalPrice);
-        model.addAttribute("cart", cart);
-        return "cart";
     }
 
-    // 장바구니 도서 수량 수정 (AJAX 요청용)
-    @PutMapping("/cart-books")
+    @PostMapping("/carts/books")
     @ResponseBody
-    public ResponseEntity<Void> updateCartBook(@RequestBody CartBookUpdateRequest request) {
-        cartApiClient.updateCartBook(request);
-        return ResponseEntity.ok().build();
+    public void addCartBook(@RequestBody CartBookAddRequest request) {
+        cartApiClient.addCartBook(request);
     }
 
-    // 장바구니 도서 삭제 (AJAX 요청용)
-    @DeleteMapping("/cart-books/{cart-book-id}")
+    @PostMapping("/carts/books/{book-id}/update")
     @ResponseBody
-    public ResponseEntity<Void> deleteCartBook(@PathVariable("cart-book-id") Long cartBookId) {
-        cartApiClient.deleteCartBook(cartBookId);
-        return ResponseEntity.ok().build();
+    public void updateCartBook(@PathVariable("book-id") Long bookId, @RequestBody CartBookUpdateRequest request) {
+        cartApiClient.updateCartBook(bookId, request);
     }
 
+    @PostMapping("/carts/books/{book-id}/delete")
+    @ResponseBody
+    public void deleteCartBook(@PathVariable("book-id") Long bookId) {
+        cartApiClient.deleteCartBook(bookId);
+    }
 }

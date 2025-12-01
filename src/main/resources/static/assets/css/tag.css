@@ -82,6 +82,10 @@
 .tag-page .hidden { display: none; }
 .tag-page .muted  { color: #6c757d; }
 
+.tag-update-elements {
+    margin-left: 5px;
+}
+
 /* Responsive tweaks */
 @media (max-width: 576px) {
     .tag-page .tag-line {

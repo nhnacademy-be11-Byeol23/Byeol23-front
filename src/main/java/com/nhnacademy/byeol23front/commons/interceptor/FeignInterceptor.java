@@ -30,20 +30,14 @@ public class FeignInterceptor {
 				for (Cookie cookie : cookies) {
 					if ("Refresh-Token".equals(cookie.getName())) {
 						String tokenValue = cookie.getValue();
-						log.info("Refresh-Token: {}", tokenValue);
-
 						template.header("Cookie", "Refresh-Token=" + tokenValue);
 					}
 					if ("Access-Token".equals(cookie.getName())) {
 						String tokenValue = cookie.getValue();
-						log.info("Access-Token: {}", tokenValue);
-
 						template.header("Cookie", "Access-Token=" + tokenValue);
 					}
                     if ("guestId".equals(cookie.getName())) {
                         String guestId = cookie.getValue();
-                        log.info("guestId: {}", guestId);
-
                         template.header("Cookie", "guestId=" + guestId);
                     }
 				}
