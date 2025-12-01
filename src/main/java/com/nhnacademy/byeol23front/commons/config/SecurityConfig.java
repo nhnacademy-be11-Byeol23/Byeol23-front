@@ -1,5 +1,6 @@
 package com.nhnacademy.byeol23front.commons.config;
 
+import com.nhnacademy.byeol23front.commons.filter.CustomAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 public class SecurityConfig {
 
 	private final JwtParser jwtParser;
+	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
@@ -30,15 +33,19 @@ public class SecurityConfig {
 			.httpBasic(AbstractHttpConfigurer::disable)   // 기본 인증
 			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
 				.requestMatchers(
-					"/mypage",
-					"/admin"
+					"/mypage/**",
+					"/admin/**"
 				).authenticated()
 				.anyRequest().permitAll()
 			)
 			.addFilterBefore(
 				new JwtAuthenticationFilter(jwtParser),
 				UsernamePasswordAuthenticationFilter.class
+			)
+			.exceptionHandling(ex -> ex
+					.authenticationEntryPoint(customAuthenticationEntryPoint)
 			);
 
 		return http.build();

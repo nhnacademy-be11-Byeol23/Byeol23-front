@@ -1,11 +1,13 @@
 package com.nhnacademy.byeol23front.commons.exception;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 
+import com.nhnacademy.byeol23front.memberset.member.dto.LoginResponse;
+import feign.RetryableException;
 import org.apache.http.HttpStatus;
-import org.springframework.stereotype.Component;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.byeol23front.bookset.contributor.exception.ContributorAlreadyExistsException;
@@ -16,13 +18,14 @@ import feign.Response;
 import feign.codec.ErrorDecoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 
 @Slf4j
 @RequiredArgsConstructor
 public class FeignExceptionDecoder implements ErrorDecoder {
 
 	private final ObjectMapper objectMapper;
-
+	private final ErrorDecoder defaultDecoder = new Default();
 	@Override
 	public Exception decode(String methodKey, Response response) {
 		log.info("response:{}", response);
@@ -45,7 +48,30 @@ public class FeignExceptionDecoder implements ErrorDecoder {
 
 
 		if (status == HttpStatus.SC_UNAUTHORIZED) {
-			//TODO: 인증과정에서 거부되었을 때의 반응 채울 것
+//			try {
+//				// Refresh 토큰으로 새 Access Token 발급
+//				LoginResponse refreshResponse = refreshAccessToken();
+//
+//				if (refreshResponse != null) {
+//					// 새 토큰을 쿠키에 저장
+//					updateCookies(refreshResponse);
+//
+//					// 원래 요청을 재시도하기 위해 RetryableException 던지기
+//					// Feign의 Retryer가 이를 처리하도록 함
+//					return new RetryableException(
+//							response.status(),
+//							"Token refreshed, retrying request",
+//							response.request().httpMethod(),
+//							null,
+//							response.request()
+//					);
+//				}
+//			} catch (Exception e) {
+//				log.error("Failed to refresh token", e);
+//			}
+
+			// Refresh 실패 시 기존처럼 AccessDeniedException 던지기
+			return new AccessDeniedException("ACCESS-TOKEN-EXPIRED");
 		}
 
 
@@ -60,6 +86,20 @@ public class FeignExceptionDecoder implements ErrorDecoder {
 			return new ContributorAlreadyExistsException(message, errorResponse.timestamp());
 		}
 
-		return null;
+		return new DefaultException("Default exception");
 	}
+
+//	private LoginResponse refreshAccessToken() {
+//		try {
+//			ResponseEntity<LoginResponse> response = memberApiClient.refreshToken();
+//			if (response != null && response.getBody() != null) {
+//				log.info("Successfully refreshed access token");
+//				return response.getBody();
+//			}
+//		} catch (Exception e) {
+//			log.error("Failed to refresh token: {}", e.getMessage());
+//		}
+//		return null;
+//	}
+
 }

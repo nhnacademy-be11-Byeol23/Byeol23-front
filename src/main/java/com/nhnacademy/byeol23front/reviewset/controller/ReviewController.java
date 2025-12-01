@@ -39,7 +39,8 @@ public class ReviewController {
 				reviewContent,
 				reviewRate,
 				orderNumber,
-				bookId
+				bookId,
+				image != null && !image.isEmpty()
 			)
 		).getBody();
 
