@@ -56,17 +56,17 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
                 } else {
 
                     response
-                            .sendRedirect("members/login");
+                            .sendRedirect("/members/login");
                     return;
                 }
             } catch (Exception e) {
                 log.error("Refresh process error", e);
-                response.sendRedirect("members/login");
+                response.sendRedirect("/members/login");
                 return;
             }
         }
 
         log.info("Unauthenticated request for {}, redirect to login", originalUrl);
-        response.sendRedirect("/login");
+        response.sendRedirect("/members/login");
     }
 }
