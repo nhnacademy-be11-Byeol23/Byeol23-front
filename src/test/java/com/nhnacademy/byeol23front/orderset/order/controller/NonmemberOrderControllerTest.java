@@ -165,7 +165,7 @@ class NonmemberOrderControllerTest {
 	void getOrderFormDirect_MissingBookId_ShouldReturnBadRequest() throws Exception {
 		// when & then
 		// @RequestParam(name = "bookId")는 'required=true'가 기본값이므로 400 에러 발생
-		mockMvc.perform(get("/orders/nonmember/direct")
+		mockMvc.perform(get("/orders/nonmember")
 				.param("quantity", String.valueOf(quantity))
 				.with(user("anonymousUser").roles("ANONYMOUS"))
 			)
@@ -176,7 +176,7 @@ class NonmemberOrderControllerTest {
 	@DisplayName("GET /orders/nonmember/direct - quantity 누락 시 400 Bad Request")
 	void getOrderFormDirect_MissingQuantity_ShouldReturnBadRequest() throws Exception {
 		// when & then
-		mockMvc.perform(get("/orders/nonmember/direct")
+		mockMvc.perform(get("/orders/nonmember")
 				.param("bookId", String.valueOf(bookId))
 				.with(user("anonymousUser").roles("ANONYMOUS"))
 			)

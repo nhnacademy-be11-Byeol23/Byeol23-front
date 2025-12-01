@@ -80,29 +80,6 @@ public class MypageController {
 		ResponseEntity<Page<OrderDetailResponse>> response = orderApiClient.getOrders(pageable);
 		Page<OrderDetailResponse> orders = response.getBody();
 
-		List<OrderViewModel> orderViewModels = new ArrayList<>();
-		String defaultImageUrl = "https://image.yes24.com/momo/Noimg_L.jpg";
-
-		if (!Objects.isNull(orders)) {
-			for (OrderDetailResponse order : orders) {
-				String imageUrl = defaultImageUrl;
-				if (order.items() != null && !order.items().isEmpty()) {
-					Long firstBookId = order.items().get(0).bookId();
-					try {
-						List<GetUrlResponse> images = minioService.getImageUrl(ImageDomain.BOOK, firstBookId);
-
-						if (images != null && !images.isEmpty()) {
-							imageUrl = images.get(0).imageUrl();
-						}
-					} catch (Exception e) {
-						log.warn("Failed to get image for bookId {}: {}", firstBookId, e.getMessage());
-					}
-				}
-				orderViewModels.add(new OrderViewModel(order, imageUrl));
-			}
-		}
-
-		model.addAttribute("viewModels", orderViewModels);
 		model.addAttribute("orders", orders);
 
 		return "mypage/orders";
@@ -180,9 +157,6 @@ public class MypageController {
 		List<UsedCouponInfoResponseDto> usedCoupons = couponApiClient.getUsedCoupons().getBody();
 		model.addAttribute("usedCoupons", usedCoupons);
 		return "mypage/coupon_box";
-	}
-
-	public record OrderViewModel(OrderDetailResponse order, String firstImageUrl) {
 	}
 
 }

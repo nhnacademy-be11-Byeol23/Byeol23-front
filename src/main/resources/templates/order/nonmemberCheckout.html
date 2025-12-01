@@ -51,7 +51,7 @@
                                         <div class="order-item"
                                              th:each="item : ${bookOrderRequest.bookList()}"
                                              th:data-book-id="${item.bookId}"
-                                             th:data-quantity="${quantity}"
+                                             th:data-quantity="${item.quantity}"
                                              th:data-sale-price="${item.salePrice}"
                                              th:data-regular-price="${item.regularPrice}"
                                              th:data-book-name="${item.bookName}"
@@ -89,7 +89,7 @@
                                                 <div class="order-item-price mb-2">
                                                     <div class="mb-1">
                                                         <span class="quantity"
-                                                              th:text="${quantity} + ' ×'">1 ×</span>
+                                                              th:text="${item.quantity()} + ' ×'">1 ×</span>
                                                     </div>
                                                     <span class="price-sale fw-bold fs-5"
                                                           th:text="${#numbers.formatInteger(item.salePrice, 0, 'COMMA') + '원'}">

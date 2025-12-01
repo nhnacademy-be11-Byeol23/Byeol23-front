@@ -155,9 +155,10 @@
                                         <div class="input-group">
                                             <input type="text" name="zip" class="form-control" id="zip"
                                                    placeholder="우편번호" required="" readonly
-                                                   th:value="${defaultAddress?.postCode}">  <button class="btn btn-outline-secondary" type="button" id="find-zip-btn">
-                                            우편번호 찾기
-                                        </button>
+                                                   th:value="${defaultAddress?.postCode}">
+                                            <button class="btn btn-outline-secondary" type="button" id="find-zip-btn">
+                                                우편번호 찾기
+                                            </button>
 
                                             <button class="btn btn-outline-primary" type="button"
                                                     data-bs-toggle="modal"
@@ -172,7 +173,7 @@
                                         <label for="address">주소</label>
                                         <input type="text" class="form-control" name="address" id="address"
                                                placeholder="기본 주소" readonly
-                                               th:value="${defaultAddress?.addressInfo}"> </div>
+                                               th:value="${defaultAddress?.addressInfo}"></div>
 
                                     <div class="row">
                                         <div class="col-md-6">
@@ -180,14 +181,14 @@
                                                 <label for="address-detail">상세주소</label>
                                                 <input type="text" class="form-control" name="address-detail"
                                                        id="address-detail" placeholder="상세주소 (아파트 동, 호수 등)"
-                                                       th:value="${defaultAddress?.addressDetail}"> </div>
+                                                       th:value="${defaultAddress?.addressDetail}"></div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="address-extra">참고 항목</label>
                                                 <input type="text" class="form-control" name="address-extra"
                                                        id="address-extra" placeholder="참고항목" readonly
-                                                       th:value="${defaultAddress?.addressExtra}"> </div>
+                                                       th:value="${defaultAddress?.addressExtra}"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -303,6 +304,14 @@
                             <h3>결제 방법</h3>
                         </div>
                         <div class="section-content">
+
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="pointPay"
+                                       value="POINT_PAYMENT">
+                                <label class="form-check-label" for="pointPay">
+                                    <strong>포인트 결제</strong>
+                                </label>
+                            </div>
 
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="radio" name="paymentMethod" id="tossPay"
@@ -505,6 +514,27 @@
 
             const orderItems = document.querySelectorAll('.order-summary-content .order-item');
             let orderName = "주문 상품"; // 기본값
+            if (!customerName || customerName.length === 0) {
+                alert("주문자 이름을 입력해 주세요.");
+                document.getElementById('name').focus();
+                return;
+            }
+            if (!phoneNumber || phoneNumber.length < 10) { // 최소 10자리 (하이픈 제외)
+                alert("유효한 연락처를 입력해 주세요.");
+                document.getElementById('phone').focus();
+                return;
+            }
+            if (!zip || zip.length === 0) {
+                alert("우편번호 찾기를 통해 배송지 주소를 입력해 주세요.");
+                document.getElementById('find-zip-btn').focus();
+                return;
+            }
+            if (!address || address.length === 0 || !addressDetail || addressDetail.length === 0) {
+                alert("상세 주소를 포함하여 정확한 배송지 정보를 입력해 주세요.");
+                document.getElementById('address-detail').focus();
+                return;
+            }
+
             if (orderItems.length > 0) {
                 const firstItemName = orderItems[0].querySelector('.order-item-details h4')?.textContent.trim();
                 if (firstItemName) {
@@ -533,11 +563,26 @@
             };
 
             const tossPayRadio = document.getElementById('tossPay');
+            const pointPayRadio = document.getElementById('pointPay');
 
-            // 최종 금액이 0보다 크고, 토스페이 라디오 버튼이 선택되지 않았으면 알림 후 중단
-            if (currentFinalPrice > 0 && (!tossPayRadio || !tossPayRadio.checked)) {
-                alert("결제 방법을 선택해주세요.");
-                return; // 함수 실행 중단
+            if (currentFinalPrice === 0) {
+                // Case 1: 0원인데 토스가 선택된 경우 (Alert 후 중단)
+                if (tossPayRadio && tossPayRadio.checked) {
+                    alert("최종 결제 금액이 0원이므로 토스 간편 결제(유료)를 사용할 수 없습니다. 토스 결제 선택을 해제 후 주문을 진행해 주세요.");
+                    return;
+                }
+            } else {
+                if (pointPayRadio && pointPayRadio.checked) {
+                    // Case 2: 유료 결제인데 '전액 포인트 결제'가 선택된 경우 (경고 후 중단)
+                    alert("총 결제 금액이 0원 이상이므로 '전액 포인트 결제'를 사용할 수 없습니다. 토스 간편 결제를 선택해 주세요.");
+                    return; // 함수 실행 중단
+                }
+
+                if (!tossPayRadio || !tossPayRadio.checked) {
+                    // Case 3: 유료 결제인데 TOSS도 선택되지 않은 경우
+                    alert("결제 방법을 선택해주세요.");
+                    return; // 함수 실행 중단
+                }
             }
 
             console.log("전송할 객체:", orderPrepareRequest);
@@ -608,14 +653,15 @@
         const applyAllBtn = document.getElementById('apply-all-points-btn');
         const pointsInput = document.getElementById('points-to-use');
         const totalBookPriceEl = document.getElementById('total-book-price');
+        const deliveryFeeEl = document.getElementById('delivery-fee'); // ⭐ 새로 추가: 배송비 요소
 
         const parsePrice = (element) => {
             if (!element || !element.textContent) return 0;
             return parseInt(element.textContent.replace(/[^\d]/g, ''), 10) || 0;
         };
 
-        if (applyAllBtn && pointsInput && totalBookPriceEl) {
-            console.log("'모두 사용' 버튼 리스너 추가됨"); // <--- 로그 추가
+        if (applyAllBtn && pointsInput && totalBookPriceEl && deliveryFeeEl) { // ⭐ deliveryFeeEl 체크 추가
+            console.log("'모두 사용' 버튼 리스너 추가됨");
             applyAllBtn.addEventListener('click', () => {
                 const maxPointsInput = parseInt(pointsInput.getAttribute('max') || '0', 10);
                 const currentPointsStr = document.getElementById('current-points')?.textContent.replace(/[^\d]/g, '');
@@ -623,15 +669,17 @@
                 const maxPointsFromBalance = Math.min(maxPointsInput, availablePoints);
 
                 const subtotal = parsePrice(totalBookPriceEl);
+                const deliveryFee = parsePrice(deliveryFeeEl);
 
-                const maxPointsToUse = Math.min(maxPointsFromBalance, subtotal);
+                const totalCost = subtotal + deliveryFee;
+
+                const maxPointsToUse = Math.min(maxPointsFromBalance, totalCost);
 
                 pointsInput.value = maxPointsToUse;
-                // 2. 그 다음 업데이트 함수 호출
                 updatePriceSummary();
             });
         } else {
-            console.error("ID 'apply-all-points-btn' 또는 'points-to-use' 요소를 찾을 수 없음!");
+            console.error("ID 'apply-all-points-btn' 또는 필수 요소를 찾을 수 없음!");
         }
     }
 
@@ -696,13 +744,14 @@
         } else {
             packagingTotalRow.style.display = 'flex'; // 0원 아니면 표시
         }
-        // ▲▲▲ [수정] 상품 금액(subtotal)과 포장비(packagingTotal) 계산 ▲▲▲
+
+        const goodsCost = subtotal + packagingTotal;
         const deliveryFee = parsePrice(deliveryFeeEl);
 
-        const totalBeforeDiscount = subtotal + packagingTotal + deliveryFee;
-        const maxPointsFromBalance = Math.min(maxPoints, availablePoints);
-        const effectiveMaxPoints = Math.min(maxPointsFromBalance, totalBeforeDiscount);
+        const totalBeforeDiscount = goodsCost + deliveryFee;
 
+        const maxPointsAllowed = Math.min(maxPoints, availablePoints);
+        const effectiveMaxPoints = Math.min(maxPointsAllowed, totalBeforeDiscount);
         console.log("계산된 최대 사용 가능 포인트:", effectiveMaxPoints); // <--- 로그 추가!
 
         // 3. 포인트 유효성 검사 및 조정
@@ -712,9 +761,8 @@
         }
         if (usedPoints > effectiveMaxPoints) {
             usedPoints = effectiveMaxPoints;
-            pointsInput.value = usedPoints; // 최대값 초과 시 최대값으로 변경
+            pointsInput.value = usedPoints;
         }
-
         // 4. 할인 금액 계산 (1포인트 = 1원으로 가정)
         const pointDiscount = usedPoints;
         // const couponDiscount = parsePrice(couponDiscountAmountEl); // (쿠폰 구현 시)

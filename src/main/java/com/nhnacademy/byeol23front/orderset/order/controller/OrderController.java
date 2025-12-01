@@ -33,6 +33,7 @@ import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.PointOrderResponse;
 import com.nhnacademy.byeol23front.orderset.order.exception.OrderPrepareFailException;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -92,7 +93,7 @@ public class OrderController {
 
 	@PostMapping("/prepare")
 	@ResponseBody
-	public ResponseEntity<OrderPrepareResponse> prepareOrder(@RequestBody OrderPrepareRequest request,
+	public ResponseEntity<OrderPrepareResponse> prepareOrder(@Valid @RequestBody OrderPrepareRequest request,
 		@CookieValue(name = "Access-Token", required = false) String accessToken) {
 		ResponseEntity<OrderPrepareResponse> response = orderApiClient.prepareOrder(request, accessToken);
 
