@@ -15,6 +15,10 @@ import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
 import com.nhnacademy.byeol23front.minio.service.MinioService;
 import com.nhnacademy.byeol23front.minio.util.ImageDomain;
 import feign.FeignException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +49,11 @@ public class BookAdminController {
 	private static final String ALL_TAGS = "allTags";
 	private static final String ALL_PUBLISHERS = "allPublishers";
 
+	@Operation(summary = "도서 생성", description = "새로운 도서를 생성하고 이미지를 업로드합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "302", description = "도서 생성 성공 (리다이렉트)"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 데이터 또는 카테고리 미선택")
+	})
 	@PostMapping("/new")
 	public String createBook(@ModelAttribute BookCreateTmpRequest tmp, RedirectAttributes redirectAttributes) {
 		List<Long> categoryIds = tmp.categoryIds() != null ? tmp.categoryIds() : List.of();
@@ -102,6 +111,12 @@ public class BookAdminController {
 		}
 	}
 
+	@Operation(summary = "도서 수정", description = "도서 정보를 수정하고 이미지를 업데이트합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "302", description = "도서 수정 성공 (리다이렉트)"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 데이터 또는 카테고리 미선택")
+	})
+	@Parameter(name = "book-id", description = "도서 ID", required = true, example = "1")
 	@PostMapping("/{book-id}")
 	public String updateBook(@PathVariable("book-id") Long bookId, @ModelAttribute BookUpdateTmpRequest tmp,
 		RedirectAttributes redirectAttributes) {
@@ -171,6 +186,12 @@ public class BookAdminController {
 		}
 	}
 
+	@Operation(summary = "도서 수정 폼", description = "도서 수정을 위한 폼 페이지를 표시합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "도서 수정 폼 조회 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+	})
+	@Parameter(name = "book-id", description = "도서 ID", required = true, example = "1")
 	@GetMapping("/update/{book-id}")
 	public String bookUpdateForm(@PathVariable("book-id") Long id, Model model){
 		BookResponse book = bookApiClient.getBook(id).getBody();
@@ -207,6 +228,12 @@ public class BookAdminController {
 		return "admin/book/bookUpdateForm";
 	}
 
+	@Operation(summary = "도서 재고 수정 폼", description = "도서 재고 수정을 위한 폼 페이지를 표시합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "도서 재고 수정 폼 조회 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+	})
+	@Parameter(name = "book-id", description = "도서 ID", required = true, example = "1")
 	@GetMapping("/update/{book-id}/stock")
 	public String getBookStock(Model model, @PathVariable("book-id")Long bookId){
 		BookStockResponse bookStock = bookApiClient.getBookStock(bookId);
@@ -214,6 +241,12 @@ public class BookAdminController {
 		return "admin/book/bookStockUpdateForm";
 	}
 
+	@Operation(summary = "도서 재고 수정", description = "도서의 재고를 수정합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "302", description = "도서 재고 수정 성공 (리다이렉트)"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+	})
+	@Parameter(name = "book-id", description = "도서 ID", required = true, example = "1")
 	@PostMapping("/update/{book-id}/stock")
 	public String updateBookStock(@PathVariable("book-id")Long bookId, BookStockUpdateRequest request){
 		bookApiClient.updateBookStock(bookId, request);
@@ -221,6 +254,13 @@ public class BookAdminController {
 	}
 
 
+	@Operation(summary = "도서 목록 조회", description = "페이징된 도서 목록을 조회합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "도서 목록 조회 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+	})
+	@Parameter(name = "page", description = "페이지 번호 (0부터 시작)", example = "0")
+	@Parameter(name = "size", description = "페이지 크기", example = "20")
 	@GetMapping
 	public String getBooks(
 		@RequestParam(defaultValue = "0") int page,
@@ -237,6 +277,12 @@ public class BookAdminController {
 		return "admin/book/bookList";
 	}
 
+	@Operation(summary = "도서 생성 폼", description = "새로운 도서를 생성하기 위한 폼 페이지를 표시합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "도서 생성 폼 조회 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
+	})
+	@Parameter(name = "fromAladin", description = "알라딘 API에서 온 요청 여부", required = false, example = "true")
 	@GetMapping("/new")
 	public String bookForm(
 		@RequestParam(required = false) String fromAladin,
@@ -263,6 +309,12 @@ public class BookAdminController {
 		return "admin/book/bookForm";
 	}
 
+	@Operation(summary = "도서 삭제", description = "도서를 삭제합니다 (Soft Delete).")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "도서 삭제 성공"),
+		@ApiResponse(responseCode = "400", description = "삭제 실패 또는 잘못된 요청")
+	})
+	@Parameter(name = "book-id", description = "도서 ID", required = true, example = "1")
 	@PostMapping("/{book-id}/delete")
 	@ResponseBody
 	public ResponseEntity<Void> deleteBook(@PathVariable("book-id") Long id) {
