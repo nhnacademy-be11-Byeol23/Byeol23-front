@@ -29,16 +29,16 @@ public interface MemberApiClient {
 	MemberMyPageResponse getMember();
 
 	@PostMapping("/api/members/put")
-	ResponseEntity<MemberUpdateResponse> updateMember(@RequestBody MemberUpdateRequest request);
+	MemberUpdateResponse updateMember(@RequestBody MemberUpdateRequest request);
 
 	@PostMapping("/api/members/put/password")
-	ResponseEntity<MemberPasswordUpdateResponse> updateMemberPassword(@RequestBody MemberPasswordUpdateRequest request);
+	MemberPasswordUpdateResponse updateMemberPassword(@RequestBody MemberPasswordUpdateRequest request);
 
 	@PutMapping("api/members/reactivate")
-	ResponseEntity<Void> reactivateMember(@RequestBody MemberPasswordUpdateRequest request);
+	Void reactivateMember(@RequestBody MemberPasswordUpdateRequest request);
 
 	@PostMapping("/api/members/delete")
-	ResponseEntity<Void> deleteMember();
+	Void deleteMember();
 
 	@GetMapping("/api/members/check-id")
 	FindLoginIdResponse findLoginId(@RequestParam("loginId") String loginId);
