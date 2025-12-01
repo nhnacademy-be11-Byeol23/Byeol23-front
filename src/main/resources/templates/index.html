@@ -78,7 +78,9 @@
         <div class="col-lg-6">
           <div class="category-featured" data-aos="fade-right" data-aos-delay="200">
             <div class="category-image">
-              <img src="https://image.yes24.com/goods/153497469/XL" alt="베스트셀러 도서" class="img-fluid">
+                <a th:href="@{'/books/' + ${bestBooks[0].id()}}">
+                    <img th:src="${bestBooks[0].imageUrl}" th:alt="${bestBooks[0].title}" class="img-fluid">
+                </a>
             </div>
             <div class="category-content">
               <span class="category-tag">지금 인기</span>
