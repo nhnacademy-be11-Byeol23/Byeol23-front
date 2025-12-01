@@ -61,112 +61,53 @@
                     <h2>나의 위시리스트</h2>
                   </div>
 
-                  <div class="wishlist-grid">
-                    <!-- Wishlist Item 1 -->
-                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="100" data-book-id="1">
-                      <button class="btn-remove" type="button" aria-label="위시리스트에서 제거">
-                          <i class="bi bi-trash"></i>
-                        </button>
-                      <a th:href="@{http://localhost:10330/books/1}" class="wishlist-link">
-                        <div class="wishlist-image">
-                          <img src="https://image.yes24.com/goods/160408776/XL" alt="대형주 추세추종 투자법칙" loading="lazy">
-                          <div class="sale-badge">-13%</div>
-                      </div>
-                      <div class="wishlist-content">
-                          <div class="product-category">이종호 저 | 사피엔테스</div>
-                          <h4>대형주 추세추종 투자법칙</h4>
-                        <div class="product-meta">
-                          <div class="rating">
-                            <i class="bi bi-star-fill"></i>
-                              <span>4.5 (5)</span>
-                          </div>
-                          <div class="price">
-                              <span class="current">28,000원</span>
-                              <span class="original">32,000원</span>
-                            </div>
-                          </div>
-                        </div>
-                      </a>
-                    </div>
-
-                    <!-- Wishlist Item 2 -->
-                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="200" data-book-id="10">
-                      <button class="btn-remove" type="button" aria-label="위시리스트에서 제거">
-                          <i class="bi bi-trash"></i>
-                        </button>
-                      <a th:href="@{http://localhost:10330/books/10}" class="wishlist-link">
-                        <div class="wishlist-image">
-                          <img src="https://image.yes24.com/goods/136734901/XL" alt="돈의 심리학" loading="lazy">
-                          <div class="sale-badge">-10%</div>
-                      </div>
-                      <div class="wishlist-content">
-                          <div class="product-category">모건 하우절 저 | 인플루엔셜</div>
-                          <h4>돈의 심리학</h4>
-                        <div class="product-meta">
-                          <div class="rating">
-                            <i class="bi bi-star-fill"></i>
-                              <span>4.0 (5)</span>
-                          </div>
-                          <div class="price">
-                              <span class="current">18,000원</span>
-                              <span class="original">20,000원</span>
-                            </div>
-                          </div>
-                        </div>
-                      </a>
-                    </div>
-
-                    <!-- Wishlist Item 3 -->
-                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="300" data-book-id="11">
-                      <button class="btn-remove" type="button" aria-label="위시리스트에서 제거">
-                          <i class="bi bi-trash"></i>
-                        </button>
-                      <a th:href="@{http://localhost:10330/books/11}" class="wishlist-link">
-                        <div class="wishlist-image">
-                          <img src="https://image.yes24.com/goods/96547408/XL" alt="용의자 X의 헌신" loading="lazy">
-                      </div>
-                      <div class="wishlist-content">
-                          <div class="product-category">히가시노 게이고 저 | 재인</div>
-                          <h4>용의자 X의 헌신</h4>
-                        <div class="product-meta">
-                          <div class="rating">
-                            <i class="bi bi-star-fill"></i>
-                              <span>5.0 (5)</span>
-                          </div>
-                          <div class="price">
-                              <span class="current">14,400원</span>
-                            </div>
-                          </div>
-                        </div>
-                      </a>
-                </div>
-
-                    <!-- Wishlist Item 4 -->
-                    <div class="wishlist-card" data-aos="fade-up" data-aos-delay="400" data-book-id="9">
-                      <button class="btn-remove" type="button" aria-label="위시리스트에서 제거">
+                  <div class="wishlist-grid" th:if="${likes != null and !likes.isEmpty()}">
+                    <div th:each="like, iterStat : ${likes}" 
+                         class="wishlist-card" 
+                         th:attr="data-aos='fade-up', data-aos-delay=${iterStat.index * 100}, data-book-id=${like.bookId}">
+                      <button class="btn-remove" 
+                              type="button" 
+                              aria-label="위시리스트에서 제거"
+                              th:data-book-id="${like.bookId}"
+                              onclick="deleteLike(this)">
                         <i class="bi bi-trash"></i>
                       </button>
-                      <a th:href="@{http://localhost:10330/books/9}" class="wishlist-link">
+                      <a th:href="@{'/books/' + ${like.bookId}}" class="wishlist-link">
                         <div class="wishlist-image">
-                          <img src="https://image.yes24.com/goods/147178677/XL" alt="단 한 줄만 내 마음에 새긴다고 해도" loading="lazy">
-                          <div class="sale-badge">-10%</div>
+                          <img th:src="${like.imageUrl != null ? like.imageUrl : 'https://image.yes24.com/momo/Noimg_L.jpg'}" 
+                               th:alt="${like.bookName}" 
+                               loading="lazy">
+                          <div class="sale-badge" 
+                               th:if="${like.regularPrice != null and like.salePrice != null and like.regularPrice.compareTo(like.salePrice) > 0}">
+                            <span th:text="'-' + ${#numbers.formatInteger((like.regularPrice.doubleValue() - like.salePrice.doubleValue()) * 100.0 / like.regularPrice.doubleValue(), 0)} + '%'"></span>
+                          </div>
                         </div>
                         <div class="wishlist-content">
-                          <div class="product-category">나민애 저 | 포레스트북스</div>
-                          <h4>단 한 줄만 내 마음에 새긴다고 해도</h4>
+                          <div class="product-category" 
+                               th:text="${like.contributors != null and !like.contributors.isEmpty() ? like.contributors + ' | ' + like.publisherName : like.publisherName}">
+                          </div>
+                          <h4 th:text="${like.bookName}"></h4>
                           <div class="product-meta">
-                          <div class="rating">
-                            <i class="bi bi-star-fill"></i>
-                              <span>4.5 (5)</span>
-                          </div>
+                            <div class="rating" th:if="${like.reviewCount != null and like.reviewCount > 0}">
+                              <i class="bi bi-star-fill"></i>
+                              <span th:text="${like.ratingAverage != null ? like.ratingAverage : '0.0'} + ' (' + ${like.reviewCount} + ')'"></span>
+                            </div>
                             <div class="price">
-                              <span class="current">8,100원</span>
-                              <span class="original">9,000원</span>
-                          </div>
+                              <span class="current" 
+                                    th:text="${#numbers.formatDecimal(like.salePrice, 0, 'COMMA', 0, 'POINT')} + '원'">
+                              </span>
+                              <span class="original" 
+                                    th:if="${like.regularPrice != null and like.regularPrice.compareTo(like.salePrice) > 0}"
+                                    th:text="${#numbers.formatDecimal(like.regularPrice, 0, 'COMMA', 0, 'POINT')} + '원'">
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </a>
                     </div>
+                  </div>
+                  <div th:if="${likes == null or likes.isEmpty()}" class="empty-wishlist">
+                    <p>위시리스트가 비어있습니다.</p>
                   </div>
                 </div>
               </div>
@@ -331,9 +272,49 @@
   <!-- Main JS File -->
   <script src="/assets/js/main.js"></script>
 
-  </body>
+  <script>
+    function deleteLike(button) {
+      const bookId = button.dataset.bookId;
+      if (!bookId) {
+        alert('도서 ID를 찾을 수 없습니다.');
+        return;
+      }
 
-</html>
-              </body>
+      if (!confirm('이 상품을 위시리스트에서 삭제하시겠습니까?')) {
+        return;
+      }
+
+      fetch(`/likes/${bookId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(body => {
+            throw new Error(body.message || '삭제 실패');
+          });
+        }
+        // 삭제 성공 시 해당 카드 제거
+        const card = button.closest('.wishlist-card');
+        if (card) {
+          card.remove();
+          
+          // 위시리스트가 비어있으면 메시지 표시
+          const grid = document.querySelector('.wishlist-grid');
+          if (grid && grid.children.length === 0) {
+            grid.innerHTML = '<div class="empty-wishlist"><p>위시리스트가 비어있습니다.</p></div>';
+          }
+        }
+      })
+      .catch(err => {
+        console.error('삭제 실패:', err);
+        alert(err.message || '위시리스트에서 삭제하는 중 오류가 발생했습니다.');
+      });
+    }
+  </script>
+
+  </body>
 
 </html>

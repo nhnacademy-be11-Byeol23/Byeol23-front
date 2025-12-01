@@ -161,8 +161,10 @@
                 <i class="bi bi-lightning"></i>
                 바로 구매
               </button>
-              <button class="btn icon-action" title="Add to Wishlist">
-                <i class="bi bi-heart"></i>
+              <button class="btn icon-action wishlist-btn" 
+                      id="wishlist-btn" 
+                      th:attr="data-book-id=${book.bookId}">
+                <i class="bi bi-heart" id="wishlist-icon"></i>
               </button>
             </div>
           </div>
@@ -490,6 +492,57 @@
               alert("장바구니 처리 중 오류 발생");
           }
       });
+  });
+
+  // 위시리스트 버튼 클릭 이벤트
+  document.addEventListener("DOMContentLoaded", () => {
+    const wishlistBtn = document.getElementById("wishlist-btn");
+    const wishlistIcon = document.getElementById("wishlist-icon");
+    
+    if (!wishlistBtn || !wishlistIcon) return;
+    
+    const bookId = wishlistBtn.dataset.bookId;
+    let isLiked = false; // 초기 상태 (나중에 서버에서 확인 가능)
+    
+    wishlistBtn.addEventListener("click", async () => {
+      try {
+        const res = await fetch(`/likes/${bookId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        });
+        
+        if (!res.ok) {
+          if (res.status === 401) {
+            alert("로그인이 필요한 서비스입니다.");
+            window.location.href = `/members/login`;
+            return;
+          }
+          const body = await res.json().catch(() => ({}));
+          alert(body.message || "위시리스트 처리 중 오류가 발생했습니다.");
+          return;
+        }
+        
+        // 토글 상태 변경
+        isLiked = !isLiked;
+        
+        // 아이콘 변경
+        if (isLiked) {
+          wishlistIcon.classList.remove("bi-heart");
+          wishlistIcon.classList.add("bi-heart-fill");
+          wishlistBtn.style.color = "#e74c3c"; // 빨간색
+          alert("위시리스트에 추가되었습니다.");
+        } else {
+          wishlistIcon.classList.remove("bi-heart-fill");
+          wishlistIcon.classList.add("bi-heart");
+          wishlistBtn.style.color = ""; // 기본 색상
+          alert("위시리스트에서 제거되었습니다.");
+        }
+        
+      } catch (err) {
+        console.error(err);
+        alert("위시리스트 처리 중 오류가 발생했습니다.");
+      }
+    });
   });
 </script>
 </body>
