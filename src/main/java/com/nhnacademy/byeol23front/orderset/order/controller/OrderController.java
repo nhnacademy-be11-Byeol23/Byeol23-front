@@ -73,6 +73,8 @@ public class OrderController {
 
 		MemberMyPageResponse member = memberApiClient.getMember().getBody();
 
+		BookResponse book = bookApiClient.getBook(bookId).getBody();
+
 		CartOrderRequest cartOrderRequest = orderUtil.createOrderRequest(bookIds, quantities);
 		BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(cartOrderRequest).getBody();
 

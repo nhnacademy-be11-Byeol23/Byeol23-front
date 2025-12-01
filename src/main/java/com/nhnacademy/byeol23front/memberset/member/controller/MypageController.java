@@ -63,13 +63,13 @@ public class MypageController {
 
 	@ModelAttribute("member")
 	public MemberMyPageResponse addMemberInfoToModel() {
-		ResponseEntity<MemberMyPageResponse> response = memberApiClient.getMember();
-		return response.getBody();
+		return memberApiClient.getMember();
 	}
 
 	@GetMapping
 	public String getMypage(Model model) {
-		MemberMyPageResponse resp = memberApiClient.getMember().getBody();
+		log.info("mypage entrance");
+		MemberMyPageResponse resp = memberApiClient.getMember();
 		model.addAttribute("activeTab", "settings");
 		model.addAttribute("member", resp);
 		return "mypage/settings";
@@ -140,7 +140,7 @@ public class MypageController {
 
 	@GetMapping("/settings")
 	public String getSettings(Model model) {
-		MemberMyPageResponse resp = memberApiClient.getMember().getBody();
+		MemberMyPageResponse resp = memberApiClient.getMember();
 		model.addAttribute("member", resp);
 		return "mypage/settings";
 	}
