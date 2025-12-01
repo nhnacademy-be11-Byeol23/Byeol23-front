@@ -16,7 +16,4 @@ public record BookSearchResultResponse(
         float ratingAverage,
         boolean isSoldOut
 ) {
-    public Long getIdAsLong() {
-        return Long.parseLong(id);
-    }
 }

@@ -3,6 +3,7 @@ package com.nhnacademy.byeol23front;
 import java.util.List;
 
 import com.nhnacademy.byeol23front.bookset.search.client.SearchApiClient;
+import com.nhnacademy.byeol23front.bookset.search.dto.BookSearchResultLongIdResponse;
 import com.nhnacademy.byeol23front.bookset.search.dto.BookSearchResultResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -21,10 +22,10 @@ public class HomeController {
 	@GetMapping("/")
 	public String mainPage(Model model) {
 		var top3BooksResult = searchApiClient.searchBestBooks(0, 3);
-		var top3Books = top3BooksResult.content();
+		var top3Books = BookSearchResultLongIdResponse.fromList(top3BooksResult.content());
 
 		var bestBooksResult = searchApiClient.searchBestBooks(0, 12);
-		var bestBooks = bestBooksResult.content();
+		var bestBooks = BookSearchResultLongIdResponse.fromList(bestBooksResult.content());
 		
 		log.info("=== 메인 페이지 베스트 도서 조회 ===");
 		log.info("Hero Section 도서 수: {}", top3Books.size());

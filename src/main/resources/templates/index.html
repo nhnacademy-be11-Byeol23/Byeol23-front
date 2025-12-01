@@ -42,7 +42,7 @@
         <div class="book-cards-stack" data-aos="fade-left" data-aos-delay="200">
           <div class="book-card card-1" data-aos="zoom-in" data-aos-delay="300"
                th:if="${top3Books != null && !top3Books.isEmpty()}">
-            <a th:href="|/books/${top3Books[0].getIdAsLong()}|">
+            <a th:href="|/books/${top3Books[0].id()}|">
               <img th:src="${(!#strings.isEmpty(top3Books[0].imageUrl())) ? top3Books[0].imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}" 
                    th:alt="${top3Books[0].title()}"
                    onerror="this.src='https://image.yes24.com/momo/Noimg_L.jpg'; this.onerror=null;">
@@ -50,7 +50,7 @@
           </div>
           <div class="book-card card-2" data-aos="zoom-in" data-aos-delay="400"
                th:if="${top3Books != null && top3Books.size() > 1}">
-            <a th:href="|/books/${top3Books[1].getIdAsLong()}|">
+            <a th:href="|/books/${top3Books[1].id()}|">
               <img th:src="${(!#strings.isEmpty(top3Books[1].imageUrl())) ? top3Books[1].imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}" 
                    th:alt="${top3Books[1].title()}"
                    onerror="this.src='https://image.yes24.com/momo/Noimg_L.jpg'; this.onerror=null;">
@@ -58,7 +58,7 @@
           </div>
           <div class="book-card card-3" data-aos="zoom-in" data-aos-delay="500"
                th:if="${top3Books != null && top3Books.size() > 2}">
-            <a th:href="|/books/${top3Books[2].getIdAsLong()}|">
+            <a th:href="|/books/${top3Books[2].id()}|">
               <img th:src="${(!#strings.isEmpty(top3Books[2].imageUrl())) ? top3Books[2].imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}" 
                    th:alt="${top3Books[2].title()}"
                    onerror="this.src='https://image.yes24.com/momo/Noimg_L.jpg'; this.onerror=null;">
@@ -168,7 +168,7 @@
 
         <!-- 베스트 도서 목록 -->
         <div th:each="book : ${bestBooks}" class="col-lg-2 col-md-4 col-sm-6"
-             th:with="bookId=${book.getIdAsLong()}">
+             th:with="bookId=${book.id()}">
           <div class="product-item" th:attr="data-book-id=${book.id()}">
             <div class="product-image">
               <a th:href="|/books/${bookId}|">
