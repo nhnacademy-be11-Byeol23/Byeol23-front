@@ -29,5 +29,6 @@ public class AuthHelper {
 		}
 
 		return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
+
 	}
 }
