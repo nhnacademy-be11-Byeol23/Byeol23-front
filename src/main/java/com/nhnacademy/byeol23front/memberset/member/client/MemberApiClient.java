@@ -35,10 +35,10 @@ public interface MemberApiClient {
 	MemberPasswordUpdateResponse updateMemberPassword(@RequestBody MemberPasswordUpdateRequest request);
 
 	@PutMapping("api/members/reactivate")
-	Void reactivateMember(@RequestBody MemberPasswordUpdateRequest request);
+	void reactivateMember(@RequestBody MemberPasswordUpdateRequest request);
 
 	@PostMapping("/api/members/delete")
-	Void deleteMember();
+	void deleteMember();
 
 	@GetMapping("/api/members/check-id")
 	FindLoginIdResponse findLoginId(@RequestParam("loginId") String loginId);
