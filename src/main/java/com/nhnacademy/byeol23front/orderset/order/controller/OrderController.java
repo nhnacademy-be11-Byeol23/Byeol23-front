@@ -1,12 +1,12 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import com.nhnacademy.byeol23front.bookset.category.dto.CategoryLeafResponse;
+import com.nhnacademy.byeol23front.couponset.coupon.client.CouponApiClient;
+import com.nhnacademy.byeol23front.couponset.coupon.dto.OrderItemRequest;
+import com.nhnacademy.byeol23front.couponset.coupon.dto.UsableCouponInfoResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +49,7 @@ public class OrderController {
 	private final OrderUtil orderUtil;
 	private final BookApiClient bookApiClient;
 	private final MemberApiClient memberApiClient;
+	private final CouponApiClient couponApiClient;
 
 	@Value("${tossPayment.client-key}")
 	private String tossClientKey;
@@ -70,6 +71,17 @@ public class OrderController {
 		BookResponse book = bookApiClient.getBook(bookId).getBody();
 		MemberMyPageResponse member = memberApiClient.getMember().getBody();
 
+		List<OrderItemRequest> orderItemRequests = List.of(new OrderItemRequest(bookId, quantity));
+		List<UsableCouponInfoResponse> usableCoupons = couponApiClient.getUsableCoupons(orderItemRequests).getBody();
+		if(!usableCoupons.isEmpty()){
+			for(UsableCouponInfoResponse couponInfoResponse : usableCoupons){
+				log.info("gd");
+				log.info("사용가능 쿠폰 : {}", couponInfoResponse.toString());
+			}
+		}else{
+			log.info("사용가능 쿠폰 없음");
+		}
+
 		String firstImageUrl = (book.images() != null && !book.images().isEmpty())
 			? book.images().getFirst().imageUrl()
 			: "https://image.yes24.com/momo/Noimg_L.jpg";
@@ -90,6 +102,12 @@ public class OrderController {
 		model.addAttribute("userPoint", member.currentPoint());
 
 		model.addAttribute("clientKey", tossClientKey);
+
+		if (usableCoupons != null) {
+			model.addAttribute("usableCoupons", usableCoupons);
+		} else {
+			model.addAttribute("usableCoupons", List.of()); // null 방지
+		}
 
 		return "order/checkout";
 	}

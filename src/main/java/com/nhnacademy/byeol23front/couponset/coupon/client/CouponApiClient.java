@@ -1,8 +1,6 @@
 package com.nhnacademy.byeol23front.couponset.coupon.client;
 
-import com.nhnacademy.byeol23front.couponset.coupon.dto.CouponIssueRequestDto;
-import com.nhnacademy.byeol23front.couponset.coupon.dto.IssuedCouponInfoResponseDto;
-import com.nhnacademy.byeol23front.couponset.coupon.dto.UsedCouponInfoResponseDto;
+import com.nhnacademy.byeol23front.couponset.coupon.dto.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,4 +21,7 @@ public interface CouponApiClient {
 
     @GetMapping("/api/coupon/used")
     ResponseEntity<List<UsedCouponInfoResponseDto>> getUsedCoupons();
+
+    @PostMapping("/api/coupon/usable")
+    ResponseEntity<List<UsableCouponInfoResponse>> getUsableCoupons(@RequestBody List<OrderItemRequest> request);
 }

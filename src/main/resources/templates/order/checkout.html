@@ -410,6 +410,7 @@
         initPointInputListener();
         initApplyAllPointsButton();
         initPackagingModal();
+        initCouponSelection();
 
         const findZipBtn = document.getElementById('find-zip-btn');
         if (findZipBtn) {
@@ -871,6 +872,51 @@
         });
     }
 
+
+    function initCouponSelection() {
+        const selectCouponBtn = document.getElementById('select-coupon-btn');
+        const couponModal = document.getElementById('couponSelectModal');
+        const applyCouponButton = document.getElementById('applyCouponButton');
+
+        if (!selectCouponBtn || !couponModal) return;
+
+        selectCouponBtn.addEventListener('click', () => {
+            const modalInstance = new bootstrap.Modal(couponModal);
+            modalInstance.show();
+        });
+
+        if (applyCouponButton) {
+            applyCouponButton.addEventListener('click', () => {
+
+                // 1. 모달 닫기
+                const modalInstance = bootstrap.Modal.getInstance(couponModal);
+                if (modalInstance) modalInstance.hide();
+
+                // 🌟🌟🌟 [최종 해결] 잔상 강제 동기 제거 🌟🌟🌟
+                // '적용' 버튼 클릭 직후, 다른 동작보다 먼저 페이지를 복구합니다.
+                document.body.classList.remove('modal-open');
+                // document.body.style.paddingRight = ''; // 패딩 문제 발생 시 추가
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => backdrop.remove());
+
+                // 2. 가격 요약 업데이트 (페이지 복구 후 실행)
+                updatePriceSummary();
+            });
+        }
+
+        // 2. hidden.bs.modal 이벤트: 취소/외부 클릭 시 잔상 제거 (동일하게 유지)
+        //    이 코드는 '취소' 버튼을 위해 필요하며, '적용' 버튼 클릭 시 위 로직이 더 빨리 실행됩니다.
+        couponModal.addEventListener('hidden.bs.modal', function () {
+            document.body.classList.remove('modal-open');
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+
+            // 💡 추가: body에 직접 style이 남아있을 경우를 대비하여 style도 제거
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+        });
+    }
+
 </script>
 <div class="modal fade" id="packagingSelectModal" tabindex="-1" aria-labelledby="packagingModalLabel"
      aria-hidden="true">
@@ -931,5 +977,70 @@
         </div>
     </div>
 </div>
+<!--쿠폰 modal-->
+<div class="modal fade" id="couponSelectModal" tabindex="-1" aria-labelledby="couponModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="couponModalLabel">사용 가능한 쿠폰 선택</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="selected_coupon_id_hidden" name="selectedCouponId" value="">
+                <input type="hidden" id="coupon_discount_amount_hidden" value="0">
+
+                <div th:if="${usableCoupons == null || #lists.isEmpty(usableCoupons)}">
+                    <p class="text-center text-muted">현재 주문 상품에 적용 가능한 쿠폰이 없습니다.</p>
+                </div>
+                <div th:unless="${usableCoupons == null || #lists.isEmpty(usableCoupons)}" class="list-group">
+
+                    <label class="list-group-item list-group-item-action d-flex align-items-center">
+                        <input class="form-check-input me-3 coupon-radio" type="radio" name="couponSelect" value="0" checked data-name="쿠폰 미적용">
+                        <i class="bi bi-x-circle me-2 text-danger"></i>
+                        <strong>쿠폰 미적용</strong>
+                        <span class="text-muted ms-auto">(할인 없음)</span>
+                    </label>
+
+                    <th:block th:each="coupon : ${usableCoupons}">
+                        <label class="list-group-item list-group-item-action d-flex align-items-center"
+                               th:data-coupon-id="${coupon.couponId}"
+                               th:data-discount-value="${coupon.discountValue}"
+                               th:data-discount-type="${coupon.discountType}"
+                               th:data-criterion-price="${coupon.criterionPrice}"
+                               th:data-discount-limit="${coupon.discountLimit}">
+
+                            <input class="form-check-input me-3 coupon-radio" type="radio" name="couponSelect"
+                                   th:id="'coupon-' + ${coupon.couponId}"
+                                   th:value="${coupon.couponId}"
+                                   th:data-coupon-name="${coupon.couponName}">
+
+                            <div class="flex-grow-1">
+                                <strong th:text="${coupon.couponName}">쿠폰 이름</strong>
+                                <span class="badge bg-secondary ms-2" th:text="${coupon.policyTargetType}">WELCOME</span>
+                                <small class="text-muted d-block"
+                                       th:text="'만료일: ' + ${#temporals.format(coupon.expiredDate, 'yyyy-MM-dd')}">만료일</small>
+                                <small class="text-muted d-block"
+                                       th:text="'최소 주문액: ' + ${#numbers.formatInteger(coupon.criterionPrice, 0, 'COMMA')} + '원'">최소 주문액</small>
+                            </div>
+
+                            <span class="fw-bold text-success ms-auto"
+                                  th:text="${coupon.discountType == 'RATE' ? (coupon.discountValue + '% 할인') : (#numbers.formatInteger(coupon.discountValue, 0, 'COMMA') + '원 할인')}">
+                                할인 금액/율
+                            </span>
+                            <small th:if="${coupon.discountType == 'RATE'}" class="text-muted d-block ms-2"
+                                   th:text="'(최대 ' + ${#numbers.formatInteger(coupon.discountLimit, 0, 'COMMA')} + '원)'"></small>
+                        </label>
+                    </th:block>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" id="applyCouponButton">적용</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
