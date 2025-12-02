@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.Map;
 
 
 @FeignClient(name = "BYEOL23-GATEWAY", contextId = "couponApiClient")
@@ -24,4 +25,7 @@ public interface CouponApiClient {
 
     @PostMapping("/api/coupon/usable")
     ResponseEntity<List<UsableCouponInfoResponse>> getUsableCoupons(@RequestBody List<OrderItemRequest> request);
+
+    @PostMapping("/api/coupon/calculate-discount")
+    ResponseEntity<Map<String, Long>> calculateDiscount(@RequestBody CouponApplyRequest request);
 }
