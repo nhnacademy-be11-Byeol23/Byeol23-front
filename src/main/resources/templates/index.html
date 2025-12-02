@@ -32,7 +32,6 @@
           <div class="features-list" data-aos="fade-up" data-aos-delay="300">
             <div class="feature-item">
               <i class="bi bi-truck"></i>
-              <span>20,000원 이상 구매 시 무료 배송</span>
             </div>
           </div>
         </div>
@@ -78,9 +77,7 @@
         <div class="col-lg-6">
           <div class="category-featured" data-aos="fade-right" data-aos-delay="200">
             <div class="category-image">
-                <a th:href="@{'/books/' + ${bestBooks[0].id()}}">
-                    <img th:src="${bestBooks[0].imageUrl}" th:alt="${bestBooks[0].title}" class="img-fluid">
-                </a>
+                <img th:src="${bestBooks[0].imageUrl}" th:alt="${bestBooks[0].title}" class="img-fluid">
             </div>
             <div class="category-content">
               <span class="category-tag">지금 인기</span>
@@ -95,54 +92,16 @@
 
           <div class="row gy-4">
 
-            <div class="col-xl-6">
+            <div th:each="category : ${categories}" class="col-xl-6">
               <div class="category-card cat-men" data-aos="fade-up" data-aos-delay="300">
                 <div class="category-image">
-                  <img src="https://image.yes24.com/goods/124909028/XL" alt="만화책" class="img-fluid">
+                  <img th:src="${category.repImgUrl()}" th:alt="${category.categoryName()}" class="img-fluid">
                 </div>
-                <div class="category-content">
-                  <h4>만화책</h4>
-                  <p>1,242권</p>
-                  <a href="#" class="card-link">둘러보기 <i class="bi bi-arrow-right"></i></a>
-                </div>
-              </div>
-            </div>
 
-            <div class="col-xl-6">
-              <div class="category-card cat-kids" data-aos="fade-up" data-aos-delay="400">
-                <div class="category-image">
-                  <img src="https://image.yes24.com/goods/118397512/XL" alt="소설" class="img-fluid">
-                </div>
                 <div class="category-content">
-                  <h4>소설</h4>
-                  <p>2,185권</p>
-                  <a href="#" class="card-link">둘러보기 <i class="bi bi-arrow-right"></i></a>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-6">
-              <div class="category-card cat-cosmetics" data-aos="fade-up" data-aos-delay="500">
-                <div class="category-image">
-                  <img src="https://image.yes24.com/goods/136734901/XL" alt="경제/경영" class="img-fluid">
-                </div>
-                <div class="category-content">
-                  <h4>경제/경영</h4>
-                  <p>827권</p>
-                  <a href="#" class="card-link">둘러보기 <i class="bi bi-arrow-right"></i></a>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-6">
-              <div class="category-card cat-accessories" data-aos="fade-up" data-aos-delay="600">
-                <div class="category-image">
-                  <img src="https://image.yes24.com/goods/150162254/XL" alt="자격증/수험서" class="img-fluid">
-                </div>
-                <div class="category-content">
-                  <h4>자격증/<br>수험서</h4>
-                  <p>1,508권</p>
-                  <a href="#" class="card-link">둘러보기 <i class="bi bi-arrow-right"></i></a>
+                  <h4 th:text="${category.categoryName()}"></h4>
+                  <p th:text="${category.categoryBookCount()}+ ' 권'"></p>
+                  <a th:href="@{/categories/{id}/books(id=${category.id()}, pathId=${category.pathId()})}" class="card-link">둘러보기 <i class="bi bi-arrow-right"></i></a>
                 </div>
               </div>
             </div>
@@ -180,11 +139,6 @@
                      loading="lazy"
                      onerror="this.src='https://image.yes24.com/momo/Noimg_L.jpg'; this.onerror=null;">
               </a>
-              <div class="product-actions">
-                <button class="action-btn wishlist-btn">
-                  <i class="bi bi-heart"></i>
-                </button>
-              </div>
             </div>
             <div class="product-info">
               <div class="product-category" th:text="${#strings.arrayJoin(book.author(), ', ')} + ' | ' + ${book.publisher()}"></div>
