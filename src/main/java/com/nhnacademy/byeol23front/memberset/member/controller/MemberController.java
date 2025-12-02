@@ -101,7 +101,7 @@ public class MemberController {
 		memberService.logout();
 
 		response.addHeader("Set-Cookie", deleteCookie("Access-Token", "/"));
-		response.addHeader("Set-Cookie", deleteCookie("Refresh-Token", "/members"));
+		response.addHeader("Set-Cookie", deleteCookie("Refresh-Token", "/"));
 
 		return "redirect:/";
 	}
@@ -155,7 +155,6 @@ public class MemberController {
 		String path;
 		String tokenType;
 		Long expiration;
-		String prefix;
 		String sameSite = "Lax";			//중요: https요청에는 none으로 설정해도 됨, http요청은 secure가 false상태이므로 브라우저에서 none에 대한 쿠키는 거부하여 lax로 설정
 		if(token instanceof RefreshToken) {
 			tokenType = "Refresh-Token";

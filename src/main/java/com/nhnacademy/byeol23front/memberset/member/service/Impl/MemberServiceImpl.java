@@ -7,7 +7,6 @@ import com.nhnacademy.byeol23front.memberset.member.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.CookieValue;
 
 @Slf4j
 @Service

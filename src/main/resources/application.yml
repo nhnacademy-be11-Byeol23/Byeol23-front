@@ -44,6 +44,6 @@ payco:
 
 jwt:
   access-token:
-    expiration: "300000"
+    expiration: "30000"
   refresh-token:
     expiration: "3000000"

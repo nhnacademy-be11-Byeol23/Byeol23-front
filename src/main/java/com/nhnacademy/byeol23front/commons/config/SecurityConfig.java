@@ -1,6 +1,6 @@
 package com.nhnacademy.byeol23front.commons.config;
 
-import com.nhnacademy.byeol23front.commons.filter.CustomAuthenticationEntryPoint;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,8 +10,11 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 import com.nhnacademy.byeol23front.commons.filter.JwtAuthenticationFilter;
 import com.nhnacademy.byeol23front.commons.parser.JwtParser;
+import com.nhnacademy.byeol23front.memberset.member.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +26,11 @@ import lombok.extern.slf4j.Slf4j;
 public class SecurityConfig {
 
 	private final JwtParser jwtParser;
-	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+	private final MemberService memberService;
+
+
+	@Value("${jwt.access-token.expiration}")
+	private long accessTokenExp;
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -33,19 +40,30 @@ public class SecurityConfig {
 			.httpBasic(AbstractHttpConfigurer::disable)   // 기본 인증
 			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
 				.requestMatchers(
 					"/mypage/**",
-					"/admin/**"
+					"/admin/**",
+					"/admin"
 				).authenticated()
 				.anyRequest().permitAll()
 			)
 			.addFilterBefore(
-				new JwtAuthenticationFilter(jwtParser),
+				new JwtAuthenticationFilter(jwtParser, memberService, accessTokenExp),
 				UsernamePasswordAuthenticationFilter.class
 			)
 			.exceptionHandling(ex -> ex
-					.authenticationEntryPoint(customAuthenticationEntryPoint)
+				.authenticationEntryPoint((request, response, authException) -> {
+					// JwtAuthenticationFilter에서 이미 처리했으므로 여기서는 추가 처리
+					// Fetch/AJAX 요청인지 확인
+					if (request.getHeader("X-Request-Type") != null || 
+						"XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
+						response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+						response.setContentType("application/json");
+						response.getWriter().write("{\"error\":\"Unauthorized\",\"redirect\":\"/members/login\"}");
+					} else {
+						response.sendRedirect("/members/login");
+					}
+				})
 			);
 
 		return http.build();
