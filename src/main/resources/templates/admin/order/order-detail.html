@@ -91,10 +91,10 @@
                 <span class="value text-end" th:text="${#numbers.formatCurrency(appliedFee)}">₩0</span>
             </div>
 
-            <th:block th:if="${pointDiscount > 0}">
+            <th:block th:if="${orderDetail.usedPoints != null and orderDetail.usedPoints.intValue() > 0}">
                 <div class="info-row d-flex justify-content-between mb-1">
                     <span class="label text-danger">포인트 할인:</span>
-                    <span class="value text-end text-danger" th:text="'-' + ${#numbers.formatCurrency(pointDiscount)}">₩0</span>
+                    <span class="value text-end text-danger" th:text="'-' + ${#numbers.formatCurrency(orderDetail.usedPoints)}">₩0</span>
                 </div>
             </th:block>
 

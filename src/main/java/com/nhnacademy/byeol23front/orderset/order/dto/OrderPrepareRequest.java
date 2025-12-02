@@ -36,5 +36,7 @@ public record OrderPrepareRequest(
 	@NotNull(message = "주문 상품 목록은 비어 있을 수 없습니다.")
 	List<BookInfoRequest> bookInfoRequestList,
 
-	String orderPassword
+	String orderPassword,
+
+	BigDecimal usedPoints
 ) {}

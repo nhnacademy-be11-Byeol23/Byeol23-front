@@ -191,6 +191,27 @@
                                                        th:value="${defaultAddress?.addressExtra}"></div>
                                         </div>
                                     </div>
+                                    <div class="section-content">
+                                        <div class="form-group mt-3">
+                                            <label class="form-label">배송일 선택 <small class="text-muted">(도착 예상일)</small></label>
+                                            <div class="delivery-date-buttons d-flex flex-wrap gap-2">
+                                                <th:block th:each="dateInfo, iterStat : ${deliveryDates}">
+                                                    <input type="radio" class="btn-check" name="deliveryDate"
+                                                           th:id="'date-' + ${dateInfo.valueDate}"
+                                                           th:value="${dateInfo.valueDate}"
+                                                           th:checked="${iterStat.first}"
+                                                           autocomplete="off">
+                                                    <label class="btn btn-outline-secondary"
+                                                           th:for="'date-' + ${dateInfo.valueDate}"
+                                                           th:text="${dateInfo.dayName} + ' (' + ${dateInfo.displayDate} + ')'">
+                                                        날짜 버튼
+                                                    </label>
+                                                </th:block>
+                                            </div>
+                                            <small class="text-muted d-block mt-1">주말 및 공휴일 제외, 5 영업일 이내 선택
+                                                가능합니다.</small>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -407,8 +428,6 @@
         initApplyAllPointsButton();
         initPackagingModal();
         initAddressSelectModal();
-        const defaultAddress = /*[[${defaultAddress}]]*/ null;
-        initDefaultAddress(defaultAddress);
         const findZipBtn = document.getElementById('find-zip-btn');
         if (findZipBtn) {
             findZipBtn.addEventListener('click', sample6_execDaumPostcode);
@@ -512,6 +531,9 @@
 
             const currentFinalPrice = parsePrice(actualOrderPriceEl.textContent); // 미리 찾아둔 요소 사용
 
+            const pointsInput = document.getElementById('points-to-use');
+            const usedPointsValue = parseInt(pointsInput.value, 10) || 0;
+
             const orderItems = document.querySelectorAll('.order-summary-content .order-item');
             let orderName = "주문 상품"; // 기본값
             if (!customerName || customerName.length === 0) {
@@ -559,7 +581,8 @@
                 receiverAddressExtra: addressExtra,
                 receiverPhone: phoneNumber,
                 deliveryArrivedDate: deliveryDateValue,
-                bookInfoRequestList: bookInfoRequestList
+                bookInfoRequestList: bookInfoRequestList,
+                usedPoints: usedPointsValue
             };
 
             const tossPayRadio = document.getElementById('tossPay');
@@ -922,7 +945,7 @@
 
                 try {
                     // 2. ✨ API 호출: 현재 로그인한 회원의 주소 목록을 요청
-                    const response = await fetch('/members/me/addresses');
+                    const response = await fetch('/addresses/me');
 
                     if (!response.ok) {
                         throw new Error('주소 목록을 불러오는 데 실패했습니다.');
