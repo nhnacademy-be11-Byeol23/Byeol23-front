@@ -58,26 +58,34 @@
                                         <span>주문내역</span>
                                     </a>
 
-                                    <a class="dropdown-item d-flex align-items-center" href="/wishlist">
+                                    <a class="dropdown-item d-flex align-items-center" href="/mypage/wishlist">
                                         <i class="bi bi-heart me-2"></i>
                                         <span>위시리스트</span>
                                     </a>
                                 </div>
 
-                            <div class="dropdown-footer">
+                            <div class="dropdown-footer" style="padding: 0">
+                                <div style="padding: 1.25rem;">
+                                    <form sec:authorize="isAuthenticated()" action="/members/logout"
+                                    method="post" style="margin: 0;">
+                                        <button type="submit" class="btn btn-outline-primary w-100">
+                                            로그아웃
+                                        </button>
+                                    </form>
 
-                                <form sec:authorize="isAuthenticated()" action="/members/logout"
-                                      method="post" style="margin: 0;">
-                                    <button type="submit" class="btn btn-outline-primary w-100">
-                                        로그아웃
-                                    </button>
-                                </form>
+                                    <a sec:authorize="!isAuthenticated()" href="/members/login"
+                                        class="btn btn-primary w-100 mb-2 mb-2">로그인</a>
 
-                                <a sec:authorize="!isAuthenticated()" href="/members/login"
-                                   class="btn btn-primary w-100 mb-2">로그인</a>
+                                    <a sec:authorize="!isAuthenticated()" href="/members/register"
+                                        class="btn btn-outline-primary w-100">회원가입</a>
+                                </div>
 
-                                <a sec:authorize="!isAuthenticated()" href="/members/register"
-                                   class="btn btn-outline-primary w-100">회원가입</a>
+                                <hr style="margin: 0;">
+
+                                <div style="padding: 0.75rem; text-align: center;">
+                                    <a sec:authorize="!isAuthenticated()" href="/orders/nonmember/lookup"
+                                       class="w-100" style="font-size: 14px;">비회원 주문조회 →</a>
+                                </div>
                             </div>
                         </div>
                     </div>

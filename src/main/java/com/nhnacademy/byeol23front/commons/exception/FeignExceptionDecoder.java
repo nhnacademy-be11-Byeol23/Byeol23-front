@@ -1,11 +1,10 @@
 package com.nhnacademy.byeol23front.commons.exception;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.LocalDateTime;
 
 import org.apache.http.HttpStatus;
-import org.springframework.stereotype.Component;
+
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.byeol23front.bookset.contributor.exception.ContributorAlreadyExistsException;
@@ -60,6 +59,6 @@ public class FeignExceptionDecoder implements ErrorDecoder {
 			return new ContributorAlreadyExistsException(message, errorResponse.timestamp());
 		}
 
-		return null;
+		return new DefaultException("Default exception");
 	}
 }

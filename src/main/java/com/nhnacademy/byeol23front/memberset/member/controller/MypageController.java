@@ -7,6 +7,8 @@ import java.util.Objects;
 import com.nhnacademy.byeol23front.couponset.coupon.client.CouponApiClient;
 import com.nhnacademy.byeol23front.couponset.coupon.dto.IssuedCouponInfoResponseDto;
 import com.nhnacademy.byeol23front.couponset.coupon.dto.UsedCouponInfoResponseDto;
+import com.nhnacademy.byeol23front.likeset.client.LikeApiClient;
+import com.nhnacademy.byeol23front.likeset.dto.LikeResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +48,7 @@ public class MypageController {
 	private final PointHistoryFeignClient pointHistoryFeignClient;
 	private final CouponApiClient couponApiClient;
 	private final OrderUtil orderUtil;
+	private final LikeApiClient likeApiClient;
 
 	@ModelAttribute("activeTab")
 	public String addActiveTabToModel(HttpServletRequest request) {
@@ -118,6 +121,13 @@ public class MypageController {
 	@GetMapping("/wishlist")
 	public String getWishlist(Model model) {
 		model.addAttribute("activeTab", "wishlist");
+		try {
+			List<LikeResponse> likes = likeApiClient.getLikes();
+			model.addAttribute("likes", likes);
+		} catch (Exception e) {
+			log.warn("위시리스트 조회 실패: {}", e.getMessage());
+			model.addAttribute("likes", new ArrayList<LikeResponse>());
+		}
 		return "mypage/wishlist";
 	}
 
