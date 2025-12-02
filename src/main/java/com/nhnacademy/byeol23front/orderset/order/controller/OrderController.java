@@ -67,7 +67,7 @@ public class OrderController {
 	public String getOrderFormDirect(@RequestParam Long bookId, @RequestParam int quantity, Model model) {
 
 		BookResponse book = bookApiClient.getBook(bookId).getBody();
-		MemberMyPageResponse member = memberApiClient.getMember();
+		MemberMyPageResponse member = memberApiClient.getMember().getBody();
 
 		String firstImageUrl = (book.images() != null && !book.images().isEmpty())
 			? book.images().getFirst().imageUrl()

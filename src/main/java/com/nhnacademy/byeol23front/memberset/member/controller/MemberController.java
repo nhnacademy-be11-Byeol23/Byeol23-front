@@ -1,15 +1,10 @@
 package com.nhnacademy.byeol23front.memberset.member.controller;
 
-import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-import com.nhnacademy.byeol23front.commons.exception.DecodingFailureException;
-import com.nhnacademy.byeol23front.memberset.domain.AccessToken;
-import com.nhnacademy.byeol23front.memberset.domain.RefreshToken;
-import com.nhnacademy.byeol23front.memberset.domain.Token;
 import com.nhnacademy.byeol23front.memberset.member.dto.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.nhnacademy.byeol23front.memberset.member.service.MemberService;
+import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,13 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/members")
 @RequiredArgsConstructor
 public class MemberController {
-	private final MemberService memberService;
-
-	@Value("${jwt.access-token.expiration}")
-	private Long accessTokenExp;
-	@Value("${jwt.refresh-token.expiration}")
-	private Long refreshTokenExp;
-
+	private final MemberApiClient memberApiClient;
 
 	@GetMapping("/register")
 	public String showRegisterForm() {
@@ -53,11 +41,10 @@ public class MemberController {
 
 	@PostMapping("/register")
 	public String register(@ModelAttribute MemberRegisterRequest request, BindingResult br) {
-		log.info("request:{}", request);
 		if (br.hasErrors()) {
 			return "member/register";
 		}
-		memberService.register(request);
+		memberApiClient.registerRequest(request);
 		return "member/login";
 	}
 
@@ -77,16 +64,15 @@ public class MemberController {
 
 	@PostMapping("/login")
 	public String login(@ModelAttribute LoginRequestTmp tmp, HttpServletResponse response) {
-
 		LoginRequest request = new LoginRequest(tmp.getLoginId(), tmp.getLoginPassword());
-		LoginResponse loginResponse = memberService.login(request);
 
-		ResponseCookie refreshCookie = createCookie(new RefreshToken(loginResponse.refreshToken()));
-		ResponseCookie accessCookie = createCookie(new AccessToken(loginResponse.accessToken()));
+		ResponseEntity<LoginResponse> feignResponse = memberApiClient.login(request);
+		List<String> setCookies = feignResponse.getHeaders().get(HttpHeaders.SET_COOKIE);
 
-		//쿠키 적용
-		response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-		response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+		if (setCookies != null) {
+			setCookies.forEach(c -> response.addHeader(HttpHeaders.SET_COOKIE, c));
+			setCookies.forEach(c -> log.info("Upstream Set-Cookie: {}", c));
+		}
 
 		if (!Objects.isNull(tmp.getBookId()) && !Objects.isNull(tmp.getQuantity())) {
 			return String.format("redirect:/orders/direct?bookId=%d&quantity=%d",
@@ -98,7 +84,7 @@ public class MemberController {
 
 	@PostMapping("/logout")
 	public String logout(@ModelAttribute LogoutRequest request, HttpServletResponse response) {
-		memberService.logout();
+		ResponseEntity<LogoutResponse> feignResponse = memberApiClient.logout();
 
 		response.addHeader("Set-Cookie", deleteCookie("Access-Token", "/"));
 		response.addHeader("Set-Cookie", deleteCookie("Refresh-Token", "/members"));
@@ -108,15 +94,9 @@ public class MemberController {
 
 	@GetMapping("/check-id")
 	@ResponseBody
-	public FindLoginIdResponse findLoginId(@RequestParam String loginId) {
-		return memberService.findLoginId(loginId);
-	}
-
-	@PostMapping("/check-duplication")
-	@ResponseBody
-	public ValueDuplicationCheckResponse checkDuplication(
-		@RequestBody ValueDuplicationCheckRequest request) {
-		 return memberService.checkDuplication(request);
+	public CheckIdResponse checkId(@RequestParam String loginId) {
+		CheckIdResponse response = memberApiClient.checkId(loginId);
+		return response;
 	}
 
 	private String deleteCookie(String name, String path) {
@@ -131,49 +111,19 @@ public class MemberController {
 
 	@PostMapping("/put")
 	@ResponseBody
-	public ResponseEntity<MemberUpdateResponse> updateMember(@RequestBody MemberUpdateRequest request){
-		MemberUpdateResponse response = memberService.updateMember(request);
-		return ResponseEntity.ok().body(response);
+	public ResponseEntity<MemberUpdateResponse> updateMember(@RequestBody MemberUpdateRequest req){
+		return memberApiClient.updateMember(req);
 	}
 
 	@PostMapping("/put/password")
 	@ResponseBody
-	public ResponseEntity<MemberPasswordUpdateResponse> updatePassword(@RequestBody MemberPasswordUpdateRequest request){
-		MemberPasswordUpdateResponse response = memberService.updateMemberPassword(request);
-		return ResponseEntity.ok().body(response);
+	public ResponseEntity<MemberPasswordUpdateResponse> updatePassword(@RequestBody MemberPasswordUpdateRequest req){
+		return memberApiClient.updateMemberPassword(req);
 	}
 
 	@PostMapping("/delete")
 	@ResponseBody
-	public ResponseEntity<Void> deleteMember() {
-		memberService.deleteMember();
-		return ResponseEntity.noContent().build();
-	}
-
-
-	private ResponseCookie createCookie(Token token) {
-		String path;
-		String tokenType;
-		Long expiration;
-		String prefix;
-		String sameSite = "Lax";			//중요: https요청에는 none으로 설정해도 됨, http요청은 secure가 false상태이므로 브라우저에서 none에 대한 쿠키는 거부하여 lax로 설정
-		if(token instanceof RefreshToken) {
-			tokenType = "Refresh-Token";
-			expiration = refreshTokenExp;
-			path = "/";
-		} else if (token instanceof AccessToken) {
-			tokenType = "Access-Token";
-			expiration = accessTokenExp;
-			path = "/";
-		} else {
-			throw new DecodingFailureException("토큰 에러");
-		}
-		return ResponseCookie.from(tokenType, token.getValue())
-				.httpOnly(true)					//XSS
-				.secure(false)					//중요: 실제 배포 환경에선 https요청으로 변경 / secure -> true
-				.sameSite(sameSite)				//CSRF
-				.path(path)
-				.maxAge(Duration.ofMinutes(expiration))
-				.build();
+	public ResponseEntity<Void> deleteMember(){
+		return memberApiClient.deleteMember();
 	}
 }

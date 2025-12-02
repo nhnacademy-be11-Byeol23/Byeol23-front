@@ -3,7 +3,6 @@ package com.nhnacademy.byeol23front.commons.filter;
 import java.io.IOException;
 import java.util.List;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -60,8 +59,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				Claims claims = jwtParser.parseToken(token);
 				Authentication authentication = createAuthentication(claims);
 				SecurityContextHolder.getContext().setAuthentication(authentication);
-			} catch (ExpiredJwtException e) {
-				request.setAttribute("ACCESS_TOKEN_EXPIRED", true);
 			} catch (Exception e) {
 				SecurityContextHolder.clearContext();
 			}
