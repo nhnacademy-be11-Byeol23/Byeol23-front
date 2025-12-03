@@ -71,7 +71,7 @@ public class OrderController {
 		@RequestParam List<Integer> quantities,
 		Model model) {
 
-		MemberMyPageResponse member = memberApiClient.getMember().getBody();
+		MemberMyPageResponse member = memberApiClient.getMember();
 
 		CartOrderRequest cartOrderRequest = orderUtil.createOrderRequest(bookIds, quantities);
 		BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(cartOrderRequest).getBody();
