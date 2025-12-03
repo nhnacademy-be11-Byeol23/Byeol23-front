@@ -1,7 +1,7 @@
 package com.nhnacademy.byeol23front.bookset.tag.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhnacademy.byeol23front.auth.AuthHelper;
+import com.nhnacademy.byeol23front.auth.AuthUtil;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 import com.nhnacademy.byeol23front.bookset.tag.client.TagApiClient;
 import com.nhnacademy.byeol23front.bookset.tag.dto.AllTagsInfoResponse;
@@ -11,7 +11,6 @@ import com.nhnacademy.byeol23front.bookset.tag.dto.TagCreateResponse;
 import com.nhnacademy.byeol23front.bookset.tag.dto.TagUpdateRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -72,7 +71,7 @@ class TagControllerTest {
 	CategoryApiClient categoryApiClient;
 
 	@MockBean(name = "authHelper")
-	AuthHelper authHelper;
+    AuthUtil authUtil;
 
 	// ───────────────────────── GET /admin/tags ─────────────────────────
 
@@ -80,7 +79,7 @@ class TagControllerTest {
 	@DisplayName("GET /admin/tags - 태그 목록 페이지 렌더링")
 	void getTags_returnsViewWithModel() throws Exception {
 		// given
-		given(authHelper.isLoggedIn()).willReturn(true);
+		given(authUtil.isLoggedIn()).willReturn(true);
 
 		AllTagsInfoResponse tag = new AllTagsInfoResponse(
 			1L,
@@ -125,7 +124,7 @@ class TagControllerTest {
 	@DisplayName("GET /admin/tags - 클라이언트 예외 발생 시 처리")
 	void getTags_clientError_throwsException() throws Exception {
 		// given
-		given(authHelper.isLoggedIn()).willReturn(true);
+		given(authUtil.isLoggedIn()).willReturn(true);
 
 		TestPrincipal principal = new TestPrincipal("admin", "관리자닉");
 		Authentication auth = new UsernamePasswordAuthenticationToken(

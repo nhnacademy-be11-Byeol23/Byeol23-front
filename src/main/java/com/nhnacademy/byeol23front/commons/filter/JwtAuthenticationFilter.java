@@ -33,24 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtParser jwtParser;
-	private final MemberService memberService;
-	private final long accessTokenExp;
-
-	public Authentication createAuthentication(Claims claims) {
-		String role = claims.get("role", String.class);
-		Long memberId = claims.get("memberId", Long.class);
-		String nickname = claims.get("nickname", String.class);
-		List<GrantedAuthority> authorities =
-			List.of(new SimpleGrantedAuthority(role));
-
-		MemberPrincipal principal = new MemberPrincipal(memberId, nickname, role, authorities);
-
-		return new UsernamePasswordAuthenticationToken(
-			principal,
-			null,
-			principal.getAuthorities()
-		);
-	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -69,17 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		Boolean refreshAttempted = (Boolean)request.getAttribute("REFRESH_ATTEMPTED");
-		if (Boolean.TRUE.equals(refreshAttempted)) {
-			filterChain.doFilter(request, response);
-			return;
-		}
-
 		Tokens tokens = getTokens(request);
-		log.debug("[JWT] accessToken={}, refreshToken={}, uri={}",
-			tokens.accessToken() != null ? "exists" : "null",
-			tokens.refreshToken() != null ? "exists" : "null",
-			request.getRequestURI());
 		String accessToken = tokens.accessToken();
 
 		if (accessToken != null) {
@@ -87,77 +59,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				Claims claims = jwtParser.parseToken(accessToken);
 				Authentication authentication = createAuthentication(claims);
 				SecurityContextHolder.getContext().setAuthentication(authentication);
-				log.debug("JWT authentication successful for memberId: {}", claims.get("memberId"));
 			} catch (ExpiredJwtException e) {
+				//요청은 게이트웨이에서 401 응답
 				log.debug("Access token expired, attempting refresh");
-				String refreshToken = tokens.refreshToken();
-				
-				if (refreshToken != null) {
-					try {
-						String newAccessToken = memberService.reissueAccessToken(refreshToken).newAccessToken();
-						if (newAccessToken != null && !newAccessToken.isEmpty()) {
-							Claims newClaims = jwtParser.parseToken(newAccessToken);
-							Authentication authentication = createAuthentication(newClaims);
-							SecurityContextHolder.getContext().setAuthentication(authentication);
-
-							ResponseCookie cookie = ResponseCookie.from("Access-Token", newAccessToken)
-								.httpOnly(true)
-								.secure(false)
-								.path("/")
-								.sameSite("Lax")
-								.maxAge(Duration.ofMinutes(accessTokenExp))
-								.build();
-
-							response.addHeader("Set-Cookie", cookie.toString());
-							request.setAttribute("NEW_ACCESS_TOKEN", newAccessToken);
-							log.debug("Token refreshed successfully");
-						} else {
-							log.warn("Token refresh returned null or empty");
-							handleUnauthenticated(request, response);
-							return;
-						}
-					} catch (Exception refreshException) {
-						log.error("Token refresh failed", refreshException);
-						handleUnauthenticated(request, response);
-						return;
-					}
-				} else {
-					log.warn("No refresh token available");
-					handleUnauthenticated(request, response);
-					return;
-				}
 			} catch (Exception e) {
-				log.warn("JWT parsing failed: {}", e.getMessage());
-				SecurityContextHolder.clearContext();
+				response.sendRedirect("/members/login");
+				return ;
 			}
-		} else {
-			log.debug("No access token found in cookies");
 		}
-		
-		filterChain.doFilter(request, response);
-	}
 
-	private void handleUnauthenticated(HttpServletRequest request, HttpServletResponse response) 
-			throws IOException {
-		SecurityContextHolder.clearContext();
-		
-		// AJAX/Fetch 요청인지 확인
-		String acceptHeader = request.getHeader("Accept");
-		boolean isAjaxRequest = acceptHeader != null && acceptHeader.contains("application/json");
-		boolean isFetchRequest = "XMLHttpRequest".equals(request.getHeader("X-Requested-With")) 
-			|| request.getHeader("X-Request-Type") != null;
-		
-		// Fetch 요청의 경우 (bookForm.js에서 보내는 요청)
-		if (isAjaxRequest || isFetchRequest) {
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			response.setContentType("application/json");
-			response.setHeader("Location", "/members/login");
-			response.getWriter().write("{\"error\":\"Unauthorized\",\"redirect\":\"/members/login\"}");
-			return;
-		}
-		
-		// 일반 요청의 경우 리다이렉트
-		response.sendRedirect("/members/login");
+		filterChain.doFilter(request, response);
 	}
 
 	private Tokens getTokens(HttpServletRequest request) {
@@ -178,5 +89,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		return new Tokens(accessToken, refreshToken);
 	}
 
-	private record Tokens(String accessToken, String refreshToken) {}
+	public Authentication createAuthentication(Claims claims) {
+		String role = claims.get("role", String.class);
+		Long memberId = claims.get("memberId", Long.class);
+		String nickname = claims.get("nickname", String.class);
+		List<GrantedAuthority> authorities =
+				List.of(new SimpleGrantedAuthority(role));
+
+		MemberPrincipal principal = new MemberPrincipal(memberId, nickname, role, authorities);
+
+		return new UsernamePasswordAuthenticationToken(
+				principal,
+				null,
+				principal.getAuthorities()
+		);
+	}
 }

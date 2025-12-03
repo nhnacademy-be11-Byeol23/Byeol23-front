@@ -47,23 +47,10 @@ public class SecurityConfig {
 				).authenticated()
 				.anyRequest().permitAll()
 			)
+			//매 요청마다 SecurityContextHolder에 Authentication을 채워줌
 			.addFilterBefore(
-				new JwtAuthenticationFilter(jwtParser, memberService, accessTokenExp),
+				new JwtAuthenticationFilter(jwtParser),
 				UsernamePasswordAuthenticationFilter.class
-			)
-			.exceptionHandling(ex -> ex
-				.authenticationEntryPoint((request, response, authException) -> {
-					// JwtAuthenticationFilter에서 이미 처리했으므로 여기서는 추가 처리
-					// Fetch/AJAX 요청인지 확인
-					if (request.getHeader("X-Request-Type") != null || 
-						"XMLHttpRequest".equals(request.getHeader("X-Requested-With"))) {
-						response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-						response.setContentType("application/json");
-						response.getWriter().write("{\"error\":\"Unauthorized\",\"redirect\":\"/members/login\"}");
-					} else {
-						response.sendRedirect("/members/login");
-					}
-				})
 			);
 
 		return http.build();

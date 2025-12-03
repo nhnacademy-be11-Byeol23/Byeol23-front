@@ -1,7 +1,7 @@
 package com.nhnacademy.byeol23front.bookset.contributor.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhnacademy.byeol23front.auth.AuthHelper;
+import com.nhnacademy.byeol23front.auth.AuthUtil;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 import com.nhnacademy.byeol23front.bookset.contributor.client.ContributorApiClient;
 import com.nhnacademy.byeol23front.bookset.contributor.dto.AllContributorResponse;
@@ -11,22 +11,16 @@ import com.nhnacademy.byeol23front.bookset.contributor.dto.PageResponse;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
@@ -80,7 +74,7 @@ class ContributorControllerTest {
 	CategoryApiClient categoryApiClient;
 
 	@MockBean(name = "authHelper")
-	AuthHelper authHelper;
+    AuthUtil authUtil;
 
 
 	// ───────────────────────── GET /admin/cont ─────────────────────────
@@ -91,7 +85,7 @@ class ContributorControllerTest {
 
 		MockitoAnnotations.openMocks(this);
 
-		given(authHelper.isLoggedIn()).willReturn(true);
+		given(authUtil.isLoggedIn()).willReturn(true);
 		// given
 		AllContributorResponse contributor = new AllContributorResponse(
 			1L,
