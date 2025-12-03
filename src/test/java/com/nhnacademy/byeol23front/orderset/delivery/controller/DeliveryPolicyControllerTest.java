@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(DeliveryPolicyController.class)
 @Import(AuthHelper.class)
-class DeliveryPolicyControllerTest {
+class DeliveryPolicyControllerTest { // 클래스 이름 수정 (Test 접미어)
 
 	@Autowired
 	private MockMvc mockMvc;

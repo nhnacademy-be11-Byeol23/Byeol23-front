@@ -2,10 +2,15 @@ package com.nhnacademy.byeol23front.memberset.member.dto;
 
 import java.util.List;
 
-public record LoginRequestTmp(
-	String loginId,
-	String loginPassword,
-	String redirectUrl,
-	List<Long> bookIds,
-	List<Integer> quantities
-) {}
+import jakarta.validation.constraints.Null;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
+public class LoginRequestTmp {
+	String loginId;
+	String loginPassword;
+	String redirectUrl;
+	private List<Long> bookIds;
+	private List<Integer> quantities;
+}

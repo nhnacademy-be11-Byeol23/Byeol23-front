@@ -1,5 +1,6 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,12 +16,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderInfoResponse;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
-import com.nhnacademy.byeol23front.cartset.cart.dto.CartOrderRequest;
 import com.nhnacademy.byeol23front.memberset.member.dto.NonmemberOrderRequest;
+import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderDetailResponse;
+import com.nhnacademy.byeol23front.orderset.packaging.dto.PackagingInfoResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -35,22 +38,25 @@ public class NonmemberOrderController {
 	@Value("${tossPayment.client-key}")
 	private String tossClientKey;
 
-	@GetMapping
-	public String getNonmemberOrderForm(@RequestParam List<Long> bookIds,
-		@RequestParam List<Integer> quantities,
+	@GetMapping("/direct")
+	public String getOrderFormDirect(@RequestParam(name = "bookId") Long bookId,
+		@RequestParam(name = "quantity") int quantity,
 		Model model) {
 
-		CartOrderRequest cartOrderRequest = orderUtil.createOrderRequest(bookIds, quantities);
-		BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(cartOrderRequest).getBody();
+		BookResponse book = bookApiClient.getBook(bookId).getBody();
 
-		orderUtil.addDeliveryDatesToModel(model);
-		orderUtil.addDeliveryFeeToModel(model, bookOrderRequest);
-		orderUtil.addOrderSummary(model, bookOrderRequest);
+		BookOrderRequest bookOrderRequest = getBookOrderRequest(quantity, book);
+
+		model.addAttribute("orderItem", bookOrderRequest.bookList());
+		model.addAttribute("quantity", quantity);
+		model.addAttribute("tossClientKey", tossClientKey);
+
 		orderUtil.addTotalQuantity(model, bookOrderRequest.bookList());
+		orderUtil.addDeliveryDatesToModel(model);
+		orderUtil.addOrderSummary(model, bookOrderRequest.bookList());
+		orderUtil.addDeliveryFeeToModel(model, bookOrderRequest);
 		orderUtil.addPackagingOption(model);
-
-		model.addAttribute("clientKey", tossClientKey);
-
+		
 		return "order/nonmemberCheckout";
 	}
 
@@ -67,6 +73,31 @@ public class NonmemberOrderController {
 		orderUtil.addFinalPaymentAmountToModel(model, orderDetail);
 
 		return "order/nonmemberOrderDetail";
+	}
+
+
+
+	@NotNull
+	private static BookOrderRequest getBookOrderRequest(int quantity, BookResponse book) {
+		String firstImageUrl = "https://image.yes24.com/momo/Noimg_L.jpg"; // 기본 이미지
+		if (book.images() != null && !book.images().isEmpty()) {
+			firstImageUrl = book.images().getFirst().imageUrl();
+		}
+
+		List<BookInfoRequest> bookInfoRequest = Collections.singletonList(new BookInfoRequest(
+			book.bookId(),
+			book.bookName(),
+			firstImageUrl,
+			book.isPack(),
+			book.regularPrice(),
+			book.salePrice(),
+			book.publisher(),
+			quantity,
+			book.contributors(),
+			null
+		));
+
+		return new BookOrderRequest(bookInfoRequest);
 	}
 
 }

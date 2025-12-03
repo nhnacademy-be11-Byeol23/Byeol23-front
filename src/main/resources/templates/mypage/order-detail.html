@@ -39,28 +39,24 @@
         <div class="list-group">
             <div class="list-group-item" th:each="item : ${orderDetail.items()}">
                 <div class="d-flex align-items-start">
-
                     <div class="flex-shrink-0 me-3">
-                        <img th:src="${item.firstImageUrl() ?: '/assets/img/book_placeholder.png'}"
-                             th:alt="${item.bookTitle()}"
+                        <img src="/assets/img/book_placeholder.png" alt="Book"
                              class="rounded" style="width: 60px; height: 80px; object-fit: cover;">
                     </div>
-
                     <div class="flex-grow-1">
                         <h6 class="mb-1" th:text="${item.bookTitle()}">도서 제목</h6>
                         <p class="mb-1 text-muted small">수량: <span th:text="${item.quantity()}">1</span>권</p>
-
                         <div th:if="${item.packaging() != null}" class="small text-success">
                             <i class="bi bi-gift-fill"></i>
                             <span th:text="${item.packaging().packagingName()}">프리미엄 포장</span>
                             <span class="ms-1"
-                                  th:if="${item.packaging().packagingPrice() != null and item.packaging().packagingPrice().intValue() > 0}"
-                                  th:text="'(' + ${#numbers.formatInteger(item.packaging().packagingPrice(), 0, 'COMMA')} + '원)'"></span>
+                                  th:text="'(' + ${#numbers.formatInteger(item.packaging().packagingPrice() ?: 0, 0, 'COMMA')} + '원)'"></span>
                         </div>
                     </div>
-
                     <div class="flex-shrink-0 text-end">
-                        <div class="fw-bold" th:text="${#numbers.formatInteger(item.price() * item.quantity(), 0, 'COMMA') + '원'}">15,000원</div>
+                        <div class="fw-bold"
+                             th:text="${#numbers.formatInteger(item.price() * item.quantity(), 0, 'COMMA') + '원'}">15,000원
+                        </div>
                     </div>
                 </div>
             </div>
@@ -77,27 +73,32 @@
                 <tr>
                     <td class="text-muted">상품 합계</td>
                     <td class="text-end"
-                        th:text="${#numbers.formatInteger(subTotal, 0, 'COMMA') + '원'}">30,000원</td>
+                        th:text="${#numbers.formatInteger(subTotal, 0, 'COMMA') + '원'}">30,000원
+                    </td>
                 </tr>
                 <tr th:if="${packagingTotal != null and packagingTotal > 0}">
                     <td class="text-muted">포장비</td>
                     <td class="text-end"
-                        th:text="${#numbers.formatInteger(packagingTotal, 0, 'COMMA') + '원'}">5,000원</td>
+                        th:text="${#numbers.formatInteger(packagingTotal, 0, 'COMMA') + '원'}">5,000원
+                    </td>
                 </tr>
                 <tr>
                     <td class="text-muted">배송비</td>
                     <td class="text-end"
-                        th:text="${#numbers.formatInteger(appliedFee, 0, 'COMMA') + '원'}">0원</td>
+                        th:text="${#numbers.formatInteger(appliedFee, 0, 'COMMA') + '원'}">0원
+                    </td>
                 </tr>
-                <tr th:if="${orderDetail.usedPoints != null and orderDetail.usedPoints.intValue() > 0}">
+                <tr th:if="${usedPoint != null and usedPoint > 0}">
                     <td class="text-danger">포인트 할인</td>
                     <td class="text-end text-danger"
-                        th:text="'-' + ${#numbers.formatInteger(orderDetail.usedPoints, 0, 'COMMA') + '원'}">0원</td>
+                        th:text="'-' + ${#numbers.formatInteger(usedPoint, 0, 'COMMA') + '원'}">0원
+                    </td>
                 </tr>
                 <tr class="border-top">
                     <td class="fw-bold">총 결제 금액</td>
                     <td class="text-end fw-bold fs-5"
-                        th:text="${#numbers.formatInteger(orderDetail.actualOrderPrice, 0, 'COMMA') + '원'}">30,000원</td>
+                        th:text="${#numbers.formatInteger(orderDetail.actualOrderPrice, 0, 'COMMA') + '원'}">30,000원
+                    </td>
                 </tr>
                 </tbody>
             </table>
@@ -107,7 +108,7 @@
     <hr>
 
     <div class="mb-3">
-        <h6>수신자 정보</h6>
+        <h6 class="mb-3 fw-bold">수신자 정보</h6>
         <div class="row g-2">
             <div class="col-2 text-muted">이름</div>
             <div class="col-10" th:text="${orderDetail.receiver ?: 'N/A'}"></div>
@@ -146,5 +147,39 @@
 
     <div id="refundSection" class="detail-section mt-4" style="display: none;">
         <h4 class="mb-3">환불/반품 요청 및 정책 확인</h4>
+
+        <form id="refundForm">
+            <div class="mb-3">
+                <label for="refundReason" class="form-label">환불/반품 사유</label>
+                <select id="refundReason" class="form-select">
+                    <option value="" selected>사유를 선택해주세요</option>
+                    <option value="simple_change">단순 변심 / 사이즈, 색상 변경</option>
+                    <option value="damage">상품 파손 / 파본 / 오배송</option>
+                </select>
+            </div>
+
+            <div class="p-3 bg-light rounded">
+                <h6 class="fw-bold">환불 정책 안내</h6>
+                <div id="refundPolicyText">
+                    <p class="text-secondary">환불 사유를 선택하시면 정책이 표시됩니다.</p>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between small">
+                    <span>배송비 차감 여부:</span>
+                    <span id="refundDeliveryFee" class="fw-bold">0원</span>
+                </div>
+                <div class="mt-2 small text-danger">
+                    모든 환불 금액은 **포인트**로 지급됩니다.
+                </div>
+            </div>
+        </form>
+
+        <div class="text-end pt-3">
+            <button type="button" class="btn btn-secondary js-cancel-refund-btn">취소</button>
+            <button type="button" class="btn btn-primary" id="processRefundBtn" disabled>환불 요청</button>
+        </div>
     </div>
+</div>
+
+
 </div>

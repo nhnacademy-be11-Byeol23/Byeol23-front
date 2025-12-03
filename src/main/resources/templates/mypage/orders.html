@@ -248,71 +248,84 @@
                             <div class="orders-grid" th:if="${orders != null and !orders.isEmpty()}">
 
                                 <div class="order-card" data-aos="fade-up" data-aos-delay="100"
-                                     th:each="orderDetail : ${orders.content}"
-
-                                     th:with="firstItem = ${orderDetail.items[0]}, totalItems = ${#lists.size(orderDetail.items)}">
+                                     th:each="viewModel : ${viewModels}"
+                                     th:with="firstItem = ${viewModel.order.items[0]}, totalItems = ${#lists.size(viewModel.order.items)}">
 
                                     <div class="order-header">
                                         <div class="order-id">
                                             <span class="label">주문 번호:</span>
-                                            <span class="value" th:text="${orderDetail.orderNumber}">...</span>
+                                            <span class="value" th:text="${viewModel.order.orderNumber}">...</span>
                                         </div>
                                         <div class="order-date"
-                                             th:text="${#temporals.format(orderDetail.orderDate, 'yyyy-MM-dd')}">...
+                                             th:text="${#temporals.format(viewModel.order.orderDate, 'yyyy-MM-dd')}">...
                                         </div>
                                     </div>
 
                                     <div class="order-content">
+
                                         <div class="product-grid">
-                                            <img th:src="${orderDetail.items[0].firstImageUrl}"
+                                            <img th:src="${viewModel.firstImageUrl}"
                                                  th:alt="${firstItem.bookTitle}"
                                                  alt="Product Image" loading="lazy">
                                         </div>
 
                                         <div class="product-details-container"
-                                             th:if="${!#lists.isEmpty(orderDetail.items)}">
+                                             th:if="${!#lists.isEmpty(viewModel.order.items)}">
 
                                             <div class="product-info-group">
                                                 <h6 class="book-title" th:text="${firstItem.bookTitle}">Book Title</h6>
                                                 <div class="item-meta">
+                                                    <span th:text="'수량: ' + ${firstItem.quantity}">수량: 1</span>
+                                                    <span class="separator">|</span>
+                                                    <span class="price" th:text="${#numbers.formatInteger(firstItem.price, 0, 'COMMA') + '원'}">15,000원</span>
+                                                </div>
+                                                <div class="more-items" th:if="${totalItems > 1}">
+                                                    <span th:text="'외 ' + (${totalItems} - 1) + '건'">외 2건</span>
                                                 </div>
                                             </div>
 
                                             <div class="order-info">
                                                 <div class="info-row">
                                                     <span class="label">상태 / 개수:</span>
-                                                    <span class="value" th:text="${orderDetail.orderStatus} + ' (' + ${totalItems} + ' items)'">대기 (3 items)</span>
+                                                    <span class="value" th:text="${viewModel.order.orderStatus} + ' (' + ${totalItems} + ' items)'">대기 (3 items)</span>
                                                 </div>
                                                 <div class="info-row total">
                                                     <span class="label">총 결제 금액</span>
-                                                    <span class="value price"  th:text="${#numbers.formatInteger(orderDetail.actualOrderPrice, 0, 'COMMA') + '원'}">30,000원</span>
+                                                    <span class="value price"  th:text="${#numbers.formatInteger(viewModel.order.actualOrderPrice, 0, 'COMMA') + '원'}">30,000원</span>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="order-footer">
                                         <button type="button" class="btn btn-light w-50"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#orderDetailsModal"
-                                                th:data-order-id="${orderDetail.orderNumber}"> 주문 상세
+                                                th:data-order-id="${viewModel.order.orderNumber}">
+                                            주문 상세
                                         </button>
                                         <button type="button" class="btn btn-light w-50 review-open-btn"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#reviewModal"
-                                                th:attr="data-order-number=${orderDetail.orderNumber}"> 리뷰 작성
+                                                th:attr="data-order-number=${viewModel.order.orderNumber}">
+                                            리뷰 작성
                                         </button>
                                     </div>
 
 
+                                    <!-- 숨겨진 select: 이 주문에 포함된 도서들을 서버사이드에서 렌더링 -->
                                     <select class="order-book-select" style="display:none;"
-                                            th:if="${!#lists.isEmpty(orderDetail.items)}"> <option value="" disabled selected>선택</option>
-                                        <option th:each="item : ${orderDetail.items}"
+                                            th:if="${!#lists.isEmpty(viewModel.order.items)}">
+                                        <option value="" disabled selected>선택</option>
+                                        <option th:each="item : ${viewModel.order.items}"
                                                 th:value="${item.bookId}"
                                                 th:text="${item.bookTitle}">
                                             Book
                                         </option>
                                     </select>
+
+                                    <div class="collapse tracking-info"
+                                         th:id="'tracking-' + ${viewModel.order.orderNumber}">
+                                    </div>
 
                                 </div>
                             </div>
@@ -521,8 +534,8 @@
     window.currentDeliveryStartDate = null;
 
     function displayAlert(message) {
+        console.warn('Alert: ' + message);
         alert(message);
-        console.error(message);
     }
 
     function getDateDifferenceInDays(date1, date2) {

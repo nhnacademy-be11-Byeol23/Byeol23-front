@@ -53,17 +53,12 @@ class OrderUtilTest {
 
 	private List<BookInfoRequest> bookList;
 
-	private BookOrderRequest bookOrderRequest;
-
 	@BeforeEach
 	void setUp() {
 		// 테스트용 BookInfoRequest 리스트 준비
 		BookInfoRequest book1 = new BookInfoRequest(1L, "책1", null, true, new BigDecimal("20000"), new BigDecimal("18000"), null, 2, null, null);
 		BookInfoRequest book2 = new BookInfoRequest(2L, "책2", null, false, new BigDecimal("10000"), new BigDecimal("10000"), null, 1, null, null);
 		bookList = List.of(book1, book2);
-
-		bookOrderRequest = new BookOrderRequest(bookList);
-
 	}
 
 	@Test
@@ -153,10 +148,10 @@ class OrderUtilTest {
 	@DisplayName("addOrderSummary: 모델에 orderItem 추가")
 	void testAddOrderSummary() {
 		// when
-		orderUtil.addOrderSummary(model, bookOrderRequest);
+		orderUtil.addOrderSummary(model, bookList);
 
 		// then
-		verify(model, times(1)).addAttribute("bookOrderRequest", bookOrderRequest);
+		verify(model, times(1)).addAttribute("orderItem", bookList);
 	}
 
 	@Test

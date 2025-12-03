@@ -48,19 +48,6 @@
                 </div>
 
                 <form action="/members/login" method="POST" class="auth-form-content">
-                  <input type="hidden" th:if="${memberRedirect != null}" name="redirectUrl" th:value="${memberRedirect}" />
-                  <th:block th:if="${bookIds != null}">
-                    <input type="hidden" th:each="bookId : ${bookIds}"
-                           name="bookIds"
-                           th:value="${bookId}" />
-                  </th:block>
-
-                  <th:block th:if="${quantities != null}">
-                    <input type="hidden" th:each="quantity : ${quantities}"
-                           name="quantities"
-                           th:value="${quantity}" />
-                  </th:block>
-
                   <div class="input-group mb-3">
                     <span class="input-icon">
                       <i class="bi bi-envelope"></i>
@@ -84,20 +71,21 @@
                     </span>
                   </div>
 
+                  <input type="hidden" th:if="${bookId != null}" name="bookId" th:value="${bookId}" />
+                  <input type="hidden" th:if="${quantity != null}" name="quantity" th:value="${quantity}" />
 
                   <button type="submit" class="auth-btn primary-btn mb-3">
                     로그인
                     <i class="bi bi-arrow-right"></i>
                   </button>
 
-                  <a th:if="${nonMemberRedirect != null}"
-
-                     th:href="@{${nonMemberRedirect}(bookIds=${bookIds}, quantities=${quantities})}"
-
+                  <a th:if="${bookId != null and quantity != null}"
+                     th:href="@{/orders/nonmember/direct(bookId=${bookId}, quantity=${quantity})}"
                      class="auth-btn social-btn mb-3 w-100"
                      role="button">
                     비회원 주문
                   </a>
+
                   <div class="divider">
                     <span>or</span>
                   </div>

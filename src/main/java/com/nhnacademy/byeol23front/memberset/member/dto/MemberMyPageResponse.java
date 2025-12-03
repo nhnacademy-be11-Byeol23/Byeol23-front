@@ -6,8 +6,6 @@ import java.util.List;
 
 import com.nhnacademy.byeol23front.memberset.grade.dto.AllGradeResponse;
 
-import com.nhnacademy.byeol23front.memberset.addresses.dto.AddressResponse;
-
 public record MemberMyPageResponse(
         String loginId,
         String memberName,
@@ -18,7 +16,6 @@ public record MemberMyPageResponse(
         BigDecimal currentPoint,
         Role memberRole,
         String gradeName,
-		List<AllGradeResponse> grades,
-		AddressResponse address
+		List<AllGradeResponse> grades
 ) {
 }
