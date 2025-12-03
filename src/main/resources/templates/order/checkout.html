@@ -655,8 +655,8 @@
         const pointsInput = document.getElementById('points-to-use');
         const pointsDiscountAmountEl = document.getElementById('points-discount-amount');
         const pointsDiscountRowEl = document.querySelector('.order-points-discount'); // 할인 행 전체 div
-        // const couponDiscountAmountEl = document.getElementById('coupon-discount-amount'); // (쿠폰 구현 시)
-        // const couponDiscountRowEl = document.querySelector('.order-coupon-discount'); // (쿠폰 구현 시)
+        const couponDiscountAmountEl = document.getElementById('coupon-discount-amount'); // (쿠폰 구현 시)
+        const couponDiscountRowEl = document.querySelector('.order-coupon-discount'); // (쿠폰 구현 시)
         const totalBookPriceEl = document.getElementById('total-book-price');
         const deliveryFeeEl = document.getElementById('delivery-fee');
         const actualOrderPriceEl = document.getElementById('actual-order-price');
@@ -730,7 +730,8 @@
         // 4. 할인 금액 계산 (1포인트 = 1원으로 가정)
         const pointDiscount = usedPoints;
         // const couponDiscount = parsePrice(couponDiscountAmountEl); // (쿠폰 구현 시)
-        const couponDiscount = 0; // 임시
+        const couponDiscount = document.getElementById('coupon_discount_amount_hidden').value;
+
 
         // 5. 할인 금액 표시 업데이트
         if (pointDiscount > 0) {
@@ -742,6 +743,19 @@
         }
 
         // (쿠폰 할인 표시 업데이트 로직 추가)
+        if (couponDiscount > 0) {
+            // 1. 텍스트 변경: 예) "-3,000원"
+            couponDiscountAmountEl.textContent = `-${couponDiscount.toLocaleString('ko-KR')}원`;
+
+            // 2. 행 보이기 (display: none 해제)
+            couponDiscountRowEl.style.display = 'flex';
+        } else {
+            // 1. 텍스트 초기화
+            couponDiscountAmountEl.textContent = '-0원';
+
+            // 2. 행 숨기기 (선택 사항: 0원일 때 안 보이게 하려면 none, 보이게 하려면 flex 유지)
+            couponDiscountRowEl.style.display = 'none';
+        }
 
         // 6. 최종 결제 금액 계산
         // (상품금액 + 포장비 + 배송비) - 할인
