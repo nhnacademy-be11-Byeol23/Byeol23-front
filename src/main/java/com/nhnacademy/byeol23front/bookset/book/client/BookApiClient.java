@@ -1,11 +1,14 @@
 package com.nhnacademy.byeol23front.bookset.book.client;
 
 import com.nhnacademy.byeol23front.bookset.book.dto.BookCreateRequest;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookStockResponse;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookStockUpdateRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookUpdateRequest;
 import com.nhnacademy.byeol23front.bookset.tag.dto.PageResponse;
+import com.nhnacademy.byeol23front.cartset.cart.dto.CartOrderRequest;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,5 +47,8 @@ public interface BookApiClient {
 
 	@GetMapping("/api/books/list")
 	List<BookResponse> getBooksByIds(@RequestParam("ids") List<Long> bookIds);
+
+	@PostMapping("/api/books/orders")
+	ResponseEntity<BookOrderRequest> getBookOrder(@RequestBody CartOrderRequest cartOrderRequest);
 
 }
