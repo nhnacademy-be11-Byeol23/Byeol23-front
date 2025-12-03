@@ -53,8 +53,8 @@ public class OrderController {
 	@PostMapping
 	@ResponseBody
 	public ResponseEntity<Map<String, String>> handleOrderRequest(@CookieValue(name = "Access-Token", required = false) String token,
-		@CookieValue(name= "guestId", required = false) String guestId,
-		@RequestBody CartOrderRequest orderRequest) {
+																  @CookieValue(name= "guestId", required = false) String guestId,
+																  @RequestBody CartOrderRequest orderRequest) {
 
 		if (Objects.isNull(token) || token.isEmpty()) {
 			orderApiClient.saveGuestOrder(guestId, orderRequest);
