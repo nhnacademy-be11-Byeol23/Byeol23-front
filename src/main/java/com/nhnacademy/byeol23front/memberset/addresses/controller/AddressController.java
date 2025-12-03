@@ -1,7 +1,5 @@
 package com.nhnacademy.byeol23front.memberset.addresses.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +15,8 @@ import com.nhnacademy.byeol23front.memberset.addresses.dto.AddressRequest;
 import com.nhnacademy.byeol23front.memberset.addresses.dto.AddressResponse;
 
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/addresses")
@@ -45,8 +45,7 @@ public class AddressController {
 	}
 
 	@GetMapping("/me")
-	public ResponseEntity<List<AddressResponse>>getAddresses() {
+	public ResponseEntity<List<AddressResponse>> getAddresses() {
 		return ResponseEntity.ok(addressApiClient.getAddresses().getBody());
 	}
-
 }

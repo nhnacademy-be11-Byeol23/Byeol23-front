@@ -42,105 +42,105 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrderController {
-	private final OrderApiClient orderApiClient;
-	private final OrderUtil orderUtil;
-	private final BookApiClient bookApiClient;
-	private final MemberApiClient memberApiClient;
+    private final OrderApiClient orderApiClient;
+    private final OrderUtil orderUtil;
+    private final BookApiClient bookApiClient;
+    private final MemberApiClient memberApiClient;
 
-	@Value("${tossPayment.client-key}")
-	private String tossClientKey;
+    @Value("${tossPayment.client-key}")
+    private String tossClientKey;
 
-	@PostMapping
-	@ResponseBody
-	public ResponseEntity<Map<String, String>> handleOrderRequest(@CookieValue(name = "Access-Token", required = false) String token,
-		@CookieValue(name= "guestId", required = false) String guestId,
-		@RequestBody CartOrderRequest orderRequest) {
+    @PostMapping
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> handleOrderRequest(@CookieValue(name = "Access-Token", required = false) String token,
+                                                                  @CookieValue(name= "guestId", required = false) String guestId,
+                                                                  @RequestBody CartOrderRequest orderRequest) {
 
-		if (Objects.isNull(token) || token.isEmpty()) {
-			orderApiClient.saveGuestOrder(guestId, orderRequest);
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-		}
+        if (Objects.isNull(token) || token.isEmpty()) {
+            orderApiClient.saveGuestOrder(guestId, orderRequest);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
-		Map<String, String> responseBody = new HashMap<>();
-		responseBody.put("redirectUrl", "/orders");
-		return ResponseEntity.status(HttpStatus.OK).body(responseBody);
-	}
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("redirectUrl", "/orders");
+        return ResponseEntity.status(HttpStatus.OK).body(responseBody);
+    }
 
-	@GetMapping
-	public String getOrderForm(@RequestParam List<Long> bookIds,
-		@RequestParam List<Integer> quantities,
-		Model model) {
+    @GetMapping
+    public String getOrderForm(@RequestParam List<Long> bookIds,
+                               @RequestParam List<Integer> quantities,
+                               Model model) {
 
-		MemberMyPageResponse member = memberApiClient.getMember();
+        MemberMyPageResponse member = memberApiClient.getMember().getBody();
 
-		CartOrderRequest cartOrderRequest = orderUtil.createOrderRequest(bookIds, quantities);
-		BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(cartOrderRequest).getBody();
+        CartOrderRequest cartOrderRequest = orderUtil.createOrderRequest(bookIds, quantities);
+        BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(cartOrderRequest).getBody();
 
-		orderUtil.addDeliveryDatesToModel(model);
-		orderUtil.addDeliveryFeeToModel(model, bookOrderRequest);
-		orderUtil.addOrderSummary(model, bookOrderRequest);
-		orderUtil.addTotalQuantity(model, bookOrderRequest.bookList());
-		orderUtil.addPackagingOption(model);
+        orderUtil.addDeliveryDatesToModel(model);
+        orderUtil.addDeliveryFeeToModel(model, bookOrderRequest);
+        orderUtil.addOrderSummary(model, bookOrderRequest);
+        orderUtil.addTotalQuantity(model, bookOrderRequest.bookList());
+        orderUtil.addPackagingOption(model);
 
-		model.addAttribute("defaultAddress", member.address());
+        model.addAttribute("defaultAddress", member.address());
 
-		model.addAttribute("userPoint", member.currentPoint());
+        model.addAttribute("userPoint", member.currentPoint());
 
-		model.addAttribute("clientKey", tossClientKey);
+        model.addAttribute("clientKey", tossClientKey);
 
-		return "order/checkout";
-	}
+        return "order/checkout";
+    }
 
-	@PostMapping("/prepare")
-	@ResponseBody
-	public ResponseEntity<OrderPrepareResponse> prepareOrder(@Valid @RequestBody OrderPrepareRequest request,
-		@CookieValue(name = "Access-Token", required = false) String accessToken) {
-		ResponseEntity<OrderPrepareResponse> response = orderApiClient.prepareOrder(request, accessToken);
+    @PostMapping("/prepare")
+    @ResponseBody
+    public ResponseEntity<OrderPrepareResponse> prepareOrder(@Valid @RequestBody OrderPrepareRequest request,
+                                                             @CookieValue(name = "Access-Token", required = false) String accessToken) {
+        ResponseEntity<OrderPrepareResponse> response = orderApiClient.prepareOrder(request, accessToken);
 
-		log.info("주문 준비 응답: {}", response.getBody());
+        log.info("주문 준비 응답: {}", response.getBody());
 
-		if (!response.getStatusCode().is2xxSuccessful()) {
-			log.error("주문 준비 실패: {}", response.getStatusCode());
-			throw new OrderPrepareFailException("주문 임시 저장에 실패했습니다.");
-		}
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            log.error("주문 준비 실패: {}", response.getStatusCode());
+            throw new OrderPrepareFailException("주문 임시 저장에 실패했습니다.");
+        }
 
-		return response;
-	}
+        return response;
+    }
 
-	@GetMapping("/success")
-	public String getOrderWithPoints(@RequestParam String orderNumber,
-		Model model) {
-		ResponseEntity<PointOrderResponse> responseEntity = orderApiClient.saveOrderWithPoints(orderNumber);
-		PointOrderResponse savedPaymentInfo = responseEntity.getBody();
+    @GetMapping("/success")
+    public String getOrderWithPoints(@RequestParam String orderNumber,
+                                     Model model) {
+        ResponseEntity<PointOrderResponse> responseEntity = orderApiClient.saveOrderWithPoints(orderNumber);
+        PointOrderResponse savedPaymentInfo = responseEntity.getBody();
 
-		if (savedPaymentInfo == null) {
-			log.error("백엔드에서 포인트 결제 정보를 받아오지 못했습니다. orderNumber: {}", orderNumber);
-			model.addAttribute("status", 500);
-			model.addAttribute("error", "Backend Response Error");
-			model.addAttribute("message", "포인트 결제 내역 저장 후 정보를 받아오지 못했습니다.");
-			return "error";
-		}
+        if (savedPaymentInfo == null) {
+            log.error("백엔드에서 포인트 결제 정보를 받아오지 못했습니다. orderNumber: {}", orderNumber);
+            model.addAttribute("status", 500);
+            model.addAttribute("error", "Backend Response Error");
+            model.addAttribute("message", "포인트 결제 내역 저장 후 정보를 받아오지 못했습니다.");
+            return "error";
+        }
 
-		Map<String, Object> paymentInfo = new HashMap<>();
-		paymentInfo.put("orderId", savedPaymentInfo.orderNumber());
-		paymentInfo.put("totalAmount", BigDecimal.valueOf(savedPaymentInfo.totalAmount().longValue()));
-		paymentInfo.put("method", savedPaymentInfo.method());
+        Map<String, Object> paymentInfo = new HashMap<>();
+        paymentInfo.put("orderId", savedPaymentInfo.orderNumber());
+        paymentInfo.put("totalAmount", BigDecimal.valueOf(savedPaymentInfo.totalAmount().longValue()));
+        paymentInfo.put("method", savedPaymentInfo.method());
 
-		model.addAttribute("orderId", savedPaymentInfo.orderNumber());
-		model.addAttribute("paymentInfo", paymentInfo);
+        model.addAttribute("orderId", savedPaymentInfo.orderNumber());
+        model.addAttribute("paymentInfo", paymentInfo);
 
-		return "order/success";
-	}
+        return "order/success";
+    }
 
-	@PostMapping("/{order-number}/cancel")
-	@ResponseBody
-	public ResponseEntity<OrderCancelResponse> cancelOrder(@PathVariable(name = "order-number") String orderNumber,
-		@RequestBody OrderCancelRequest request) {
+    @PostMapping("/{order-number}/cancel")
+    @ResponseBody
+    public ResponseEntity<OrderCancelResponse> cancelOrder(@PathVariable(name = "order-number") String orderNumber,
+                                                           @RequestBody OrderCancelRequest request) {
 
-		OrderCancelResponse response = orderApiClient.cancelOrder(orderNumber, request).getBody();
+        OrderCancelResponse response = orderApiClient.cancelOrder(orderNumber, request).getBody();
 
-		return ResponseEntity.ok(response);
-	}
+        return ResponseEntity.ok(response);
+    }
 
 
 

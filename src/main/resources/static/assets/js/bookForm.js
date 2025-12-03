@@ -70,33 +70,9 @@
         fetch(url, {
             method: 'POST',
             body: formData,
-            redirect: 'manual',
-            credentials: 'include',
-            headers: {
-                'X-Request-Type': 'fetch'  // Fetch 요청임을 명시
-            }
+            redirect: 'manual'
         })
             .then(response => {
-                // 401 Unauthorized 처리
-                if (response.status === 401) {
-                    try {
-                        return response.json().then(data => {
-                            if (data.redirect) {
-                                alert('인증이 필요합니다. 로그인 페이지로 이동합니다.');
-                                window.location.href = data.redirect;
-                            } else {
-                                alert('인증이 필요합니다.');
-                                window.location.href = '/members/login';
-                            }
-                        });
-                    } catch (e) {
-                        alert('인증이 필요합니다.');
-                        window.location.href = '/members/login';
-                    }
-                    return;
-                }
-                
-                // 302 리다이렉트 처리
                 if (response.status === 302 || response.status === 0) {
                     const location = response.headers.get('Location');
                     if (location && location.includes('/admin/books') && 
@@ -106,9 +82,6 @@
                         window.location.href = location;
                     } else if (location && (location.includes('/admin/books/new') || location.includes('/admin/books/update'))) {
                         alert(isUpdateForm ? '도서 수정에 실패했습니다. 페이지를 새로고침하여 오류 메시지를 확인하세요.' : '도서 생성에 실패했습니다. 페이지를 새로고침하여 오류 메시지를 확인하세요.');
-                        window.location.href = location;
-                    } else if (location && location.includes('/members/login')) {
-                        alert('인증이 필요합니다. 로그인 페이지로 이동합니다.');
                         window.location.href = location;
                     } else {
                         window.location.href = location || '/admin/books';
