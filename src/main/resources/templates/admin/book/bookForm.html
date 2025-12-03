@@ -161,8 +161,8 @@
 <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 <div id="preloader"></div>
 
-<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
-<script th:src="@{/assets/js/main.js}"></script>
+<!-- Vendor & Main JS Files -->
+<th:block th:replace="~{fragments/common_scripts :: commonScripts}"></th:block>
 
 <!-- 태그 선택 모달 -->
 <div class="modal fade" id="tagModal" tabindex="-1" aria-labelledby="tagModalLabel" aria-hidden="true">

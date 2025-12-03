@@ -21,12 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
+import com.nhnacademy.byeol23front.cartset.cart.dto.CartOrderRequest;
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 import com.nhnacademy.byeol23front.memberset.member.dto.MemberMyPageResponse;
-import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderCancelRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderCancelResponse;
@@ -35,6 +33,7 @@ import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.PointOrderResponse;
 import com.nhnacademy.byeol23front.orderset.order.exception.OrderPrepareFailException;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,7 +43,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class OrderController {
 	private final OrderApiClient orderApiClient;
-	private final DeliveryApiClient deliveryApiClient;
 	private final OrderUtil orderUtil;
 	private final BookApiClient bookApiClient;
 	private final MemberApiClient memberApiClient;
@@ -52,39 +50,39 @@ public class OrderController {
 	@Value("${tossPayment.client-key}")
 	private String tossClientKey;
 
-	@PostMapping("/direct")
+	@PostMapping
 	@ResponseBody
-	public ResponseEntity<Void> handleDirectOrder(@CookieValue(name = "Access-Token", required = false) String token) {
+	public ResponseEntity<Map<String, String>> handleOrderRequest(@CookieValue(name = "Access-Token", required = false) String token,
+		@CookieValue(name= "guestId", required = false) String guestId,
+		@RequestBody CartOrderRequest orderRequest) {
 
-		if (Objects.isNull(token)) {
+		if (Objects.isNull(token) || token.isEmpty()) {
+			orderApiClient.saveGuestOrder(guestId, orderRequest);
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 		}
 
-		return ResponseEntity.status(HttpStatus.OK).build();
+		Map<String, String> responseBody = new HashMap<>();
+		responseBody.put("redirectUrl", "/orders");
+		return ResponseEntity.status(HttpStatus.OK).body(responseBody);
 	}
 
-	@GetMapping("/direct")
-	public String getOrderFormDirect(@RequestParam Long bookId, @RequestParam int quantity, Model model) {
+	@GetMapping
+	public String getOrderForm(@RequestParam List<Long> bookIds,
+		@RequestParam List<Integer> quantities,
+		Model model) {
 
-		BookResponse book = bookApiClient.getBook(bookId).getBody();
 		MemberMyPageResponse member = memberApiClient.getMember();
 
-		String firstImageUrl = (book.images() != null && !book.images().isEmpty())
-			? book.images().getFirst().imageUrl()
-			: "https://image.yes24.com/momo/Noimg_L.jpg";
+		CartOrderRequest cartOrderRequest = orderUtil.createOrderRequest(bookIds, quantities);
+		BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(cartOrderRequest).getBody();
 
-		List<BookInfoRequest> bookOrderInfo = List.of(new BookInfoRequest(bookId, book.bookName(),
-			firstImageUrl, book.isPack(), book.regularPrice(), book.salePrice(), book.publisher(), quantity,
-			book.contributors(),
-			null));
-
-		BookOrderRequest request = new BookOrderRequest(bookOrderInfo);
-
-		orderUtil.addTotalQuantity(model, request.bookList());
 		orderUtil.addDeliveryDatesToModel(model);
-		orderUtil.addOrderSummary(model, request.bookList());
-		orderUtil.addDeliveryFeeToModel(model, request);
+		orderUtil.addDeliveryFeeToModel(model, bookOrderRequest);
+		orderUtil.addOrderSummary(model, bookOrderRequest);
+		orderUtil.addTotalQuantity(model, bookOrderRequest.bookList());
 		orderUtil.addPackagingOption(model);
+
+		model.addAttribute("defaultAddress", member.address());
 
 		model.addAttribute("userPoint", member.currentPoint());
 
@@ -93,10 +91,9 @@ public class OrderController {
 		return "order/checkout";
 	}
 
-
 	@PostMapping("/prepare")
 	@ResponseBody
-	public ResponseEntity<OrderPrepareResponse> prepareOrder(@RequestBody OrderPrepareRequest request,
+	public ResponseEntity<OrderPrepareResponse> prepareOrder(@Valid @RequestBody OrderPrepareRequest request,
 		@CookieValue(name = "Access-Token", required = false) String accessToken) {
 		ResponseEntity<OrderPrepareResponse> response = orderApiClient.prepareOrder(request, accessToken);
 
@@ -144,5 +141,7 @@ public class OrderController {
 
 		return ResponseEntity.ok(response);
 	}
+
+
 
 }

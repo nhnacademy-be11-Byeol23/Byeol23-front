@@ -49,9 +49,9 @@
                                     <div class="order-items-container">
 
                                         <div class="order-item"
-                                             th:each="item : ${orderItem}"
+                                             th:each="item : ${bookOrderRequest.bookList()}"
                                              th:data-book-id="${item.bookId}"
-                                             th:data-quantity="${quantity}"
+                                             th:data-quantity="${item.quantity}"
                                              th:data-sale-price="${item.salePrice}"
                                              th:data-regular-price="${item.regularPrice}"
                                              th:data-book-name="${item.bookName}"
@@ -89,7 +89,7 @@
                                                 <div class="order-item-price mb-2">
                                                     <div class="mb-1">
                                                         <span class="quantity"
-                                                              th:text="${quantity} + ' ×'">1 ×</span>
+                                                              th:text="${item.quantity()} + ' ×'">1 ×</span>
                                                     </div>
                                                     <span class="price-sale fw-bold fs-5"
                                                           th:text="${#numbers.formatInteger(item.salePrice, 0, 'COMMA') + '원'}">
@@ -364,17 +364,8 @@
 <!-- Preloader -->
 <div id="preloader"></div>
 
-<!-- Vendor JS Files -->
-<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
-<script th:src="@{/assets/vendor/php-email-form/validate.js}"></script>
-<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
-<script th:src="@{/assets/vendor/aos/aos.js}"></script>
-<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
-<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
-<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
-
-<!-- Main JS File -->
-<script th:src="@{/assets/js/main.js}"></script>
+<!-- Vendor & Main JS Files -->
+<th:block th:replace="~{fragments/common_scripts :: commonScripts}"></th:block>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         initPhoneHyphen();

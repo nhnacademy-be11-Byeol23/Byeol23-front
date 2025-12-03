@@ -68,7 +68,6 @@ public class MypageController {
 
 	@GetMapping
 	public String getMypage(Model model) {
-		log.info("mypage entrance");
 		MemberMyPageResponse resp = memberApiClient.getMember();
 		model.addAttribute("activeTab", "settings");
 		model.addAttribute("member", resp);
