@@ -4,9 +4,10 @@ import java.math.BigDecimal;
 
 import com.nhnacademy.byeol23front.orderset.packaging.dto.PackagingInfoResponse;
 
-public record BookOrderInfoResponse(Long bookId,
-									String bookTitle,
-									int quantity,
-									BigDecimal price,
-									PackagingInfoResponse packaging) {
+public record  BookOrderInfoResponse(Long bookId,
+									 String firstImageUrl,
+									 String bookTitle,
+									 int quantity,
+									 BigDecimal price,
+									 PackagingInfoResponse packaging) {
 }

@@ -1,7 +1,10 @@
 package com.nhnacademy.byeol23front.memberset.addresses.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -39,6 +42,11 @@ public class AddressController {
 	@PostMapping("/{address-id}")
 	public ResponseEntity<Void> setDefaultAddress(@PathVariable(name = "address-id") Long addressId) {
 		return addressApiClient.setDefaultAddress(addressId);
+	}
+
+	@GetMapping("/me")
+	public ResponseEntity<List<AddressResponse>>getAddresses() {
+		return ResponseEntity.ok(addressApiClient.getAddresses().getBody());
 	}
 
 }
