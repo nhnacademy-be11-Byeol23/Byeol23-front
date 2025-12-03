@@ -75,7 +75,7 @@ public class MemberController {
 	@PostMapping("/login")
 	public String login(@ModelAttribute LoginRequestTmp tmp, HttpServletResponse response) {
 
-		LoginRequest request = new LoginRequest(tmp.getLoginId(), tmp.getLoginPassword());
+		LoginRequest request = new LoginRequest(tmp.loginId(), tmp.loginPassword());
 		LoginResponse loginResponse = memberService.login(request);
 
 		ResponseCookie refreshCookie = createCookie(new RefreshToken(loginResponse.refreshToken()));
@@ -85,9 +85,9 @@ public class MemberController {
 		response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 		response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 
-		if (!Objects.isNull(tmp.getBookId()) && !Objects.isNull(tmp.getQuantity())) {
+		if (!Objects.isNull(tmp.bookIds()) && !Objects.isNull(tmp.quantities())) {
 			return String.format("redirect:/orders/direct?bookId=%d&quantity=%d",
-				tmp.getBookId(), tmp.getQuantity());
+				tmp.bookIds(), tmp.quantities());
 		}
 
 		return "redirect:/";
