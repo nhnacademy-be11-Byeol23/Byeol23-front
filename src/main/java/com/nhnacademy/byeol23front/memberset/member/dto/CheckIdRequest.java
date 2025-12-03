@@ -1,6 +1,6 @@
 package com.nhnacademy.byeol23front.memberset.member.dto;
 
-public record FindLoginIdResponse(
-	boolean isDuplicated
+public record CheckIdRequest(
+	String loginId
 ) {
 }
