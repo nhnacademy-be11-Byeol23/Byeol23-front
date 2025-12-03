@@ -24,6 +24,9 @@ public interface CategoryApiClient {
     @GetMapping("/api/categories/leaf")
     List<CategoryLeafResponse> getLeafs();
 
+	@GetMapping("/api/categories/leaf/mainpage")
+	List<CategoryMainPageResponse> getLeavesForMainPage();
+
     @GetMapping("/api/categories/{parentId}/children")
     List<CategoryListResponse> getChildren(@PathVariable("parentId") Long parentId);
 

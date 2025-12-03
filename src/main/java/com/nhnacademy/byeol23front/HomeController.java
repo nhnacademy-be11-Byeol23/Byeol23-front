@@ -1,7 +1,12 @@
 package com.nhnacademy.byeol23front;
 
+import static com.nhnacademy.byeol23front.bookset.category.factory.DefaultCategoryFactory.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
+import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
+import com.nhnacademy.byeol23front.bookset.category.dto.CategoryMainPageResponse;
 import com.nhnacademy.byeol23front.bookset.search.client.SearchApiClient;
 import com.nhnacademy.byeol23front.bookset.search.dto.BookSearchResultLongIdResponse;
 import com.nhnacademy.byeol23front.bookset.search.dto.BookSearchResultResponse;
@@ -18,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class HomeController {
 	private static final Logger log = LoggerFactory.getLogger(HomeController.class);
 	private final SearchApiClient searchApiClient;
+	private final CategoryApiClient categoryApiClient;
 
 	@GetMapping("/")
 	public String mainPage(Model model) {
@@ -27,7 +33,15 @@ public class HomeController {
 		var bestBooksResult = searchApiClient.searchBestBooks(0, 12);
 		var bestBooks = BookSearchResultLongIdResponse.fromList(bestBooksResult.content());
 
-		// var categoryBooks = searchApiClient.searchBooksByCategory().content();
+		List<CategoryMainPageResponse> categories = categoryApiClient.getLeavesForMainPage();
+		List<CategoryMainPageResponse> mainCategories = new ArrayList<>(
+			categories.stream().limit(4).toList()
+		);
+
+		while(mainCategories.size() < 4){
+			categories.add(createDefaultCategory(mainCategories.size()));
+		}
+
 		
 		log.info("=== 메인 페이지 베스트 도서 조회 ===");
 		log.info("Hero Section 도서 수: {}", top3Books.size());
@@ -36,7 +50,7 @@ public class HomeController {
 		model.addAttribute("top3Books", top3Books);
 		model.addAttribute("bestBooks", bestBooks);
 
-		// model.addAttribute("categoryBooks", categoryBooks);
+		model.addAttribute("categories", mainCategories);
 		return "index";
 	}
 
