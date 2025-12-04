@@ -46,7 +46,7 @@ public interface MemberApiClient {
 	ValueDuplicationCheckResponse checkDuplication(@RequestBody ValueDuplicationCheckRequest request);
 
 	@PostMapping("/auth/social-login")
-	Void socialLogin(SocialLoginRequest request);
+	LoginResponse socialLogin(SocialLoginRequest request);
 
 
 }

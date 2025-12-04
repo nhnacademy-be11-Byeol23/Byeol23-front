@@ -2,6 +2,7 @@ package com.nhnacademy.byeol23front.auth.service;
 
 import com.nhnacademy.byeol23front.auth.feign.AuthClient;
 import com.nhnacademy.byeol23front.auth.feign.TokenContext;
+import com.nhnacademy.byeol23front.commons.exception.ExpiredRefreshTokenException;
 import com.nhnacademy.byeol23front.memberset.member.dto.ReAuthenticateResponse;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -76,6 +77,9 @@ public class TokenRefreshService {
 
             log.info("토큰 재발급 성공. 새 AccessToken 설정 완료");
             return newAccessToken;
+        } catch (ExpiredRefreshTokenException e) {
+            log.error("리프레시 토큰 만료", e);
+            throw e; // 다시 던지기
         } catch (Exception e) {
             log.error("토큰 재발급 중 예외 발생", e);
             return null;

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import jakarta.servlet.http.Cookie;
 
 @Slf4j
 @RestControllerAdvice
@@ -43,5 +44,13 @@ public class GlobalExceptionHandler {
         log.warn("ExpiredTokenException 발생: {}", e.getMessage());
         String encodedMsg = URLEncoder.encode("다시 로그인해 주세요.", StandardCharsets.UTF_8);
         response.sendRedirect("/members/login?loginFailed=true&errorMsg=" + encodedMsg);
+    }
+
+    @ExceptionHandler(ExpiredRefreshTokenException.class)
+    public void handleExpiredRefreshTokenException(
+        HttpServletResponse response
+    ) throws IOException {
+        
+        response.sendRedirect("/");
     }
 }

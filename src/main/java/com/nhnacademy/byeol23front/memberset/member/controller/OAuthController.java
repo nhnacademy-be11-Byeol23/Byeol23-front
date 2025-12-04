@@ -3,7 +3,13 @@ package com.nhnacademy.byeol23front.memberset.member.controller;
 import java.time.Duration;
 import java.util.UUID;
 
+import com.nhnacademy.byeol23front.auth.CookieProperties;
+import com.nhnacademy.byeol23front.commons.exception.DecodingFailureException;
+import com.nhnacademy.byeol23front.memberset.domain.AccessToken;
+import com.nhnacademy.byeol23front.memberset.domain.RefreshToken;
+import com.nhnacademy.byeol23front.memberset.domain.Token;
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
+import com.nhnacademy.byeol23front.memberset.member.dto.LoginResponse;
 import com.nhnacademy.byeol23front.memberset.member.dto.MemberRegisterRequest;
 import com.nhnacademy.byeol23front.memberset.member.dto.PaycoTokenResponse;
 import com.nhnacademy.byeol23front.memberset.member.dto.PaycoUserInfo;
@@ -15,6 +21,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -35,6 +43,10 @@ public class OAuthController {
 	private final PaycoOAuthService paycoOAuthService;
 	private final MemberApiClient memberApiClient;
 	private final MemberService memberService;
+	private final CookieProperties cookieProperties;
+
+	@Value("${jwt.refresh-cookie.expiration}")
+	private Long refreshCookieExp;
 
 	@GetMapping("/login")
 	@Operation(summary = "페이코 로그인 페이지로 리다이렉트",
@@ -70,7 +82,8 @@ public class OAuthController {
 			"이미 가입된 사용자는 소셜 로그인으로 처리하고, 미가입자는 회원가입 페이지로 리다이렉트합니다.")
 	public String paycoCallback(
 		@RequestParam String code,
-		RedirectAttributes redirectAttributes
+		RedirectAttributes redirectAttributes,
+		HttpServletResponse response
 	) {
 
 		// 2. Access Token 발급
@@ -82,7 +95,14 @@ public class OAuthController {
 
 		if(memberService.findLoginId(userInfo.paycoId()).isDuplicated()) {
 			SocialLoginRequest request = new SocialLoginRequest(userInfo.paycoId());
-			memberApiClient.socialLogin(request);
+			LoginResponse loginResponse = memberApiClient.socialLogin(request);
+
+			ResponseCookie refreshCookie = createCookie(new RefreshToken(loginResponse.refreshToken()));
+			ResponseCookie accessCookie = createCookie(new AccessToken(loginResponse.accessToken()));
+
+			//쿠키 적용
+			response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+			response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 
 			return "redirect:/";
 		}
@@ -102,5 +122,29 @@ public class OAuthController {
 		request.setLoginId(userInfo.paycoId());
 		request.setLoginPassword(rawPassword);		//아무거나
 		return "member/payco-register";
+	}
+
+	private ResponseCookie createCookie(Token token) {
+		String path;
+		String tokenType;
+		Long expiration;			//중요: https요청에는 none으로 설정해도 됨, http요청은 secure가 false상태이므로 브라우저에서 none에 대한 쿠키는 거부하여 lax로 설정
+		if(token instanceof RefreshToken) {
+			tokenType = "Refresh-Token";
+			expiration = refreshCookieExp;
+			path = "/";
+		} else if (token instanceof AccessToken) {
+			tokenType = "Access-Token";
+			expiration = -1L;		//session 방식
+			path = "/";
+		} else {
+			throw new DecodingFailureException("토큰 에러");
+		}
+		return ResponseCookie.from(tokenType, token.getValue())
+			.httpOnly(true)					//XSS
+			.secure(cookieProperties.isSecure())					//중요: 실제 배포 환경에선 https요청으로 변경 / secure -> true
+			.sameSite(cookieProperties.getSameSite())				//CSRF
+			.path(path)
+			.maxAge(Duration.ofMinutes(expiration))
+			.build();
 	}
 }

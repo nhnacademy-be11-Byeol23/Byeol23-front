@@ -16,7 +16,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.nhnacademy.byeol23front.auth.CookieProperties;
 import com.nhnacademy.byeol23front.auth.MemberPrincipal;
+import com.nhnacademy.byeol23front.commons.exception.ExpiredRefreshTokenException;
 import com.nhnacademy.byeol23front.commons.parser.JwtParser;
 import com.nhnacademy.byeol23front.memberset.member.service.MemberService;
 
@@ -35,6 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtParser jwtParser;
 	private final TokenRefreshService tokenRefreshService;
+	private final CookieProperties cookieProperties;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -67,22 +70,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				String refreshToken = tokens.refreshToken();
 
 				if (refreshToken == null || refreshToken.isBlank()) {
-					response.sendRedirect("/members/login");
+					// 모든 쿠키 삭제
+					deleteAllCookies(request, response);
+					response.sendRedirect("/");
 					return;
 				}
-				String newAccessToken = tokenRefreshService.refreshTokens();
 
-				if (newAccessToken == null || newAccessToken.isBlank()) {
-					response.sendRedirect("/members/login");
+				try {
+					String newAccessToken = tokenRefreshService.refreshTokens();
+
+					if (newAccessToken == null || newAccessToken.isBlank()) {
+						response.sendRedirect("/members/login");
+						return;
+					}
+					Claims newClaims = jwtParser.parseToken(newAccessToken);
+					Authentication authentication = createAuthentication(newClaims);
+					SecurityContextHolder.getContext().setAuthentication(authentication);
+				} catch (ExpiredRefreshTokenException e2) {
+					log.warn("ExpiredRefreshTokenException 발생: 리프레시 토큰 만료로 인한 로그아웃 처리");
+					
+					// 모든 쿠키 삭제
+					deleteAllCookies(request, response);
+					
+					response.sendRedirect("/");
 					return;
 				}
-				Claims newClaims = jwtParser.parseToken(newAccessToken);
-				Authentication authentication = createAuthentication(newClaims);
-				SecurityContextHolder.getContext().setAuthentication(authentication);
 			} catch (Exception e) {
-			response.sendRedirect("/members/login");
-			return;
-		}
+				log.error("토큰 처리 중 예외 발생", e);
+				// 모든 쿠키 삭제
+				deleteAllCookies(request, response);
+				response.sendRedirect("/");
+				return;
+			}
 		}
 
 		filterChain.doFilter(request, response);
@@ -104,6 +123,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			}
 		}
 		return new Tokens(accessToken, refreshToken);
+	}
+
+	private void deleteAllCookies(HttpServletRequest request, HttpServletResponse response) {
+		Cookie[] cookies = request.getCookies();
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				// Access-Token과 Refresh-Token만 삭제 (guestId는 유지)
+				if ("Access-Token".equals(cookie.getName()) || "Refresh-Token".equals(cookie.getName()) || "PAYCO_STATE".equals(cookie.getName())) {
+					ResponseCookie deleteCookie = ResponseCookie.from(cookie.getName(), "")
+						.path("/")
+						.httpOnly(true)
+						.secure(cookieProperties.isSecure())
+						.sameSite(cookieProperties.getSameSite())
+						.maxAge(0)
+						.build();
+					response.addHeader("Set-Cookie", deleteCookie.toString());
+				}
+			}
+		}
 	}
 
 	public Authentication createAuthentication(Claims claims) {
