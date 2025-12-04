@@ -17,5 +17,4 @@ public interface MemberService {
 	MemberUpdateResponse updateMember(MemberUpdateRequest request);
 	MemberPasswordUpdateResponse updateMemberPassword(MemberPasswordUpdateRequest request);
 	void deleteMember();
-	ReAuthenticateResponse reissueAccessToken();
 }

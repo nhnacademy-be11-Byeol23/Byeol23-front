@@ -28,13 +28,21 @@ public class FeignInterceptor {
 		Cookie[] cookies = request.getCookies();
 
 		String refreshToken = null;
-		String accessToken = request.getHeader(HttpHeaders.AUTHORIZATION);
+		String accessToken = null;
 
 		// Refresh-Token과 guestId 쿠키 처리
 		if (cookies != null) {
 			for (Cookie cookie : cookies) {
-				if ("Refresh-Token".equals(cookie.getName())) {
+				if ("Refresh-Token".equals(cookie.getName()) && template.path().startsWith("/auth")) {
 					refreshToken = cookie.getValue();
+
+					template.header("Refresh-Token", refreshToken);
+				}
+				if ("Access-Token".equals(cookie.getName()) && !template.path().startsWith("/api/categories") && template.path().startsWith("/api")) {
+					accessToken = cookie.getValue();
+
+					template.header(HttpHeaders.AUTHORIZATION, accessToken);
+					template.header("Access-Token", accessToken);		//임시용
 				}
 				
 				if ("guestId".equals(cookie.getName())) {
@@ -43,12 +51,6 @@ public class FeignInterceptor {
 				}
 			}
 		}
-			if (accessToken != null) {
-				template.header(HttpHeaders.AUTHORIZATION, accessToken);
-			}
-			if (refreshToken != null) {
-				template.header("Refresh-Token", refreshToken);
-			}
 		};
 	}
 }

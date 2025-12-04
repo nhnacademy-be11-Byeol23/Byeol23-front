@@ -56,9 +56,4 @@ public class MemberServiceImpl implements MemberService {
 		memberApiClient.deleteMember();
 	}
 
-	@Override
-	public ReAuthenticateResponse reissueAccessToken() {
-		return memberApiClient.reissueAccessToken();
-	}
-
 }

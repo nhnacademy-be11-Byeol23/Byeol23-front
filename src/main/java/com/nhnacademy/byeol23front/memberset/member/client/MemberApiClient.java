@@ -48,6 +48,5 @@ public interface MemberApiClient {
 	@PostMapping("/auth/social-login")
 	Void socialLogin(SocialLoginRequest request);
 
-	@PostMapping("/auth/refresh")
-	ReAuthenticateResponse reissueAccessToken();
+
 }

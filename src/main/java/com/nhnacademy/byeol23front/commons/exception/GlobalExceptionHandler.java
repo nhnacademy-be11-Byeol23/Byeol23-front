@@ -11,8 +11,5 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-	@ExceptionHandler(AccessDeniedException.class)
-	public ResponseEntity<AccessDeniedException> AccessDeniedHandle() {
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-	}
+
 }
