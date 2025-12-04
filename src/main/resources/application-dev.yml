@@ -13,6 +13,8 @@ logging:
 
 jwt:
   public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAiNJoRcPJmLQ7Ii+hv78JNhtSgo7w7u8TS3PsftAMKBvkqpeAInmnpra1usEPhXTVWOyLLxL6yJAymKY8lzDf3I74T0F4GJiomkjjOdIT5TEAc5X3um+IuHxu7Qapr0BuKwBvT4FCBJ9jzPOCq8xkh2q/AWGfOTlPLjBmAVnp2NbbV4aI5cQR6D9a/extPX6hhAtq/NZqE665L/SVIXqPabu2Owpvn90O6HtNXzg6ytk7Rj4FBx6YLtqHy0QAf8/o/Zc1nr+ZHwSsDQ+am6Sp2ZmUl03ScerF7EMtfZyzUqY46RFNgUkhB7iJb2hZ3xYGtR9SUI+PDvt2Kz6AETewhQIDAQAB
+  refresh-cookie:
+    expiration: "30"
 
 payco:
   redirect-uri: http://local.byeol23.shop:10330/payco/callback
@@ -20,3 +22,7 @@ payco:
   authorize-uri: https://id.payco.com/oauth2.0/authorize
   user-info-uri: https://apis-payco.krp.toastoven.net/payco/friends/find_member_v2.json
 
+app:
+  cookie:
+    secure: false
+    same-site: Lax

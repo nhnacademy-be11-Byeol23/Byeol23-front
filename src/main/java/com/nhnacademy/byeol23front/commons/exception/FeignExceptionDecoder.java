@@ -53,10 +53,13 @@ public class FeignExceptionDecoder implements ErrorDecoder {
 		}
 
 		if (status == HttpStatus.SC_UNAUTHORIZED) {
-				log.warn("401 ExpiredJwtException 발생 → ExpiredTokenException 던짐. methodKey={}, path={}", methodKey, path);
-				return new ExpiredTokenException(message);
+			log.warn("401 ExpiredJwtException 발생 → ExpiredTokenException 던짐. methodKey={}, path={}", methodKey, path);
+			return new ExpiredTokenException(message);
 		}
 
+		if(status == HttpStatus.SC_BAD_REQUEST && path.startsWith("/auth/login")) {
+			return new LoginFailureException(message);
+		}
 
 
 		//태그 관련 예외 처리

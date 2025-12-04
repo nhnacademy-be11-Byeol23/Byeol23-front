@@ -42,8 +42,3 @@ payco:
   client-id: 3RDqzUwAf9DoEwippcFB96j
   client-secret: VhS7D7ntRVD14NSGcOjnPndf
 
-jwt:
-  access-token:
-    expiration: "30000"
-  refresh-token:
-    expiration: "3000000"

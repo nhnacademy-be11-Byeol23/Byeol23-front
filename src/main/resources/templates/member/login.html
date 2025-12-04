@@ -83,6 +83,9 @@
                       <i class="bi bi-eye"></i>
                     </span>
                   </div>
+                  <div th:if="${loginFailed}" class="alert alert-danger">
+                    <span th:text="${loginErrorMsg}">로그인에 실패했습니다.</span>
+                  </div>
 
 
                   <button type="submit" class="auth-btn primary-btn mb-3">

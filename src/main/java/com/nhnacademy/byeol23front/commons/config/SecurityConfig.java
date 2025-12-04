@@ -30,10 +30,6 @@ public class SecurityConfig {
 	private final JwtParser jwtParser;
 	private final TokenRefreshService tokenRefreshService;
 
-
-	@Value("${jwt.access-token.expiration}")
-	private long accessTokenExp;
-
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http
@@ -42,12 +38,9 @@ public class SecurityConfig {
 			.httpBasic(AbstractHttpConfigurer::disable)   // 기본 인증
 			.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers(
-					"/mypage/**",
-					"/admin/**",
-					"/admin"
-				).authenticated()
-				.anyRequest().permitAll()
+					.requestMatchers("/mypage/**").authenticated()
+					.requestMatchers("/admin", "/admin/**").hasAuthority("ADMIN")
+					.anyRequest().permitAll()
 			)
 			//매 요청마다 SecurityContextHolder에 Authentication을 채워줌
 			.addFilterBefore(

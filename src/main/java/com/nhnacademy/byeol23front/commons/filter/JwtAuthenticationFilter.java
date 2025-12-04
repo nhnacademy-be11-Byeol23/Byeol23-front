@@ -43,11 +43,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		String uri = request.getRequestURI();
 
 		if (uri.startsWith("/members/login")
+			|| uri.startsWith("/payco/login")
 			|| uri.startsWith("/members/join")
 			|| uri.startsWith("/css/")
 			|| uri.startsWith("/js/")
 			|| uri.startsWith("/images/")
-			|| uri.startsWith("/assets/")) {
+			|| uri.startsWith("/assets/")
+		) {
 
 			filterChain.doFilter(request, response);
 			return;
