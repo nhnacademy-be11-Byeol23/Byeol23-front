@@ -8,11 +8,8 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.nhnacademy.byeol23front.auth.service.RefreshHandler;
 import com.nhnacademy.byeol23front.commons.exception.FeignExceptionDecoder;
-import com.nhnacademy.byeol23front.commons.feign.RefreshableFeignClient;
 
-import feign.Client;
 import feign.codec.ErrorDecoder;
 
 @Configuration
@@ -24,9 +21,7 @@ public class CommonFeignConfig {
 
 		mapper.registerModule(new JavaTimeModule());
 
-		// record 생성자에 없는 필드도 null로 허용
 		mapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, false);
-		// 모르는 필드는 무시
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
 		return mapper;
@@ -36,12 +31,6 @@ public class CommonFeignConfig {
 	@Bean
 	public ErrorDecoder errorDecoder(ObjectMapper objectMapper) {
 		return new FeignExceptionDecoder(objectMapper);
-	}
-
-	@Bean
-	@Primary
-	public Client feignClient(Client feignClient, RefreshHandler refreshHandler) {
-		return new RefreshableFeignClient(feignClient, refreshHandler);
 	}
 
 }

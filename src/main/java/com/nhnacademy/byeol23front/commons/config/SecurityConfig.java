@@ -1,5 +1,7 @@
 package com.nhnacademy.byeol23front.commons.config;
 
+import com.nhnacademy.byeol23front.auth.service.TokenRefreshService;
+import com.nhnacademy.byeol23front.memberset.domain.Token;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SecurityConfig {
 
 	private final JwtParser jwtParser;
-	private final MemberService memberService;
+	private final TokenRefreshService tokenRefreshService;
 
 
 	@Value("${jwt.access-token.expiration}")
@@ -49,7 +51,7 @@ public class SecurityConfig {
 			)
 			//매 요청마다 SecurityContextHolder에 Authentication을 채워줌
 			.addFilterBefore(
-				new JwtAuthenticationFilter(jwtParser),
+				new JwtAuthenticationFilter(jwtParser, tokenRefreshService),
 				UsernamePasswordAuthenticationFilter.class
 			);
 

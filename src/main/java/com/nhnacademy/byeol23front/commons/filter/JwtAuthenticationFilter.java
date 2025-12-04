@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
+import com.nhnacademy.byeol23front.auth.service.TokenRefreshService;
 import io.jsonwebtoken.ExpiredJwtException;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtParser jwtParser;
+	private final TokenRefreshService tokenRefreshService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -60,12 +62,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				Authentication authentication = createAuthentication(claims);
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 			} catch (ExpiredJwtException e) {
-				//요청은 게이트웨이에서 401 응답
-				log.debug("Access token expired, attempting refresh");
+				String refreshToken = tokens.refreshToken();
+
+				if (refreshToken == null || refreshToken.isBlank()) {
+					response.sendRedirect("/members/login");
+					return;
+				}
+				String newAccessToken = tokenRefreshService.refreshTokens();
+
+				if (newAccessToken == null || newAccessToken.isBlank()) {
+					response.sendRedirect("/members/login");
+					return;
+				}
+				Claims newClaims = jwtParser.parseToken(newAccessToken);
+				Authentication authentication = createAuthentication(newClaims);
+				SecurityContextHolder.getContext().setAuthentication(authentication);
 			} catch (Exception e) {
-				response.sendRedirect("/members/login");
-				return ;
-			}
+			response.sendRedirect("/members/login");
+			return;
+		}
 		}
 
 		filterChain.doFilter(request, response);

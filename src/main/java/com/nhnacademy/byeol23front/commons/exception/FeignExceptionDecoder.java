@@ -3,7 +3,6 @@ package com.nhnacademy.byeol23front.commons.exception;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-
 import org.apache.http.HttpStatus;
 
 
@@ -54,10 +53,8 @@ public class FeignExceptionDecoder implements ErrorDecoder {
 		}
 
 		if (status == HttpStatus.SC_UNAUTHORIZED) {
-			if(message.equals("ExpiredJwtException")) {
-
-			}
-			return new PermissionDeniedException(message);
+				log.warn("401 ExpiredJwtException 발생 → ExpiredTokenException 던짐. methodKey={}, path={}", methodKey, path);
+				return new ExpiredTokenException(message);
 		}
 
 

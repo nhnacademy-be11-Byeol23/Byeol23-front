@@ -3,7 +3,6 @@ package com.nhnacademy.byeol23front.bookset.search.client;
 import com.nhnacademy.byeol23front.bookset.search.dto.BookSearchResultResponse;
 import com.nhnacademy.byeol23front.bookset.search.dto.SearchCondition;
 import com.nhnacademy.byeol23front.bookset.search.dto.SearchPageResponse;
-import com.nhnacademy.byeol23front.commons.feign.RefreshableFeignClient;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
@@ -15,8 +14,7 @@ import java.util.List;
 
 @FeignClient(
         name = "BYEOL23-GATEWAY",
-        contextId = "searchApiClient",
-        configuration = RefreshableFeignClient.class
+        contextId = "searchApiClient"
 )
 public interface SearchApiClient {
     @GetMapping("/search-api/search")
