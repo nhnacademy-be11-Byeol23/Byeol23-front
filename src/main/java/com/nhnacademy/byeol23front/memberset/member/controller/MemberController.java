@@ -102,7 +102,7 @@ public class MemberController {
         ResponseEntity<LogoutResponse> feignResponse = memberApiClient.logout();
 
         response.addHeader("Set-Cookie", deleteCookie("Access-Token", "/"));
-        response.addHeader("Set-Cookie", deleteCookie("Refresh-Token", "/members"));
+        response.addHeader("Set-Cookie", deleteCookie("Refresh-Token", "/"));
 
         return "redirect:/";
     }
