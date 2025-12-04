@@ -1,11 +1,11 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
+import com.nhnacademy.byeol23front.couponset.coupon.client.CouponApiClient;
+import com.nhnacademy.byeol23front.couponset.coupon.dto.OrderItemRequest;
+import com.nhnacademy.byeol23front.couponset.coupon.dto.UsableCouponInfoResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +46,7 @@ public class OrderController {
     private final OrderUtil orderUtil;
     private final BookApiClient bookApiClient;
     private final MemberApiClient memberApiClient;
+    private final CouponApiClient couponApiClient;
 
     @Value("${tossPayment.client-key}")
     private String tossClientKey;
@@ -76,6 +77,28 @@ public class OrderController {
         CartOrderRequest cartOrderRequest = orderUtil.createOrderRequest(bookIds, quantities);
         BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(cartOrderRequest).getBody();
 
+        //쿠폰 사용을 위한 로직
+        List<OrderItemRequest> orderItemRequests = new ArrayList<>();
+        if (bookIds != null && quantities != null && bookIds.size() == quantities.size()) {
+            for (int i = 0; i < bookIds.size(); i++) {
+                // 리스트의 각 요소를 꺼내 DTO로 변환
+                orderItemRequests.add(new OrderItemRequest(bookIds.get(i), quantities.get(i)));
+            }
+        }
+
+        List<UsableCouponInfoResponse> usableCoupons = List.of(); // 기본값: 빈 리스트
+        try {
+            ResponseEntity<List<UsableCouponInfoResponse>> couponResponse =
+                    couponApiClient.getUsableCoupons(orderItemRequests);
+
+            if (couponResponse != null && couponResponse.getBody() != null) {
+                usableCoupons = couponResponse.getBody();
+                log.info("조회된 사용 가능 쿠폰 수: {}", usableCoupons.size());
+            }
+        } catch (Exception e) {
+            log.error("쿠폰 목록 조회 중 오류 발생 (주문은 계속 진행): ", e);
+        }
+
         orderUtil.addDeliveryDatesToModel(model);
         orderUtil.addDeliveryFeeToModel(model, bookOrderRequest);
         orderUtil.addOrderSummary(model, bookOrderRequest);
@@ -87,6 +110,8 @@ public class OrderController {
         model.addAttribute("userPoint", member.currentPoint());
 
         model.addAttribute("clientKey", tossClientKey);
+
+        model.addAttribute("usableCoupons", usableCoupons);
 
         return "order/checkout";
     }
