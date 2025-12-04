@@ -5,6 +5,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
 import com.nhnacademy.byeol23front.memberset.domain.Token;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Service
 public interface MemberService {
@@ -16,5 +17,5 @@ public interface MemberService {
 	MemberUpdateResponse updateMember(MemberUpdateRequest request);
 	MemberPasswordUpdateResponse updateMemberPassword(MemberPasswordUpdateRequest request);
 	void deleteMember();
-	ReAuthenticateResponse reissueAccessToken(String refreshToken);
+	ReAuthenticateResponse reissueAccessToken();
 }

@@ -7,6 +7,7 @@ import com.nhnacademy.byeol23front.memberset.member.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 @Slf4j
 @Service
@@ -56,8 +57,8 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public ReAuthenticateResponse reissueAccessToken(String refreshToken) {
-		return memberApiClient.reissueAccessToken(refreshToken);
+	public ReAuthenticateResponse reissueAccessToken() {
+		return memberApiClient.reissueAccessToken();
 	}
 
 }

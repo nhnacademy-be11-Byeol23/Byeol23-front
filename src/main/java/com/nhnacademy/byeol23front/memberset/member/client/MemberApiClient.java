@@ -3,11 +3,7 @@ package com.nhnacademy.byeol23front.memberset.member.client;
 import com.nhnacademy.byeol23front.memberset.member.dto.*;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "BYEOL23-GATEWAY", contextId = "MemberApiClient")
 public interface MemberApiClient {
@@ -26,7 +22,7 @@ public interface MemberApiClient {
 	Void loginWithPayco();
 
 	@PostMapping("/auth/logout")
-	LogoutResponse logout();
+	Void logout();
 
 	@GetMapping("/api/members")
 	MemberMyPageResponse getMember();
@@ -53,5 +49,5 @@ public interface MemberApiClient {
 	Void socialLogin(SocialLoginRequest request);
 
 	@PostMapping("/auth/refresh")
-	ReAuthenticateResponse reissueAccessToken(@RequestBody String refreshToken);
+	ReAuthenticateResponse reissueAccessToken();
 }

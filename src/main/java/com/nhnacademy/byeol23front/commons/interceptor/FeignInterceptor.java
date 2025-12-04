@@ -43,8 +43,12 @@ public class FeignInterceptor {
 				}
 			}
 		}
-		request.setAttribute("AccessToken", accessToken);
-		request.setAttribute("RefreshToken", refreshToken);
+			if (accessToken != null) {
+				template.header(HttpHeaders.AUTHORIZATION, accessToken);
+			}
+			if (refreshToken != null) {
+				template.header("Refresh-Token", refreshToken);
+			}
 		};
 	}
 }
