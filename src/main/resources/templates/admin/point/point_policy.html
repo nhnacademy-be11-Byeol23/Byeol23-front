@@ -146,10 +146,8 @@
 </a>
 <div id="preloader"></div>
 
-<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
-<script th:src="@{/assets/vendor/aos/aos.js}"></script>
-<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
-<script th:src="@{/assets/js/main.js}"></script>
+<!-- Vendor & Main JS Files -->
+<th:block th:replace="~{fragments/common_scripts :: commonScripts}"></th:block>
 
 <script>
     const API_BASE = '/api/front/point-policies';

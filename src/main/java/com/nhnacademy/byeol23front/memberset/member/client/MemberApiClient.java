@@ -15,47 +15,37 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name = "BYEOL23-GATEWAY", contextId = "MemberApiClient")
 public interface MemberApiClient {
-	/**
-	 * 회원 가입
-	 */
-	@PostMapping("/api/members")
-	Void registerRequest(@RequestBody MemberRegisterRequest request);
-	/**
-	 * 로그인
-	 */
-	@PostMapping("/auth/login")
-	LoginResponse login(@RequestBody LoginRequest request);
+    /**
+     * 회원 가입
+     */
+    @PostMapping("/api/members/register")
+    ResponseEntity<MemberRegisterResponse> registerRequest(@RequestBody MemberRegisterRequest request);
 
-	@GetMapping("/auth/payco/login")
-	Void loginWithPayco();
+    /**
+     * 로그인
+     */
+    @PostMapping("/auth/login")
+    ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request);
 
-	@PostMapping("/auth/logout")
-	LogoutResponse logout();
+    @PostMapping("/auth/logout")
+    ResponseEntity<LogoutResponse> logout();
 
-	@GetMapping("/api/members")
-	MemberMyPageResponse getMember();
+    @GetMapping("/api/members")
+    ResponseEntity<MemberMyPageResponse> getMember();
 
-	@PostMapping("/api/members/put")
-	MemberUpdateResponse updateMember(@RequestBody MemberUpdateRequest request);
+    @PutMapping("/api/members")
+    ResponseEntity<MemberUpdateResponse> updateMember(@RequestBody MemberUpdateRequest request);
 
-	@PostMapping("/api/members/put/password")
-	MemberPasswordUpdateResponse updateMemberPassword(@RequestBody MemberPasswordUpdateRequest request);
+    @PutMapping("/api/members/password")
+    ResponseEntity<MemberPasswordUpdateResponse> updateMemberPassword(@RequestBody MemberPasswordUpdateRequest request);
 
-	@PutMapping("api/members/reactivate")
-	void reactivateMember(@RequestBody MemberPasswordUpdateRequest request);
+    @PutMapping("api/members/reactivate")
+    ResponseEntity<Void> reactivateMember(@RequestBody MemberPasswordUpdateRequest request);
 
-	@PostMapping("/api/members/delete")
-	void deleteMember();
+    @DeleteMapping("/api/members")
+    ResponseEntity<Void> deleteMember();
 
-	@GetMapping("/api/members/check-id")
-	FindLoginIdResponse findLoginId(@RequestParam("loginId") String loginId);
+    @GetMapping("/api/members/check-id")
+    CheckIdResponse checkId(@RequestParam("loginId") String loginId);
 
-	@GetMapping("/api/members/check-duplication")
-	ValueDuplicationCheckResponse checkDuplication(@RequestBody ValueDuplicationCheckRequest request);
-
-	@PostMapping("/auth/social-login")
-	Void socialLogin(SocialLoginRequest request);
-
-	@PostMapping("/auth/refresh")
-	ReAuthenticateResponse reissueAccessToken(@RequestBody String refreshToken);
 }

@@ -140,7 +140,7 @@
                         <span>or sign up with</span>
                       </div>
                       <div class="social-buttons">
-                        <a th:href="@{/payco/login}" class="btn btn-social">
+                        <a href="#" class="btn btn-social">
                           <i class="bi bi-payco"></i>
                           <span>Payco</span>
                         </a>
@@ -174,13 +174,8 @@
 <div id="preloader"></div>
 
 <!-- Vendor JS Files -->
-<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
-<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
-<script th:src="@{/assets/vendor/aos/aos.js}"></script>
-<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
-<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
-<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
-<script th:src="@{/assets/js/main.js}"></script>
+<!-- Vendor & Main JS Files -->
+<th:block th:replace="~{fragments/common_scripts :: commonScripts}"></th:block>
 
 </body>
 
