@@ -44,12 +44,20 @@ public class MemberController {
 
 	@GetMapping("/register")
 	@Operation(summary = "회원가입 폼 화면", description = "회원가입 폼 페이지를 반환합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "회원가입 폼 페이지 반환 성공")
+	})
 	public String showRegisterForm() {
 		return "member/register";
 	}
 
 	@PostMapping("/register")
 	@Operation(summary = "회원가입 요청", description = "회원가입 폼에서 입력한 정보를 이용해 신규 회원을 등록합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "회원가입 성공 - 로그인 페이지로 리다이렉트"),
+		@ApiResponse(responseCode = "400", description = "검증 실패 - 회원가입 폼으로 다시 리다이렉트",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
 	public String register(@ModelAttribute MemberRegisterRequest request, BindingResult br) {
 		log.info("request:{}", request);
 		if (br.hasErrors()) {
@@ -60,7 +68,11 @@ public class MemberController {
 	}
 
 	@GetMapping("/login")
-	@Operation(summary = "로그인 폼 화면", description = "로그인 폼 페이지를 반환합니다.")
+	@Operation(summary = "로그인 폼 화면", description = "로그인 폼 페이지를 반환합니다. " +
+		"bookId와 quantity 파라미터가 있으면 로그인 후 해당 도서의 직접 주문 페이지로 리다이렉트됩니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "로그인 폼 페이지 반환 성공")
+	})
 	public String showLoginForm(@RequestParam(name = "bookId", required = false) Long bookId,
 								@RequestParam(name = "quantity", required = false) Integer quantity,
 								@RequestParam(name = "loginFailed", required = false) Boolean loginFailed,
@@ -82,7 +94,15 @@ public class MemberController {
 
 
 	@PostMapping("/login")
-	@Operation(summary = "로그인 요청", description = "아이디와 비밀번호를 이용해 로그인하고 토큰 쿠키를 설정합니다.")
+	@Operation(summary = "로그인 요청", description = "아이디와 비밀번호를 이용해 로그인하고 Access-Token과 Refresh-Token 쿠키를 설정합니다. " +
+		"로그인 성공 시 홈페이지로 리다이렉트되며, bookId와 quantity가 있으면 직접 주문 페이지로 리다이렉트됩니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "302", description = "로그인 성공 - 홈페이지 또는 주문 페이지로 리다이렉트"),
+		@ApiResponse(responseCode = "400", description = "로그인 실패 - 로그인 폼으로 다시 리다이렉트",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "401", description = "인증 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
 	public String login(@ModelAttribute LoginRequestTmp tmp, HttpServletResponse response) {
 
 		LoginRequest request = new LoginRequest(tmp.loginId(), tmp.loginPassword());
@@ -95,16 +115,23 @@ public class MemberController {
 		response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 		response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 
-		if (!Objects.isNull(tmp.bookIds()) && !Objects.isNull(tmp.quantities())) {
+		if (!Objects.isNull(tmp.bookIds()) && !Objects.isNull(tmp.quantities())
+			&& !tmp.bookIds().isEmpty() && !tmp.quantities().isEmpty()) {
 			return String.format("redirect:/orders/direct?bookId=%d&quantity=%d",
-				tmp.bookIds(), tmp.quantities());
+				tmp.bookIds().get(0), tmp.quantities().get(0));
 		}
 
 		return "redirect:/";
 	}
 
 	@PostMapping("/logout")
-	@Operation(summary = "로그아웃 요청", description = "현재 로그인된 사용자의 토큰 쿠키를 삭제하고 로그아웃합니다.")
+	@Operation(summary = "로그아웃 요청", description = "현재 로그인된 사용자의 Access-Token과 Refresh-Token 쿠키를 삭제하고 로그아웃합니다. " +
+		"로그아웃 성공 시 홈페이지로 리다이렉트됩니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "302", description = "로그아웃 성공 - 홈페이지로 리다이렉트"),
+		@ApiResponse(responseCode = "401", description = "인증 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
 	public String logout(@ModelAttribute LogoutRequest request, HttpServletResponse response) {
 		memberService.logout();
 
@@ -117,6 +144,10 @@ public class MemberController {
 	@GetMapping("/check-id")
 	@ResponseBody
 	@Operation(summary = "아이디 중복 체크", description = "입력한 로그인 아이디가 이미 사용 중인지 확인합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "중복 체크 성공",
+			content = @Content(schema = @Schema(implementation = FindLoginIdResponse.class)))
+	})
 	public FindLoginIdResponse findLoginId(@RequestParam String loginId) {
 		return memberService.findLoginId(loginId);
 	}
@@ -124,6 +155,12 @@ public class MemberController {
 	@PostMapping("/check-duplication")
 	@ResponseBody
 	@Operation(summary = "회원 정보 중복 체크", description = "닉네임/이메일/전화번호 등의 중복 여부를 확인합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "중복 체크 성공",
+			content = @Content(schema = @Schema(implementation = ValueDuplicationCheckResponse.class))),
+		@ApiResponse(responseCode = "400", description = "요청 파라미터 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
 	public ValueDuplicationCheckResponse checkDuplication(
 		@RequestBody ValueDuplicationCheckRequest request) {
 		 return memberService.checkDuplication(request);
@@ -141,11 +178,14 @@ public class MemberController {
 
 	@PostMapping("/put")
 	@ResponseBody
-	@Operation(summary = "회원 정보 수정", description = "프론트에서 전달된 회원 정보로 백엔드에 수정 요청을 전송합니다.")
+	@Operation(summary = "회원 정보 수정", description = "프론트에서 전달된 회원 정보로 백엔드에 수정 요청을 전송합니다. " +
+		"닉네임, 이메일, 전화번호, 생년월일 등을 수정할 수 있습니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "수정 성공",
 			content = @Content(schema = @Schema(implementation = MemberUpdateResponse.class))),
-		@ApiResponse(responseCode = "400", description = "검증 실패",
+		@ApiResponse(responseCode = "400", description = "검증 실패 - 중복된 정보 또는 잘못된 형식",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "401", description = "인증 실패",
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	public ResponseEntity<MemberUpdateResponse> updateMember(@RequestBody MemberUpdateRequest request){
@@ -155,11 +195,14 @@ public class MemberController {
 
 	@PostMapping("/put/password")
 	@ResponseBody
-	@Operation(summary = "비밀번호 변경", description = "현재 사용자의 비밀번호 변경 요청을 백엔드로 전달합니다.")
+	@Operation(summary = "비밀번호 변경", description = "현재 사용자의 비밀번호 변경 요청을 백엔드로 전달합니다. " +
+		"현재 비밀번호와 새 비밀번호를 입력해야 합니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "변경 성공",
 			content = @Content(schema = @Schema(implementation = MemberPasswordUpdateResponse.class))),
-		@ApiResponse(responseCode = "400", description = "검증 실패",
+		@ApiResponse(responseCode = "400", description = "검증 실패 - 현재 비밀번호 불일치 또는 새 비밀번호 형식 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "401", description = "인증 실패",
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	public ResponseEntity<MemberPasswordUpdateResponse> updatePassword(@RequestBody MemberPasswordUpdateRequest request){
@@ -169,10 +212,13 @@ public class MemberController {
 
 	@PostMapping("/delete")
 	@ResponseBody
-	@Operation(summary = "회원 탈퇴", description = "현재 사용자의 회원 탈퇴 요청을 백엔드로 전달합니다.")
+	@Operation(summary = "회원 탈퇴", description = "현재 사용자의 회원 탈퇴 요청을 백엔드로 전달합니다. " +
+		"회원 상태가 WITHDRAWN으로 변경되며, 실제로 삭제되지는 않습니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "204", description = "탈퇴 성공"),
 		@ApiResponse(responseCode = "400", description = "요청 오류",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "401", description = "인증 실패",
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
 	public ResponseEntity<Void> deleteMember() {

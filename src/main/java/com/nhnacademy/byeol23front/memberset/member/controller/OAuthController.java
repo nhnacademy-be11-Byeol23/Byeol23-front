@@ -16,7 +16,12 @@ import com.nhnacademy.byeol23front.memberset.member.dto.PaycoUserInfo;
 import com.nhnacademy.byeol23front.memberset.member.dto.SocialLoginRequest;
 import com.nhnacademy.byeol23front.memberset.member.service.MemberService;
 import com.nhnacademy.byeol23front.memberset.member.service.PaycoOAuthService;
+import com.nhnacademy.byeol23front.commons.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +55,11 @@ public class OAuthController {
 
 	@GetMapping("/login")
 	@Operation(summary = "페이코 로그인 페이지로 리다이렉트",
-		description = "CSRF 방지를 위한 STATE 쿠키를 설정하고, 페이코 인증 페이지로 리다이렉트합니다.")
+		description = "CSRF 방지를 위한 STATE 쿠키를 설정하고, 페이코 인증 페이지로 리다이렉트합니다. " +
+			"STATE 쿠키는 10분간 유효하며, 페이코 인증 후 콜백에서 검증됩니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "302", description = "페이코 인증 페이지로 리다이렉트 성공")
+	})
 	public ResponseEntity<Void> redirectToPayco(HttpServletResponse servletResponse) {
 		String state = paycoOAuthService.generateState();
 
@@ -74,12 +83,18 @@ public class OAuthController {
 	}
 
 
-	// 페이코로부터 응답을 받은 URI
-	// 2-4 과정 실행
 	@GetMapping("/callback")
 	@Operation(summary = "페이코 콜백 처리",
 		description = "페이코에서 전달된 인증 코드를 사용해 토큰을 발급받고, 사용자 정보를 조회합니다. " +
-			"이미 가입된 사용자는 소셜 로그인으로 처리하고, 미가입자는 회원가입 페이지로 리다이렉트합니다.")
+			"이미 가입된 사용자는 소셜 로그인으로 처리하고(토큰 쿠키 설정 후 홈으로 리다이렉트), " +
+			"미가입자는 회원가입 페이지로 리다이렉트합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "302", description = "콜백 처리 성공 - 홈 또는 회원가입 페이지로 리다이렉트"),
+		@ApiResponse(responseCode = "400", description = "인증 코드 오류 또는 STATE 검증 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+		@ApiResponse(responseCode = "401", description = "페이코 인증 실패",
+			content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+	})
 	public String paycoCallback(
 		@RequestParam String code,
 		RedirectAttributes redirectAttributes,
@@ -114,7 +129,11 @@ public class OAuthController {
 
 	@GetMapping("/register")
 	@Operation(summary = "페이코 회원가입 폼",
-		description = "페이코에서 받아온 사용자 정보를 기반으로 회원가입 폼을 초기화합니다.")
+		description = "페이코에서 받아온 사용자 정보를 기반으로 회원가입 폼을 초기화합니다. " +
+			"페이코 ID는 자동으로 입력되며, 비밀번호는 랜덤으로 생성됩니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "회원가입 폼 페이지 반환 성공")
+	})
 	public String paycoRegister(
 		@ModelAttribute("form")MemberRegisterRequest request,
 		@ModelAttribute("userInfo") PaycoUserInfo userInfo) {
