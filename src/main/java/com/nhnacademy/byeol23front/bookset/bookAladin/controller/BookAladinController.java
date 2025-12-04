@@ -52,7 +52,7 @@ public class BookAladinController {
 	private final TagApiClient tagApiClient;
 
 	@GetMapping
-	public String getAllBooks(@RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "20") int size, Model model) throws JsonProcessingException {
+	public String getAllBooks(@RequestParam(required = false) String keyword, @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size, Model model) throws JsonProcessingException {
 		AladinResult result = bookAladinService.getAllBooks(keyword, page, size);
 		model.addAttribute("books", result.item());
 		model.addAttribute("page", result.page());
