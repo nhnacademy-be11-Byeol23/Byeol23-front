@@ -92,6 +92,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(responseBody);
     }
 
+    //장바구니에서 주문
     @GetMapping
     public String getOrderForm(@RequestParam("token") String validationToken,
                                Model model) {
@@ -143,6 +144,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    //바로구매
     @GetMapping("/direct")
     public String getOrderFormDirect(
             @RequestParam Long bookId,
