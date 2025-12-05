@@ -298,78 +298,80 @@
                                     </table>
                                 </div>
 
-                                <nav th:if="${policies.totalPages > 0}" aria-label="Page navigation">
-                                    <ul class="pagination justify-content-center mt-3">
+                                <div class="pagination-wrapper" data-aos="fade-up" th:if="${policies != null and policies.totalPages > 0}">
+                                    <th:block th:if="${policies.hasPrevious()}">
+                                        <a th:href="@{/admin/coupon-policy(
+                                            page=${policies.number - 1},
+                                            size=${policies.size},
+                                            book_page=${booksPage.number},
+                                            book_size=${booksPage.size},
+                                            targetTypeSelect=${param.targetTypeSelect != null ? param.targetTypeSelect : 'CATEGORY'}
+                                        )}"
+                                           class="btn-prev">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </th:block>
+                                    <th:block th:unless="${policies.hasPrevious()}">
+                                        <a href="#" class="btn-prev disabled">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </th:block>
 
-                                        <li class="page-item" th:classappend="${policies.first} ? 'disabled'">
-                                            <a class="page-link"
-                                               th:href="@{/admin/coupon-policy(
-                                                   page=0,
-                                                   size=${policies.size},
-                                                   book_page=${booksPage.number},
-                                                   book_size=${booksPage.size},
-                                                   targetTypeSelect=${param.targetTypeSelect != null ? param.targetTypeSelect : 'CATEGORY'}
-                                               )}"
-                                               aria-label="First">
-                                                <span aria-hidden="true">&laquo;</span>
-                                            </a>
-                                        </li>
-                                        <li class="page-item" th:classappend="${policies.first} ? 'disabled'">
-                                            <a class="page-link"
-                                               th:href="@{/admin/coupon-policy(
-                                                   page=${policies.number - 1},
-                                                   size=${policies.size},
-                                                   book_page=${booksPage.number},
-                                                   book_size=${booksPage.size},
-                                                   targetTypeSelect=${param.targetTypeSelect != null ? param.targetTypeSelect : 'CATEGORY'}
-                                               )}"
-                                               aria-label="Previous">
-                                                <span aria-hidden="true">&lt;</span>
-                                            </a>
-                                        </li>
+                                    <div class="page-numbers">
+                                        <th:block th:if="${policies.totalPages <= 5}">
+                                            <th:block th:each="i : ${#numbers.sequence(0, policies.totalPages - 1)}">
+                                                <a th:href="@{/admin/coupon-policy(
+                                                       page=${i},
+                                                       size=${policies.size},
+                                                       book_page=${booksPage.number},
+                                                       book_size=${booksPage.size},
+                                                       targetTypeSelect=${param.targetTypeSelect != null ? param.targetTypeSelect : 'CATEGORY'}
+                                                   )}"
+                                                   th:text="${i + 1}"
+                                                   th:classappend="${i == policies.number ? 'active' : ''}">
+                                                    1
+                                                </a>
+                                            </th:block>
+                                        </th:block>
+                                        <th:block th:if="${policies.totalPages > 5}">
+                                            <th:block th:with="
+                                                    start=${T(java.lang.Math).max(0, T(java.lang.Math).min(policies.number - 2, policies.totalPages - 5))},
+                                                    end=${T(java.lang.Math).min(policies.totalPages - 1, start + 4)}">
+                                                <th:block th:each="i : ${#numbers.sequence(start, end)}">
+                                                    <a th:href="@{/admin/coupon-policy(
+                                                           page=${i},
+                                                           size=${policies.size},
+                                                           book_page=${booksPage.number},
+                                                           book_size=${booksPage.size},
+                                                           targetTypeSelect=${param.targetTypeSelect != null ? param.targetTypeSelect : 'CATEGORY'}
+                                                       )}"
+                                                       th:text="${i + 1}"
+                                                       th:classappend="${i == policies.number ? 'active' : ''}">
+                                                        1
+                                                    </a>
+                                                </th:block>
+                                            </th:block>
+                                        </th:block>
+                                    </div>
 
-                                        <li class="page-item"
-                                            th:each="i : ${#numbers.sequence(0, policies.totalPages - 1)}"
-                                            th:classappend="${i == policies.number} ? 'active'">
-                                            <a class="page-link"
-                                               th:href="@{/admin/coupon-policy(
-                                                   page=${i},
-                                                   size=${policies.size},
-                                                   book_page=${booksPage.number},
-                                                   book_size=${booksPage.size},
-                                                   targetTypeSelect=${param.targetTypeSelect != null ? param.targetTypeSelect : 'CATEGORY'}
-                                               )}"
-                                               th:text="${i + 1}">1</a>
-                                        </li>
-
-                                        <li class="page-item" th:classappend="${policies.last} ? 'disabled'">
-                                            <a class="page-link"
-                                               th:href="@{/admin/coupon-policy(
-                                                   page=${policies.number + 1},
-                                                   size=${policies.size},
-                                                   book_page=${booksPage.number},
-                                                   book_size=${booksPage.size},
-                                                   targetTypeSelect=${param.targetTypeSelect != null ? param.targetTypeSelect : 'CATEGORY'}
-                                               )}"
-                                               aria-label="Next">
-                                                <span aria-hidden="true">&gt;</span>
-                                            </a>
-                                        </li>
-                                        <li class="page-item" th:classappend="${policies.last} ? 'disabled'">
-                                            <a class="page-link"
-                                               th:href="@{/admin/coupon-policy(
-                                                   page=${policies.totalPages - 1},
-                                                   size=${policies.size},
-                                                   book_page=${booksPage.number},
-                                                   book_size=${booksPage.size},
-                                                   targetTypeSelect=${param.targetTypeSelect != null ? param.targetTypeSelect : 'CATEGORY'}
-                                               )}"
-                                               aria-label="Last">
-                                                <span aria-hidden="true">&raquo;</span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </nav>
+                                    <th:block th:if="${policies.hasNext()}">
+                                        <a th:href="@{/admin/coupon-policy(
+                                            page=${policies.number + 1},
+                                            size=${policies.size},
+                                            book_page=${booksPage.number},
+                                            book_size=${booksPage.size},
+                                            targetTypeSelect=${param.targetTypeSelect != null ? param.targetTypeSelect : 'CATEGORY'}
+                                        )}"
+                                           class="btn-next">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </th:block>
+                                    <th:block th:unless="${policies.hasNext()}">
+                                        <a href="#" class="btn-next disabled">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </th:block>
+                                </div>
                             </div>
                         </div>
                     </div>
