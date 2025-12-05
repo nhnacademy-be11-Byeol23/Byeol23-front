@@ -65,3 +65,48 @@
         </nav>
     </div>
 </th:block>
+
+<!-- Grade Modal Fragment -->
+<th:block xmlns:th="http://www.thymeleaf.org" th:fragment="grade_modal">
+    <div class="modal fade" id="gradeModal" tabindex="-1" aria-labelledby="gradeModalLabel" aria-hidden="true"
+         data-bs-backdrop="true" data-bs-keyboard="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="gradeModalLabel">등급 정보</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="list-group"
+                        th:if="${member.grades != null and !member.grades.isEmpty()}">
+
+                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                            th:each="grade : ${member.grades}">
+                            <div>
+                                <!-- Grade name -->
+                                <strong th:text="${grade.gradeName}">GOLD</strong><br>
+
+                                <!-- Criterion price -->
+                                <small>
+                                    기준 금액:
+                                    <span th:text="${grade.criterionPrice}">100000</span> 원
+                                </small>
+                            </div>
+
+                            <!-- 할인률 / 적립률 등 -->
+                            <span th:text="${grade.pointRate * 100} + '%'">5%</span>
+                        </li>
+                    </ul>
+
+                    <p class="text-muted"
+                       th:if="${member.grades == null or member.grades.isEmpty()}">
+                        등록된 등급 정보가 없습니다.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
