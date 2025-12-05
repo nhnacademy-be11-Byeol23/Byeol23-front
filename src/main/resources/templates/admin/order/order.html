@@ -144,51 +144,44 @@
                   </tbody>
                 </table>
 
-                <nav th:if="${!orders.isEmpty() and orders.totalPages > 1}" aria-label="Page navigation" class="mt-4">
-                  <ul class="pagination justify-content-center">
+                <div class="pagination-wrapper" data-aos="fade-up" th:if="${orders != null and !orders.isEmpty() and orders.totalPages > 1}">
+                  <a th:href="${orders.hasPrevious()} ? @{/admin/orders(page=${orders.number - 1}, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})} : '#'"
+                     class="btn-prev"
+                     th:classappend="${!orders.hasPrevious()} ? 'disabled'">
+                    <i class="bi bi-chevron-left"></i>
+                  </a>
 
-                    <li class="page-item" th:classappend="${orders.first} ? 'disabled'">
-                      <a class="page-link"
-                         th:href="@{/admin/orders(page=0, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})}"
-                         aria-label="First">
-                        <span aria-hidden="true">&laquo;</span>
-                      </a>
-                    </li>
-                    <li class="page-item" th:classappend="${orders.first} ? 'disabled'">
-                      <a class="page-link"
-                         th:href="@{/admin/orders(page=${orders.number - 1}, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})}"
-                         aria-label="Previous">
-                        <span aria-hidden="true">&lsaquo;</span>
-                      </a>
-                    </li>
-
-                    <th:block th:with="
-                        start = ${T(java.lang.Math).max(0, orders.number - 2)},
-                        end = ${T(java.lang.Math).min(orders.totalPages - 1, orders.number + 2)}">
-                      <li class="page-item" th:each="pageNum : ${#numbers.sequence(start, end)}"
-                          th:classappend="${pageNum == orders.number} ? 'active'">
-                        <a class="page-link"
-                           th:href="@{/admin/orders(page=${pageNum}, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})}"
-                           th:text="${pageNum + 1}">1</a>
-                      </li>
+                  <div class="page-numbers">
+                    <th:block th:if="${orders.totalPages <= 5}">
+                      <th:block th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}">
+                        <a th:href="@{/admin/orders(page=${i}, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})}"
+                           th:text="${i + 1}"
+                           th:classappend="${i == orders.number ? 'active' : ''}">
+                          1
+                        </a>
+                      </th:block>
                     </th:block>
+                    <th:block th:if="${orders.totalPages > 5}">
+                      <th:block th:with="
+                          start=${T(java.lang.Math).max(0, T(java.lang.Math).min(orders.number - 2, orders.totalPages - 5))},
+                          end=${T(java.lang.Math).min(orders.totalPages - 1, start + 4)}">
+                        <th:block th:each="i : ${#numbers.sequence(start, end)}">
+                          <a th:href="@{/admin/orders(page=${i}, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})}"
+                             th:text="${i + 1}"
+                             th:classappend="${i == orders.number ? 'active' : ''}">
+                            1
+                          </a>
+                        </th:block>
+                      </th:block>
+                    </th:block>
+                  </div>
 
-                    <li class="page-item" th:classappend="${orders.last} ? 'disabled'">
-                      <a class="page-link"
-                         th:href="@{/admin/orders(page=${orders.number + 1}, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})}"
-                         aria-label="Next">
-                        <span aria-hidden="true">&rsaquo;</span>
-                      </a>
-                    </li>
-                    <li class="page-item" th:classappend="${orders.last} ? 'disabled'">
-                      <a class="page-link"
-                         th:href="@{/admin/orders(page=${orders.totalPages - 1}, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})}"
-                         aria-label="Last">
-                        <span aria-hidden="true">&raquo;</span>
-                      </a>
-                    </li>
-                  </ul>
-                </nav>
+                  <a th:href="${orders.hasNext()} ? @{/admin/orders(page=${orders.number + 1}, status=${param.status}, orderNumber=${param.orderNumber}, receiver=${param.receiver})} : '#'"
+                     class="btn-next"
+                     th:classappend="${!orders.hasNext()} ? 'disabled'">
+                    <i class="bi bi-chevron-right"></i>
+                  </a>
+                </div>
               </div>
             </div>
 

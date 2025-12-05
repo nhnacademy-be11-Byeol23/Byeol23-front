@@ -319,33 +319,42 @@
                             <div class="pagination-wrapper" data-aos="fade-up"
                                  th:if="${orders != null and orders.totalPages > 1}">
 
-                                <a th:if="${orders.hasPrevious()}"
-                                   th:href="@{/mypage/orders(page=${orders.number - 1})}"
-                                   class="btn-prev">
+                                <a th:href="${orders.hasPrevious()} ? @{/mypage/orders(page=${orders.number - 1})} : '#'"
+                                   class="btn-prev"
+                                   th:classappend="${!orders.hasPrevious()} ? 'disabled'">
                                     <i class="bi bi-chevron-left"></i>
                                 </a>
-                                <button type="button" class="btn-prev" th:unless="${orders.hasPrevious()}" disabled>
-                                    <i class="bi bi-chevron-left"></i>
-                                </button>
 
                                 <div class="page-numbers">
-                                    <th:block th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}">
-                                        <a th:href="@{/mypage/orders(page=${i})}"
-                                           th:text="${i + 1}"
-                                           th:classappend="${i == orders.number ? 'active' : ''}">
-                                            1
-                                        </a>
+                                    <th:block th:if="${orders.totalPages <= 5}">
+                                        <th:block th:each="i : ${#numbers.sequence(0, orders.totalPages - 1)}">
+                                            <a th:href="@{/mypage/orders(page=${i})}"
+                                               th:text="${i + 1}"
+                                               th:classappend="${i == orders.number ? 'active' : ''}">
+                                                1
+                                            </a>
+                                        </th:block>
+                                    </th:block>
+                                    <th:block th:if="${orders.totalPages > 5}">
+                                        <th:block th:with="
+                                                start=${T(java.lang.Math).max(0, T(java.lang.Math).min(orders.number - 2, orders.totalPages - 5))},
+                                                end=${T(java.lang.Math).min(orders.totalPages - 1, start + 4)}">
+                                            <th:block th:each="i : ${#numbers.sequence(start, end)}">
+                                                <a th:href="@{/mypage/orders(page=${i})}"
+                                                   th:text="${i + 1}"
+                                                   th:classappend="${i == orders.number ? 'active' : ''}">
+                                                    1
+                                                </a>
+                                            </th:block>
+                                        </th:block>
                                     </th:block>
                                 </div>
 
-                                <a th:if="${orders.hasNext()}"
-                                   th:href="@{/mypage/orders(page=${orders.number + 1})}"
-                                   class="btn-next">
+                                <a th:href="${orders.hasNext()} ? @{/mypage/orders(page=${orders.number + 1})} : '#'"
+                                   class="btn-next"
+                                   th:classappend="${!orders.hasNext()} ? 'disabled'">
                                     <i class="bi bi-chevron-right"></i>
                                 </a>
-                                <button type="button" class="btn-next" th:unless="${orders.hasNext()}" disabled>
-                                    <i class="bi bi-chevron-right"></i>
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -871,6 +880,9 @@
     });
 
 </script>
+
+  <!-- Grade Modal Fragment -->
+  <div th:replace="~{fragments/grade_modal :: grade_modal}"></div>
 
 </body>
 
