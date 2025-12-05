@@ -171,14 +171,18 @@
                         nickname: nickname || null
                     })
                 });
-                // 디버깅: 저장된 데이터 출력
-                console.log("중복 체크 결과:", dupData);
+
+                console.log("중복 체크 status:", dupRes.status);
+
+                const raw = await dupRes.text();
+                console.log("중복 체크 raw response:", raw);
 
                 if (!dupRes.ok) {
                     throw new Error("중복 검사 중 오류 발생");
                 }
 
-                const dupData = await dupRes.json();
+                const dupData = JSON.parse(raw);
+                console.log("중복 체크 결과:", dupData);
 
                 let hasProblem = false;
 

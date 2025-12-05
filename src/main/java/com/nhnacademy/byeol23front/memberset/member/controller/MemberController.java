@@ -239,7 +239,7 @@ public class MemberController {
 	@PostMapping("/delete")
 	@ResponseBody
 	@Operation(summary = "회원 탈퇴", description = "현재 사용자의 회원 탈퇴 요청을 백엔드로 전달합니다. " +
-		"회원 상태가 WITHDRAWN으로 변경되며, 실제로 삭제되지는 않습니다.")
+		"회원 상태가 WITHDRAWN으로 변경되며, 실제로 삭제되지는 않습니다. 탈퇴 시 모든 인증 쿠키가 삭제됩니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "204", description = "탈퇴 성공"),
 		@ApiResponse(responseCode = "400", description = "요청 오류",
@@ -247,8 +247,14 @@ public class MemberController {
 		@ApiResponse(responseCode = "401", description = "인증 실패",
 			content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
 	})
-	public ResponseEntity<Void> deleteMember() {
+	public ResponseEntity<Void> deleteMember(HttpServletResponse response) {
 		memberService.deleteMember();
+		
+		// 회원 탈퇴 시 모든 인증 쿠키 삭제
+		response.addHeader("Set-Cookie", deleteCookie("Access-Token", "/"));
+		response.addHeader("Set-Cookie", deleteCookie("Refresh-Token", "/"));
+		response.addHeader("Set-Cookie", deleteCookie("PAYCO_STATE", "/"));
+		
 		return ResponseEntity.noContent().build();
 	}
 
