@@ -462,8 +462,11 @@
 
         // DTO 구조에 맞춰 CartOrderRequest 객체 생성
         const requestBody = {
-            cartOrderList: cartOrderList
+            orderList: cartOrderList,
+            isCartCheckout: true
         };
+
+
 
         fetch("/orders", {
             method: "POST",
@@ -471,51 +474,35 @@
             body: JSON.stringify(requestBody)
         })
             .then(async (res) => {
+                const responseData = await res.json().catch(() => ({}));
+
+                const validationToken = responseData.validationToken;
+                const baseUrl = responseData.redirectUrl || "/orders";
+
                 if (res.ok) { // 200 OK: 인증 성공 (회원)
-                    const data = await res.json();
-                    const bookIds = [];
-                    const quantities = [];
+                    if(!validationToken) { throw new Error("Validation token not received.")}
 
-                    // cartOrderList 객체에서 bookId와 quantity를 배열로 추출
-                    for (const [bookId, quantity] of Object.entries(cartOrderList)) {
-                        bookIds.push(bookId);
-                        quantities.push(quantity);
-                    }
-
-                    // --- 2. 쿼리 파라미터 생성 ---
-                    const params = new URLSearchParams();
-                    bookIds.forEach(id => params.append('bookIds', id));
-                    quantities.forEach(qty => params.append('quantities', qty));
-
-                    const baseUrl = data.redirectUrl || "/orders";
-
-                    const getUrl = `${baseUrl}?${params.toString()}`;
+                    const getUrl = `${baseUrl}?token=${validationToken}`;
 
                     console.log("최종 Checkout URL:", getUrl);
                     window.location.href = getUrl; // GET 요청 실행
 
                 } else if (res.status === 401) { // 401 UNAUTHORIZED: 인증 실패 (비회원)
+                    if (!validationToken) { throw new Error("Validation token not received in 401 response."); }
+
                     displayAlert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
 
-                    const bookIds = [];
-                    const quantities = [];
-
-                    for (const [bookId, quantity] of Object.entries(cartOrderList)) {
-                        bookIds.push(bookId);
-                        quantities.push(quantity);
-                    }
-
-                    const params = new URLSearchParams();
-                    bookIds.forEach(id => params.append('bookIds', id));
-                    quantities.forEach(qty => params.append('quantities', qty));
-                    const itemParams = params.toString(); // "bookIds=1&bookIds=2&quantities=5&quantities=1"
-
                     const nonMemberOrderBaseUrl = "/orders/nonmember";
+                    const memberOrderBaseUrl = "/orders"; // 최종 GET 요청의 베이스 경로
 
-                    const redirectUrl = encodeURIComponent(nonMemberOrderBaseUrl);
-                    const memberOrderUrl = encodeURIComponent("/orders");
+                    const nonMemberRedirectUrl = `${nonMemberOrderBaseUrl}`; // 순수 경로만 보냄
+                    const memberRedirectUrl = memberOrderBaseUrl; // 순수 경로만 보냄
 
-                    window.location.href = `/members/login?nonMemberRedirect=${redirectUrl}&memberRedirect=${memberOrderUrl}&${itemParams}`;
+                    // 2. ⭐ Final Redirect: token을 URL 파라미터로 명시적으로 전달 ⭐
+                    // LoginController는 URL의 쿼리 파라미터로 token을 받습니다.
+                    window.location.href = `/members/login?nonMemberRedirect=${encodeURIComponent(nonMemberRedirectUrl)}` +
+                        `&memberRedirect=${encodeURIComponent(memberRedirectUrl)}` +
+                        `&token=${validationToken}`;
                 } else {
                     // 기타 서버 오류 (400, 500 등)
                     // JSON 응답을 시도하고 실패하면 일반 메시지를 표시합니다.

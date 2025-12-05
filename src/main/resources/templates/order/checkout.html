@@ -562,6 +562,10 @@
             const selectedDeliveryArrivedDate = document.querySelector('input[name="deliveryDate"]:checked');
             const deliveryDateValue = selectedDeliveryArrivedDate ? selectedDeliveryArrivedDate.value : null;
 
+
+            const isDirectBuyPath = window.location.pathname.includes('/orders/direct');
+            const isCartCheckoutValue = !isDirectBuyPath; // /orders/direct가 아니면 true (장바구니)
+
             const orderPrepareRequest = {
                 totalBookPrice: totalBookPrice,
                 actualOrderPrice: currentFinalPrice,
@@ -573,7 +577,8 @@
                 receiverPhone: phoneNumber,
                 deliveryArrivedDate: deliveryDateValue,
                 bookInfoRequestList: bookInfoRequestList,
-                usedPoints: usedPointsValue
+                usedPoints: usedPointsValue,
+                isCartCheckout: isCartCheckoutValue
             };
 
             const tossPayRadio = document.getElementById('tossPay');
@@ -1031,6 +1036,123 @@
         return `<div class="list-group">${html}</div>`;
     }
 
+    /**
+     * 쿠폰 선택 모달 로직 (API 연동 버전 - 수정됨)
+     * - 백엔드 DTO(CouponApplyRequest) 구조에 맞춰 orderItems 리스트를 전송
+     */
+    function initCouponSelection() {
+        const applyBtn = document.getElementById('applyCouponButton');
+        const couponModal = document.getElementById('couponSelectModal');
+
+        const selectedCouponInfoDiv = document.getElementById('selected-coupon-info');
+        const selectCouponBtn = document.getElementById('select-coupon-btn');
+
+        const hiddenCouponId = document.getElementById('selected_coupon_id_hidden');
+        const hiddenDiscountAmt = document.getElementById('coupon_discount_amount_hidden');
+
+        if (applyBtn && couponModal) {
+            applyBtn.addEventListener('click', async () => {
+                // 1. 선택된 쿠폰 라디오 버튼 찾기
+                const selectedRadio = couponModal.querySelector('input[name="couponSelect"]:checked');
+
+                if (!selectedRadio) {
+                    alert("쿠폰을 선택해주세요.");
+                    return;
+                }
+
+                const selectedCouponId = selectedRadio.value;
+                const couponName = selectedRadio.dataset.couponName;
+
+                // 2. '쿠폰 미적용' 처리
+                if (selectedCouponId === '0') {
+                    hiddenCouponId.value = '';
+                    hiddenDiscountAmt.value = 0;
+                    selectedCouponInfoDiv.style.display = 'none';
+                    selectedCouponInfoDiv.textContent = '';
+                    selectCouponBtn.textContent = "사용 가능한 쿠폰 선택하기";
+                    updatePriceSummary();
+                    bootstrap.Modal.getInstance(couponModal).hide();
+                    return;
+                }
+
+                // ============================================================
+                // [추가됨] 3. 최소 주문 금액(criterionPrice) 검사 로직
+                // ============================================================
+
+                // 3-1. 선택된 쿠폰의 기준 금액 가져오기
+                // HTML 구조상 input의 부모(label)에 data 속성이 있음
+                const couponLabel = selectedRadio.closest('.list-group-item');
+                const criterionPrice = parseInt(couponLabel.dataset.criterionPrice, 10) || 0;
+
+                // 3-2. 현재 주문 상품들의 총 금액 계산
+                let currentTotalBookPrice = 0;
+                const orderItems = []; // API 전송용 리스트도 같이 생성
+
+                document.querySelectorAll('.order-item').forEach(item => {
+                    const bId = item.dataset.bookId;
+                    const qty = parseInt(item.dataset.quantity, 10) || 0;
+                    const price = parseFloat(item.dataset.salePrice) || 0;
+
+                    // 총액 합산
+                    currentTotalBookPrice += (price * qty);
+
+                    // API 전송용 데이터 적재
+                    orderItems.push({
+                        bookId: parseInt(bId, 10),
+                        quantity: qty
+                    });
+                });
+
+                // 3-3. 금액 비교 및 차단
+                if (currentTotalBookPrice < criterionPrice) {
+                    alert(`이 쿠폰은 총 주문 금액이 ${criterionPrice.toLocaleString()}원 이상일 때만 사용할 수 있습니다.\n(현재 주문 금액: ${currentTotalBookPrice.toLocaleString()}원)`);
+                    return; // 함수 종료 (API 호출 안 함)
+                }
+
+                // ============================================================
+
+                // 4. API 호출 (DTO 구조: couponId, orderItems)
+                try {
+                    const requestData = {
+                        couponId: parseInt(selectedCouponId, 10),
+                        orderItems: orderItems
+                    };
+
+                    const response = await fetch('/api/coupon/calculate-discount', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    if (!response.ok) {
+                        const errorMsg = await response.text();
+                        throw new Error(errorMsg || '쿠폰 적용 실패');
+                    }
+
+                    // 5. 응답 처리
+                    const result = await response.json();
+                    const discountAmount = result.discountAmount || 0;
+
+                    // 6. 결과 적용
+                    hiddenCouponId.value = selectedCouponId;
+                    hiddenDiscountAmt.value = discountAmount;
+
+                    selectedCouponInfoDiv.style.display = 'block';
+                    selectedCouponInfoDiv.textContent = `[적용됨] ${couponName} (-${discountAmount.toLocaleString()}원)`;
+                    selectCouponBtn.textContent = "쿠폰 변경하기";
+
+                    updatePriceSummary(); // 전체 금액 재계산
+                    bootstrap.Modal.getInstance(couponModal).hide();
+
+                } catch (error) {
+                    console.error("쿠폰 계산 에러:", error);
+                    alert("쿠폰 적용 중 오류가 발생했습니다: " + error.message);
+                }
+            });
+        }
+    }
 
 </script>
 <div class="modal fade" id="packagingSelectModal" tabindex="-1" aria-labelledby="packagingModalLabel"

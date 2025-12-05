@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.byeol23front.auth.AuthUtil;
 import com.nhnacademy.byeol23front.auth.CookieProperties;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
+import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 import com.nhnacademy.byeol23front.memberset.member.dto.*;
 import com.nhnacademy.byeol23front.memberset.member.service.MemberService;
+import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +42,12 @@ class MemberControllerTest {
 
 	@MockBean
 	private CategoryApiClient categoryApiClient;
+
+	@MockBean
+	private MemberApiClient memberApiClient;
+
+	@MockBean
+	private OrderApiClient orderApiClient;
 
 	@MockBean(name = "authHelper")
 	private AuthUtil authUtil;
@@ -76,10 +84,10 @@ class MemberControllerTest {
 		findLoginIdResponse = new FindLoginIdResponse(false);
 
 		duplicationCheckRequest = new ValueDuplicationCheckRequest(
-			"testuser", "테스트유저", "010-1234-5678", "test@example.com"
+		"테스트유저", "010-1234-5678", "test@example.com"
 		);
 		duplicationCheckResponse = new ValueDuplicationCheckResponse(
-			false, false, false, false
+			false, false, false
 		);
 
 		memberUpdateRequest = new MemberUpdateRequest(
@@ -162,15 +170,16 @@ class MemberControllerTest {
 	@DisplayName("POST /members/login - 로그인 성공 후 주문 페이지로 리다이렉트")
 	void login_Success_RedirectToOrder() throws Exception {
 		given(memberService.login(any(LoginRequest.class))).willReturn(loginResponse);
+		willDoNothing().given(orderApiClient).migrateGuestOrderToMember(any(String.class));
 
 		mockMvc.perform(post("/members/login")
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.param("loginId", "testuser")
 				.param("loginPassword", "Test1234!")
-				.param("bookIds", "1")
-				.param("quantities", "2"))
+				.param("redirectUrl", "/orders/direct")
+				.param("validationToken", "test-token"))
 			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/orders/direct?bookId=1&quantity=2"))
+			.andExpect(redirectedUrl("/orders/direct?token=test-token"))
 			.andExpect(cookie().exists("Access-Token"))
 			.andExpect(cookie().exists("Refresh-Token"));
 	}
@@ -213,7 +222,6 @@ class MemberControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(duplicationCheckRequest)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.isDuplicatedId").value(false))
 			.andExpect(jsonPath("$.isDuplicatedNickname").value(false))
 			.andExpect(jsonPath("$.isDuplicatedEmail").value(false))
 			.andExpect(jsonPath("$.isDuplicatedPhoneNumber").value(false));
@@ -260,4 +268,3 @@ class MemberControllerTest {
 		verify(memberService).deleteMember();
 	}
 }
-

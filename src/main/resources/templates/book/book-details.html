@@ -393,79 +393,64 @@
 
     const buyNowButton = document.getElementById('buy-now-btn');
 
+    // --- (Buy Now Button Click Listener 내부 전체 수정) ---
+
     if (buyNowButton) {
       buyNowButton.addEventListener('click', () => {
         const quantity = parseInt(qtyInput.value, 10);
+
+        // 유효성 검사
         if (quantity < minQuantity || quantity > maxStock) {
           alert(`수량은 ${minQuantity}권 이상, ${maxStock}권 이하로 설정해주세요.`);
           return;
         }
 
-        const cartOrderList = { [bookId]: quantity };
-        const requestBody = { cartOrderList: cartOrderList };
+        // 1. 단일 상품 정보 수집
+        const bookId = /*[[${book.bookId}]]*/ 1;
 
-        // 1. POST 요청 (인증 검증)
-        fetch("/orders", {
+        // 2. DTO Payload (for POST check)
+        const requestBody = {
+          orderList: { [bookId]: quantity },
+          isCartCheckout: false // Direct Buy
+        };
+
+        // 3. GET Redirect에 포함될 공통 Query Parameter String 생성
+        const params = new URLSearchParams();
+        params.append('bookId', String(bookId));
+        params.append('quantity', String(quantity));
+        const itemParams = params.toString();
+
+        // 4. POST 요청: 인증 상태 확인 (Controller: handleDirectOrderCheck)
+        fetch("/orders/direct-check", {
           method: "POST",
           headers: {"Content-Type": "application/json"},
-          body: JSON.stringify(requestBody)
+          body: JSON.stringify(requestBody) // Send DTO for server-side validation
         })
-                .then(async (res) => {
-                  // 2. 서버 응답 확인
-                  if (res.ok) { // 200 OK: 인증 성공 (회원)
-                    const data = await res.json();
-                    const bookIds = [];
-                    const quantities = [];
+                .then(response => {
 
-                    for (const [bookId, quantity] of Object.entries(cartOrderList)) {
-                      bookIds.push(bookId);
-                      quantities.push(quantity);
-                    }
+                  // 5. 서버 응답 확인 및 분기 처리
+                  if (response.status === 200) {
+                    // ⭐ 200 OK: 회원 주문서로 리다이렉트 ⭐
+                    const memberOrderBaseUrl = "/orders/direct";
+                    const finalUrl = `${memberOrderBaseUrl}?${itemParams}`; // GET URL에 데이터 포함
 
-                    // 3. GET URL 구성 및 이동
-                    const params = new URLSearchParams();
-                    bookIds.forEach(id => params.append('bookIds', id));
-                    quantities.forEach(qty => params.append('quantities', qty));
+                    console.log("회원 바로 구매 URL:", finalUrl);
+                    window.location.href = finalUrl;
 
-                    const baseUrl = data.redirectUrl || "/orders";
+                  } else if (response.status === 401) {
+                    // 401 Unauthorized일 경우
+                    const nonMemberOrderBaseUrl = "/orders/nonmember/direct";
+                    const finalUrl = `${nonMemberOrderBaseUrl}?${itemParams}`;
 
-                    const getUrl = `${baseUrl}?${params.toString()}`;
-
-                    console.log("최종 Checkout URL:", getUrl);
-                    window.location.href = getUrl; // GET 요청 실행
-
-                  } else if (res.status === 401) { // 401 UNAUTHORIZED: 인증 실패 (비회원)
-                    alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
-
-                    const bookIds = [];
-                    const quantities = [];
-
-                    for (const [bookId, quantity] of Object.entries(cartOrderList)) {
-                      bookIds.push(bookId);
-                      quantities.push(quantity);
-                    }
-
-                    const params = new URLSearchParams();
-                    bookIds.forEach(id => params.append('bookIds', id));
-                    quantities.forEach(qty => params.append('quantities', qty));
-                    const itemParams = params.toString();
-
-                    const nonMemberOrderBaseUrl = "/orders/nonmember";
-
-                    const redirectUrl = encodeURIComponent(nonMemberOrderBaseUrl);
-                    const memberOrderUrl = encodeURIComponent("/orders");
-
-                    window.location.href = `/members/login?nonMemberRedirect=${redirectUrl}&memberRedirect=${memberOrderUrl}&${itemParams}`;
-                  } else {
-
-                    // 기타 서버 오류 (400, 500 등)
-                    const err = await res.json().catch(() => ({}));
-                    throw new Error(err.message || "주문 검증 중 서버 오류가 발생했습니다.");
+                    window.location.href = finalUrl;
+                  }else {
+                    // 7. 기타 오류 (400, 500 등)
+                    alert('주문 검증 중 서버 오류가 발생했습니다. 다시 시도해 주세요.');
                   }
                 })
                 .catch(error => {
                   console.error('Error: ', error);
-                  alert('요청 처리 중 오류가 발생했습니다.');
+                  alert('요청 처리 중 네트워크 오류가 발생했습니다.');
                 });
       });
     }

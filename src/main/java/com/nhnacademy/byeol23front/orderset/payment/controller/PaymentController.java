@@ -30,6 +30,7 @@ public class PaymentController {
 	public String paymentConfirm(@RequestParam String orderId,
 		@RequestParam String paymentKey,
 		@RequestParam BigDecimal amount,
+		@RequestParam(required = false) Long couponId,
 		Model model) {
 
 		log.info("결제 성공 리다이렉션: {}, {}, {},", orderId, paymentKey, amount);
