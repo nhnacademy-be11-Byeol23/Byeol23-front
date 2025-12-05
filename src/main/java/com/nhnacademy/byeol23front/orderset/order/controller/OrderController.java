@@ -1,11 +1,10 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
+import com.nhnacademy.byeol23front.couponset.coupon.dto.OrderItemRequest;
+import com.nhnacademy.byeol23front.couponset.coupon.dto.UsableCouponInfoResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -101,6 +100,33 @@ public class OrderController {
         OrderRequest orderRequest = orderApiClient.getAndRemoveOrderRequest(validationToken);
         BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(orderRequest).getBody();
 
+        //쿠폰로직
+        List<OrderItemRequest> orderItemRequests = new ArrayList<>();
+
+        if (orderRequest.orderList() != null && !orderRequest.orderList().isEmpty()) {
+            // Map<Long, Integer> -> List<OrderItemRequest> 변환
+            orderItemRequests = orderRequest.orderList().entrySet().stream()
+                    .map(entry -> new OrderItemRequest(
+                            entry.getKey(),   // Map Key -> bookId
+                            entry.getValue()  // Map Value -> quantity
+                    ))
+                    .toList();
+        }
+
+        List<UsableCouponInfoResponse> usableCoupons = List.of(); // 기본값: 빈 리스트
+        try {
+            ResponseEntity<List<UsableCouponInfoResponse>> couponResponse =
+                    couponApiClient.getUsableCoupons(orderItemRequests);
+
+            if (couponResponse != null && couponResponse.getBody() != null) {
+                usableCoupons = couponResponse.getBody();
+                log.info("조회된 사용 가능 쿠폰 수: {}", usableCoupons.size());
+            }
+        } catch (Exception e) {
+            log.error("쿠폰 목록 조회 중 오류 발생 (주문은 계속 진행): ", e);
+        }
+
+
         orderUtil.addDeliveryDatesToModel(model);
         orderUtil.addDeliveryFeeToModel(model, bookOrderRequest);
         orderUtil.addOrderSummary(model, bookOrderRequest);
@@ -112,6 +138,8 @@ public class OrderController {
         model.addAttribute("userPoint", member.currentPoint());
 
         model.addAttribute("clientKey", tossClientKey);
+
+        model.addAttribute("usableCoupons", usableCoupons);
 
         return "order/checkout";
     }

@@ -1036,6 +1036,100 @@
         return `<div class="list-group">${html}</div>`;
     }
 
+    /**
+     * 쿠폰 선택 모달 로직 (API 연동 버전 - 수정됨)
+     * - 백엔드 DTO(CouponApplyRequest) 구조에 맞춰 orderItems 리스트를 전송
+     */
+    function initCouponSelection() {
+        const applyBtn = document.getElementById('applyCouponButton');
+        const couponModal = document.getElementById('couponSelectModal');
+
+        const selectedCouponInfoDiv = document.getElementById('selected-coupon-info');
+        const selectCouponBtn = document.getElementById('select-coupon-btn');
+
+        const hiddenCouponId = document.getElementById('selected_coupon_id_hidden');
+        const hiddenDiscountAmt = document.getElementById('coupon_discount_amount_hidden');
+
+        if (applyBtn && couponModal) {
+            applyBtn.addEventListener('click', async () => {
+                // 1. 선택된 쿠폰 확인
+                const selectedRadio = couponModal.querySelector('input[name="couponSelect"]:checked');
+
+                if (!selectedRadio) {
+                    alert("쿠폰을 선택해주세요.");
+                    return;
+                }
+
+                const selectedCouponId = selectedRadio.value;
+                const couponName = selectedRadio.dataset.couponName;
+
+                // 2. '쿠폰 미적용' 처리
+                if (selectedCouponId === '0') {
+                    hiddenCouponId.value = '';
+                    hiddenDiscountAmt.value = 0;
+                    selectedCouponInfoDiv.style.display = 'none';
+                    selectedCouponInfoDiv.textContent = '';
+                    selectCouponBtn.textContent = "사용 가능한 쿠폰 선택하기";
+                    updatePriceSummary();
+                    bootstrap.Modal.getInstance(couponModal).hide();
+                    return;
+                }
+
+                // 3. [수정됨] OrderItemRequest 리스트 구성
+                // 화면에 있는 주문 상품들(bookId, quantity)을 리스트로 만듭니다.
+                const orderItems = [];
+                document.querySelectorAll('.order-item').forEach(item => {
+                    const bId = item.dataset.bookId;
+                    const qty = item.dataset.quantity;
+
+                    orderItems.push({
+                        bookId: parseInt(bId, 10),
+                        quantity: parseInt(qty, 10)
+                    });
+                });
+
+                // 4. API 호출 (DTO 구조: couponId, orderItems)
+                try {
+                    const requestData = {
+                        couponId: parseInt(selectedCouponId, 10),
+                        orderItems: orderItems
+                    };
+
+                    const response = await fetch('/api/coupon/calculate-discount', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    if (!response.ok) {
+                        const errorMsg = await response.text();
+                        throw new Error(errorMsg || '쿠폰 적용 실패');
+                    }
+
+                    // 5. 응답 처리 (Map<String, Long> -> { "discountAmount": 3000 } 가정)
+                    const result = await response.json();
+                    const discountAmount = result.discountAmount || 0;
+
+                    // 6. 결과 적용
+                    hiddenCouponId.value = selectedCouponId;
+                    hiddenDiscountAmt.value = discountAmount;
+
+                    selectedCouponInfoDiv.style.display = 'block';
+                    selectedCouponInfoDiv.textContent = `[적용됨] ${couponName} (-${discountAmount.toLocaleString()}원)`;
+                    selectCouponBtn.textContent = "쿠폰 변경하기";
+
+                    updatePriceSummary(); // 전체 금액 재계산
+                    bootstrap.Modal.getInstance(couponModal).hide();
+
+                } catch (error) {
+                    console.error("쿠폰 계산 에러:", error);
+                    alert("쿠폰 적용 중 오류가 발생했습니다: " + error.message);
+                }
+            });
+        }
+    }
 
 </script>
 <div class="modal fade" id="packagingSelectModal" tabindex="-1" aria-labelledby="packagingModalLabel"
