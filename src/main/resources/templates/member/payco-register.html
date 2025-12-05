@@ -161,53 +161,6 @@
             const phone = phoneInput.value.trim();
             const nickname = nicknameInput.value.trim();
 
-            try {
-                const dupRes = await fetch("/members/check-duplication", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        email: email || null,
-                        phoneNumber: phone || null,
-                        nickname: nickname || null
-                    })
-                });
-
-                console.log("중복 체크 status:", dupRes.status);
-
-                const raw = await dupRes.text();
-                console.log("중복 체크 raw response:", raw);
-
-                if (!dupRes.ok) {
-                    throw new Error("중복 검사 중 오류 발생");
-                }
-
-                const dupData = JSON.parse(raw);
-                console.log("중복 체크 결과:", dupData);
-
-                let hasProblem = false;
-
-                if (dupData.isDuplicatedEmail) {
-                    emailResultDiv.textContent = "이미 사용 중인 이메일입니다.";
-                    emailResultDiv.style.color = "red";
-                    hasProblem = true;
-                }
-
-                if (dupData.isDuplicatedPhoneNumber) {
-                    phoneResultDiv.textContent = "이미 사용 중인 전화번호입니다.";
-                    phoneResultDiv.style.color = "red";
-                    hasProblem = true;
-                }
-
-                if (dupData.isDuplicatedNickname) {
-                    nicknameResultDiv.textContent = "이미 사용 중인 닉네임입니다.";
-                    nicknameResultDiv.style.color = "red";
-                    hasProblem = true;
-                }
-
-                if (hasProblem) {
-                    return;
-                }
-
                 const formData = new FormData(registerForm);
 
                 const registerRes = await fetch(registerForm.action, {
@@ -219,10 +172,6 @@
                     errorBox.textContent = "회원가입 중 오류가 발생했습니다.";
                     return;
                 }
-            } catch (err) {
-                console.error(err);
-                errorBox.textContent = "요청 처리 중 오류가 발생했습니다.";
-            }
         });
     });
 </script>
