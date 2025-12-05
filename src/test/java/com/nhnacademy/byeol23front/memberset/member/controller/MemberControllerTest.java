@@ -260,4 +260,3 @@ class MemberControllerTest {
 		verify(memberService).deleteMember();
 	}
 }
-

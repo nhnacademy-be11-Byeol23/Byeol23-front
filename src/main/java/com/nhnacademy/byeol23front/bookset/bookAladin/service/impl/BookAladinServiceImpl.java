@@ -40,14 +40,13 @@ public class BookAladinServiceImpl implements BookAladinService {
 
 	@Override
 	public AladinResult getAllBooks(String keyword, int page, int size) throws JsonProcessingException {
-		int start = (page - 1) * size + 1;
 		String q = UriUtils.encodeQueryParam(keyword, StandardCharsets.UTF_8);
 		String body = webClient.get()
 			.uri(uri -> UriComponentsBuilder.fromHttpUrl(baseUrl)
 				.queryParam("ttbkey", ttbKey)
 				.queryParam("Query", q)
 				.queryParam("QueryType", "title")
-				.queryParam("Start", start)
+				.queryParam("Start", page)
 				.queryParam("SearchTarget", "Book")
 				.queryParam("MaxResults", size)
 				.queryParam("Output", "js")

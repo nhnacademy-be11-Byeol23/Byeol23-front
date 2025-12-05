@@ -562,6 +562,10 @@
             const selectedDeliveryArrivedDate = document.querySelector('input[name="deliveryDate"]:checked');
             const deliveryDateValue = selectedDeliveryArrivedDate ? selectedDeliveryArrivedDate.value : null;
 
+
+            const isDirectBuyPath = window.location.pathname.includes('/orders/direct');
+            const isCartCheckoutValue = !isDirectBuyPath; // /orders/direct가 아니면 true (장바구니)
+
             const orderPrepareRequest = {
                 totalBookPrice: totalBookPrice,
                 actualOrderPrice: currentFinalPrice,
@@ -573,7 +577,8 @@
                 receiverPhone: phoneNumber,
                 deliveryArrivedDate: deliveryDateValue,
                 bookInfoRequestList: bookInfoRequestList,
-                usedPoints: usedPointsValue
+                usedPoints: usedPointsValue,
+                isCartCheckout: isCartCheckoutValue
             };
 
             const tossPayRadio = document.getElementById('tossPay');

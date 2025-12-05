@@ -10,6 +10,9 @@ import com.nhnacademy.byeol23front.bookset.category.dto.CategoryMainPageResponse
 import com.nhnacademy.byeol23front.bookset.search.client.SearchApiClient;
 import com.nhnacademy.byeol23front.bookset.search.dto.BookSearchResultLongIdResponse;
 import com.nhnacademy.byeol23front.bookset.search.dto.BookSearchResultResponse;
+import com.nhnacademy.byeol23front.memberset.addresses.dto.AddressResponse;
+import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
+import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -24,6 +27,7 @@ public class HomeController {
 	private static final Logger log = LoggerFactory.getLogger(HomeController.class);
 	private final SearchApiClient searchApiClient;
 	private final CategoryApiClient categoryApiClient;
+	private final DeliveryApiClient deliveryApiClient;
 
 	@GetMapping("/")
 	public String mainPage(Model model) {
@@ -32,6 +36,8 @@ public class HomeController {
 
 		var bestBooksResult = searchApiClient.searchBestBooks(0, 12);
 		var bestBooks = BookSearchResultLongIdResponse.fromList(bestBooksResult.content());
+
+		DeliveryPolicyInfoResponse deliveryPolicy = deliveryApiClient.getCurrentDeliveryPolicy().getBody();
 
 		List<CategoryMainPageResponse> categories = categoryApiClient.getLeavesForMainPage();
 		List<CategoryMainPageResponse> mainCategories = new ArrayList<>(
@@ -51,6 +57,7 @@ public class HomeController {
 		model.addAttribute("bestBooks", bestBooks);
 
 		model.addAttribute("categories", mainCategories);
+		model.addAttribute("deliveryPolicy", deliveryPolicy);
 		return "index";
 	}
 

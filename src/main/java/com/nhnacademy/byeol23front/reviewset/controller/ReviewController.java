@@ -1,5 +1,3 @@
-// src/main/java/com/nhnacademy/byeol23front/reviewset/controller/ReviewController.java
-
 package com.nhnacademy.byeol23front.reviewset.controller;
 
 import org.springframework.http.ResponseEntity;
@@ -40,7 +38,7 @@ public class ReviewController {
 				reviewRate,
 				orderNumber,
 				bookId,
-				image != null && !image.isEmpty()
+				!(image != null && !image.isEmpty())
 			)
 		).getBody();
 
