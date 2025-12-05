@@ -49,17 +49,7 @@
 
                 <form action="/members/login" method="POST" class="auth-form-content">
                   <input type="hidden" th:if="${memberRedirect != null}" name="redirectUrl" th:value="${memberRedirect}" />
-                  <th:block th:if="${bookIds != null}">
-                    <input type="hidden" th:each="bookId : ${bookIds}"
-                           name="bookIds"
-                           th:value="${bookId}" />
-                  </th:block>
-
-                  <th:block th:if="${quantities != null}">
-                    <input type="hidden" th:each="quantity : ${quantities}"
-                           name="quantities"
-                           th:value="${quantity}" />
-                  </th:block>
+                  <input type="hidden" th:if="${token != null}" name="validationToken" th:value="${token}" />
 
                   <div class="input-group mb-3">
                     <span class="input-icon">
@@ -94,10 +84,7 @@
                   </button>
 
                   <a th:if="${nonMemberRedirect != null}"
-
-                     th:href="@{${nonMemberRedirect}(bookIds=${bookIds}, quantities=${quantities})}"
-
-                     class="auth-btn social-btn mb-3 w-100"
+                     th:href="@{${nonMemberRedirect}(token=${token})}" class="auth-btn social-btn mb-3 w-100"
                      role="button">
                     비회원 주문
                   </a>
