@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>포인트 내역 - 마이페이지</title>
+  <title>포인트 내역 - 별이삼shop</title>
+
   <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
   <style>
     .point-card { background: #fff; border: 1px solid #eee; border-radius: 8px; margin-bottom: 12px; padding: 12px; }
@@ -12,61 +13,94 @@
   </style>
 </head>
 <body class="account-page">
-<div th:replace="~{fragments/common_header :: commonHeader}"></div>
-<main class="main">
-  <div class="page-title light-background">
-    <div class="container d-lg-flex justify-content-between align-items-center">
-      <h1 class="mb-2 mb-lg-0">포인트 내역</h1>
-      <nav class="breadcrumbs">
-        <ol>
-          <li><a th:href="@{/}">홈</a></li>
-          <li><a th:href="@{/mypage}">마이페이지</a></li>
-          <li class="current">포인트 내역</li>
-        </ol>
-      </nav>
-    </div>
-  </div>
 
-  <section class="section">
-    <div class="container" data-aos="fade-up" data-aos-delay="100">
-      <div th:replace="~{fragments/mypage_profile :: mypage_profile}"></div>
+  <div th:replace="~{fragments/common_header :: commonHeader}"></div>
 
-      <div class="content-area col-lg-9">
-        <div class="section-header">
-          <h2>포인트 내역</h2>
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title light-background">
+      <div class="container d-lg-flex justify-content-between align-items-center">
+        <h1 class="mb-2 mb-lg-0">포인트 내역</h1>
+        <nav class="breadcrumbs">
+          <ol>
+            <li><a th:href="@{/}">홈</a></li>
+            <li><a th:href="@{/mypage}">마이페이지</a></li>
+            <li class="current">포인트 내역</li>
+          </ol>
+        </nav>
+      </div>
+    </div><!-- End Page Title -->
+
+    <!-- Account Section -->
+    <section id="account" class="account section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <!-- Mobile Menu Toggle -->
+        <div class="mobile-menu d-lg-none mb-4">
+          <button class="mobile-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#profileMenu">
+            <i class="bi bi-grid"></i>
+            <span>Menu</span>
+          </button>
         </div>
 
-        <div>
-          <div th:if="${#lists.isEmpty(pointsHistories)}" class="alert alert-info">포인트 내역이 없습니다.</div>
-
-          <div th:if="${!#lists.isEmpty(pointsHistories)}">
-            <div th:each="ph : ${pointsHistories}">
-              <div class="point-card d-flex justify-content-between align-items-start">
-                <div>
-                  <div class="point-amount" th:text="${ph.pointAmount != null} ? ${ph.pointAmount} + ' P' : ''">0 P</div>
-                  <div class="point-meta" th:text="${ph.pointPolicyName}">정책명</div>
-                </div>
-                <div class="text-end">
-                  <div class="point-meta" th:text="${#temporals.format(ph.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2025-01-01 12:00:00</div>
-                </div>
-              </div>
-            </div>
+        <div class="row g-4">
+          <!-- Profile Menu -->
+          <div class="col-lg-3">
+            <div th:replace="~{fragments/mypage_profile :: mypage_profile}"></div>
           </div>
 
+          <!-- Content Area -->
+          <div class="col-lg-9">
+            <div class="content-area">
+              <div class="section-header" data-aos="fade-up">
+                <h2>포인트 내역</h2>
+              </div>
+
+              <div>
+                <div th:if="${#lists.isEmpty(pointsHistories)}" class="alert alert-info">포인트 내역이 없습니다.</div>
+
+                <div th:if="${!#lists.isEmpty(pointsHistories)}">
+                  <div th:each="ph : ${pointsHistories}">
+                    <div class="point-card d-flex justify-content-between align-items-start">
+                      <div>
+                        <div class="point-amount" th:text="${ph.pointAmount != null} ? ${ph.pointAmount} + ' P' : ''">0 P</div>
+                        <div class="point-meta" th:text="${ph.pointPolicyName}">정책명</div>
+                      </div>
+                      <div class="text-end">
+                        <div class="point-meta" th:text="${#temporals.format(ph.createdAt, 'yyyy-MM-dd HH:mm:ss')}">2025-01-01 12:00:00</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
 
       </div>
-    </div>
-  </section>
-</main>
-<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
-<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-<div id="preloader"></div>
+
+    </section><!-- /Account Section -->
+
+  </main>
+  <div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
 
 <!-- Grade Modal -->
 <div th:replace="~{fragments/mypage_profile :: grade_modal}"></div>
 
 <!-- Vendor & Main JS Files -->
 <th:block th:replace="~{fragments/common_scripts :: commonScripts}"></th:block>
+
+<!-- Grade Modal Fragment -->
+<div th:replace="~{fragments/grade_modal :: grade_modal}"></div>
+
 </body>
 </html>

@@ -237,7 +237,6 @@
     <input type="hidden" name="cartOrderJson" id="cart-order-json-input">
 </form>
 
-<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
 <script>
 
     const debounceTimers = {};
@@ -518,5 +517,17 @@
             });
     }
 </script>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+
+<!-- Vendor & Main JS Files -->
+<th:block th:replace="~{fragments/common_scripts :: commonScripts}"></th:block>
+
 </body>
 </html>

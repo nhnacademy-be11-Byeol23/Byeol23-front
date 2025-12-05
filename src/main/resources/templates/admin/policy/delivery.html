@@ -96,41 +96,44 @@
                                     </tr>
                                     </tbody>
                                 </table>
-                                <nav th:if="${!policies.isEmpty() and policies.totalPages > 1}" aria-label="Page navigation" class="mt-4">
-                                    <ul class="pagination justify-content-center">
+                                <div class="pagination-wrapper" data-aos="fade-up" th:if="${policies != null and !policies.isEmpty() and policies.totalPages > 1}">
+                                    <a th:href="${policies.hasPrevious()} ? @{/admin/policies/deliveries(page=${policies.number - 1})} : '#'"
+                                       class="btn-prev"
+                                       th:classappend="${!policies.hasPrevious()} ? 'disabled'">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
 
-                                        <li class="page-item" th:classappend="${policies.first} ? 'disabled'">
-                                            <a class="page-link" th:href="@{/admin/policies/deliveries(page=0)}" aria-label="First">
-                                                <span aria-hidden="true">&laquo;</span>
-                                            </a>
-                                        </li>
-                                        <li class="page-item" th:classappend="${policies.first} ? 'disabled'">
-                                            <a class="page-link" th:href="@{/admin/policies/deliveries(page=${policies.number - 1})}" aria-label="Previous">
-                                                <span aria-hidden="true">&lsaquo;</span>
-                                            </a>
-                                        </li>
-
-                                        <th:block th:with="
-                                            start = ${T(java.lang.Math).max(0, policies.number - 2)},
-                                            end = ${T(java.lang.Math).min(policies.totalPages - 1, policies.number + 2)}">
-                                            <li class="page-item" th:each="pageNum : ${#numbers.sequence(start, end)}"
-                                                th:classappend="${pageNum == policies.number} ? 'active'">
-                                                <a class="page-link" th:href="@{/admin/policies/deliveries(page=${pageNum})}" th:text="${pageNum + 1}">1</a>
-                                            </li>
+                                    <div class="page-numbers">
+                                        <th:block th:if="${policies.totalPages <= 5}">
+                                            <th:block th:each="i : ${#numbers.sequence(0, policies.totalPages - 1)}">
+                                                <a th:href="@{/admin/policies/deliveries(page=${i})}"
+                                                   th:text="${i + 1}"
+                                                   th:classappend="${i == policies.number ? 'active' : ''}">
+                                                    1
+                                                </a>
+                                            </th:block>
                                         </th:block>
+                                        <th:block th:if="${policies.totalPages > 5}">
+                                            <th:block th:with="
+                                                    start=${T(java.lang.Math).max(0, T(java.lang.Math).min(policies.number - 2, policies.totalPages - 5))},
+                                                    end=${T(java.lang.Math).min(policies.totalPages - 1, start + 4)}">
+                                                <th:block th:each="i : ${#numbers.sequence(start, end)}">
+                                                    <a th:href="@{/admin/policies/deliveries(page=${i})}"
+                                                       th:text="${i + 1}"
+                                                       th:classappend="${i == policies.number ? 'active' : ''}">
+                                                        1
+                                                    </a>
+                                                </th:block>
+                                            </th:block>
+                                        </th:block>
+                                    </div>
 
-                                        <li class="page-item" th:classappend="${policies.last} ? 'disabled'">
-                                            <a class="page-link" th:href="@{/admin/policies/deliveries(page=${policies.number + 1})}" aria-label="Next">
-                                                <span aria-hidden="true">&rsaquo;</span>
-                                            </a>
-                                        </li>
-                                        <li class="page-item" th:classappend="${policies.last} ? 'disabled'">
-                                            <a class="page-link" th:href="@{/admin/policies/deliveries(page=${policies.totalPages - 1})}" aria-label="Last">
-                                                <span aria-hidden="true">&raquo;</span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </nav>
+                                    <a th:href="${policies.hasNext()} ? @{/admin/policies/deliveries(page=${policies.number + 1})} : '#'"
+                                       class="btn-next"
+                                       th:classappend="${!policies.hasNext()} ? 'disabled'">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
