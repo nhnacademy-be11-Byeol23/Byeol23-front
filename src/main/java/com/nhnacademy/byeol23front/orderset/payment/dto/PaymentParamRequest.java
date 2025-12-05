@@ -4,6 +4,5 @@ import java.math.BigDecimal;
 
 public record PaymentParamRequest(String orderId,
 								  String paymentKey,
-								  BigDecimal amount,
-								  Long couponId) {
+								  BigDecimal amount) {
 }

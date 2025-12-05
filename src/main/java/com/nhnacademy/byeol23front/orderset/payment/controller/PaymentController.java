@@ -36,7 +36,7 @@ public class PaymentController {
 		log.info("결제 성공 리다이렉션: {}, {}, {},", orderId, paymentKey, amount);
 
 		try {
-			PaymentParamRequest paymentParamRequest = new PaymentParamRequest(orderId, paymentKey, amount, couponId);
+			PaymentParamRequest paymentParamRequest = new PaymentParamRequest(orderId, paymentKey, amount);
 			ResponseEntity<PaymentResultResponse> response = paymentApiClient.confirmPayment(paymentParamRequest);
 
 			log.info("토스페이먼츠 승인 API 응답 상태 코드: {}", response.getStatusCode());

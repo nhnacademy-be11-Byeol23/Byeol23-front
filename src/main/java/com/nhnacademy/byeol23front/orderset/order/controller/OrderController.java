@@ -191,6 +191,25 @@ public class OrderController {
         List<BookInfoRequest> bookOrderInfo = List.of(bookInfo);
         BookOrderRequest request = new BookOrderRequest(bookOrderInfo); // BookOrderRequest DTO 사용
 
+        //쿠폰로직
+        List<OrderItemRequest> orderItemRequests = new ArrayList<>();
+        OrderItemRequest orderItemRequest = new OrderItemRequest(bookId, quantity);
+        orderItemRequests.add(orderItemRequest);
+
+
+        List<UsableCouponInfoResponse> usableCoupons = List.of();
+        try {
+            ResponseEntity<List<UsableCouponInfoResponse>> couponResponse =
+                    couponApiClient.getUsableCoupons(orderItemRequests);
+
+            if (couponResponse != null && couponResponse.getBody() != null) {
+                usableCoupons = couponResponse.getBody();
+                log.info("조회된 사용 가능 쿠폰 수: {}", usableCoupons.size());
+            }
+        } catch (Exception e) {
+            log.error("쿠폰 목록 조회 중 오류 발생 (주문은 계속 진행): ", e);
+        }
+
         orderUtil.addTotalQuantity(model, request.bookList());
         orderUtil.addDeliveryDatesToModel(model);
         orderUtil.addOrderSummary(model, request);
@@ -200,6 +219,7 @@ public class OrderController {
         model.addAttribute("defaultAddress", member.address());
         model.addAttribute("userPoint", member.currentPoint());
         model.addAttribute("clientKey", tossClientKey);
+        model.addAttribute("usableCoupons", usableCoupons);
 
         return "order/checkout";
     }
