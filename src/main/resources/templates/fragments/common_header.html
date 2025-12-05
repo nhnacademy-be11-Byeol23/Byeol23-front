@@ -47,22 +47,28 @@
                                 <p class="mb-0">로그인 해주세요</p>
                             </div>
 
-                            <div class="dropdown-body" sec:authorize="isAuthenticated()">
-                                <a class="dropdown-item d-flex align-items-center" href="/mypage">
-                                    <i class="bi bi-person-circle me-2"></i>
-                                    <span>마이페이지</span>
-                                </a>
 
-                                <a class="dropdown-item d-flex align-items-center" href="/mypage/orders">
-                                    <i class="bi bi-bag-check me-2"></i>
-                                    <span>주문내역</span>
-                                </a>
+                                <div class="dropdown-body" th:if="${@authHelper.isAdmin()}">
+                                    <a class="dropdown-item d-flex align-items-center" href="/admin">
+                                        <i class="bi bi-person-circle me-2"></i>
+                                        <span>관리자페이지</span>
+                                    </a>
 
-                                <a class="dropdown-item d-flex align-items-center" href="/mypage/wishlist">
-                                    <i class="bi bi-heart me-2"></i>
-                                    <span>위시리스트</span>
-                                </a>
-                            </div>
+                                    <a class="dropdown-item d-flex align-items-center" href="/mypage">
+                                        <i class="bi bi-person-circle me-2"></i>
+                                        <span>마이페이지</span>
+                                    </a>
+
+                                    <a class="dropdown-item d-flex align-items-center" href="/mypage/orders">
+                                        <i class="bi bi-bag-check me-2"></i>
+                                        <span>주문내역</span>
+                                    </a>
+
+                                    <a class="dropdown-item d-flex align-items-center" href="/mypage/wishlist">
+                                        <i class="bi bi-heart me-2"></i>
+                                        <span>위시리스트</span>
+                                    </a>
+                                </div>
 
                             <div class="dropdown-footer" style="padding: 0">
                                 <div style="padding: 1.25rem;">
