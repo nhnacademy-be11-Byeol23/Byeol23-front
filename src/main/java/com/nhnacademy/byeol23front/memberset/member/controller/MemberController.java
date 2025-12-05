@@ -137,6 +137,7 @@ public class MemberController {
 
 		response.addHeader("Set-Cookie", deleteCookie("Access-Token", "/"));
 		response.addHeader("Set-Cookie", deleteCookie("Refresh-Token", "/"));
+		response.addHeader("Set-Cookie", deleteCookie("PAYCO_STATE", "/"));
 
 		return "redirect:/";
 	}
