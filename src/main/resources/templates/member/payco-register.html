@@ -172,7 +172,7 @@
                     })
                 });
 
-                console.log(dupRes)
+                console.log(dupRes.json())
                 console.log(dupRes.status)
                 if (!dupRes.ok) {
                     throw new Error("중복 검사 중 오류 발생");
