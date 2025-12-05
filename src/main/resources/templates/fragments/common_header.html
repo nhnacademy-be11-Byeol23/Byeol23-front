@@ -47,7 +47,13 @@
                                 <p class="mb-0">로그인 해주세요</p>
                             </div>
 
-                                <div class="dropdown-body" sec:authorize="isAuthenticated()">
+
+                                <div class="dropdown-body" th:if="${@authHelper.isAdmin()}">
+                                    <a class="dropdown-item d-flex align-items-center" href="/admin">
+                                        <i class="bi bi-person-circle me-2"></i>
+                                        <span>관리자페이지</span>
+                                    </a>
+
                                     <a class="dropdown-item d-flex align-items-center" href="/mypage">
                                         <i class="bi bi-person-circle me-2"></i>
                                         <span>마이페이지</span>

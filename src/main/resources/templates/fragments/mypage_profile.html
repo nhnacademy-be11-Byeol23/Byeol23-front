@@ -96,7 +96,7 @@
                             </div>
 
                             <!-- 할인률 / 적립률 등 -->
-                            <span th:text="${grade.pointRate} + '%'">5%</span>
+                            <span th:text="${grade.pointRate * 100} + '%'">5%</span>
                         </li>
                     </ul>
 
