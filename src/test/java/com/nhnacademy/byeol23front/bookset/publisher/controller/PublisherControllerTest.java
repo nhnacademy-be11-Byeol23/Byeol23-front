@@ -29,7 +29,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhnacademy.byeol23front.auth.AuthHelper;
+import com.nhnacademy.byeol23front.auth.AuthUtil;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 import com.nhnacademy.byeol23front.bookset.publisher.client.PublisherApiClient;
 import com.nhnacademy.byeol23front.bookset.publisher.dto.AllPublishersInfoResponse;
@@ -74,7 +74,7 @@ class PublisherControllerTest {
 
 	// common_header에서 @authHelper 사용
 	@MockBean(name = "authHelper")
-	AuthHelper authHelper;
+    AuthUtil authUtil;
 
 	// ───────────────────────── GET /admin/pub ─────────────────────────
 
@@ -84,7 +84,7 @@ class PublisherControllerTest {
 		MockitoAnnotations.openMocks(this);
 
 		// header에서 로그인 여부 체크
-		given(authHelper.isLoggedIn()).willReturn(true);
+		given(authUtil.isLoggedIn()).willReturn(true);
 
 		// given
 		AllPublishersInfoResponse publisher = new AllPublishersInfoResponse(

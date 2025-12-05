@@ -1,8 +1,8 @@
 package com.nhnacademy.byeol23front.commons.exception;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-
 import org.apache.http.HttpStatus;
 
 
@@ -12,6 +12,7 @@ import com.nhnacademy.byeol23front.bookset.tag.exception.TagAlreadyExistsExcepti
 import com.nhnacademy.byeol23front.bookset.tag.exception.TagNotFoundException;
 
 import feign.Response;
+import feign.Util;
 import feign.codec.ErrorDecoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,30 +26,46 @@ public class FeignExceptionDecoder implements ErrorDecoder {
 	@Override
 	public Exception decode(String methodKey, Response response) {
 		log.info("response:{}", response);
-		String message = "Unexpected error from backend";
-		int status = response.status();
-		ErrorResponse errorResponse = new ErrorResponse(400, "Default Error Response", "", LocalDateTime.now());
-
-		if (response.body() == null){
-			throw new RuntimeException("Response body of error response is null");
-		}
-
+		String errorResponseBody = null;
 		try {
-			errorResponse = objectMapper.readValue(response.body().asInputStream(), ErrorResponse.class);
-			if (errorResponse.message() != null) {
-				message = errorResponse.message();
-			}
+			errorResponseBody = Util.toString(response.body().asReader(StandardCharsets.UTF_8));
 		} catch (IOException e) {
-			message = "Failed to parse error response from backend";
+			log.error("디코딩 실패");
+			return new DefaultException("Default exception");
 		}
+		ErrorResponse errorResponse = null;
+		try {
+			if(errorResponseBody != null && !errorResponseBody.isBlank()) {
+				errorResponse = objectMapper.readValue(errorResponseBody, ErrorResponse.class);
+			}
+		} catch (Exception e) {
+			log.error("JSON 파싱 실패");
+			return new DefaultException("Default exception");
+		}
+		int status = errorResponse.status();
+		String message = errorResponse.message();
+		String path = errorResponse.path();
+		LocalDateTime time = errorResponse.timestamp();
 
+		//회원 관련 예외 처리
+		if (status == HttpStatus.SC_BAD_REQUEST && path.startsWith("/api/members")) {
+
+		}
 
 		if (status == HttpStatus.SC_UNAUTHORIZED) {
-			//TODO: 인증과정에서 거부되었을 때의 반응 채울 것
+			log.warn("401 ExpiredJwtException 발생 → ExpiredTokenException 던짐. methodKey={}, path={}", methodKey, path);
+			if(path.equals("/auth/refresh")) {
+				return new ExpiredRefreshTokenException(message);
+			}
+			return new ExpiredTokenException(message);
+		}
+
+		if(status == HttpStatus.SC_BAD_REQUEST && path.startsWith("/auth/login")) {
+			return new LoginFailureException(message);
 		}
 
 
-
+		//태그 관련 예외 처리
 		if (status == HttpStatus.SC_CONFLICT && errorResponse.path().equals("/api/tags")){
 			return new TagAlreadyExistsException(message, errorResponse.timestamp());
 		}

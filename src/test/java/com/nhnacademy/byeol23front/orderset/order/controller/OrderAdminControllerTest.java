@@ -37,7 +37,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nhnacademy.byeol23front.auth.AuthHelper;
+import com.nhnacademy.byeol23front.auth.AuthUtil;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderInfoResponse;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyInfoResponse;
@@ -54,7 +54,7 @@ import feign.Request;
 import feign.RequestTemplate;
 
 @WebMvcTest(OrderAdminController.class)
-@Import(AuthHelper.class)
+@Import(AuthUtil.class)
 class OrderAdminControllerTest {
 
 	@Autowired
@@ -67,7 +67,7 @@ class OrderAdminControllerTest {
 	private CategoryApiClient categoryApiClient;
 
 	@MockBean
-	private AuthHelper authHelper;
+	private AuthUtil authUtil;
 
 	@MockBean
 	private OrderUtil orderUtil; // OrderUtil은 Mock으로 처리하거나 실제 구현체를 주입해야 합니다.

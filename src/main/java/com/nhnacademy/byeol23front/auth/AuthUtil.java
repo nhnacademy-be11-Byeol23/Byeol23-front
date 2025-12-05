@@ -6,7 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component("authHelper")
-public class AuthHelper {
+public class AuthUtil {
 
 	public boolean isLoggedIn() {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -29,6 +29,5 @@ public class AuthHelper {
 		}
 
 		return auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"));
-
 	}
 }

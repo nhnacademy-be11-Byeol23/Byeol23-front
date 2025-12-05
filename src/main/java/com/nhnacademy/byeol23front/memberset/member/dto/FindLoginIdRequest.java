@@ -1,6 +1,6 @@
 package com.nhnacademy.byeol23front.memberset.member.dto;
 
-public record CheckIdRequest(
+public record FindLoginIdRequest(
 	String loginId
 ) {
 }
