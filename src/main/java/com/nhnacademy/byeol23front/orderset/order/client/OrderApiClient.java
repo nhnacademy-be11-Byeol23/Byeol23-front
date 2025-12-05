@@ -1,5 +1,7 @@
 package com.nhnacademy.byeol23front.orderset.order.client;
 
+import java.util.Map;
+
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.SpringQueryMap;
 import org.springframework.data.domain.Page;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.nhnacademy.byeol23front.cartset.cart.dto.CartOrderRequest;
+import com.nhnacademy.byeol23front.orderset.order.dto.OrderRequest;
 import com.nhnacademy.byeol23front.memberset.member.dto.NonmemberOrderRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderBulkUpdateRequest;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderCancelRequest;
@@ -57,6 +59,15 @@ public interface OrderApiClient {
 	OrderDetailResponse getNonmemberOrder(@RequestBody NonmemberOrderRequest request);
 
 	@PostMapping("/api/orders/nonmembers")
-	ResponseEntity<Void> saveGuestOrder(@RequestParam("guestId") String guestId, @RequestBody CartOrderRequest orderRequest);
+	ResponseEntity<Map<String, Object>> saveGuestOrder(@RequestParam("guestId") String guestId, @RequestBody OrderRequest orderRequest);
 
+	@PostMapping("/api/orders/tmp")
+	ResponseEntity<Map<String, Object>> saveMemberOrderTmp(@RequestBody OrderRequest orderRequest);
+
+	@GetMapping("/api/orders/validationToken")
+	OrderRequest getAndRemoveOrderRequest(@RequestParam("validationToken") String validationToken);
+
+
+	@PostMapping("/api/orders/migrate")
+	void migrateGuestOrderToMember(@RequestParam("validationToken") String token);
 }
