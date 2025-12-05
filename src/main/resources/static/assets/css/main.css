@@ -7695,6 +7695,91 @@ section,
   color: color-mix(in srgb, var(--default-color), transparent 40%);
 }
 
+/* 범용 페이지네이션 스타일 (관리자 페이지 포함) */
+.pagination-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 1.5rem;
+}
+
+.pagination-wrapper a,
+.pagination-wrapper button {
+  min-width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
+  transition: all 0.3s ease;
+  background-color: transparent;
+  color: var(--default-color, #333);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.pagination-wrapper a:hover:not(:disabled),
+.pagination-wrapper button:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--accent-color, #252223), transparent 92%);
+  color: var(--accent-color, #252223);
+}
+
+.pagination-wrapper a.active,
+.pagination-wrapper button.active {
+  background-color: var(--accent-color, #252223);
+  color: var(--contrast-color, #fff);
+}
+
+.pagination-wrapper a:disabled,
+.pagination-wrapper button:disabled,
+.pagination-wrapper a.disabled,
+.pagination-wrapper button.disabled {
+  color: color-mix(in srgb, var(--default-color, #333), transparent 60%);
+  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.pagination-wrapper a i,
+.pagination-wrapper button i {
+  font-size: 18px;
+}
+
+.pagination-wrapper .page-numbers {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-wrapper .page-numbers a {
+  min-width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background-color: transparent;
+  color: var(--default-color, #333);
+  text-decoration: none;
+}
+
+.pagination-wrapper .page-numbers a:hover {
+  background-color: color-mix(in srgb, var(--accent-color, #252223), transparent 92%);
+  color: var(--accent-color, #252223);
+}
+
+.pagination-wrapper .page-numbers a.active {
+  background-color: var(--accent-color, #252223);
+  color: var(--contrast-color, #fff);
+}
+
 @media (max-width: 991.98px) {
   .account .profile-menu {
     margin-bottom: 24px;
