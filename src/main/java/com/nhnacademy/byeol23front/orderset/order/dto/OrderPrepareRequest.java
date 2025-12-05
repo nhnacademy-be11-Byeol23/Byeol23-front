@@ -38,5 +38,7 @@ public record OrderPrepareRequest(
 
 	String orderPassword,
 
-	BigDecimal usedPoints
+	BigDecimal usedPoints,
+
+	Boolean isCartCheckout
 ) {}

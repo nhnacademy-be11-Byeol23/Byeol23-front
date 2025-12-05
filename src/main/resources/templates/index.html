@@ -32,6 +32,16 @@
           <div class="features-list" data-aos="fade-up" data-aos-delay="300">
             <div class="feature-item">
               <i class="bi bi-truck"></i>
+
+              <span th:if="${deliveryPolicy != null}"
+                    th:text="${#numbers.formatInteger(deliveryPolicy.freeDeliveryCondition, 0, 'COMMA')} + '원 이상 구매 시 무료 배송'">
+                    50,000원 이상 구매 시 무료 배송
+                </span>
+              <small th:if="${deliveryPolicy != null}"
+                     th:text="'(기본 배송비: ' + ${#numbers.formatInteger(deliveryPolicy.deliveryFee, 0, 'COMMA')} + '원)'">
+                (기본 배송비: 3,000원)
+              </small>
+              <span th:unless="${deliveryPolicy != null}">배송 정책 정보 없음</span>
             </div>
           </div>
         </div>
@@ -42,7 +52,7 @@
           <div class="book-card card-1" data-aos="zoom-in" data-aos-delay="300"
                th:if="${top3Books != null && !top3Books.isEmpty()}">
             <a th:href="|/books/${top3Books[0].id()}|">
-              <img th:src="${(!#strings.isEmpty(top3Books[0].imageUrl())) ? top3Books[0].imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}" 
+              <img th:src="${(!#strings.isEmpty(top3Books[0].imageUrl())) ? top3Books[0].imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}"
                    th:alt="${top3Books[0].title()}"
                    onerror="this.src='https://image.yes24.com/momo/Noimg_L.jpg'; this.onerror=null;">
             </a>
@@ -50,7 +60,7 @@
           <div class="book-card card-2" data-aos="zoom-in" data-aos-delay="400"
                th:if="${top3Books != null && top3Books.size() > 1}">
             <a th:href="|/books/${top3Books[1].id()}|">
-              <img th:src="${(!#strings.isEmpty(top3Books[1].imageUrl())) ? top3Books[1].imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}" 
+              <img th:src="${(!#strings.isEmpty(top3Books[1].imageUrl())) ? top3Books[1].imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}"
                    th:alt="${top3Books[1].title()}"
                    onerror="this.src='https://image.yes24.com/momo/Noimg_L.jpg'; this.onerror=null;">
             </a>
@@ -58,7 +68,7 @@
           <div class="book-card card-3" data-aos="zoom-in" data-aos-delay="500"
                th:if="${top3Books != null && top3Books.size() > 2}">
             <a th:href="|/books/${top3Books[2].id()}|">
-              <img th:src="${(!#strings.isEmpty(top3Books[2].imageUrl())) ? top3Books[2].imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}" 
+              <img th:src="${(!#strings.isEmpty(top3Books[2].imageUrl())) ? top3Books[2].imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}"
                    th:alt="${top3Books[2].title()}"
                    onerror="this.src='https://image.yes24.com/momo/Noimg_L.jpg'; this.onerror=null;">
             </a>
@@ -133,9 +143,9 @@
           <div class="product-item" th:attr="data-book-id=${book.id()}">
             <div class="product-image">
               <a th:href="|/books/${bookId}|">
-                <img th:src="${(!#strings.isEmpty(book.imageUrl())) ? book.imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}" 
-                     alt="Product Image" 
-                     class="img-fluid" 
+                <img th:src="${(!#strings.isEmpty(book.imageUrl())) ? book.imageUrl() : 'https://image.yes24.com/momo/Noimg_L.jpg'}"
+                     alt="Product Image"
+                     class="img-fluid"
                      loading="lazy"
                      onerror="this.src='https://image.yes24.com/momo/Noimg_L.jpg'; this.onerror=null;">
               </a>
@@ -146,10 +156,10 @@
                 <a th:href="|/books/${bookId}|" th:text="${book.title()}"></a>
               </h4>
               <div class="product-price">
-                <span th:if="${book.regularPrice() != book.salePrice()}" 
-                      class="old-price" 
+                <span th:if="${book.regularPrice() != book.salePrice()}"
+                      class="old-price"
                       th:text="${#numbers.formatInteger(book.regularPrice(), 3, 'COMMA')} + '원'"></span>
-                <span class="current-price" 
+                <span class="current-price"
                       th:text="${#numbers.formatInteger(book.salePrice(), 3, 'COMMA')} + '원'"></span>
               </div>
             </div>

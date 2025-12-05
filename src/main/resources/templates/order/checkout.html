@@ -425,1086 +425,619 @@
         }
     });
 
-    // --- [1. 유틸리티 함수] ---
-
     function initPhoneHyphen() {
         const phoneInput = document.getElementById('phone');
         if (!phoneInput) return;
+
+        const formatPhoneNumber = (value) => {
+            if (!value) return value;
+            let phoneNumber = value.replace(/[^\d]/g, '');
+            if (phoneNumber.length > 11) phoneNumber = phoneNumber.slice(0, 11);
+            const len = phoneNumber.length;
+            if (len < 4) return phoneNumber;
+            if (len < 8) return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;
+            return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;
+        };
+
         phoneInput.addEventListener('input', (e) => {
-            let val = e.target.value.replace(/[^\d]/g, '');
-            if (val.length > 11) val = val.slice(0, 11);
-            if (val.length < 4) e.target.value = val;
-            else if (val.length < 8) e.target.value = `${val.slice(0, 3)}-${val.slice(3)}`;
-            else e.target.value = `${val.slice(0, 3)}-${val.slice(3, 7)}-${val.slice(7)}`;
+            const target = e.target;
+            const originalValue = target.value;
+            const formattedValue = formatPhoneNumber(originalValue);
+            // 커서 계산은 간단하게 처리 (정교화 가능)
+            target.value = formattedValue;
         });
     }
 
-    const parsePrice = (element) => {
-        if (!element || (typeof element !== 'string' && !element.textContent)) return 0;
-        const text = typeof element === 'string' ? element : element.textContent;
-        return parseInt(text.replace(/[^\d]/g, ''), 10) || 0;
+    // 결제 금액 가져오기
+    // 금액 파싱 함수 (이 함수 스코프 안에도 정의)
+    const parsePrice = (priceValue) => {
+        if (priceValue == null) return 0;
+        const priceString = String(priceValue);
+        return Number(priceString.replace(/[^\d]/g, '')) || 0;
     };
-
-    // --- [2. 쿠폰 관련 로직 (적용 및 계산)] ---
-
-    // 2-1. 주문 상품 정보 수집
-    function collectOrderItems() {
-        const orderItems = [];
-        document.querySelectorAll('.order-item').forEach(item => {
-            orderItems.push({
-                bookId: parseInt(item.dataset.bookId, 10),
-                quantity: parseInt(item.dataset.quantity, 10)
-            });
-        });
-        return orderItems;
-    }
-
-    // 2-2. 백엔드 API 호출 (최종 할인 금액 요청)
-    async function fetchFinalCouponDiscount(couponId, orderItems) {
-        if (!couponId || couponId === '0') return 0;
-
-        try {
-            const response = await fetch('/api/coupon/calculate-discount', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ couponId: couponId, orderItems: orderItems })
-            });
-
-            if (!response.ok) throw new Error();
-            const data = await response.json();
-            return data.discountAmount || 0; // 백엔드에서 계산된 금액 반환
-
-        } catch (error) {
-            console.error("쿠폰 계산 실패:", error);
-            return 0;
-        }
-    }
-
-    // 2-3. 쿠폰 선택 및 적용 버튼 로직
-    function initCouponSelection() {
-        const selectBtn = document.getElementById('select-coupon-btn');
-        const modalEl = document.getElementById('couponSelectModal');
-        const applyBtn = document.getElementById('applyCouponButton');
-
-        if (!selectBtn || !modalEl) return;
-
-        // 모달 열기
-        selectBtn.addEventListener('click', () => {
-            new bootstrap.Modal(modalEl).show();
-        });
-
-        // '적용' 버튼 클릭
-        if (applyBtn) {
-            applyBtn.addEventListener('click', async () => {
-                const selectedRadio = modalEl.querySelector('input[name="couponSelect"]:checked');
-                if (!selectedRadio) return;
-
-                const couponId = selectedRadio.value;
-                const couponName = selectedRadio.dataset.couponName || '선택된 쿠폰';
-                const selectedCouponInfoEl = document.getElementById('selected-coupon-info');
-                const selectedCouponIdHidden = document.getElementById('selected_coupon_id_hidden');
-                const couponDiscountHidden = document.getElementById('coupon_discount_amount_hidden');
-
-                let finalDiscount = 0;
-
-                // (A) 쿠폰 미적용 선택 시
-                if (couponId === '0') {
-                    selectedCouponIdHidden.value = '';
-                    couponDiscountHidden.value = 0;
-                    selectedCouponInfoEl.style.display = 'none';
-                }
-                // (B) 유효한 쿠폰 선택 시 -> 백엔드 계산 요청
-                else {
-                    const orderItems = collectOrderItems();
-                    finalDiscount = await fetchFinalCouponDiscount(couponId, orderItems);
-
-                    if (finalDiscount > 0) {
-                        selectedCouponIdHidden.value = couponId;
-                        couponDiscountHidden.value = finalDiscount;
-                        selectedCouponInfoEl.textContent = `${couponName}: ${finalDiscount.toLocaleString()}원 할인 적용`;
-                        selectedCouponInfoEl.style.display = 'block';
-                    } else {
-                        alert("적용 조건 불충족(최소금액/대상상품)으로 할인이 적용되지 않습니다.");
-                        // 초기화
-                        modalEl.querySelector('input[value="0"]').checked = true;
-                        selectedCouponIdHidden.value = '';
-                        couponDiscountHidden.value = 0;
-                        selectedCouponInfoEl.style.display = 'none';
-                    }
-                }
-
-                // (C) 모달 닫기 및 UI 갱신
-                const instance = bootstrap.Modal.getInstance(modalEl);
-                if (instance) instance.hide();
-
-                // 잔상 제거
-                document.body.classList.remove('modal-open');
-                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-                document.body.style.removeProperty('overflow');
-                document.body.style.removeProperty('padding-right');
-
-                // 가격 재계산
-                updatePriceSummary();
-            });
-        }
-
-        // 모달 닫힘 이벤트 (안전장치)
-        modalEl.addEventListener('hidden.bs.modal', () => {
-            document.body.classList.remove('modal-open');
-            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-            document.body.style.removeProperty('overflow');
-            document.body.style.removeProperty('padding-right');
-        });
-    }
-
-    // --- [3. 결제 및 가격 계산 함수] ---
 
     function initTossPayments(clientKey) {
         const paymentButton = document.getElementById('payment-button');
-        const actualOrderPriceEl = document.getElementById('actual-order-price');
+        const actualOrderPriceEl = document.getElementById('actual-order-price'); // 요소 미리 찾아두기
 
-        if (!paymentButton || !actualOrderPriceEl) return;
+        if (!paymentButton || !actualOrderPriceEl) {
+            console.error("결제 버튼 또는 최종 금액 요소를 찾을 수 없습니다!");
+            return;
+        }
         var tossPayments = TossPayments(clientKey);
 
         paymentButton.addEventListener('click', async function () {
-            // 주문 상품 수집
-            const bookInfoRequestList = [];
-            document.querySelectorAll('.order-item').forEach(item => {
-                const ds = item.dataset;
+
+            const bookInfoRequestList = []; // 백엔드로 보낼 최종 리스트
+            const orderItemElements = document.querySelectorAll('.order-item');
+
+            orderItemElements.forEach(item => {
+                const dataset = item.dataset;
+
+                const publisher = {
+                    publisherId: parseInt(dataset.publisherId, 10),
+                    publisherName: dataset.publisherName
+                };
+
                 const contributors = [];
-                item.querySelectorAll('.contributor').forEach(c => contributors.push({
-                    contributorId: parseInt(c.dataset.contributorId),
-                    contributorName: c.dataset.contributorName,
-                    contributorRole: c.dataset.contributorRole
-                }));
+                const contributorElements = item.querySelectorAll('.contributor-data .contributor');
+
+                contributorElements.forEach(c_item => {
+                    contributors.push({
+                        contributorId: parseInt(c_item.dataset.contributorId, 10),
+                        contributorName: c_item.dataset.contributorName,
+                        contributorRole: c_item.dataset.contributorRole
+                    });
+                });
+
                 bookInfoRequestList.push({
-                    bookId: parseInt(ds.bookId),
-                    bookName: ds.bookName,
-                    imageUrl: ds.imageUrl,
-                    isPack: ds.isPack === 'true',
-                    regularPrice: parseFloat(ds.regularPrice),
-                    salePrice: parseFloat(ds.salePrice),
-                    publisher: { publisherId: parseInt(ds.publisherId), publisherName: ds.publisherName },
-                    quantity: parseInt(ds.quantity),
+                    bookId: parseInt(dataset.bookId, 10),
+                    bookName: dataset.bookName,
+                    imageUrl: dataset.imageUrl,
+                    isPack: (dataset.isPack === 'true'),
+                    regularPrice: parseFloat(dataset.regularPrice),
+                    salePrice: parseFloat(dataset.salePrice),
+                    publisher: publisher,
+                    quantity: parseInt(dataset.quantity, 10),
                     contributors: contributors,
-                    packagingId: parseInt(ds.packagingId || '0')
+                    packagingId: parseInt(dataset.packagingId || '0', 10)
                 });
             });
 
+            console.log("bookInfoRequestList:", bookInfoRequestList);
+
             if (bookInfoRequestList.length === 0) {
-                alert("주문할 상품이 없습니다."); return;
+                alert("주문할 상품이 없습니다.");
+                return;
             }
 
-            // 사용자 정보 수집
-            const name = document.getElementById('name').value.trim();
-            const phone = document.getElementById('phone').value.replace(/[^\d]/g, '');
-            const zip = document.getElementById('zip').value;
-            const address = document.getElementById('address').value;
-            const detail = document.getElementById('address-detail').value;
+            const customerName = document.getElementById('name')?.value.trim();
+            const rawPhone = document.getElementById('phone')?.value;
+            const phoneNumber = rawPhone ? rawPhone.replace(/[^\d]/g, '') : '';
+            const zip = document.getElementById('zip')?.value;
+            const address = document.getElementById('address')?.value;
+            const addressDetail = document.getElementById('address-detail')?.value;
+            const addressExtra = document.getElementById('address-extra')?.value;
+            const totalBookPrice = parsePrice(document.getElementById('total-book-price')?.textContent);
 
-            if (!name || phone.length < 10 || !zip || !address || !detail) {
-                alert("주문자 정보 및 배송지 정보를 정확히 입력해주세요."); return;
+            const currentFinalPrice = parsePrice(actualOrderPriceEl.textContent); // 미리 찾아둔 요소 사용
+
+            const pointsInput = document.getElementById('points-to-use');
+            const usedPointsValue = parseInt(pointsInput.value, 10) || 0;
+
+            const orderItems = document.querySelectorAll('.order-summary-content .order-item');
+            let orderName = "주문 상품"; // 기본값
+            if (!customerName || customerName.length === 0) {
+                alert("주문자 이름을 입력해 주세요.");
+                document.getElementById('name').focus();
+                return;
+            }
+            if (!phoneNumber || phoneNumber.length < 10) { // 최소 10자리 (하이픈 제외)
+                alert("유효한 연락처를 입력해 주세요.");
+                document.getElementById('phone').focus();
+                return;
+            }
+            if (!zip || zip.length === 0) {
+                alert("우편번호 찾기를 통해 배송지 주소를 입력해 주세요.");
+                document.getElementById('find-zip-btn').focus();
+                return;
+            }
+            if (!address || address.length === 0 || !addressDetail || addressDetail.length === 0) {
+                alert("상세 주소를 포함하여 정확한 배송지 정보를 입력해 주세요.");
+                document.getElementById('address-detail').focus();
+                return;
             }
 
-            // 금액 정보
-            const totalBookPrice = parsePrice(document.getElementById('total-book-price'));
-            const currentFinalPrice = parsePrice(actualOrderPriceEl);
-            const deliveryDate = document.querySelector('input[name="deliveryDate"]:checked')?.value || null;
+            if (orderItems.length > 0) {
+                const firstItemName = orderItems[0].querySelector('.order-item-details h4')?.textContent.trim();
+                if (firstItemName) {
+                    if (orderItems.length > 1) {
+                        orderName = `${firstItemName} 외 ${orderItems.length - 1}건`;
+                    } else {
+                        orderName = firstItemName;
+                    }
+                }
+            }
 
-            // 쿠폰 및 포인트 정보
-            const couponId = document.getElementById('selected_coupon_id_hidden').value;
-            const usedPoints = parseInt(document.getElementById('points-to-use').value || '0', 10);
+            const selectedDeliveryArrivedDate = document.querySelector('input[name="deliveryDate"]:checked');
+            const deliveryDateValue = selectedDeliveryArrivedDate ? selectedDeliveryArrivedDate.value : null;
 
-            const requestBody = {
+
+            const isDirectBuyPath = window.location.pathname.includes('/orders/direct');
+            const isCartCheckoutValue = !isDirectBuyPath; // /orders/direct가 아니면 true (장바구니)
+
+            const orderPrepareRequest = {
                 totalBookPrice: totalBookPrice,
                 actualOrderPrice: currentFinalPrice,
-                receiver: name,
-                receiverPhone: phone,
-                postCode: zip,
-                receiverAddress: address,
-                receiverAddressDetail: detail,
-                receiverAddressExtra: document.getElementById('address-extra').value,
-                deliveryArrivedDate: deliveryDate,
+                receiver: customerName,
+                postCode: `${zip}`,
+                receiverAddress: `${address}`,
+                receiverAddressDetail: addressDetail,
+                receiverAddressExtra: addressExtra,
+                receiverPhone: phoneNumber,
+                deliveryArrivedDate: deliveryDateValue,
                 bookInfoRequestList: bookInfoRequestList,
-                // usedCouponId: couponId ? parseInt(couponId) : null,
-                usedPoints: usedPoints
+                usedPoints: usedPointsValue,
+                isCartCheckout: isCartCheckoutValue
             };
 
-            const tossPay = document.getElementById('tossPay');
-            const pointPay = document.getElementById('pointPay');
+            const tossPayRadio = document.getElementById('tossPay');
+            const pointPayRadio = document.getElementById('pointPay');
 
             if (currentFinalPrice === 0) {
-                if (tossPay && tossPay.checked) {
-                    alert("0원 결제 시 토스 결제는 불가능합니다."); return;
+                // Case 1: 0원인데 토스가 선택된 경우 (Alert 후 중단)
+                if (tossPayRadio && tossPayRadio.checked) {
+                    alert("최종 결제 금액이 0원이므로 토스 간편 결제(유료)를 사용할 수 없습니다. 토스 결제 선택을 해제 후 주문을 진행해 주세요.");
+                    return;
                 }
             } else {
-                if (pointPay && pointPay.checked) {
-                    alert("유료 결제 시 전액 포인트 결제는 불가능합니다."); return;
+                if (pointPayRadio && pointPayRadio.checked) {
+                    // Case 2: 유료 결제인데 '전액 포인트 결제'가 선택된 경우 (경고 후 중단)
+                    alert("총 결제 금액이 0원 이상이므로 '전액 포인트 결제'를 사용할 수 없습니다. 토스 간편 결제를 선택해 주세요.");
+                    return; // 함수 실행 중단
                 }
-                if (!tossPay || !tossPay.checked) {
-                    alert("결제 방법을 선택해주세요."); return;
+
+                if (!tossPayRadio || !tossPayRadio.checked) {
+                    // Case 3: 유료 결제인데 TOSS도 선택되지 않은 경우
+                    alert("결제 방법을 선택해주세요.");
+                    return; // 함수 실행 중단
                 }
             }
 
+            console.log("전송할 객체:", orderPrepareRequest);
+            console.log("실제 JSON:", JSON.stringify(orderPrepareRequest));
+
             try {
-                const res = await fetch('/orders/prepare', {
+                const response = await fetch('/orders/prepare', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(orderPrepareRequest)
                 });
-                if (!res.ok) throw new Error();
-                const data = await res.json();
+
+                console.log("주문 준비 응답: {}", response)
+                console.log("주문 준비 응답 바디: {}", response.body);
+                console.log("주문 준비 응답 코드: {}", response.status);
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({message: '주문 준비 API 응답 실패.'}));
+                    throw new Error(err.message || '주문 준비에 실패했습니다.');
+                }
+                const prepareResponse = await response.json();
+                const orderIdFromServer = prepareResponse.orderNumber;
+                if (!orderIdFromServer) {
+                    throw new Error('주문 ID를 서버로부터 받지 못했습니다.');
+                }
 
                 if (currentFinalPrice === 0) {
-                    window.location.href = `/orders/success?orderNumber=${data.orderNumber}`;
+                    // 회원 주문일 경우에만 0원 처리 (비회원은 위에서 이미 차단됨)
+                    console.log("0원 주문: 성공 처리.");
+                    window.location.href = window.location.origin + `/orders/success?orderNumber=${orderIdFromServer}`;
                 } else {
-                    //쿠폰 사용 됐으면 coupon id 가져옴
-                    const rawCouponId = document.getElementById('selected_coupon_id_hidden').value;
-                    const couponId = (rawCouponId && rawCouponId !== '0') ? rawCouponId : null;
-
-                    let successUrl = window.location.origin + "/payments/confirm";
-                    if (couponId) {
-                        successUrl += `?couponId=${couponId}`; // 💡 URL 뒤에 붙이기
-                    }
-
+                    // 유료 주문: 토스페이먼츠 호출
+                    console.log("유료 주문: 토스페이먼츠 호출");
                     tossPayments.requestPayment('토스페이', {
-                        orderId: data.orderNumber,
+                        orderId: orderIdFromServer,
                         amount: currentFinalPrice,
-                        orderName: "주문 상품",
-                        customerName: data.receiver,
-                        successUrl: successUrl,
+                        orderName: orderName,
+                        customerName: prepareResponse.receiver,
+                        successUrl: window.location.origin + "/payments/confirm",
                         failUrl: window.location.origin + "/payments/fail"
                     });
                 }
-            } catch (e) {
-                console.error(e);
-                alert("주문 준비 중 오류가 발생했습니다.");
+            } catch (error) {
+                console.error('주문 처리 중 오류: ', error);
+                alert(error.message || '알 수 없는 오류가 발생하였습니다.');
             }
         });
     }
 
+    /**
+     * 포인트 입력 필드에 이벤트 리스너를 추가하는 함수
+     */
     function initPointInputListener() {
-        const input = document.getElementById('points-to-use');
-        if (input) input.addEventListener('input', updatePriceSummary);
-    }
-
-    function initApplyAllPointsButton() {
-        const btn = document.getElementById('apply-all-points-btn');
-        if (btn) {
-            btn.addEventListener('click', () => {
-                const input = document.getElementById('points-to-use');
-                const max = parseInt(input.getAttribute('max') || '0');
-                const current = parsePrice(document.getElementById('current-points'));
-                const totalBook = parsePrice(document.getElementById('total-book-price'));
-                const delivery = parsePrice(document.getElementById('delivery-fee'));
-
-                input.value = Math.min(max, current, totalBook + delivery);
+        const pointsInput = document.getElementById('points-to-use');
+        if (pointsInput) {
+            console.log("포인트 입력 리스너 추가됨"); // <--- 로그 추가
+            pointsInput.addEventListener('input', (event) => { // event 파라미터 추가
+                console.log("포인트 입력 감지:", event.target.value); // <--- 로그 추가
                 updatePriceSummary();
             });
+        } else {
+            console.error("ID 'points-to-use' 요소를 찾을 수 없음!"); // <--- 요소 못 찾을 때 로그 추가
         }
     }
 
-    // 💡 가격 요약 업데이트 (쿠폰 할인 반영)
-    function updatePriceSummary() {
+    // --- [추가] '모두 사용' 버튼 클릭 이벤트 리스너 ---
+    function initApplyAllPointsButton() {
+        const applyAllBtn = document.getElementById('apply-all-points-btn');
         const pointsInput = document.getElementById('points-to-use');
-        const pointsEl = document.getElementById('points-discount-amount');
-        const pointsRow = document.querySelector('.order-points-discount');
+        const totalBookPriceEl = document.getElementById('total-book-price');
+        const deliveryFeeEl = document.getElementById('delivery-fee'); // ⭐ 새로 추가: 배송비 요소
 
-        // 쿠폰 요소
-        const couponHidden = document.getElementById('coupon_discount_amount_hidden');
-        const couponEl = document.getElementById('coupon-discount-amount');
-        const couponRow = document.querySelector('.order-coupon-discount');
+        const parsePrice = (element) => {
+            if (!element || !element.textContent) return 0;
+            return parseInt(element.textContent.replace(/[^\d]/g, ''), 10) || 0;
+        };
 
-        const totalBookEl = document.getElementById('total-book-price');
-        const deliveryEl = document.getElementById('delivery-fee');
-        const actualPriceEl = document.getElementById('actual-order-price');
-        const payBtn = document.getElementById('payment-button');
+        if (applyAllBtn && pointsInput && totalBookPriceEl && deliveryFeeEl) { // ⭐ deliveryFeeEl 체크 추가
+            console.log("'모두 사용' 버튼 리스너 추가됨");
+            applyAllBtn.addEventListener('click', () => {
+                const maxPointsInput = parseInt(pointsInput.getAttribute('max') || '0', 10);
+                const currentPointsStr = document.getElementById('current-points')?.textContent.replace(/[^\d]/g, '');
+                const availablePoints = parseInt(currentPointsStr, 10) || 0;
+                const maxPointsFromBalance = Math.min(maxPointsInput, availablePoints);
 
-        // 1. 상품 & 포장비
+                const subtotal = parsePrice(totalBookPriceEl);
+                const deliveryFee = parsePrice(deliveryFeeEl);
+
+                const totalCost = subtotal + deliveryFee;
+
+                const maxPointsToUse = Math.min(maxPointsFromBalance, totalCost);
+
+                pointsInput.value = maxPointsToUse;
+                updatePriceSummary();
+            });
+        } else {
+            console.error("ID 'apply-all-points-btn' 또는 필수 요소를 찾을 수 없음!");
+        }
+    }
+
+    /**
+     * 최종 결제 금액 및 할인 내역을 업데이트하는 함수
+     */
+    function updatePriceSummary() {
+        // 1. 필요한 DOM 요소 가져오기
+        const pointsInput = document.getElementById('points-to-use');
+        const pointsDiscountAmountEl = document.getElementById('points-discount-amount');
+        const pointsDiscountRowEl = document.querySelector('.order-points-discount'); // 할인 행 전체 div
+        const couponDiscountAmountEl = document.getElementById('coupon-discount-amount'); // (쿠폰 구현 시)
+        const couponDiscountRowEl = document.querySelector('.order-coupon-discount'); // (쿠폰 구현 시)
+        const totalBookPriceEl = document.getElementById('total-book-price');
+        const deliveryFeeEl = document.getElementById('delivery-fee');
+        const actualOrderPriceEl = document.getElementById('actual-order-price');
+        const paymentButton = document.getElementById('payment-button');
+
+        let packagingTotalRow = document.getElementById('order-packaging-total');
+        // 포장비 행이 없으면 동적으로 생성
+        if (!packagingTotalRow) {
+            packagingTotalRow = document.createElement('div');
+            packagingTotalRow.id = 'order-packaging-total';
+            packagingTotalRow.className = 'order-shipping d-flex justify-content-between'; // 배송비와 같은 스타일 적용
+            // 배송비(deliveryFeeEl)의 부모(order-totals)를 찾아 그 다음에 삽입
+            deliveryFeeEl.parentNode.insertAdjacentElement('afterend', packagingTotalRow);
+        }
+
+        // 금액 파싱 함수 (쉼표, '원' 제거)
+        const parsePrice = (element) => {
+            if (!element || !element.textContent) return 0;
+            return parseInt(element.textContent.replace(/[^\d]/g, ''), 10) || 0;
+        };
+
+        // 2. 현재 값 읽기
+        let usedPoints = parseInt(pointsInput.value, 10) || 0;
+        const maxPoints = parseInt(pointsInput.getAttribute('max') || '0', 10); // input의 max 속성값
+        const currentPointsStr = document.getElementById('current-points')?.textContent.replace(/[^\d]/g, '');
+        const availablePoints = parseInt(currentPointsStr, 10) || 0; // 실제 보유 포인트
+
+
+        // ▼▼▼ [수정] 상품 금액(subtotal)과 포장비(packagingTotal) 계산 ▼▼▼
         let subtotal = 0;
-        let packTotal = 0;
+        let packagingTotal = 0;
         document.querySelectorAll('.order-item').forEach(item => {
-            const qty = parseInt(item.dataset.quantity);
-            subtotal += parseFloat(item.dataset.salePrice) * qty;
-            packTotal += parseFloat(item.dataset.packagingPrice || 0) * qty;
+            const salePrice = parseFloat(item.dataset.salePrice) || 0;
+            const quantity = parseInt(item.dataset.quantity, 10) || 0;
+            subtotal += salePrice * quantity;
+
+            // 각 아이템에 저장된 포장지 가격 * 수량
+            const packagingPrice = parseFloat(item.dataset.packagingPrice) || 0;
+            packagingTotal += packagingPrice * quantity;
         });
 
-        totalBookEl.textContent = `${subtotal.toLocaleString()}원`;
+        // 화면에 상품 금액 업데이트
+        totalBookPriceEl.textContent = `${subtotal.toLocaleString('ko-KR')}원`;
 
-        let packRow = document.getElementById('order-packaging-total');
-        if (!packRow) {
-            packRow = document.createElement('div');
-            packRow.id = 'order-packaging-total';
-            packRow.className = 'order-shipping d-flex justify-content-between';
-            deliveryEl.parentNode.insertAdjacentElement('afterend', packRow);
-        }
-        packRow.innerHTML = `<span>포장비</span><span>+${packTotal.toLocaleString()}원</span>`;
-        packRow.style.display = packTotal > 0 ? 'flex' : 'none';
-
-        // 2. 할인 전 총액
-        const deliveryFee = parsePrice(deliveryEl);
-        const totalBeforeDiscount = subtotal + packTotal + deliveryFee;
-
-        // 3. 포인트
-        let usedPoints = parseInt(pointsInput.value || 0);
-        const maxPoints = parseInt(pointsInput.getAttribute('max') || 0);
-        const userPoints = parsePrice(document.getElementById('current-points'));
-        const limit = Math.min(maxPoints, userPoints, totalBeforeDiscount);
-
-        if (usedPoints < 0) usedPoints = 0;
-        if (usedPoints > limit) usedPoints = limit;
-        pointsInput.value = usedPoints;
-
-        // 4. 할인 반영
-        const couponDiscount = parseInt(couponHidden?.value || 0); // 💡 값 읽기
-
-        // 포인트 UI
-        if (usedPoints > 0) {
-            pointsEl.textContent = `-${usedPoints.toLocaleString()}원`;
-            pointsRow.style.display = 'flex';
+        // 화면에 포장비 업데이트
+        packagingTotalRow.innerHTML = `<span>포장비</span><span>+${packagingTotal.toLocaleString('ko-KR')}원</span>`;
+        if (packagingTotal === 0) {
+            packagingTotalRow.style.display = 'none'; // 포장비가 0원이면 숨김
         } else {
-            pointsRow.style.display = 'none';
+            packagingTotalRow.style.display = 'flex'; // 0원 아니면 표시
         }
 
-        // 쿠폰 UI 💡
+        const goodsCost = subtotal + packagingTotal;
+        const deliveryFee = parsePrice(deliveryFeeEl);
+
+        const totalBeforeDiscount = goodsCost + deliveryFee;
+
+        const maxPointsAllowed = Math.min(maxPoints, availablePoints);
+        const effectiveMaxPoints = Math.min(maxPointsAllowed, totalBeforeDiscount);
+        console.log("계산된 최대 사용 가능 포인트:", effectiveMaxPoints); // <--- 로그 추가!
+
+        // 3. 포인트 유효성 검사 및 조정
+        if (usedPoints < 0) {
+            usedPoints = 0;
+            pointsInput.value = 0; // 음수 입력 시 0으로 변경
+        }
+        if (usedPoints > effectiveMaxPoints) {
+            usedPoints = effectiveMaxPoints;
+            pointsInput.value = usedPoints;
+        }
+        // 4. 할인 금액 계산 (1포인트 = 1원으로 가정)
+        const pointDiscount = usedPoints;
+        // const couponDiscount = parsePrice(couponDiscountAmountEl); // (쿠폰 구현 시)
+        const couponDiscount = document.getElementById('coupon_discount_amount_hidden').value;
+
+
+        // 5. 할인 금액 표시 업데이트
+        if (pointDiscount > 0) {
+            pointsDiscountAmountEl.textContent = `-${pointDiscount.toLocaleString('ko-KR')}원`;
+            pointsDiscountRowEl.style.display = 'flex'; // 할인 행 보이기
+        } else {
+            pointsDiscountAmountEl.textContent = '-0원';
+            pointsDiscountRowEl.style.display = 'none'; // 할인 행 숨기기
+        }
+
+        // (쿠폰 할인 표시 업데이트 로직 추가)
         if (couponDiscount > 0) {
-            couponEl.textContent = `-${couponDiscount.toLocaleString()}원`;
-            couponRow.style.display = 'flex';
+            // 1. 텍스트 변경: 예) "-3,000원"
+            couponDiscountAmountEl.textContent = `-${couponDiscount.toLocaleString('ko-KR')}원`;
+
+            // 2. 행 보이기 (display: none 해제)
+            couponDiscountRowEl.style.display = 'flex';
         } else {
-            couponRow.style.display = 'none';
+            // 1. 텍스트 초기화
+            couponDiscountAmountEl.textContent = '-0원';
+
+            // 2. 행 숨기기 (선택 사항: 0원일 때 안 보이게 하려면 none, 보이게 하려면 flex 유지)
+            couponDiscountRowEl.style.display = 'none';
         }
 
-        // 5. 최종 금액
-        const finalPrice = Math.max(0, totalBeforeDiscount - usedPoints - couponDiscount);
+        // 6. 최종 결제 금액 계산
+        // (상품금액 + 포장비 + 배송비) - 할인
+        const finalPrice = Math.max(0, totalBeforeDiscount - pointDiscount - couponDiscount);
 
-        actualPriceEl.textContent = `${finalPrice.toLocaleString()}원`;
-        payBtn.textContent = `${finalPrice.toLocaleString()}원 결제하기`;
-    }
-
-    // --- [4. 기타 모달 로직] ---
-
-    function initPackagingModal() {
-        const modal = document.getElementById('packagingSelectModal');
-        const saveBtn = document.getElementById('savePackagingButton');
-        if (!modal || !saveBtn) return;
-
-        modal.addEventListener('show.bs.modal', (e) => {
-            document.getElementById('modal_order_item_id').value = e.relatedTarget.dataset.orderItemId;
-        });
-
-        saveBtn.addEventListener('click', () => {
-            const bookId = document.getElementById('modal_order_item_id').value;
-            const selected = modal.querySelector('input[name="packagingId"]:checked');
-            if (selected) {
-                const price = parsePrice(selected.closest('label').querySelector('.text-muted'));
-                const item = document.querySelector(`.order-item[data-book-id="${bookId}"]`);
-                if (item) {
-                    item.dataset.packagingId = selected.value;
-                    item.dataset.packagingPrice = price;
-                    const btn = document.querySelector(`button[data-order-item-id="${bookId}"]`);
-                    if (selected.value === '0') {
-                        btn.className = 'btn btn-outline-secondary btn-sm';
-                        btn.innerHTML = '<i class="bi bi-box-seam me-1"></i> 포장 선택';
-                    } else {
-                        const name = selected.closest('label').querySelector('span').textContent;
-                        btn.className = 'btn btn-dark text-white btn-sm';
-                        btn.innerHTML = `<i class="bi bi-check-lg me-1"></i> ${name}`;
-                    }
-                }
-            }
-            updatePriceSummary();
-            bootstrap.Modal.getInstance(modal).hide();
-        });
-    }
-
-    function initAddressSelectModal() {
-        const modal = document.getElementById('addressSelectModal');
-        if (!modal) return;
-
-        modal.addEventListener('show.bs.modal', async () => {
-            const body = document.getElementById('address-list-body');
-            body.innerHTML = '<div class="text-center p-3">로딩 중...</div>';
-            try {
-                const res = await fetch('/addresses/me');
-                if (!res.ok) throw new Error();
-                const list = await res.json();
-                body.innerHTML = renderAddressList(list);
-            } catch (e) {
-                body.innerHTML = '<div class="text-danger">주소 로딩 실패</div>';
-            }
-        });
-
-        modal.addEventListener('click', (e) => {
-            const item = e.target.closest('.address-select-item');
-            if (item) {
-                const ds = item.dataset;
-                document.getElementById('zip').value = ds.postCode;
-                document.getElementById('address').value = ds.addressInfo;
-                document.getElementById('address-detail').value = ds.addressDetail;
-                document.getElementById('address-extra').value = ds.addressExtra;
-                bootstrap.Modal.getInstance(modal).hide();
-            }
-        });
-    }
-
-    function renderAddressList(list) {
-        if (!list || !list.length) return '<div class="alert alert-info">주소 없음</div>';
-        return '<div class="list-group">' + list.map(addr => `
-            <div class="list-group-item address-select-item list-group-item-action ${addr.isDefault ? 'border-primary' : ''}"
-                 role="button"
-                 data-post-code="${addr.postCode}" data-address-info="${addr.addressInfo}"
-                 data-address-detail="${addr.addressDetail}" data-address-extra="${addr.addressExtra}">
-                 <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1 fw-bold">[${addr.addressAlias || '주소'}] ${addr.isDefault ? '(기본)' : ''}</h6>
-                    <small>${addr.postCode}</small>
-                 </div>
-                 <p class="mb-1">${addr.addressInfo} ${addr.addressDetail}</p>
-            </div>
-        `).join('') + '</div>';
+        // 7. 최종 결제 금액 및 버튼 텍스트 업데이트
+        actualOrderPriceEl.textContent = `${finalPrice.toLocaleString('ko-KR')}원`;
+        paymentButton.textContent = `${finalPrice.toLocaleString('ko-KR')}원 결제하기`;
     }
 
     function sample6_execDaumPostcode() {
         new daum.Postcode({
             oncomplete: function (data) {
-                document.getElementById('zip').value = data.zonecode;
-                document.getElementById("address").value = data.roadAddress || data.jibunAddress;
-                let extra = '';
-                if (data.userSelectedType === 'R') {
-                    if (data.bname && /[동|로|가]$/g.test(data.bname)) extra += data.bname;
-                    if (data.buildingName && data.apartment === 'Y') extra += (extra !== '' ? ', ' + data.buildingName : data.buildingName);
-                    if (extra !== '') extra = ' (' + extra + ')';
+                //  팝업에서 검색 결과 항목을 클릭했을 때 실행할 코드를 작성하는 부분
+                var addr = '';
+                var extraAddr = '';
+
+                // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져옴
+                if (data.userSelectedType !== 'R') { // 사용자가 도로명을 선택하지 않았을 경우
+                    alert('지번 주소가 선택되었습니다. 도로명 주소로 반영됩니다.');
                 }
-                document.getElementById("address-extra").value = extra;
+
+                addr = data.roadAddress;
+
+                // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                if (data.userSelectedType === 'R') {
+                    // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                    // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                    if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                        extraAddr += data.bname;
+                    }
+                    // 건물명이 있고, 공동주택일 경우 추가한다.
+                    if (data.buildingName !== '' && data.apartment === 'Y') {
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                    if (extraAddr !== '') {
+                        extraAddr = ' (' + extraAddr + ')';
+                    }
+                    // 조합된 참고항목을 해당 필드에 넣는다.
+                    document.getElementById("address-extra").value = extraAddr;
+
+                } else {
+                    document.getElementById("address-extra").value = '';
+                }
+
+                document.getElementById('zip').value = data.zonecode;
+                document.getElementById("address").value = addr;
                 document.getElementById("address-detail").focus();
             }
         }).open();
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. "포장지 선택" 모달 요소를 가져옵니다.
+        const packagingModal = document.getElementById('packagingSelectModal');
+        if (packagingModal) {
+            // 2. 모달이 열리기 '직전'에 실행되는 이벤트를 감지합니다.
+            packagingModal.addEventListener('show.bs.modal', function (event) {
+                // 3. 어떤 버튼이 모달을 열었는지 가져옵니다.
+                const button = event.relatedTarget;
+                // 4. 버튼에 심어둔 'data-order-item-id' 속성 값을 읽어옵니다.
+                const orderItemId = button.dataset.orderItemId;
+                // 5. 모달 안의 숨겨진(hidden) input을 찾습니다.
+                const hiddenInput = document.getElementById('modal_order_item_id');
+                // 6. 숨겨진 input의 값(value)에 상품 ID를 설정합니다.
+                hiddenInput.value = orderItemId;
+                // 7. (선택) 모달이 열릴 때마다 "포장 안 함"을 기본으로 체크
+                const defaultRadio = packagingModal.querySelector('input[name="packagingId"][value="0"]');
+                if (defaultRadio) {
+                    defaultRadio.checked = true;
+                }
+            });
+        }
+    });
+
+    function initPackagingModal() {
+        const packagingModal = document.getElementById('packagingSelectModal');
+        const savePackagingButton = document.getElementById('savePackagingButton');
+        if (!packagingModal || !savePackagingButton) return;
+
+        // ... (모달 열릴 때 로직은 그대로) ...
+
+        // '적용' 버튼 클릭 시
+        savePackagingButton.addEventListener('click', () => {
+            const bookId = document.getElementById('modal_order_item_id').value;
+            const selectedRadio = packagingModal.querySelector('input[name="packagingId"]:checked');
+            if (!selectedRadio) return;
+
+            const packagingId = selectedRadio.value;
+            const label = selectedRadio.closest('label');
+
+            const priceText = label.querySelector('.text-muted').textContent;
+            const packagingPrice = parseInt(priceText.replace(/[^\d]/g, ''), 10) || 0;
+
+            const nameElement = label.querySelector('strong, span:not(.text-muted)');
+            const packagingName = nameElement ? nameElement.textContent : '포장 선택됨';
+
+            const orderItemDiv = document.querySelector(`.order-item[data-book-id="${bookId}"]`);
+            const triggerButton = document.querySelector(`button[data-order-item-id="${bookId}"]`);
+
+            if (orderItemDiv && triggerButton) {
+                orderItemDiv.dataset.packagingId = packagingId;
+                orderItemDiv.dataset.packagingPrice = packagingPrice;
+
+                // 모든 색상 클래스를 제거하여 초기화합니다.
+                triggerButton.classList.remove('btn-success', 'btn-dark', 'btn-outline-secondary', 'text-white');
+
+                if (packagingId === '0') {
+                    // '포장 안 함' 선택 시 (기본값)
+                    triggerButton.innerHTML = '<i class="bi bi-box-seam me-1"></i> 포장 선택';
+                    triggerButton.classList.add('btn-outline-secondary'); // 기본 회색 테두리 버튼
+                } else {
+                    // 포장 선택 시
+                    triggerButton.innerHTML = `<i class="bi bi-check-lg me-1"></i> ${packagingName}`;
+                    triggerButton.classList.add('btn', 'btn-dark', 'text-white'); // 검은색 배경, 흰색 텍스트
+                }
+            }
+
+            updatePriceSummary();
+
+            const modalInstance = bootstrap.Modal.getInstance(packagingModal);
+            modalInstance.hide();
+
+            if (triggerButton) {
+                triggerButton.focus();
+            }
+        });
+    }
+
+    /**
+     * 주소 선택 모달 초기화 및 로드 로직
+     */
+    function initAddressSelectModal() {
+        const addressSelectModal = document.getElementById('addressSelectModal');
+        if (addressSelectModal) {
+            addressSelectModal.addEventListener('show.bs.modal', async (event) => {
+                const modalBody = document.getElementById('address-list-body');
+
+                // 1. 모달 내용을 로딩 스피너로 초기화 (임시 스피너)
+                modalBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-dark" role="status"></div></div>`;
+
+                try {
+                    // 2. ✨ API 호출: 현재 로그인한 회원의 주소 목록을 요청
+                    const response = await fetch('/addresses/me');
+
+                    if (!response.ok) {
+                        throw new Error('주소 목록을 불러오는 데 실패했습니다.');
+                    }
+
+                    // 3. 주소 목록 데이터 (JSON 배열) 획득
+                    const addresses = await response.json();
+
+                    // 4. 주소 목록 HTML 렌더링
+                    modalBody.innerHTML = renderAddressList(addresses);
+
+                } catch (error) {
+                    modalBody.innerHTML = `<div class="alert alert-danger">주소 로딩 실패: ${error.message || '오류 발생'}</div>`;
+                }
+            });
+
+            // 5. 주소 목록에서 항목 선택 시 폼에 데이터 주입
+            addressSelectModal.addEventListener('click', function (event) {
+                const target = event.target.closest('.address-select-item');
+                if (target) {
+                    const dataset = target.dataset;
+
+                    // 폼 요소에 데이터 주입
+                    document.getElementById('zip').value = dataset.postCode;         // DTO: postCode -> dataset.postCode
+                    document.getElementById('address').value = dataset.addressInfo;    // DTO: addressInfo -> dataset.addressInfo
+                    document.getElementById('address-detail').value = dataset.addressDetail || ''; // DTO: addressDetail -> dataset.addressDetail
+                    document.getElementById('address-extra').value = dataset.addressExtra || '';   // DTO: addressExtra -> dataset.addressExtra
+                    // 모달 닫기
+                    const modalInstance = bootstrap.Modal.getInstance(addressSelectModal);
+                    modalInstance.hide();
+
+                    document.getElementById('address-detail').focus();
+                }
+            });
+        }
+    }
+
+
+    /**
+     * 주소 목록 데이터를 받아 HTML로 렌더링하는 헬퍼 함수
+     */
+    function renderAddressList(addresses) {
+        if (addresses.length === 0) {
+            return '<div class="alert alert-info">등록된 배송지가 없습니다. 새로운 주소를 입력해주세요.</div>';
+        }
+
+        let html = '';
+
+        addresses.forEach((addr, index) => {
+
+            // ⭐ DTO: isDefault (Boolean) 필드를 사용하여 '기본' 여부를 판단합니다.
+            const isDefault = addr.isDefault ? ' (기본)' : '';
+            const defaultClass = addr.isDefault ? ' border-primary border-2' : '';
+
+            html += `
+        <div class="list-group-item list-group-item-action d-flex flex-column address-select-item ${defaultClass}"
+             role="button"
+
+             data-post-code="${addr.postCode || ''}"
+             data-address-info="${addr.addressInfo || ''}"
+             data-address-detail="${addr.addressDetail || ''}"
+             data-address-extra="${addr.addressExtra || ''}"
+
+        >
+            <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1 fw-bold">
+                    [${addr.addressAlias || '주소'}] ${isDefault}
+                </h6>
+                <small class="text-muted">${addr.postCode || 'N/A'}</small>
+            </div>
+
+            <p class="mb-1">${addr.addressInfo || ''} ${addr.addressDetail || ''}</p>
+
+        </div>
+        `;
+        });
+
+        return `<div class="list-group">${html}</div>`;
+    }
+
+
 </script>
-<!--<script>-->
-<!--    document.addEventListener('DOMContentLoaded', () => {-->
-<!--        initPhoneHyphen();-->
-<!--        const TOSS_CLIENT_KEY = /*[[${tossClientIKey}]]*/ 'test_ck_nRQoOaPz8L4QRwM6lGa58y47BMw6';-->
-<!--        initTossPayments(TOSS_CLIENT_KEY);-->
-<!--        initPointInputListener();-->
-<!--        initApplyAllPointsButton();-->
-<!--        initPackagingModal();-->
-<!--        initAddressSelectModal();-->
-<!--        initCouponSelection();-->
-
-<!--        const findZipBtn = document.getElementById('find-zip-btn');-->
-<!--        if (findZipBtn) {-->
-<!--            findZipBtn.addEventListener('click', sample6_execDaumPostcode);-->
-<!--        }-->
-<!--    });-->
-
-<!--    function initPhoneHyphen() {-->
-<!--        const phoneInput = document.getElementById('phone');-->
-<!--        if (!phoneInput) return;-->
-
-<!--        const formatPhoneNumber = (value) => {-->
-<!--            if (!value) return value;-->
-<!--            let phoneNumber = value.replace(/[^\d]/g, '');-->
-<!--            if (phoneNumber.length > 11) phoneNumber = phoneNumber.slice(0, 11);-->
-<!--            const len = phoneNumber.length;-->
-<!--            if (len < 4) return phoneNumber;-->
-<!--            if (len < 8) return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3)}`;-->
-<!--            return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;-->
-<!--        };-->
-
-<!--        phoneInput.addEventListener('input', (e) => {-->
-<!--            const target = e.target;-->
-<!--            const originalValue = target.value;-->
-<!--            const formattedValue = formatPhoneNumber(originalValue);-->
-<!--            // 커서 계산은 간단하게 처리 (정교화 가능)-->
-<!--            target.value = formattedValue;-->
-<!--        });-->
-<!--    }-->
-
-<!--    // 결제 금액 가져오기-->
-<!--    // 금액 파싱 함수 (이 함수 스코프 안에도 정의)-->
-<!--    const parsePrice = (priceValue) => {-->
-<!--        if (priceValue == null) return 0;-->
-<!--        const priceString = String(priceValue);-->
-<!--        return Number(priceString.replace(/[^\d]/g, '')) || 0;-->
-<!--    };-->
-
-<!--    function initTossPayments(clientKey) {-->
-<!--        const paymentButton = document.getElementById('payment-button');-->
-<!--        const actualOrderPriceEl = document.getElementById('actual-order-price'); // 요소 미리 찾아두기-->
-
-<!--        if (!paymentButton || !actualOrderPriceEl) {-->
-<!--            console.error("결제 버튼 또는 최종 금액 요소를 찾을 수 없습니다!");-->
-<!--            return;-->
-<!--        }-->
-<!--        var tossPayments = TossPayments(clientKey);-->
-
-<!--        paymentButton.addEventListener('click', async function () {-->
-
-<!--            const bookInfoRequestList = []; // 백엔드로 보낼 최종 리스트-->
-<!--            const orderItemElements = document.querySelectorAll('.order-item');-->
-
-<!--            orderItemElements.forEach(item => {-->
-<!--                const dataset = item.dataset;-->
-
-<!--                const publisher = {-->
-<!--                    publisherId: parseInt(dataset.publisherId, 10),-->
-<!--                    publisherName: dataset.publisherName-->
-<!--                };-->
-
-<!--                const contributors = [];-->
-<!--                const contributorElements = item.querySelectorAll('.contributor-data .contributor');-->
-
-<!--                contributorElements.forEach(c_item => {-->
-<!--                    contributors.push({-->
-<!--                        contributorId: parseInt(c_item.dataset.contributorId, 10),-->
-<!--                        contributorName: c_item.dataset.contributorName,-->
-<!--                        contributorRole: c_item.dataset.contributorRole-->
-<!--                    });-->
-<!--                });-->
-
-<!--                bookInfoRequestList.push({-->
-<!--                    bookId: parseInt(dataset.bookId, 10),-->
-<!--                    bookName: dataset.bookName,-->
-<!--                    imageUrl: dataset.imageUrl,-->
-<!--                    isPack: (dataset.isPack === 'true'),-->
-<!--                    regularPrice: parseFloat(dataset.regularPrice),-->
-<!--                    salePrice: parseFloat(dataset.salePrice),-->
-<!--                    publisher: publisher,-->
-<!--                    quantity: parseInt(dataset.quantity, 10),-->
-<!--                    contributors: contributors,-->
-<!--                    packagingId: parseInt(dataset.packagingId || '0', 10)-->
-<!--                });-->
-<!--            });-->
-
-<!--            console.log("bookInfoRequestList:", bookInfoRequestList);-->
-
-<!--            if (bookInfoRequestList.length === 0) {-->
-<!--                alert("주문할 상품이 없습니다.");-->
-<!--                return;-->
-<!--            }-->
-
-<!--            const customerName = document.getElementById('name')?.value.trim();-->
-<!--            const rawPhone = document.getElementById('phone')?.value;-->
-<!--            const phoneNumber = rawPhone ? rawPhone.replace(/[^\d]/g, '') : '';-->
-<!--            const zip = document.getElementById('zip')?.value;-->
-<!--            const address = document.getElementById('address')?.value;-->
-<!--            const addressDetail = document.getElementById('address-detail')?.value;-->
-<!--            const addressExtra = document.getElementById('address-extra')?.value;-->
-<!--            const totalBookPrice = parsePrice(document.getElementById('total-book-price')?.textContent);-->
-
-<!--            const currentFinalPrice = parsePrice(actualOrderPriceEl.textContent); // 미리 찾아둔 요소 사용-->
-
-<!--            const pointsInput = document.getElementById('points-to-use');-->
-<!--            const usedPointsValue = parseInt(pointsInput.value, 10) || 0;-->
-
-<!--            const orderItems = document.querySelectorAll('.order-summary-content .order-item');-->
-<!--            let orderName = "주문 상품"; // 기본값-->
-<!--            if (!customerName || customerName.length === 0) {-->
-<!--                alert("주문자 이름을 입력해 주세요.");-->
-<!--                document.getElementById('name').focus();-->
-<!--                return;-->
-<!--            }-->
-<!--            if (!phoneNumber || phoneNumber.length < 10) { // 최소 10자리 (하이픈 제외)-->
-<!--                alert("유효한 연락처를 입력해 주세요.");-->
-<!--                document.getElementById('phone').focus();-->
-<!--                return;-->
-<!--            }-->
-<!--            if (!zip || zip.length === 0) {-->
-<!--                alert("우편번호 찾기를 통해 배송지 주소를 입력해 주세요.");-->
-<!--                document.getElementById('find-zip-btn').focus();-->
-<!--                return;-->
-<!--            }-->
-<!--            if (!address || address.length === 0 || !addressDetail || addressDetail.length === 0) {-->
-<!--                alert("상세 주소를 포함하여 정확한 배송지 정보를 입력해 주세요.");-->
-<!--                document.getElementById('address-detail').focus();-->
-<!--                return;-->
-<!--            }-->
-
-<!--            if (orderItems.length > 0) {-->
-<!--                const firstItemName = orderItems[0].querySelector('.order-item-details h4')?.textContent.trim();-->
-<!--                if (firstItemName) {-->
-<!--                    if (orderItems.length > 1) {-->
-<!--                        orderName = `${firstItemName} 외 ${orderItems.length - 1}건`;-->
-<!--                    } else {-->
-<!--                        orderName = firstItemName;-->
-<!--                    }-->
-<!--                }-->
-<!--            }-->
-
-<!--            const selectedDeliveryArrivedDate = document.querySelector('input[name="deliveryDate"]:checked');-->
-<!--            const deliveryDateValue = selectedDeliveryArrivedDate ? selectedDeliveryArrivedDate.value : null;-->
-
-<!--            const orderPrepareRequest = {-->
-<!--                totalBookPrice: totalBookPrice,-->
-<!--                actualOrderPrice: currentFinalPrice,-->
-<!--                receiver: customerName,-->
-<!--                postCode: `${zip}`,-->
-<!--                receiverAddress: `${address}`,-->
-<!--                receiverAddressDetail: addressDetail,-->
-<!--                receiverAddressExtra: addressExtra,-->
-<!--                receiverPhone: phoneNumber,-->
-<!--                deliveryArrivedDate: deliveryDateValue,-->
-<!--                bookInfoRequestList: bookInfoRequestList,-->
-<!--                usedPoints: usedPointsValue-->
-<!--            };-->
-
-<!--            const tossPayRadio = document.getElementById('tossPay');-->
-<!--            const pointPayRadio = document.getElementById('pointPay');-->
-
-<!--            if (currentFinalPrice === 0) {-->
-<!--                // Case 1: 0원인데 토스가 선택된 경우 (Alert 후 중단)-->
-<!--                if (tossPayRadio && tossPayRadio.checked) {-->
-<!--                    alert("최종 결제 금액이 0원이므로 토스 간편 결제(유료)를 사용할 수 없습니다. 토스 결제 선택을 해제 후 주문을 진행해 주세요.");-->
-<!--                    return;-->
-<!--                }-->
-<!--            } else {-->
-<!--                if (pointPayRadio && pointPayRadio.checked) {-->
-<!--                    // Case 2: 유료 결제인데 '전액 포인트 결제'가 선택된 경우 (경고 후 중단)-->
-<!--                    alert("총 결제 금액이 0원 이상이므로 '전액 포인트 결제'를 사용할 수 없습니다. 토스 간편 결제를 선택해 주세요.");-->
-<!--                    return; // 함수 실행 중단-->
-<!--                }-->
-
-<!--                if (!tossPayRadio || !tossPayRadio.checked) {-->
-<!--                    // Case 3: 유료 결제인데 TOSS도 선택되지 않은 경우-->
-<!--                    alert("결제 방법을 선택해주세요.");-->
-<!--                    return; // 함수 실행 중단-->
-<!--                }-->
-<!--            }-->
-
-<!--            console.log("전송할 객체:", orderPrepareRequest);-->
-<!--            console.log("실제 JSON:", JSON.stringify(orderPrepareRequest));-->
-
-<!--            try {-->
-<!--                const response = await fetch('/orders/prepare', {-->
-<!--                    method: 'POST',-->
-<!--                    headers: {'Content-Type': 'application/json'},-->
-<!--                    body: JSON.stringify(orderPrepareRequest)-->
-<!--                });-->
-
-<!--                console.log("주문 준비 응답: {}", response)-->
-<!--                console.log("주문 준비 응답 바디: {}", response.body);-->
-<!--                console.log("주문 준비 응답 코드: {}", response.status);-->
-
-<!--                if (!response.ok) {-->
-<!--                    const err = await response.json().catch(() => ({message: '주문 준비 API 응답 실패.'}));-->
-<!--                    throw new Error(err.message || '주문 준비에 실패했습니다.');-->
-<!--                }-->
-<!--                const prepareResponse = await response.json();-->
-<!--                const orderIdFromServer = prepareResponse.orderNumber;-->
-<!--                if (!orderIdFromServer) {-->
-<!--                    throw new Error('주문 ID를 서버로부터 받지 못했습니다.');-->
-<!--                }-->
-
-<!--                if (currentFinalPrice === 0) {-->
-<!--                    // 회원 주문일 경우에만 0원 처리 (비회원은 위에서 이미 차단됨)-->
-<!--                    console.log("0원 주문: 성공 처리.");-->
-<!--                    window.location.href = window.location.origin + `/orders/success?orderNumber=${orderIdFromServer}`;-->
-<!--                } else {-->
-<!--                    // 유료 주문: 토스페이먼츠 호출-->
-<!--                    console.log("유료 주문: 토스페이먼츠 호출");-->
-<!--                    tossPayments.requestPayment('토스페이', {-->
-<!--                        orderId: orderIdFromServer,-->
-<!--                        amount: currentFinalPrice,-->
-<!--                        orderName: orderName,-->
-<!--                        customerName: prepareResponse.receiver,-->
-<!--                        successUrl: window.location.origin + "/payments/confirm",-->
-<!--                        failUrl: window.location.origin + "/payments/fail"-->
-<!--                    });-->
-<!--                }-->
-<!--            } catch (error) {-->
-<!--                console.error('주문 처리 중 오류: ', error);-->
-<!--                alert(error.message || '알 수 없는 오류가 발생하였습니다.');-->
-<!--            }-->
-<!--        });-->
-<!--    }-->
-
-<!--    /**-->
-<!--     * 포인트 입력 필드에 이벤트 리스너를 추가하는 함수-->
-<!--     */-->
-<!--    function initPointInputListener() {-->
-<!--        const pointsInput = document.getElementById('points-to-use');-->
-<!--        if (pointsInput) {-->
-<!--            console.log("포인트 입력 리스너 추가됨"); // <-&#45;&#45; 로그 추가-->
-<!--            pointsInput.addEventListener('input', (event) => { // event 파라미터 추가-->
-<!--                console.log("포인트 입력 감지:", event.target.value); // <-&#45;&#45; 로그 추가-->
-<!--                updatePriceSummary();-->
-<!--            });-->
-<!--        } else {-->
-<!--            console.error("ID 'points-to-use' 요소를 찾을 수 없음!"); // <-&#45;&#45; 요소 못 찾을 때 로그 추가-->
-<!--        }-->
-<!--    }-->
-
-<!--    // -&#45;&#45; [추가] '모두 사용' 버튼 클릭 이벤트 리스너 -&#45;&#45;-->
-<!--    function initApplyAllPointsButton() {-->
-<!--        const applyAllBtn = document.getElementById('apply-all-points-btn');-->
-<!--        const pointsInput = document.getElementById('points-to-use');-->
-<!--        const totalBookPriceEl = document.getElementById('total-book-price');-->
-<!--        const deliveryFeeEl = document.getElementById('delivery-fee'); // ⭐ 새로 추가: 배송비 요소-->
-
-<!--        const parsePrice = (element) => {-->
-<!--            if (!element || !element.textContent) return 0;-->
-<!--            return parseInt(element.textContent.replace(/[^\d]/g, ''), 10) || 0;-->
-<!--        };-->
-
-<!--        if (applyAllBtn && pointsInput && totalBookPriceEl && deliveryFeeEl) { // ⭐ deliveryFeeEl 체크 추가-->
-<!--            console.log("'모두 사용' 버튼 리스너 추가됨");-->
-<!--            applyAllBtn.addEventListener('click', () => {-->
-<!--                const maxPointsInput = parseInt(pointsInput.getAttribute('max') || '0', 10);-->
-<!--                const currentPointsStr = document.getElementById('current-points')?.textContent.replace(/[^\d]/g, '');-->
-<!--                const availablePoints = parseInt(currentPointsStr, 10) || 0;-->
-<!--                const maxPointsFromBalance = Math.min(maxPointsInput, availablePoints);-->
-
-<!--                const subtotal = parsePrice(totalBookPriceEl);-->
-<!--                const deliveryFee = parsePrice(deliveryFeeEl);-->
-
-<!--                const totalCost = subtotal + deliveryFee;-->
-
-<!--                const maxPointsToUse = Math.min(maxPointsFromBalance, totalCost);-->
-
-<!--                pointsInput.value = maxPointsToUse;-->
-<!--                updatePriceSummary();-->
-<!--            });-->
-<!--        } else {-->
-<!--            console.error("ID 'apply-all-points-btn' 또는 필수 요소를 찾을 수 없음!");-->
-<!--        }-->
-<!--    }-->
-
-<!--    /**-->
-<!--     * 최종 결제 금액 및 할인 내역을 업데이트하는 함수-->
-<!--     */-->
-<!--    function updatePriceSummary() {-->
-<!--        // 1. 필요한 DOM 요소 가져오기-->
-<!--        const pointsInput = document.getElementById('points-to-use');-->
-<!--        const pointsDiscountAmountEl = document.getElementById('points-discount-amount');-->
-<!--        const pointsDiscountRowEl = document.querySelector('.order-points-discount'); // 할인 행 전체 div-->
-<!--        const couponDiscountAmountEl = document.getElementById('coupon-discount-amount'); // (쿠폰 구현 시)-->
-<!--        const couponDiscountRowEl = document.querySelector('.order-coupon-discount'); // (쿠폰 구현 시)-->
-<!--        const totalBookPriceEl = document.getElementById('total-book-price');-->
-<!--        const deliveryFeeEl = document.getElementById('delivery-fee');-->
-<!--        const actualOrderPriceEl = document.getElementById('actual-order-price');-->
-<!--        const paymentButton = document.getElementById('payment-button');-->
-
-<!--        let packagingTotalRow = document.getElementById('order-packaging-total');-->
-<!--        // 포장비 행이 없으면 동적으로 생성-->
-<!--        if (!packagingTotalRow) {-->
-<!--            packagingTotalRow = document.createElement('div');-->
-<!--            packagingTotalRow.id = 'order-packaging-total';-->
-<!--            packagingTotalRow.className = 'order-shipping d-flex justify-content-between'; // 배송비와 같은 스타일 적용-->
-<!--            // 배송비(deliveryFeeEl)의 부모(order-totals)를 찾아 그 다음에 삽입-->
-<!--            deliveryFeeEl.parentNode.insertAdjacentElement('afterend', packagingTotalRow);-->
-<!--        }-->
-
-<!--        // 금액 파싱 함수 (쉼표, '원' 제거)-->
-<!--        const parsePrice = (element) => {-->
-<!--            if (!element || !element.textContent) return 0;-->
-<!--            return parseInt(element.textContent.replace(/[^\d]/g, ''), 10) || 0;-->
-<!--        };-->
-
-<!--        // 2. 현재 값 읽기-->
-<!--        let usedPoints = parseInt(pointsInput.value, 10) || 0;-->
-<!--        const maxPoints = parseInt(pointsInput.getAttribute('max') || '0', 10); // input의 max 속성값-->
-<!--        const currentPointsStr = document.getElementById('current-points')?.textContent.replace(/[^\d]/g, '');-->
-<!--        const availablePoints = parseInt(currentPointsStr, 10) || 0; // 실제 보유 포인트-->
-
-
-<!--        // ▼▼▼ [수정] 상품 금액(subtotal)과 포장비(packagingTotal) 계산 ▼▼▼-->
-<!--        let subtotal = 0;-->
-<!--        let packagingTotal = 0;-->
-<!--        document.querySelectorAll('.order-item').forEach(item => {-->
-<!--            const salePrice = parseFloat(item.dataset.salePrice) || 0;-->
-<!--            const quantity = parseInt(item.dataset.quantity, 10) || 0;-->
-<!--            subtotal += salePrice * quantity;-->
-
-<!--            // 각 아이템에 저장된 포장지 가격 * 수량-->
-<!--            const packagingPrice = parseFloat(item.dataset.packagingPrice) || 0;-->
-<!--            packagingTotal += packagingPrice * quantity;-->
-<!--        });-->
-
-<!--        // 화면에 상품 금액 업데이트-->
-<!--        totalBookPriceEl.textContent = `${subtotal.toLocaleString('ko-KR')}원`;-->
-
-<!--        // 화면에 포장비 업데이트-->
-<!--        packagingTotalRow.innerHTML = `<span>포장비</span><span>+${packagingTotal.toLocaleString('ko-KR')}원</span>`;-->
-<!--        if (packagingTotal === 0) {-->
-<!--            packagingTotalRow.style.display = 'none'; // 포장비가 0원이면 숨김-->
-<!--        } else {-->
-<!--            packagingTotalRow.style.display = 'flex'; // 0원 아니면 표시-->
-<!--        }-->
-
-<!--        const goodsCost = subtotal + packagingTotal;-->
-<!--        const deliveryFee = parsePrice(deliveryFeeEl);-->
-
-<!--        const totalBeforeDiscount = goodsCost + deliveryFee;-->
-
-<!--        const maxPointsAllowed = Math.min(maxPoints, availablePoints);-->
-<!--        const effectiveMaxPoints = Math.min(maxPointsAllowed, totalBeforeDiscount);-->
-<!--        console.log("계산된 최대 사용 가능 포인트:", effectiveMaxPoints); // <-&#45;&#45; 로그 추가!-->
-
-<!--        // 3. 포인트 유효성 검사 및 조정-->
-<!--        if (usedPoints < 0) {-->
-<!--            usedPoints = 0;-->
-<!--            pointsInput.value = 0; // 음수 입력 시 0으로 변경-->
-<!--        }-->
-<!--        if (usedPoints > effectiveMaxPoints) {-->
-<!--            usedPoints = effectiveMaxPoints;-->
-<!--            pointsInput.value = usedPoints;-->
-<!--        }-->
-<!--        // 4. 할인 금액 계산 (1포인트 = 1원으로 가정)-->
-<!--        const pointDiscount = usedPoints;-->
-<!--        // const couponDiscount = parsePrice(couponDiscountAmountEl); // (쿠폰 구현 시)-->
-<!--        const couponDiscount = document.getElementById('coupon_discount_amount_hidden').value;-->
-
-
-<!--        // 5. 할인 금액 표시 업데이트-->
-<!--        if (pointDiscount > 0) {-->
-<!--            pointsDiscountAmountEl.textContent = `-${pointDiscount.toLocaleString('ko-KR')}원`;-->
-<!--            pointsDiscountRowEl.style.display = 'flex'; // 할인 행 보이기-->
-<!--        } else {-->
-<!--            pointsDiscountAmountEl.textContent = '-0원';-->
-<!--            pointsDiscountRowEl.style.display = 'none'; // 할인 행 숨기기-->
-<!--        }-->
-
-<!--        // (쿠폰 할인 표시 업데이트 로직 추가)-->
-<!--        if (couponDiscount > 0) {-->
-<!--            // 1. 텍스트 변경: 예) "-3,000원"-->
-<!--            couponDiscountAmountEl.textContent = `-${couponDiscount.toLocaleString('ko-KR')}원`;-->
-
-<!--            // 2. 행 보이기 (display: none 해제)-->
-<!--            couponDiscountRowEl.style.display = 'flex';-->
-<!--        } else {-->
-<!--            // 1. 텍스트 초기화-->
-<!--            couponDiscountAmountEl.textContent = '-0원';-->
-
-<!--            // 2. 행 숨기기 (선택 사항: 0원일 때 안 보이게 하려면 none, 보이게 하려면 flex 유지)-->
-<!--            couponDiscountRowEl.style.display = 'none';-->
-<!--        }-->
-
-<!--        // 6. 최종 결제 금액 계산-->
-<!--        // (상품금액 + 포장비 + 배송비) - 할인-->
-<!--        const finalPrice = Math.max(0, totalBeforeDiscount - pointDiscount - couponDiscount);-->
-
-<!--        // 7. 최종 결제 금액 및 버튼 텍스트 업데이트-->
-<!--        actualOrderPriceEl.textContent = `${finalPrice.toLocaleString('ko-KR')}원`;-->
-<!--        paymentButton.textContent = `${finalPrice.toLocaleString('ko-KR')}원 결제하기`;-->
-<!--    }-->
-
-<!--    function sample6_execDaumPostcode() {-->
-<!--        new daum.Postcode({-->
-<!--            oncomplete: function (data) {-->
-<!--                //  팝업에서 검색 결과 항목을 클릭했을 때 실행할 코드를 작성하는 부분-->
-<!--                var addr = '';-->
-<!--                var extraAddr = '';-->
-
-<!--                // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져옴-->
-<!--                if (data.userSelectedType !== 'R') { // 사용자가 도로명을 선택하지 않았을 경우-->
-<!--                    alert('지번 주소가 선택되었습니다. 도로명 주소로 반영됩니다.');-->
-<!--                }-->
-
-<!--                addr = data.roadAddress;-->
-
-<!--                // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.-->
-<!--                if (data.userSelectedType === 'R') {-->
-<!--                    // 법정동명이 있을 경우 추가한다. (법정리는 제외)-->
-<!--                    // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.-->
-<!--                    if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {-->
-<!--                        extraAddr += data.bname;-->
-<!--                    }-->
-<!--                    // 건물명이 있고, 공동주택일 경우 추가한다.-->
-<!--                    if (data.buildingName !== '' && data.apartment === 'Y') {-->
-<!--                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);-->
-<!--                    }-->
-<!--                    // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.-->
-<!--                    if (extraAddr !== '') {-->
-<!--                        extraAddr = ' (' + extraAddr + ')';-->
-<!--                    }-->
-<!--                    // 조합된 참고항목을 해당 필드에 넣는다.-->
-<!--                    document.getElementById("address-extra").value = extraAddr;-->
-
-<!--                } else {-->
-<!--                    document.getElementById("address-extra").value = '';-->
-<!--                }-->
-
-<!--                document.getElementById('zip').value = data.zonecode;-->
-<!--                document.getElementById("address").value = addr;-->
-<!--                document.getElementById("address-detail").focus();-->
-<!--            }-->
-<!--        }).open();-->
-<!--    }-->
-
-<!--    document.addEventListener('DOMContentLoaded', () => {-->
-<!--        // 1. "포장지 선택" 모달 요소를 가져옵니다.-->
-<!--        const packagingModal = document.getElementById('packagingSelectModal');-->
-<!--        if (packagingModal) {-->
-<!--            // 2. 모달이 열리기 '직전'에 실행되는 이벤트를 감지합니다.-->
-<!--            packagingModal.addEventListener('show.bs.modal', function (event) {-->
-<!--                // 3. 어떤 버튼이 모달을 열었는지 가져옵니다.-->
-<!--                const button = event.relatedTarget;-->
-<!--                // 4. 버튼에 심어둔 'data-order-item-id' 속성 값을 읽어옵니다.-->
-<!--                const orderItemId = button.dataset.orderItemId;-->
-<!--                // 5. 모달 안의 숨겨진(hidden) input을 찾습니다.-->
-<!--                const hiddenInput = document.getElementById('modal_order_item_id');-->
-<!--                // 6. 숨겨진 input의 값(value)에 상품 ID를 설정합니다.-->
-<!--                hiddenInput.value = orderItemId;-->
-<!--                // 7. (선택) 모달이 열릴 때마다 "포장 안 함"을 기본으로 체크-->
-<!--                const defaultRadio = packagingModal.querySelector('input[name="packagingId"][value="0"]');-->
-<!--                if (defaultRadio) {-->
-<!--                    defaultRadio.checked = true;-->
-<!--                }-->
-<!--            });-->
-<!--        }-->
-<!--    });-->
-
-<!--    function initPackagingModal() {-->
-<!--        const packagingModal = document.getElementById('packagingSelectModal');-->
-<!--        const savePackagingButton = document.getElementById('savePackagingButton');-->
-<!--        if (!packagingModal || !savePackagingButton) return;-->
-
-<!--        // ... (모달 열릴 때 로직은 그대로) ...-->
-
-<!--        // '적용' 버튼 클릭 시-->
-<!--        savePackagingButton.addEventListener('click', () => {-->
-<!--            const bookId = document.getElementById('modal_order_item_id').value;-->
-<!--            const selectedRadio = packagingModal.querySelector('input[name="packagingId"]:checked');-->
-<!--            if (!selectedRadio) return;-->
-
-<!--            const packagingId = selectedRadio.value;-->
-<!--            const label = selectedRadio.closest('label');-->
-
-<!--            const priceText = label.querySelector('.text-muted').textContent;-->
-<!--            const packagingPrice = parseInt(priceText.replace(/[^\d]/g, ''), 10) || 0;-->
-
-<!--            const nameElement = label.querySelector('strong, span:not(.text-muted)');-->
-<!--            const packagingName = nameElement ? nameElement.textContent : '포장 선택됨';-->
-
-<!--            const orderItemDiv = document.querySelector(`.order-item[data-book-id="${bookId}"]`);-->
-<!--            const triggerButton = document.querySelector(`button[data-order-item-id="${bookId}"]`);-->
-
-<!--            if (orderItemDiv && triggerButton) {-->
-<!--                orderItemDiv.dataset.packagingId = packagingId;-->
-<!--                orderItemDiv.dataset.packagingPrice = packagingPrice;-->
-
-<!--                // 모든 색상 클래스를 제거하여 초기화합니다.-->
-<!--                triggerButton.classList.remove('btn-success', 'btn-dark', 'btn-outline-secondary', 'text-white');-->
-
-<!--                if (packagingId === '0') {-->
-<!--                    // '포장 안 함' 선택 시 (기본값)-->
-<!--                    triggerButton.innerHTML = '<i class="bi bi-box-seam me-1"></i> 포장 선택';-->
-<!--                    triggerButton.classList.add('btn-outline-secondary'); // 기본 회색 테두리 버튼-->
-<!--                } else {-->
-<!--                    // 포장 선택 시-->
-<!--                    triggerButton.innerHTML = `<i class="bi bi-check-lg me-1"></i> ${packagingName}`;-->
-<!--                    triggerButton.classList.add('btn', 'btn-dark', 'text-white'); // 검은색 배경, 흰색 텍스트-->
-<!--                }-->
-<!--            }-->
-
-<!--            updatePriceSummary();-->
-
-<!--            const modalInstance = bootstrap.Modal.getInstance(packagingModal);-->
-<!--            modalInstance.hide();-->
-
-<!--            if (triggerButton) {-->
-<!--                triggerButton.focus();-->
-<!--            }-->
-<!--        });-->
-<!--    }-->
-
-<!--    /**-->
-<!--     * 주소 선택 모달 초기화 및 로드 로직-->
-<!--     */-->
-<!--    function initAddressSelectModal() {-->
-<!--        const addressSelectModal = document.getElementById('addressSelectModal');-->
-<!--        if (addressSelectModal) {-->
-<!--            addressSelectModal.addEventListener('show.bs.modal', async (event) => {-->
-<!--                const modalBody = document.getElementById('address-list-body');-->
-
-<!--                // 1. 모달 내용을 로딩 스피너로 초기화 (임시 스피너)-->
-<!--                modalBody.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-dark" role="status"></div></div>`;-->
-
-<!--                try {-->
-<!--                    // 2. ✨ API 호출: 현재 로그인한 회원의 주소 목록을 요청-->
-<!--                    const response = await fetch('/addresses/me');-->
-
-<!--                    if (!response.ok) {-->
-<!--                        throw new Error('주소 목록을 불러오는 데 실패했습니다.');-->
-<!--                    }-->
-
-<!--                    // 3. 주소 목록 데이터 (JSON 배열) 획득-->
-<!--                    const addresses = await response.json();-->
-
-<!--                    // 4. 주소 목록 HTML 렌더링-->
-<!--                    modalBody.innerHTML = renderAddressList(addresses);-->
-
-<!--                } catch (error) {-->
-<!--                    modalBody.innerHTML = `<div class="alert alert-danger">주소 로딩 실패: ${error.message || '오류 발생'}</div>`;-->
-<!--                }-->
-<!--            });-->
-
-<!--            // 5. 주소 목록에서 항목 선택 시 폼에 데이터 주입-->
-<!--            addressSelectModal.addEventListener('click', function (event) {-->
-<!--                const target = event.target.closest('.address-select-item');-->
-<!--                if (target) {-->
-<!--                    const dataset = target.dataset;-->
-
-<!--                    // 폼 요소에 데이터 주입-->
-<!--                    document.getElementById('zip').value = dataset.postCode;         // DTO: postCode -> dataset.postCode-->
-<!--                    document.getElementById('address').value = dataset.addressInfo;    // DTO: addressInfo -> dataset.addressInfo-->
-<!--                    document.getElementById('address-detail').value = dataset.addressDetail || ''; // DTO: addressDetail -> dataset.addressDetail-->
-<!--                    document.getElementById('address-extra').value = dataset.addressExtra || '';   // DTO: addressExtra -> dataset.addressExtra-->
-<!--                    // 모달 닫기-->
-<!--                    const modalInstance = bootstrap.Modal.getInstance(addressSelectModal);-->
-<!--                    modalInstance.hide();-->
-
-<!--                    document.getElementById('address-detail').focus();-->
-<!--                }-->
-<!--            });-->
-<!--        }-->
-<!--    }-->
-
-
-<!--    /**-->
-<!--     * 주소 목록 데이터를 받아 HTML로 렌더링하는 헬퍼 함수-->
-<!--     */-->
-<!--    function renderAddressList(addresses) {-->
-<!--        if (addresses.length === 0) {-->
-<!--            return '<div class="alert alert-info">등록된 배송지가 없습니다. 새로운 주소를 입력해주세요.</div>';-->
-<!--        }-->
-
-<!--        let html = '';-->
-
-<!--        addresses.forEach((addr, index) => {-->
-
-<!--            // ⭐ DTO: isDefault (Boolean) 필드를 사용하여 '기본' 여부를 판단합니다.-->
-<!--            const isDefault = addr.isDefault ? ' (기본)' : '';-->
-<!--            const defaultClass = addr.isDefault ? ' border-primary border-2' : '';-->
-
-<!--            html += `-->
-<!--        <div class="list-group-item list-group-item-action d-flex flex-column address-select-item ${defaultClass}"-->
-<!--             role="button"-->
-
-<!--             data-post-code="${addr.postCode || ''}"-->
-<!--             data-address-info="${addr.addressInfo || ''}"-->
-<!--             data-address-detail="${addr.addressDetail || ''}"-->
-<!--             data-address-extra="${addr.addressExtra || ''}"-->
-
-<!--        >-->
-<!--            <div class="d-flex w-100 justify-content-between">-->
-<!--                <h6 class="mb-1 fw-bold">-->
-<!--                    [${addr.addressAlias || '주소'}] ${isDefault}-->
-<!--                </h6>-->
-<!--                <small class="text-muted">${addr.postCode || 'N/A'}</small>-->
-<!--            </div>-->
-
-<!--            <p class="mb-1">${addr.addressInfo || ''} ${addr.addressDetail || ''}</p>-->
-
-<!--        </div>-->
-<!--        `;-->
-<!--        });-->
-
-<!--        return `<div class="list-group">${html}</div>`;-->
-<!--    }-->
-
-
-<!--</script>-->
 <div class="modal fade" id="packagingSelectModal" tabindex="-1" aria-labelledby="packagingModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">

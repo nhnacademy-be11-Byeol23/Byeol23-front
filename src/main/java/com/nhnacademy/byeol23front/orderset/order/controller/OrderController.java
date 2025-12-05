@@ -1,11 +1,11 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-import com.nhnacademy.byeol23front.couponset.coupon.client.CouponApiClient;
-import com.nhnacademy.byeol23front.couponset.coupon.dto.OrderItemRequest;
-import com.nhnacademy.byeol23front.couponset.coupon.dto.UsableCouponInfoResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +21,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
-import com.nhnacademy.byeol23front.cartset.cart.dto.CartOrderRequest;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
+import com.nhnacademy.byeol23front.orderset.order.dto.OrderRequest;
+import com.nhnacademy.byeol23front.couponset.coupon.client.CouponApiClient;
 import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
 import com.nhnacademy.byeol23front.memberset.member.dto.MemberMyPageResponse;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
@@ -33,6 +36,7 @@ import com.nhnacademy.byeol23front.orderset.order.dto.OrderPrepareResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.PointOrderResponse;
 import com.nhnacademy.byeol23front.orderset.order.exception.OrderPrepareFailException;
 
+import feign.FeignException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,51 +57,48 @@ public class OrderController {
 
     @PostMapping
     @ResponseBody
-    public ResponseEntity<Map<String, String>> handleOrderRequest(@CookieValue(name = "Access-Token", required = false) String token,
-                                                                  @CookieValue(name= "guestId", required = false) String guestId,
-                                                                  @RequestBody CartOrderRequest orderRequest) {
+    public ResponseEntity<Map<String, String>> handleOrderRequest(
+            @CookieValue(name = "Access-Token", required = false) String token,
+            @CookieValue(name = "guestId", required = false) String guestId,
+            @RequestBody OrderRequest orderRequest) {
+
+        String validationToken;
+        final String REDIRECT_URL = "/orders";
 
         if (Objects.isNull(token) || token.isEmpty()) {
-            orderApiClient.saveGuestOrder(guestId, orderRequest);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            try {
+                ResponseEntity<Map<String, Object>> response = orderApiClient.saveGuestOrder(guestId, orderRequest);
+                validationToken = (String)response.getBody().get("validationToken");
+
+                Map<String, String> responseBody = new HashMap<>();
+                responseBody.put("validationToken", validationToken);
+                responseBody.put("redirectUrl", REDIRECT_URL);
+
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseBody);
+            } catch (FeignException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Map.of("message", "주문 임시 저장 중 API 통신 오류 발생"));
+            }
+
         }
 
+        ResponseEntity<Map<String, Object>> response = orderApiClient.saveMemberOrderTmp(orderRequest);
+        validationToken = (String)response.getBody().get("validationToken");
+
         Map<String, String> responseBody = new HashMap<>();
-        responseBody.put("redirectUrl", "/orders");
+        responseBody.put("validationToken", validationToken);
+        responseBody.put("redirectUrl", REDIRECT_URL);
+
         return ResponseEntity.status(HttpStatus.OK).body(responseBody);
     }
 
     @GetMapping
-    public String getOrderForm(@RequestParam List<Long> bookIds,
-                               @RequestParam List<Integer> quantities,
+    public String getOrderForm(@RequestParam("token") String validationToken,
                                Model model) {
-
         MemberMyPageResponse member = memberApiClient.getMember();
 
-        CartOrderRequest cartOrderRequest = orderUtil.createOrderRequest(bookIds, quantities);
-        BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(cartOrderRequest).getBody();
-
-        //쿠폰 사용을 위한 로직
-        List<OrderItemRequest> orderItemRequests = new ArrayList<>();
-        if (bookIds != null && quantities != null && bookIds.size() == quantities.size()) {
-            for (int i = 0; i < bookIds.size(); i++) {
-                // 리스트의 각 요소를 꺼내 DTO로 변환
-                orderItemRequests.add(new OrderItemRequest(bookIds.get(i), quantities.get(i)));
-            }
-        }
-
-        List<UsableCouponInfoResponse> usableCoupons = List.of(); // 기본값: 빈 리스트
-        try {
-            ResponseEntity<List<UsableCouponInfoResponse>> couponResponse =
-                    couponApiClient.getUsableCoupons(orderItemRequests);
-
-            if (couponResponse != null && couponResponse.getBody() != null) {
-                usableCoupons = couponResponse.getBody();
-                log.info("조회된 사용 가능 쿠폰 수: {}", usableCoupons.size());
-            }
-        } catch (Exception e) {
-            log.error("쿠폰 목록 조회 중 오류 발생 (주문은 계속 진행): ", e);
-        }
+        OrderRequest orderRequest = orderApiClient.getAndRemoveOrderRequest(validationToken);
+        BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(orderRequest).getBody();
 
         orderUtil.addDeliveryDatesToModel(model);
         orderUtil.addDeliveryFeeToModel(model, bookOrderRequest);
@@ -110,8 +111,6 @@ public class OrderController {
         model.addAttribute("userPoint", member.currentPoint());
 
         model.addAttribute("clientKey", tossClientKey);
-
-        model.addAttribute("usableCoupons", usableCoupons);
 
         return "order/checkout";
     }
@@ -130,6 +129,49 @@ public class OrderController {
         }
 
         return response;
+    }
+
+    @PostMapping("/direct-check")
+    @ResponseBody
+    public ResponseEntity<Void> handleDirectOrderCheck(
+            @CookieValue(name = "Access-Token", required = false) String token) {
+
+        if (Objects.isNull(token) || token.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/direct")
+    public String getOrderFormDirect(
+            @RequestParam Long bookId,
+            @RequestParam int quantity,
+            Model model) {
+
+        BookResponse book = bookApiClient.getBook(bookId).getBody();
+
+        MemberMyPageResponse member = memberApiClient.getMember();
+
+        BookInfoRequest bookInfo = new BookInfoRequest(
+                bookId, book.bookName(), book.images().getFirst().imageUrl(), // 이미지 null 체크는 Service에서 처리해야 안전함
+                book.isPack(), book.regularPrice(), book.salePrice(), book.publisher(), quantity,
+                book.contributors(), null
+        );
+        List<BookInfoRequest> bookOrderInfo = List.of(bookInfo);
+        BookOrderRequest request = new BookOrderRequest(bookOrderInfo); // BookOrderRequest DTO 사용
+
+        orderUtil.addTotalQuantity(model, request.bookList());
+        orderUtil.addDeliveryDatesToModel(model);
+        orderUtil.addOrderSummary(model, request);
+        orderUtil.addDeliveryFeeToModel(model, request);
+        orderUtil.addPackagingOption(model);
+
+        model.addAttribute("defaultAddress", member.address());
+        model.addAttribute("userPoint", member.currentPoint());
+        model.addAttribute("clientKey", tossClientKey);
+
+        return "order/checkout";
     }
 
     @GetMapping("/success")
@@ -166,7 +208,5 @@ public class OrderController {
 
         return ResponseEntity.ok(response);
     }
-
-
 
 }

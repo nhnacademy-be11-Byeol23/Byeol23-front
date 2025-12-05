@@ -519,6 +519,10 @@
             const selectedDeliveryArrivedDate = document.querySelector('input[name="deliveryDate"]:checked');
             const deliveryDateValue = selectedDeliveryArrivedDate ? selectedDeliveryArrivedDate.value : null;
 
+            const isDirectBuyPath = window.location.pathname.includes('/orders/nonmember/direct')
+            const isCartCheckoutValue = !isDirectBuyPath;
+
+
             const orderPrepareRequest = {
                 totalBookPrice: totalBookPrice,
                 actualOrderPrice: currentFinalPrice,
@@ -530,7 +534,8 @@
                 receiverPhone: phoneNumber,
                 deliveryArrivedDate: deliveryDateValue,
                 bookInfoRequestList: bookInfoRequestList,
-                orderPassword: orderPassword
+                orderPassword: orderPassword,
+                isCartCheckout: isCartCheckoutValue
             };
 
             const tossPayRadio = document.getElementById('tossPay');
