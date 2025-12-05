@@ -32,7 +32,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/new")
                 .addPathPatterns("/error/**")
                 .addPathPatterns("/carts/books/**")
-                .addPathPatterns("/orders/nonmember/**")
+                .addPathPatterns("/orders/**")
                 .order(1);
     }
 

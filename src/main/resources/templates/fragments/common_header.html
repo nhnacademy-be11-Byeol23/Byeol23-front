@@ -47,37 +47,37 @@
                                 <p class="mb-0">로그인 해주세요</p>
                             </div>
 
-                                <div class="dropdown-body" sec:authorize="isAuthenticated()">
-                                    <a class="dropdown-item d-flex align-items-center" href="/mypage">
-                                        <i class="bi bi-person-circle me-2"></i>
-                                        <span>마이페이지</span>
-                                    </a>
+                            <div class="dropdown-body" sec:authorize="isAuthenticated()">
+                                <a class="dropdown-item d-flex align-items-center" href="/mypage">
+                                    <i class="bi bi-person-circle me-2"></i>
+                                    <span>마이페이지</span>
+                                </a>
 
-                                    <a class="dropdown-item d-flex align-items-center" href="/mypage/orders">
-                                        <i class="bi bi-bag-check me-2"></i>
-                                        <span>주문내역</span>
-                                    </a>
+                                <a class="dropdown-item d-flex align-items-center" href="/mypage/orders">
+                                    <i class="bi bi-bag-check me-2"></i>
+                                    <span>주문내역</span>
+                                </a>
 
-                                    <a class="dropdown-item d-flex align-items-center" href="/mypage/wishlist">
-                                        <i class="bi bi-heart me-2"></i>
-                                        <span>위시리스트</span>
-                                    </a>
-                                </div>
+                                <a class="dropdown-item d-flex align-items-center" href="/mypage/wishlist">
+                                    <i class="bi bi-heart me-2"></i>
+                                    <span>위시리스트</span>
+                                </a>
+                            </div>
 
                             <div class="dropdown-footer" style="padding: 0">
                                 <div style="padding: 1.25rem;">
                                     <form sec:authorize="isAuthenticated()" action="/members/logout"
-                                    method="post" style="margin: 0;">
+                                          method="post" style="margin: 0;">
                                         <button type="submit" class="btn btn-outline-primary w-100">
                                             로그아웃
                                         </button>
                                     </form>
 
                                     <a sec:authorize="!isAuthenticated()" href="/members/login"
-                                        class="btn btn-primary w-100 mb-2 mb-2">로그인</a>
+                                       class="btn btn-primary w-100 mb-2 mb-2">로그인</a>
 
                                     <a sec:authorize="!isAuthenticated()" href="/members/register"
-                                        class="btn btn-outline-primary w-100">회원가입</a>
+                                       class="btn btn-outline-primary w-100">회원가입</a>
                                 </div>
 
                                 <hr style="margin: 0;">
@@ -119,7 +119,7 @@
 
                                 <ul th:if="${#lists.size(child.children) > 0}" class="dropdown-menu level-2">
                                     <li th:each="grand : ${child.children}">
-                                    <a th:href="@{'/categories/' + ${grand.categoryId} + '/books'(pathId=${grand.pathId})}" th:text="${grand.categoryName}"></a>
+                                        <a th:href="@{'/categories/' + ${grand.categoryId} + '/books'(pathId=${grand.pathId})}" th:text="${grand.categoryName}"></a>
                                     </li>
                                 </ul>
                             </li>
@@ -134,9 +134,9 @@
     <!-- Mobile Search Form -->
     <div class="collapse" id="mobileSearch">
         <div class="container">
-            <form class="search-form">
+            <form class="search-form" th:action="@{/search}" method="get">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search for products">
+                    <input type="text" name="query" class="form-control" placeholder="검색어를 입력하세요." th:value="${query}" required>
                     <button class="btn" type="submit">
                         <i class="bi bi-search"></i>
                     </button>
