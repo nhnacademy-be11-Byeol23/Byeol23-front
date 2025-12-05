@@ -393,6 +393,8 @@
 
     const buyNowButton = document.getElementById('buy-now-btn');
 
+    // --- (Buy Now Button Click Listener 내부 전체 수정) ---
+
     if (buyNowButton) {
       buyNowButton.addEventListener('click', () => {
         const quantity = parseInt(qtyInput.value, 10);
@@ -403,22 +405,53 @@
           return;
         }
 
-        // 1. 단일 상품 정보 수집 (bookId 변수는 이미 정의되어 있다고 가정)
-        const bookId = /*[[${book.bookId}]]*/ 1; // Thymeleaf 변수 사용
+        // 1. 단일 상품 정보 수집
+        const bookId = /*[[${book.bookId}]]*/ 1;
 
-        // 2. ⭐ URL Query Parameter String 생성 ⭐
+        // 2. DTO Payload (for POST check)
+        const requestBody = {
+          orderList: { [bookId]: quantity },
+          isCartCheckout: false // Direct Buy
+        };
+
+        // 3. GET Redirect에 포함될 공통 Query Parameter String 생성
         const params = new URLSearchParams();
-        params.append('bookIds', String(bookId));
-        params.append('quantities', String(quantity));
-        const itemParams = params.toString(); // "bookIds=X&quantities=Y"
+        params.append('bookId', String(bookId));
+        params.append('quantity', String(quantity));
+        const itemParams = params.toString();
 
-        // 3. ⭐ POST 검증 API 호출 없이, 바로 비회원 주문서 GET URL로 리다이렉트 ⭐
-        const nonMemberOrderBaseUrl = "/orders/nonmember/direct";
-        const finalUrl = `${nonMemberOrderBaseUrl}?${itemParams}`;
+        // 4. POST 요청: 인증 상태 확인 (Controller: handleDirectOrderCheck)
+        fetch("/orders/direct-check", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(requestBody) // Send DTO for server-side validation
+        })
+                .then(response => {
 
-        console.log("최종 Checkout URL:", finalUrl);
-        window.location.href = finalUrl;
+                  // 5. 서버 응답 확인 및 분기 처리
+                  if (response.status === 200) {
+                    // ⭐ 200 OK: 회원 주문서로 리다이렉트 ⭐
+                    const memberOrderBaseUrl = "/orders/direct";
+                    const finalUrl = `${memberOrderBaseUrl}?${itemParams}`; // GET URL에 데이터 포함
 
+                    console.log("회원 바로 구매 URL:", finalUrl);
+                    window.location.href = finalUrl;
+
+                  } else if (response.status === 401) {
+                    // 401 Unauthorized일 경우
+                    const nonMemberOrderBaseUrl = "/orders/nonmember/direct";
+                    const finalUrl = `${nonMemberOrderBaseUrl}?${itemParams}`;
+
+                    window.location.href = finalUrl;
+                  }else {
+                    // 7. 기타 오류 (400, 500 등)
+                    alert('주문 검증 중 서버 오류가 발생했습니다. 다시 시도해 주세요.');
+                  }
+                })
+                .catch(error => {
+                  console.error('Error: ', error);
+                  alert('요청 처리 중 네트워크 오류가 발생했습니다.');
+                });
       });
     }
 
