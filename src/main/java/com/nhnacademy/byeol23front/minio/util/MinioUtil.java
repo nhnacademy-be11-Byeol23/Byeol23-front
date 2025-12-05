@@ -175,7 +175,8 @@ public class MinioUtil {
 
 	private String urlToObjectKey(String url) {
 		// http://host:port/bucketName/objectKey
-		if (url.startsWith(prefix)) {
+		String proxyPrefix = "https://byeol23.shop/img-proxy/";
+		if (url.startsWith(proxyPrefix)) {
 			return url.substring(prefix.length());
 		} else {
 			throw new IllegalArgumentException("Invalid URL: " + url);
