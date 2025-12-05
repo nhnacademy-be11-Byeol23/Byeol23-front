@@ -396,77 +396,29 @@
     if (buyNowButton) {
       buyNowButton.addEventListener('click', () => {
         const quantity = parseInt(qtyInput.value, 10);
+
+        // 유효성 검사
         if (quantity < minQuantity || quantity > maxStock) {
           alert(`수량은 ${minQuantity}권 이상, ${maxStock}권 이하로 설정해주세요.`);
           return;
         }
 
-        const cartOrderList = { [bookId]: quantity };
-        const requestBody = { cartOrderList: cartOrderList };
+        // 1. 단일 상품 정보 수집 (bookId 변수는 이미 정의되어 있다고 가정)
+        const bookId = /*[[${book.bookId}]]*/ 1; // Thymeleaf 변수 사용
 
-        // 1. POST 요청 (인증 검증)
-        fetch("/orders", {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify(requestBody)
-        })
-                .then(async (res) => {
-                  // 2. 서버 응답 확인
-                  if (res.ok) { // 200 OK: 인증 성공 (회원)
-                    const data = await res.json();
-                    const bookIds = [];
-                    const quantities = [];
+        // 2. ⭐ URL Query Parameter String 생성 ⭐
+        const params = new URLSearchParams();
+        params.append('bookIds', String(bookId));
+        params.append('quantities', String(quantity));
+        const itemParams = params.toString(); // "bookIds=X&quantities=Y"
 
-                    for (const [bookId, quantity] of Object.entries(cartOrderList)) {
-                      bookIds.push(bookId);
-                      quantities.push(quantity);
-                    }
+        // 3. ⭐ POST 검증 API 호출 없이, 바로 비회원 주문서 GET URL로 리다이렉트 ⭐
+        const nonMemberOrderBaseUrl = "/orders/nonmember/direct";
+        const finalUrl = `${nonMemberOrderBaseUrl}?${itemParams}`;
 
-                    // 3. GET URL 구성 및 이동
-                    const params = new URLSearchParams();
-                    bookIds.forEach(id => params.append('bookIds', id));
-                    quantities.forEach(qty => params.append('quantities', qty));
+        console.log("최종 Checkout URL:", finalUrl);
+        window.location.href = finalUrl;
 
-                    const baseUrl = data.redirectUrl || "/orders";
-
-                    const getUrl = `${baseUrl}?${params.toString()}`;
-
-                    console.log("최종 Checkout URL:", getUrl);
-                    window.location.href = getUrl; // GET 요청 실행
-
-                  } else if (res.status === 401) { // 401 UNAUTHORIZED: 인증 실패 (비회원)
-                    alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
-
-                    const bookIds = [];
-                    const quantities = [];
-
-                    for (const [bookId, quantity] of Object.entries(cartOrderList)) {
-                      bookIds.push(bookId);
-                      quantities.push(quantity);
-                    }
-
-                    const params = new URLSearchParams();
-                    bookIds.forEach(id => params.append('bookIds', id));
-                    quantities.forEach(qty => params.append('quantities', qty));
-                    const itemParams = params.toString();
-
-                    const nonMemberOrderBaseUrl = "/orders/nonmember";
-
-                    const redirectUrl = encodeURIComponent(nonMemberOrderBaseUrl);
-                    const memberOrderUrl = encodeURIComponent("/orders");
-
-                    window.location.href = `/members/login?nonMemberRedirect=${redirectUrl}&memberRedirect=${memberOrderUrl}&${itemParams}`;
-                  } else {
-
-                    // 기타 서버 오류 (400, 500 등)
-                    const err = await res.json().catch(() => ({}));
-                    throw new Error(err.message || "주문 검증 중 서버 오류가 발생했습니다.");
-                  }
-                })
-                .catch(error => {
-                  console.error('Error: ', error);
-                  alert('요청 처리 중 오류가 발생했습니다.');
-                });
       });
     }
 

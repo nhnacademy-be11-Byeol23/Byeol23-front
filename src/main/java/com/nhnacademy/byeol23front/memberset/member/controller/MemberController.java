@@ -28,6 +28,23 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import com.nhnacademy.byeol23front.memberset.member.client.MemberApiClient;
+import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
+
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
@@ -41,6 +58,8 @@ public class MemberController {
 	@Value("${jwt.refresh-cookie.expiration}")
 	private Long refreshCookieExp;
 
+    private final MemberApiClient memberApiClient;
+    private final OrderApiClient orderApiClient;
 
 	@GetMapping("/register")
 	@Operation(summary = "회원가입 폼 화면", description = "회원가입 폼 페이지를 반환합니다.")
@@ -67,30 +86,29 @@ public class MemberController {
 		return "member/login";
 	}
 
-	@GetMapping("/login")
-	@Operation(summary = "로그인 폼 화면", description = "로그인 폼 페이지를 반환합니다. " +
-		"bookId와 quantity 파라미터가 있으면 로그인 후 해당 도서의 직접 주문 페이지로 리다이렉트됩니다.")
-	@ApiResponses({
-		@ApiResponse(responseCode = "200", description = "로그인 폼 페이지 반환 성공")
-	})
-	public String showLoginForm(@RequestParam(name = "bookId", required = false) Long bookId,
-								@RequestParam(name = "quantity", required = false) Integer quantity,
-								@RequestParam(name = "loginFailed", required = false) Boolean loginFailed,
-								@RequestParam(name = "errorMsg", required = false) String errorMsg,
-								Model model) {
-
-		if (bookId != null && quantity != null) {
-			model.addAttribute("bookId", bookId);
-			model.addAttribute("quantity", quantity);
-		}
+    @GetMapping("/login")
+    public String showLoginForm(
+            @RequestParam(required = false) String nonMemberRedirect,
+            @RequestParam(required = false) String memberRedirect,
+            @RequestParam(required = false) String token,
+		@RequestParam(name = "loginFailed", required = false) Boolean loginFailed,
+		@RequestParam(name = "errorMsg", required = false) String errorMsg,
+            Model model) {
 
 		if (Boolean.TRUE.equals(loginFailed)) {
 			model.addAttribute("loginFailed", true);
 			model.addAttribute("loginErrorMsg", errorMsg);
 		}
 
-		return "member/login";
-	}
+        model.addAttribute("nonMemberRedirect", nonMemberRedirect);
+        model.addAttribute("memberRedirect", memberRedirect);
+
+        if (token != null) {
+            model.addAttribute("token", token);
+        }
+
+        return "member/login";
+    }
 
 
 	@PostMapping("/login")
@@ -115,14 +133,21 @@ public class MemberController {
 		response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 		response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
 
-		if (!Objects.isNull(tmp.bookIds()) && !Objects.isNull(tmp.quantities())
-			&& !tmp.bookIds().isEmpty() && !tmp.quantities().isEmpty()) {
-			return String.format("redirect:/orders/direct?bookId=%d&quantity=%d",
-				tmp.bookIds().get(0), tmp.quantities().get(0));
-		}
+		if (tmp.validationToken() != null && !tmp.validationToken().isEmpty()) {
 
-		return "redirect:/";
-	}
+            orderApiClient.migrateGuestOrderToMember(tmp.validationToken());
+
+            String baseUrl = tmp.redirectUrl() != null ? tmp.redirectUrl() : "/orders";
+
+            UriComponentsBuilder builder = UriComponentsBuilder
+                .fromPath(baseUrl)
+                .queryParam("token", tmp.validationToken());
+
+            return "redirect:" + builder.build().toUriString();
+        }
+
+        return "redirect:/";
+    }
 
 	@PostMapping("/logout")
 	@Operation(summary = "로그아웃 요청", description = "현재 로그인된 사용자의 Access-Token과 Refresh-Token 쿠키를 삭제하고 로그아웃합니다. " +
@@ -139,8 +164,8 @@ public class MemberController {
 		response.addHeader("Set-Cookie", deleteCookie("Refresh-Token", "/"));
 		response.addHeader("Set-Cookie", deleteCookie("PAYCO_STATE", "/"));
 
-		return "redirect:/";
-	}
+    return "redirect:/";
+  }
 
 	@GetMapping("/check-id")
 	@ResponseBody
