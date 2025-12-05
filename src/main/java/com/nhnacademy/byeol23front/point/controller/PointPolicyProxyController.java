@@ -48,7 +48,7 @@ public class PointPolicyProxyController {
 	}
 
 	@Operation(summary = "포인트 정책 수정 (프록시)")
-	@PutMapping("/update/{id}")
+	@PostMapping("/update/{id}")
 	public ResponseEntity<Void> updatePointPolicy(@PathVariable("id") Long id, @RequestBody PointPolicyDTO dto) {
 		pointPolicyFeignClinet.updatePointPolicy(id, dto);
 		return ResponseEntity.ok().build();
@@ -61,7 +61,7 @@ public class PointPolicyProxyController {
 	}
 
 	@Operation(summary = "포인트 정책 삭제 (프록시)")
-	@DeleteMapping("/{id}")
+	@PostMapping("/{id}")
 	public ResponseEntity<Void> deletePointPolicy(@PathVariable("id") Long id) {
 		pointPolicyFeignClinet.deletePointPolicy(id);
 		return ResponseEntity.noContent().build();
