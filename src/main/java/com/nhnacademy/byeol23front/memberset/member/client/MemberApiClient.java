@@ -42,7 +42,7 @@ public interface MemberApiClient {
 	@GetMapping("/api/members/check-id")
 	FindLoginIdResponse findLoginId(@RequestParam("loginId") String loginId);
 
-	@GetMapping("/api/members/check-duplication")
+	@PostMapping("/api/members/check-duplication")
 	ValueDuplicationCheckResponse checkDuplication(@RequestBody ValueDuplicationCheckRequest request);
 
 	@PostMapping("/auth/social-login")

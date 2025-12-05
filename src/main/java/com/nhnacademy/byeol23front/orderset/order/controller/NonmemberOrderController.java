@@ -1,8 +1,6 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -14,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
+import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.orderset.order.dto.OrderRequest;
 import com.nhnacademy.byeol23front.memberset.member.dto.NonmemberOrderRequest;
 import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
@@ -52,33 +52,24 @@ public class NonmemberOrderController {
 	}
 
 	@GetMapping("/direct")
-	public String getNonMemberDirectOrderForm(@RequestParam List<Long> bookIds,
-		@RequestParam List<Integer> quantities,
+	public String getNonMemberDirectOrderForm(@RequestParam Long bookId,
+		@RequestParam int quantity,
 		Model model) {
 
-		Map<Long, Integer> orderList = new HashMap<>();
+		BookResponse book = bookApiClient.getBook(bookId).getBody();
 
-		if (bookIds.size() != quantities.size()) {
-			throw new IllegalArgumentException("도서 ID 목록과 수량 목록의 크기가 일치하지 않습니다.");
-		}
-
-		for (int i = 0; i < bookIds.size(); i++) {
-			Long bookId = bookIds.get(i);
-			Integer quantity = quantities.get(i);
-
-			if (bookId != null && quantity != null && quantity > 0) {
-				orderList.put(bookId, quantity);
-			}
-		}
-
-		OrderRequest orderRequest = new OrderRequest(orderList, false);
-
-		BookOrderRequest bookOrderRequest = bookApiClient.getBookOrder(orderRequest).getBody();
+		BookInfoRequest bookInfo = new BookInfoRequest(
+			bookId, book.bookName(), book.images().getFirst().imageUrl(), // 이미지 null 체크는 Service에서 처리해야 안전함
+			book.isPack(), book.regularPrice(), book.salePrice(), book.publisher(), quantity,
+			book.contributors(), null
+		);
+		List<BookInfoRequest> bookOrderInfo = List.of(bookInfo);
+		BookOrderRequest request = new BookOrderRequest(bookOrderInfo); // BookOrderRequest DTO 사용
 
 		orderUtil.addDeliveryDatesToModel(model);
-		orderUtil.addDeliveryFeeToModel(model, bookOrderRequest);
-		orderUtil.addOrderSummary(model, bookOrderRequest);
-		orderUtil.addTotalQuantity(model, bookOrderRequest.bookList());
+		orderUtil.addDeliveryFeeToModel(model, request);
+		orderUtil.addOrderSummary(model, request);
+		orderUtil.addTotalQuantity(model, request.bookList());
 		orderUtil.addPackagingOption(model);
 
 		model.addAttribute("clientKey", tossClientKey);
