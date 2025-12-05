@@ -29,10 +29,10 @@ public interface PackagingApiClient {
 	@PostMapping("/api/packagings")
 	ResponseEntity<PackagingCreateResponse> createPackaging(@RequestBody PackagingCreateRequest request);
 
-	@PutMapping("/api/packagings/{packaging-id}")
+	@PostMapping("/api/packagings/{packaging-id}/update")
 	ResponseEntity<PackagingUpdateResponse> updatePackaging(@PathVariable(name = "packaging-id") Long packagingId, @RequestBody PackagingUpdateRequest request);
 
-	@DeleteMapping("/api/packagings/{packaging-id}")
+	@PostMapping("/api/packagings/{packaging-id}/delete")
 	ResponseEntity<Void> deleteById(@PathVariable(name = "packaging-id") Long packagingId);
 
 	@GetMapping("/api/packagings/lists")
