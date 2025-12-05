@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Register - NiceShop Bootstrap Template</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    <th:block th:replace="~{fragments/file_link :: linkInfo}"></th:block>
+</head>
+
+<body class="register-page">
+
+<div th:replace="~{fragments/common_header :: commonHeader}"></div>
+
+<main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">Register</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a href="../index.html">Home</a></li>
+                    <li class="current">Register</li>
+                </ol>
+            </nav>
+        </div>
+    </div><!-- End Page Title -->
+
+    <!-- Register Section -->
+    <section id="register" class="register section">
+
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="registration-form-wrapper">
+                        <div class="form-header text-center">
+                            <h2>회원 가입</h2>
+                            <p>회원이 되어 다양한 혜택을 경험해 보세요!</p>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-8 mx-auto">
+                                <form action="/members/register" method="post">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="memberName" name="memberName"
+                                               placeholder="이름" required autocomplete="memberName"
+                                               th:value="${userInfo != null ? userInfo.name : ''}">
+                                        <label for="memberName">이름</label>
+                                    </div>
+
+                                    <div class="form-floating mb-3">
+                                        <input type="email" class="form-control" id="email" name="email"
+                                               placeholder="이메일" required autocomplete="email"
+                                               th:value="${userInfo != null ? userInfo.email : ''}">
+                                        <label for="email">이메일</label>
+                                    </div>
+                                    <div id="emailResultDiv"></div>
+
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="phoneNumber" name="phoneNumber"
+                                               placeholder="전화번호" required autocomplete="phoneNumber"
+                                               th:value="${userInfo != null ? userInfo.phoneNumber : ''}">
+                                        <label for="phoneNumber">전화번호</label>
+                                    </div>
+                                    <div id="phoneNumberResultDiv"></div>
+
+                                    <div class="form-floating mb-3">
+                                        <input type="text" class="form-control" id="nickname" name="nickname" placeholder="닉네임" required="" autocomplete="nickname">
+                                        <label for="nickname">닉네임</label>
+                                    </div>
+                                    <div id="nicknameResultDiv"></div>
+
+                                    <div class="form-floating mb-3">
+                                        <input
+                                                type="date"
+                                                class="form-control"
+                                                id="birthDate"
+                                                name="birthDate"
+                                                placeholder="생년월일"
+                                                required
+                                                max=""
+                                        >
+                                        <label for="birthDate">생년월일</label>
+                                    </div>
+                                    <input type="hidden" name="loginId" th:value="${form.loginId}">
+                                    <input type="hidden" name="loginPassword" th:value="${form.loginPassword}">
+                                    <input type="hidden" name="joinedFrom" value="PAYCO">
+                                    <input type="hidden" name="memberRole" value="USER">
+                                    <div class="d-grid mb-4">
+                                        <button id="registerBtn" type="submit" class="btn btn-register">가입하기</button>
+                                    </div>
+                                </form>
+                                <div class="login-link text-center">
+                                    <p>이미 계정이 있으신가요? <a href="/members/login">로그인하러 가기</a></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="decorative-elements">
+                            <div class="circle circle-1"></div>
+                            <div class="circle circle-2"></div>
+                            <div class="circle circle-3"></div>
+                            <div class="square square-1"></div>
+                            <div class="square square-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </section><!-- /Register Section -->
+
+</main>
+
+<div th:replace="~{fragments/common_footer :: commonFooter}"></div>
+
+<!-- Scroll Top -->
+<a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<!-- Preloader -->
+<div id="preloader"></div>
+
+<!-- Vendor JS Files -->
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+<script th:src="@{/assets/vendor/aos/aos.js}"></script>
+<script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+<script th:src="@{/assets/vendor/drift-zoom/Drift.min.js}"></script>
+<script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+<script th:src="@{/assets/js/main.js}"></script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const registerForm = document.querySelector('form[action="/members/register"]');
+
+        const emailInput = document.getElementById("email");
+        const phoneInput = document.getElementById("phoneNumber");
+        const nicknameInput = document.getElementById("nickname");
+
+        const emailResultDiv = document.getElementById("emailResultDiv");
+        const phoneResultDiv = document.getElementById("phoneNumberResultDiv");
+        const nicknameResultDiv = document.getElementById("nicknameResultDiv");
+        const errorBox = document.createElement("div");
+        errorBox.classList.add("text-danger", "mt-2");
+        registerForm.appendChild(errorBox);
+
+        registerForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            errorBox.textContent = "";
+            emailResultDiv.textContent = "";
+            phoneResultDiv.textContent = "";
+            nicknameResultDiv.textContent = "";
+
+            const email = emailInput.value.trim();
+            const phone = phoneInput.value.trim();
+            const nickname = nicknameInput.value.trim();
+
+            try {
+                const dupRes = await fetch("/members/check-duplication", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        email: email || null,
+                        phoneNumber: phone || null,
+                        nickname: nickname || null
+                    })
+                });
+
+                if (!dupRes.ok) {
+                    throw new Error("중복 검사 중 오류 발생");
+                }
+
+                const dupData = await dupRes.json();
+
+                let hasProblem = false;
+
+                if (dupData.isDuplicatedEmail) {
+                    emailResultDiv.textContent = "이미 사용 중인 이메일입니다.";
+                    emailResultDiv.style.color = "red";
+                    hasProblem = true;
+                }
+
+                if (dupData.isDuplicatedPhoneNumber) {
+                    phoneResultDiv.textContent = "이미 사용 중인 전화번호입니다.";
+                    phoneResultDiv.style.color = "red";
+                    hasProblem = true;
+                }
+
+                if (dupData.isDuplicatedNickname) {
+                    nicknameResultDiv.textContent = "이미 사용 중인 닉네임입니다.";
+                    nicknameResultDiv.style.color = "red";
+                    hasProblem = true;
+                }
+
+                if (hasProblem) {
+                    return;
+                }
+
+                const formData = new FormData(registerForm);
+
+                const registerRes = await fetch(registerForm.action, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!registerRes.ok) {
+                    errorBox.textContent = "회원가입 중 오류가 발생했습니다.";
+                    return;
+                }
+            } catch (err) {
+                console.error(err);
+                errorBox.textContent = "요청 처리 중 오류가 발생했습니다.";
+            }
+        });
+    });
+</script>
+
+</body>
+
+</html>

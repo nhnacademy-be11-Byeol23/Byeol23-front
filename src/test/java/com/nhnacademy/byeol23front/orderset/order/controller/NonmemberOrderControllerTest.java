@@ -1,35 +1,25 @@
 package com.nhnacademy.byeol23front.orderset.order.controller;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
-import com.nhnacademy.byeol23front.auth.AuthHelper;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookOrderRequest;
+import com.nhnacademy.byeol23front.auth.AuthUtil;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.ui.Model;
 
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
-import com.nhnacademy.byeol23front.bookset.book.dto.BookInfoRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 import com.nhnacademy.byeol23front.bookset.contributor.dto.AllContributorResponse;
@@ -39,7 +29,7 @@ import com.nhnacademy.byeol23front.orderset.order.client.OrderApiClient;
 import com.nhnacademy.byeol23front.orderset.packaging.client.PackagingApiClient;
 
 @WebMvcTest(NonmemberOrderController.class)
-@Import(AuthHelper.class)
+@Import(AuthUtil.class)
 class NonmemberOrderControllerTest {
 
 	@Autowired
@@ -56,7 +46,7 @@ class NonmemberOrderControllerTest {
 	private OrderUtil orderUtil;
 
 	@MockBean
-	private AuthHelper authHelper;
+	private AuthUtil authUtil;
 
 	@MockBean
 	private CategoryApiClient categoryApiClient;

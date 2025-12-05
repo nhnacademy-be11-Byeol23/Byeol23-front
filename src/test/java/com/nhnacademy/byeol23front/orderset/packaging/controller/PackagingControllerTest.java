@@ -34,7 +34,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.nhnacademy.byeol23front.auth.AuthHelper;
+import com.nhnacademy.byeol23front.auth.AuthUtil;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 import com.nhnacademy.byeol23front.minio.dto.back.GetUrlResponse;
 import com.nhnacademy.byeol23front.minio.service.MinioService;
@@ -47,7 +47,7 @@ import com.nhnacademy.byeol23front.orderset.packaging.dto.PackagingUpdateRequest
 
 // PackagingController를 단위 테스트하기 위해 @WebMvcTest 사용
 @WebMvcTest(PackagingController.class)
-@Import(AuthHelper.class)
+@Import(AuthUtil.class)
 class PackagingControllerTest {
 
 	@Autowired
@@ -61,7 +61,7 @@ class PackagingControllerTest {
 	private CategoryApiClient categoryApiClient;
 
 	@MockBean
-	private AuthHelper authHelper;
+	private AuthUtil authUtil;
 
 	@MockBean
 	private MinioService minioService;
