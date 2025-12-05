@@ -1,7 +1,7 @@
 package com.nhnacademy.byeol23front.orderset.delivery.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper; // [추가] ObjectMapper 임포트
-import com.nhnacademy.byeol23front.auth.AuthHelper;
+import com.nhnacademy.byeol23front.auth.AuthUtil;
 import com.nhnacademy.byeol23front.bookset.category.client.CategoryApiClient;
 import com.nhnacademy.byeol23front.orderset.delivery.client.DeliveryApiClient;
 import com.nhnacademy.byeol23front.orderset.delivery.dto.DeliveryPolicyCreateRequest;
@@ -24,7 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -42,7 +41,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(DeliveryPolicyController.class)
-@Import(AuthHelper.class)
+@Import(AuthUtil.class)
 class DeliveryPolicyControllerTest {
 
 	@Autowired
@@ -55,7 +54,7 @@ class DeliveryPolicyControllerTest {
 	private CategoryApiClient categoryApiClient;
 
 	@MockBean
-	private AuthHelper authHelper;
+	private AuthUtil authUtil;
 
 	private Pageable defaultPageable;
 	private DeliveryPolicyInfoResponse infoResponse;

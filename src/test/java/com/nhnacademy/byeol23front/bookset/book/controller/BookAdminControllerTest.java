@@ -1,6 +1,6 @@
 package com.nhnacademy.byeol23front.bookset.book.controller;
 
-import com.nhnacademy.byeol23front.auth.AuthHelper;
+import com.nhnacademy.byeol23front.auth.AuthUtil;
 import com.nhnacademy.byeol23front.bookset.book.client.BookApiClient;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookCreateRequest;
 import com.nhnacademy.byeol23front.bookset.book.dto.BookResponse;
@@ -73,7 +73,7 @@ class BookAdminControllerTest {
 	private MinioService minioService;
 
 	@MockitoBean(name = "authHelper")
-	private AuthHelper authHelper;
+	private AuthUtil authUtil;
 
 	private AllPublishersInfoResponse publisherInfo;
 	private List<CategoryLeafResponse> bookCategories;
@@ -88,8 +88,8 @@ class BookAdminControllerTest {
 		bookContributors = List.of(new AllContributorResponse(3L, "홍길동", "AUTHOR"));
 
 		// 템플릿에서 principal.nickname 접근을 방지하기 위해 false로 설정
-		when(authHelper.isLoggedIn()).thenReturn(false);
-		when(authHelper.isAdmin()).thenReturn(true);
+		when(authUtil.isLoggedIn()).thenReturn(false);
+		when(authUtil.isAdmin()).thenReturn(true);
 	}
 
 	@Test
