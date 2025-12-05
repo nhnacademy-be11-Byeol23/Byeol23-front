@@ -66,7 +66,7 @@ public class FeignInterceptor {
 						: "Bearer " + accessToken;
 
 				template.header(HttpHeaders.AUTHORIZATION, headerValue);
-				template.header("Cookie", "Access-Token=" + headerValue); // 임시용 유지하고 싶으면
+				template.header("Cookie", "Access-Token=" + headerValue.substring(7)); // 임시용 유지하고 싶으면
 			}
 
 			// Refresh-Token 필요 시 헤더로 넣기 (Auth 관련 요청)
