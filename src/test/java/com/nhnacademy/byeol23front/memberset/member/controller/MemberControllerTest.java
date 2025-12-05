@@ -76,7 +76,7 @@ class MemberControllerTest {
 		findLoginIdResponse = new FindLoginIdResponse(false);
 
 		duplicationCheckRequest = new ValueDuplicationCheckRequest(
-			"testuser", "테스트유저", "010-1234-5678", "test@example.com"
+		"테스트유저", "010-1234-5678", "test@example.com"
 		);
 		duplicationCheckResponse = new ValueDuplicationCheckResponse(
 			false, false, false, false

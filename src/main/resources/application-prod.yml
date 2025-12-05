@@ -11,10 +11,10 @@ jwt:
     expiration: "86400"
 
 payco:
-  redirect-uri: https://byeol23.shop/payco/callback
+  redirect-uri: https://test.byeol23.shop/payco/callback
   authorize-uri: https://id.payco.com/oauth2.0/authorize
   token-uri: https://id.payco.com/oauth2.0/token
-  user-info-uri: https://apis-payco.com/me
+  user-info-uri: https://apis-payco.krp.toastoven.net/payco/friends/find_member_v2.json
 
 app:
   cookie:
