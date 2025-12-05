@@ -9,6 +9,7 @@ public enum ReservedPolicy {//enum의 내용 삭제하지 말것 추가만 하�
 	REVIEW_WITHOUT_IMAGE("이미지 리뷰"),
 	REGISTER("회원가입"),
 	UNKNOWN("알수없음"),
+	USE("포인트사용"),
 	CANCEL("취소");
 
 	private final String description;
