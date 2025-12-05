@@ -27,11 +27,10 @@ public class HomeController {
 
 	@GetMapping("/")
 	public String mainPage(Model model) {
-		var top3BooksResult = searchApiClient.searchBestBooks(0, 3);
-		var top3Books = BookSearchResultLongIdResponse.fromList(top3BooksResult.content());
-
 		var bestBooksResult = searchApiClient.searchBestBooks(0, 12);
 		var bestBooks = BookSearchResultLongIdResponse.fromList(bestBooksResult.content());
+
+		var top3Books = BookSearchResultLongIdResponse.fromList(bestBooksResult.content().stream().limit(3).toList());
 
 		List<CategoryMainPageResponse> categories = categoryApiClient.getLeavesForMainPage();
 		List<CategoryMainPageResponse> mainCategories = new ArrayList<>(
