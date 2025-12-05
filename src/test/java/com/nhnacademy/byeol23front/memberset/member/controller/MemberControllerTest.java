@@ -87,7 +87,7 @@ class MemberControllerTest {
 		"테스트유저", "010-1234-5678", "test@example.com"
 		);
 		duplicationCheckResponse = new ValueDuplicationCheckResponse(
-			false, false, false, false
+			false, false, false
 		);
 
 		memberUpdateRequest = new MemberUpdateRequest(
@@ -222,7 +222,6 @@ class MemberControllerTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(duplicationCheckRequest)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.isDuplicatedId").value(false))
 			.andExpect(jsonPath("$.isDuplicatedNickname").value(false))
 			.andExpect(jsonPath("$.isDuplicatedEmail").value(false))
 			.andExpect(jsonPath("$.isDuplicatedPhoneNumber").value(false));

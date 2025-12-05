@@ -58,7 +58,7 @@ class MemberServiceImplTest {
 			"테스트유저", "010-1234-5678", "test@example.com"
 		);
 		duplicationCheckResponse = new ValueDuplicationCheckResponse(
-			false, false, false, false
+			false, false, false
 		);
 
 		memberUpdateRequest = new MemberUpdateRequest(
@@ -124,7 +124,6 @@ class MemberServiceImplTest {
 		ValueDuplicationCheckResponse result = memberService.checkDuplication(duplicationCheckRequest);
 
 		assertThat(result).isNotNull();
-		assertThat(result.isDuplicatedId()).isFalse();
 		assertThat(result.isDuplicatedNickname()).isFalse();
 		assertThat(result.isDuplicatedEmail()).isFalse();
 		assertThat(result.isDuplicatedPhoneNumber()).isFalse();
