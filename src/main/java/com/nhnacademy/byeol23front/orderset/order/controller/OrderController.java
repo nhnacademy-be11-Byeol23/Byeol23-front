@@ -196,7 +196,6 @@ public class OrderController {
         OrderItemRequest orderItemRequest = new OrderItemRequest(bookId, quantity);
         orderItemRequests.add(orderItemRequest);
 
-
         List<UsableCouponInfoResponse> usableCoupons = List.of();
         try {
             ResponseEntity<List<UsableCouponInfoResponse>> couponResponse =
