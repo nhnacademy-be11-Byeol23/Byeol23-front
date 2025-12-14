@@ -146,5 +146,36 @@
 
     <div id="refundSection" class="detail-section mt-4" style="display: none;">
         <h4 class="mb-3">환불/반품 요청 및 정책 확인</h4>
+
+        <form id="refundForm">
+            <div class="mb-3">
+                <label for="refundReason" class="form-label">환불/반품 사유</label>
+                <select id="refundReason" class="form-select">
+                    <option value="" selected>사유를 선택해주세요</option>
+                    <option value="simple_change">단순 변심 / 사이즈, 색상 변경</option>
+                    <option value="damage">상품 파손 / 파본 / 오배송</option>
+                </select>
+            </div>
+
+            <div class="p-3 bg-light rounded">
+                <h6 class="fw-bold">환불 정책 안내</h6>
+                <div id="refundPolicyText">
+                    <p class="text-secondary">환불 사유를 선택하시면 정책이 표시됩니다.</p>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between small">
+                    <span>배송비 차감 여부:</span>
+                    <span id="refundDeliveryFee" class="fw-bold">0원</span>
+                </div>
+                <div class="mt-2 small text-danger">
+                    모든 환불 금액은 **포인트**로 지급됩니다.
+                </div>
+            </div>
+        </form>
+
+        <div class="text-end pt-3">
+            <button type="button" class="btn btn-secondary js-cancel-refund-btn" data-bs-dismiss="modal">취소</button>
+            <button type="button" class="btn btn-primary" id="processRefundBtn">환불 요청</button>
+        </div>
     </div>
 </div>
