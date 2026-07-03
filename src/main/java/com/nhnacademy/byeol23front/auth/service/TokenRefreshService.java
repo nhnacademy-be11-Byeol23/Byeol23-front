@@ -1,5 +1,6 @@
 package com.nhnacademy.byeol23front.auth.service;
 
+import com.nhnacademy.byeol23front.auth.CookieProperties;
 import com.nhnacademy.byeol23front.auth.feign.AuthClient;
 import com.nhnacademy.byeol23front.auth.feign.TokenContext;
 import com.nhnacademy.byeol23front.commons.exception.ExpiredRefreshTokenException;
@@ -9,6 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -19,6 +22,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class TokenRefreshService {
 
     private final AuthClient authClient;
+    private final CookieProperties cookieProperties;
 
     /**
      * @return 재발급 성공 여부
@@ -68,11 +72,15 @@ public class TokenRefreshService {
             TokenContext.set(newAccessToken);
 
             if (response != null) {
-                Cookie accessCookie = new Cookie("Access-Token", newAccessToken);
-                accessCookie.setPath("/");
-                accessCookie.setHttpOnly(true);
-                accessCookie.setSecure(true);
-                response.addCookie(accessCookie);
+                // 로그인 시 발급 쿠키와 동일한 보안 속성으로 재설정한다.
+                // secure/sameSite를 환경 설정(CookieProperties)에 맞춰야 dev(HTTP)에서도 브라우저가 쿠키를 저장한다.
+                ResponseCookie accessCookie = ResponseCookie.from("Access-Token", newAccessToken)
+                        .httpOnly(true)
+                        .secure(cookieProperties.isSecure())
+                        .sameSite(cookieProperties.getSameSite())
+                        .path("/")
+                        .build();
+                response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
             }
 
             log.info("토큰 재발급 성공. 새 AccessToken 설정 완료");
