@@ -2,6 +2,7 @@ package com.nhnacademy.byeol23front.commons.interceptor;
 
 import com.nhnacademy.byeol23front.auth.feign.TokenContext;
 import org.apache.http.HttpHeaders;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -15,6 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Configuration
 public class FeignInterceptor {
+
+	@Value("${auth.social-login.internal-key}")
+	private String socialLoginInternalKey;
 
 	@Bean
 	public RequestInterceptor authHeaderInterceptor() {
@@ -75,7 +79,12 @@ public class FeignInterceptor {
 				template.header("Refresh-Token", refreshToken);
 			}
 
-			// guestId를 쿠키 형태로 포워딩
+			// 소셜 로그인은 내부 전용 엔드포인트이므로 내부 키를 함께 전달한다.
+				if (template.path().startsWith("/auth/social-login")) {
+					template.header("X-Internal-Key", socialLoginInternalKey);
+				}
+
+				// guestId를 쿠키 형태로 포워딩
 			if (guestId != null && !guestId.isBlank() && accessToken==null) {
 				template.header("Cookie", "guestId=" + guestId);
 			}

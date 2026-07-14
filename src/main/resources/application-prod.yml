@@ -20,3 +20,8 @@ app:
   cookie:
     secure: true
     same-site: None
+
+
+auth:
+  social-login:
+    internal-key: ${SOCIAL_LOGIN_INTERNAL_KEY}

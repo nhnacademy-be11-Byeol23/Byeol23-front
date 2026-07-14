@@ -46,6 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		String uri = request.getRequestURI();
 
 		if (uri.startsWith("/members/login")
+			|| uri.startsWith("/members/logout")
 			|| uri.startsWith("/payco/login")
 			|| uri.startsWith("/members/join")
 			|| uri.startsWith("/css/")
@@ -80,6 +81,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 					String newAccessToken = tokenRefreshService.refreshTokens();
 
 					if (newAccessToken == null || newAccessToken.isBlank()) {
+						// 재발급 실패: 만료된 쿠키를 지우지 않으면 매 요청마다 재발급 시도 → 리다이렉트 루프가 된다.
+						deleteAllCookies(request, response);
 						response.sendRedirect("/members/login");
 						return;
 					}

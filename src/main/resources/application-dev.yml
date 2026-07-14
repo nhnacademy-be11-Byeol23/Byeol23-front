@@ -26,3 +26,7 @@ app:
   cookie:
     secure: false
     same-site: Lax
+
+auth:
+  social-login:
+    internal-key: "dev-byeol23-social-internal-key"
